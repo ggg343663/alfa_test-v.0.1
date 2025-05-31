@@ -1,21 +1,29 @@
-<form onsubmit="return validateForm();">
-  <label>ตั้งรหัสลับ (Private Key):<br>
-    <input type="password" id="private1" required>
-  </label><br>
-  <label>ยืนยันรหัสลับอีกครั้ง:<br>
-    <input type="password" id="private2" required>
-  </label><br>
-  <button type="submit">สร้าง Genesis QR</button>
-</form>
-<script>
-function validateForm() {
-  var key1 = document.getElementById('private1').value;
-  var key2 = document.getElementById('private2').value;
-  if(key1 !== key2) {
-    alert('รหัสลับทั้ง 2 ช่องไม่ตรงกัน กรุณาลองใหม่!');
-    return false;
-  }
-  alert('สร้าง Genesis QR สำเร็จ! (Demo)');
-  return true;
-}
-</script>
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>สร้าง Genesis QR</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+</head>
+<body>
+  <h2>สร้าง Genesis QR</h2>
+  <label>Genesis Key: <input type="text" id="genesis_key" placeholder="ชื่อ/รหัส Genesis"></label>
+  <button onclick="createQR()">สร้าง QR</button>
+  <div id="qrcode" style="margin-top:20px;"></div>
+
+  <script>
+    function createQR() {
+      var key = document.getElementById('genesis_key').value;
+      var qrDiv = document.getElementById('qrcode');
+      qrDiv.innerHTML = "";
+      if(key.length > 0) {
+        new QRCode(qrDiv, {
+          text: key,
+          width: 256,
+          height: 256
+        });
+      }
+    }
+  </script>
+</body>
+</html>
