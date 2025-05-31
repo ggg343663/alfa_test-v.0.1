@@ -12,5 +12,14 @@
     <label>Private Input: <input type="password" name="private_input" placeholder="ความลับส่วนตัว"></label><br>
     <button type="submit">ลงทะเบียน</button>
   </form>
+  <script>
+    document.querySelector("form").onsubmit = function(e) {
+      e.preventDefault();
+      const qr = this.qr.value;
+      const pub = this.public_key.value;
+      const priv = this.private_input.value;
+      alert(`QR: ${qr}\nPublic Key: ${pub}\nPrivate Input: ${priv}`);
+    };
+  </script>
 </body>
 </html>
