@@ -1,29 +1,42 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>สร้าง Key Pair (ECDSA)</title>
+  <meta charset="UTF-8" />
+  <title>สร้าง Address จากรหัสผ่าน</title>
 </head>
 <body>
-  <h1>สร้าง Key Pair</h1>
-  <button onclick="genKeyPair()">สร้าง Key Pair</button>
-  <div id="result"></div>
+  <h1>สร้าง Address (Web3-style) จากรหัสผ่าน</h1>
+  <label>รหัสผ่าน (6-12 ตัวอักษร):</label><br />
+  <input type="password" id="privateKey1" maxlength="12" minlength="6" /><br /><br />
+  <label>ยืนยันรหัสผ่าน:</label><br />
+  <input type="password" id="privateKey2" maxlength="12" minlength="6" /><br /><br />
+  <button onclick="generateAddress()">สร้าง Address</button>
+  <h3>Address:</h3>
+  <textarea id="addressOutput" rows="2" cols="50" readonly></textarea>
+
   <script>
-    async function genKeyPair() {
-      const key = await window.crypto.subtle.generateKey(
-        { name: "ECDSA", namedCurve: "P-256" },
-        true,
-        ["sign", "verify"]
-      );
-      const pub = await window.crypto.subtle.exportKey("raw", key.publicKey);
-      const priv = await window.crypto.subtle.exportKey("pkcs8", key.privateKey);
-      const pub_b64 = btoa(String.fromCharCode(...new Uint8Array(pub)));
-      const priv_b64 = btoa(String.fromCharCode(...new Uint8Array(priv)));
-      document.getElementById("result").innerHTML = `
-        <b>Public Key:</b><br><textarea rows=4 cols=65 readonly>${pub_b64}</textarea><br>
-        <b>Private Key:</b><br><textarea rows=4 cols=65 readonly>${priv_b64}</textarea>
-        <p style="color:red"><b>*** สำคัญ: ต้อง copy เก็บ Private Key นี้เอง! ห้ามลืมหรือทำหาย ***</b></p>
-      `;
+    async function sha256Hex(str) {
+      const buffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+      return Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    async function generateAddress() {
+      const pw1 = document.getElementById("privateKey1").value.trim();
+      const pw2 = document.getElementById("privateKey2").value.trim();
+      if (pw1.length < 6 || pw1.length > 12) {
+        alert("กรุณากรอกรหัสผ่าน 6-12 ตัวอักษร");
+        return;
+      }
+      if (pw1 !== pw2) {
+        alert("รหัสผ่านไม่ตรงกัน กรุณากรอกใหม่");
+        return;
+      }
+      const fullHash = await sha256Hex(pw1);
+      const address = "0x" + fullHash.slice(-40);
+      document.getElementById("addressOutput").value = address;
     }
   </script>
 </body>
