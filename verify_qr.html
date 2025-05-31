@@ -7,8 +7,15 @@
 <body>
   <h2>ตรวจสอบ QR</h2>
   <form>
-    <label>QR Code: <input type="text" name="qr" placeholder="ใส่รหัส QR"></label>
+    <label>QR Code: <input type="text" name="qr" placeholder="กรอกรหัส QR"></label>
     <button type="submit">ตรวจสอบ</button>
   </form>
+  <script>
+    document.querySelector("form").onsubmit = function(e) {
+      e.preventDefault();
+      const qr = this.qr.value;
+      alert(`QR ที่ต้องการตรวจสอบ: ${qr}`);
+    };
+  </script>
 </body>
 </html>
