@@ -2,28 +2,29 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>สร้าง Genesis QR</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <title>ลงทะเบียน Genesis QR</title>
 </head>
 <body>
-  <h2>สร้าง Genesis QR</h2>
-  <label>Genesis Key: <input type="text" id="genesis_key" placeholder="ชื่อ/รหัส Genesis"></label>
-  <button onclick="createQR()">สร้าง QR</button>
-  <div id="qrcode" style="margin-top:20px;"></div>
-
+  <h2>สร้าง Genesis QR (ได้เฉพาะ hash QR)</h2>
+  <form id="genesisForm">
+    <label>Genesis Key (input): <input type="text" id="genesisKey" required></label>
+    <button type="submit">สร้าง hash QR</button>
+  </form>
+  <p id="result"></p>
   <script>
-    function createQR() {
-      var key = document.getElementById('genesis_key').value;
-      var qrDiv = document.getElementById('qrcode');
-      qrDiv.innerHTML = "";
-      if(key.length > 0) {
-        new QRCode(qrDiv, {
-          text: key,
-          width: 256,
-          height: 256
-        });
-      }
+    function sha256(str) {
+      // ใช้ SubtleCrypto (Browser)
+      const encoder = new TextEncoder();
+      return crypto.subtle.digest('SHA-256', encoder.encode(str)).then(buf => {
+        return Array.from(new Uint8Array(buf)).map(x=>x.toString(16).padStart(2,'0')).join('');
+      });
     }
+    document.getElementById('genesisForm').onsubmit = async function(e){
+      e.preventDefault();
+      const key = document.getElementById('genesisKey').value;
+      const hash = await sha256(key);
+      document.getElementById('result').innerText = 'hash QR: ' + hash;
+    };
   </script>
 </body>
 </html>
