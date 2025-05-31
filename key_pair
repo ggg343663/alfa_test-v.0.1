@@ -2,29 +2,29 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>สร้าง Key Pair</title>
+  <title>สร้าง Key Pair (ECDSA)</title>
 </head>
 <body>
-<h1>สร้าง Key Pair</h1>
-<button onclick="genKeyPair()">Generate Key Pair</button>
-<pre id="keypair"></pre>
-<script>
-async function generateKeyPair() {
-  const key = await window.crypto.subtle.generateKey(
-    { name: "ECDSA", namedCurve: "P-256" }, true, ["sign", "verify"]
-  );
-  const publicKey = await window.crypto.subtle.exportKey("raw", key.publicKey);
-  const privateKey = await window.crypto.subtle.exportKey("pkcs8", key.privateKey);
-  return {
-    publicKey: btoa(String.fromCharCode(...new Uint8Array(publicKey))),
-    privateKey: btoa(String.fromCharCode(...new Uint8Array(privateKey)))
-  };
-}
-async function genKeyPair() {
-  const kp = await generateKeyPair();
-  document.getElementById("keypair").textContent =
-    "Public Key:\n" + kp.publicKey + "\n\nPrivate Key (เก็บไว้เอง!):\n" + kp.privateKey;
-}
-</script>
+  <h1>สร้าง Key Pair</h1>
+  <button onclick="genKeyPair()">สร้าง Key Pair</button>
+  <div id="result"></div>
+  <script>
+    async function genKeyPair() {
+      const key = await window.crypto.subtle.generateKey(
+        { name: "ECDSA", namedCurve: "P-256" },
+        true,
+        ["sign", "verify"]
+      );
+      const pub = await window.crypto.subtle.exportKey("raw", key.publicKey);
+      const priv = await window.crypto.subtle.exportKey("pkcs8", key.privateKey);
+      const pub_b64 = btoa(String.fromCharCode(...new Uint8Array(pub)));
+      const priv_b64 = btoa(String.fromCharCode(...new Uint8Array(priv)));
+      document.getElementById("result").innerHTML = `
+        <b>Public Key:</b><br><textarea rows=4 cols=65 readonly>${pub_b64}</textarea><br>
+        <b>Private Key:</b><br><textarea rows=4 cols=65 readonly>${priv_b64}</textarea>
+        <p style="color:red"><b>*** สำคัญ: ต้อง copy เก็บ Private Key นี้เอง! ห้ามลืมหรือทำหาย ***</b></p>
+      `;
+    }
+  </script>
 </body>
 </html>
