@@ -7,10 +7,19 @@
 <body>
   <h2>โอนกรรมสิทธิ์ QR</h2>
   <form>
-    <label>QR Code: <input type="text" name="qr" placeholder="รหัส QR"></label><br>
+    <label>QR Code: <input type="text" name="qr" placeholder="กรอกรหัส QR"></label><br>
     <label>Public Key ใหม่: <input type="text" name="new_public_key" placeholder="public key ใหม่"></label><br>
-    <label>Private Input ปัจจุบัน: <input type="password" name="private_input" placeholder="private input"></label><br>
+    <label>Private Input (ของเจ้าของเดิม): <input type="password" name="private_input" placeholder="ความลับส่วนตัว"></label><br>
     <button type="submit">โอนกรรมสิทธิ์</button>
   </form>
+  <script>
+    document.querySelector("form").onsubmit = function(e) {
+      e.preventDefault();
+      const qr = this.qr.value;
+      const newPub = this.new_public_key.value;
+      const priv = this.private_input.value;
+      alert(`QR: ${qr}\nPublic Key ใหม่: ${newPub}\nPrivate Input: ${priv}`);
+    };
+  </script>
 </body>
 </html>
