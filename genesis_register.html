@@ -2,29 +2,35 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>ลงทะเบียน Genesis QR</title>
+  <title>สร้าง Genesis QR (เฉพาะ hash)</title>
 </head>
 <body>
-  <h2>สร้าง Genesis QR (ได้เฉพาะ hash QR)</h2>
-  <form id="genesisForm">
-    <label>Genesis Key (input): <input type="text" id="genesisKey" required></label>
-    <button type="submit">สร้าง hash QR</button>
-  </form>
-  <p id="result"></p>
+  <h1>สร้าง Genesis QR (ได้เฉพาะ hash)</h1>
+  <label>Public Key: <input id="pubkey" size="64"></label><br>
+  <label>Timestamp: <input id="timestamp" value=""></label><br>
+  <label>Nonce: <input id="nonce" value=""></label><br>
+  <button onclick="genHash()">สร้าง hash สำหรับ QR</button>
+  <div id="result"></div>
   <script>
-    function sha256(str) {
-      // ใช้ SubtleCrypto (Browser)
-      const encoder = new TextEncoder();
-      return crypto.subtle.digest('SHA-256', encoder.encode(str)).then(buf => {
-        return Array.from(new Uint8Array(buf)).map(x=>x.toString(16).padStart(2,'0')).join('');
-      });
+    function currentTimestamp() {
+      return new Date().toISOString();
     }
-    document.getElementById('genesisForm').onsubmit = async function(e){
-      e.preventDefault();
-      const key = document.getElementById('genesisKey').value;
-      const hash = await sha256(key);
-      document.getElementById('result').innerText = 'hash QR: ' + hash;
-    };
+    document.getElementById("timestamp").value = currentTimestamp();
+    document.getElementById("nonce").value = Math.floor(Math.random()*1e12).toString();
+
+    async function sha256Hex(str) {
+      const buffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    async function genHash() {
+      const pub = document.getElementById("pubkey").value.trim();
+      const t = document.getElementById("timestamp").value.trim();
+      const n = document.getElementById("nonce").value.trim();
+      const hash = await sha256Hex(pub + "|" + t + "|" + n);
+      document.getElementById("result").innerHTML = `<b>QR hash:</b><br><code>${hash}</code><br>timestamp: ${t}<br>nonce: ${n}`;
+    }
   </script>
 </body>
 </html>
