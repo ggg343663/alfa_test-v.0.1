@@ -6,16 +6,26 @@
 </head>
 <body>
   <h2>ตรวจสอบ QR</h2>
-  <form>
-    <label>QR Code: <input type="text" name="qr" placeholder="กรอกรหัส QR"></label>
+  <form id="verifyForm">
+    <label>hash QR: <input type="text" id="verifyHash" required></label>
     <button type="submit">ตรวจสอบ</button>
   </form>
+  <p id="verifyResult"></p>
   <script>
-    document.querySelector("form").onsubmit = function(e) {
+    // ตัวอย่าง whitelist hash ที่อนุญาต (ในจริงควรโหลดไฟล์ JSON จาก github)
+    const whitelist = [
+      'c0ffee254d008b6e1234567890abcdef0123456789abcdef0123456789abcdef', // ตัวอย่าง
+      // ... เพิ่ม hash QR ที่อนุญาต
+    ];
+    document.getElementById('verifyForm').onsubmit = function(e){
       e.preventDefault();
-      const qr = this.qr.value;
-      alert(`QR ที่ต้องการตรวจสอบ: ${qr}`);
-    };
+      const hash = document.getElementById('verifyHash').value.trim();
+      if (whitelist.includes(hash)) {
+        document.getElementById('verifyResult').innerText = 'QR นี้อยู่ใน whitelist!';
+      } else {
+        document.getElementById('verifyResult').innerText = 'QR นี้ไม่ถูกต้อง หรือไม่ได้รับอนุญาต';
+      }
+    }
   </script>
 </body>
 </html>
