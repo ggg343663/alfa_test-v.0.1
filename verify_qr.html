@@ -5,25 +5,29 @@
   <title>ตรวจสอบ QR</title>
 </head>
 <body>
-  <h2>ตรวจสอบ QR</h2>
-  <form id="verifyForm">
-    <label>hash QR: <input type="text" id="verifyHash" required></label>
-    <button type="submit">ตรวจสอบ</button>
-  </form>
-  <p id="verifyResult"></p>
+  <h1>ตรวจสอบ QR</h1>
+  <label>QR hash: <input id="hash" size="64"></label><br>
+  <label>Public Key: <input id="pubkey" size="64"></label><br>
+  <label>Timestamp: <input id="timestamp"></label><br>
+  <label>Nonce: <input id="nonce"></label><br>
+  <button onclick="verifyHash()">ตรวจสอบ</button>
+  <div id="result"></div>
   <script>
-    // ตัวอย่าง whitelist hash ที่อนุญาต (ในจริงควรโหลดไฟล์ JSON จาก github)
-    const whitelist = [
-      'c0ffee254d008b6e1234567890abcdef0123456789abcdef0123456789abcdef', // ตัวอย่าง
-      // ... เพิ่ม hash QR ที่อนุญาต
-    ];
-    document.getElementById('verifyForm').onsubmit = function(e){
-      e.preventDefault();
-      const hash = document.getElementById('verifyHash').value.trim();
-      if (whitelist.includes(hash)) {
-        document.getElementById('verifyResult').innerText = 'QR นี้อยู่ใน whitelist!';
+    async function sha256Hex(str) {
+      const buffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function verifyHash() {
+      const pub = document.getElementById("pubkey").value.trim();
+      const t = document.getElementById("timestamp").value.trim();
+      const n = document.getElementById("nonce").value.trim();
+      const hash = await sha256Hex(pub + "|" + t + "|" + n);
+      const hashInput = document.getElementById("hash").value.trim();
+      if(hash === hashInput) {
+        document.getElementById("result").innerHTML = `<span style="color:green">✔ ถูกต้อง!</span>`;
       } else {
-        document.getElementById('verifyResult').innerText = 'QR นี้ไม่ถูกต้อง หรือไม่ได้รับอนุญาต';
+        document.getElementById("result").innerHTML = `<span style="color:red">✘ ไม่ตรง</span>`;
       }
     }
   </script>
