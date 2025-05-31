@@ -2,13 +2,16 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>ลงทะเบียน Genesis QR</title>
+  <title>ลงทะเบียน QR</title>
 </head>
 <body>
-  <h1>ลงทะเบียน Genesis QR</h1>
-  <form onsubmit="return validateForm();">
-    <label>Genesis Key (ชื่อ/รหัส):<br>
-      <input type="text" id="genesis_key" placeholder="เช่น master123" required>
-    </label><br>
-    <label>จำนวน QR Genesis:<br>
-      <input type="number" id="amount" value="1
+  <h2>ลงทะเบียน QR</h2>
+  <form>
+    <label>QR Code: <input type="text" name="qr"></label><br>
+    <label>Public Key: <input type="text" name="public_key"></label><br>
+    <label>Private Input: <input type="password" name="private_input"></label><br>
+    <button type="submit">ลงทะเบียน</button>
+  </form>
+  <a href="index.html">← กลับหน้าแรก</a>
+</body>
+</html>
