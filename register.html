@@ -1,45 +1,35 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>ลงทะเบียน QR</title>
+<meta charset="UTF-8" />
+<title>ลงทะเบียน QR</title>
 </head>
 <body>
   <h1>ลงทะเบียน QR</h1>
   <form id="registerForm">
-    <label>
-      Hash QR: <input type="text" id="qrHash" required size="40" />
-    </label>
-    <br /><br />
-    <label>
-      Public Key: <input type="text" id="publicKey" required size="60" />
-    </label>
-    <br /><br />
+    <label>hash QR: <input type="text" id="hashQr" required /></label><br />
+    <label>Public Key: <input type="text" id="pubKey" required /></label><br />
     <button type="submit">ลงทะเบียน</button>
   </form>
-
   <div id="result"></div>
 
   <script>
-    document.getElementById('registerForm').addEventListener('submit', function(e) {
+    document.getElementById('registerForm').onsubmit = function(e) {
       e.preventDefault();
-
-      const qrHash = document.getElementById('qrHash').value.trim();
-      const publicKey = document.getElementById('publicKey').value.trim();
-
-      if (!qrHash || !publicKey) {
-        alert('กรุณากรอกทั้ง Hash QR และ Public Key');
+      const hashQr = document.getElementById('hashQr').value.trim();
+      const pubKey = document.getElementById('pubKey').value.trim();
+      if(!hashQr || !pubKey) {
+        alert('กรุณากรอกทั้ง hash QR และ Public Key');
         return;
       }
-
-      // ตัวอย่าง: แสดงข้อมูลที่กรอกออกมา หรือจะส่งไปเก็บในระบบจริง
-      document.getElementById('result').innerHTML =
-        `<p>ลงทะเบียนเรียบร้อยแล้ว</p>
-         <p><strong>Hash QR:</strong> ${qrHash}</p>
-         <p><strong>Public Key:</strong> ${publicKey}</p>`;
-
-      // TODO: ส่งข้อมูลไปบันทึกใน whitelist หรือระบบ backend ของคุณ
-    });
+      // ตัวอย่างการแสดงผล (แทนส่งไป backend)
+      document.getElementById('result').innerHTML = 
+        `<p>ลงทะเบียนสำเร็จ!</p>
+         <p>hash QR: <b>${hashQr}</b></p>
+         <p>Public Key: <b>${pubKey}</b></p>`;
+      
+      // TODO: แทนที่ด้วยโค้ดส่งข้อมูลไปเก็บจริง เช่น fetch API หรือบันทึกในไฟล์ JSON
+    };
   </script>
 </body>
 </html>
