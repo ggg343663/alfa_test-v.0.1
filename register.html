@@ -6,12 +6,21 @@
 </head>
 <body>
   <h2>ลงทะเบียน QR</h2>
-  <form>
-    <label>QR Code: <input type="text" name="qr"></label><br>
-    <label>Public Key: <input type="text" name="public_key"></label><br>
-    <label>Private Input: <input type="password" name="private_input"></label><br>
+  <form id="registerForm">
+    <label>hash QR: <input type="text" id="hashQR" required></label><br>
+    <label>Public Key: <input type="text" id="pubKey" required></label><br>
     <button type="submit">ลงทะเบียน</button>
   </form>
-  <a href="index.html">← กลับหน้าแรก</a>
+  <p id="regResult"></p>
+  <script>
+    document.getElementById('registerForm').onsubmit = function(e){
+      e.preventDefault();
+      const hash = document.getElementById('hashQR').value;
+      const pub = document.getElementById('pubKey').value;
+      // ปกติจะบันทึกบน server/github, ตัวอย่างนี้แค่แสดง
+      document.getElementById('regResult').innerText =
+        `ลงทะเบียนสำเร็จ!\nhash QR: ${hash}\nPublic Key: ${pub}`;
+    }
+  </script>
 </body>
 </html>
