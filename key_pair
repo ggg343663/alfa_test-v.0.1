@@ -1,0 +1,15 @@
+// สร้าง key pair (ใช้ Crypto API ใน browser)
+async function generateKeyPair() {
+  const key = await window.crypto.subtle.generateKey(
+    { name: "ECDSA", namedCurve: "P-256" },
+    true,
+    ["sign", "verify"]
+  );
+  const publicKey = await window.crypto.subtle.exportKey("raw", key.publicKey);
+  const privateKey = await window.crypto.subtle.exportKey("pkcs8", key.privateKey);
+  // encode เป็น base64 เพื่อ copy ได้ง่าย
+  return {
+    publicKey: btoa(String.fromCharCode(...new Uint8Array(publicKey))),
+    privateKey: btoa(String.fromCharCode(...new Uint8Array(privateKey)))
+  };
+}
