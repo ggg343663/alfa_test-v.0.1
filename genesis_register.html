@@ -1,21 +1,21 @@
 <form onsubmit="return validateForm();">
-  <label>Genesis Key (ชื่อ/รหัส):<br>
-    <input type="text" id="genesis_key" placeholder="เช่น master123" required>
-  </label><br>
-  <label>จำนวน QR Genesis:<br>
-    <input type="number" id="amount" value="1" min="1" required>
-  </label><br>
   <label>ตั้งรหัสลับ (Private Key):<br>
     <input type="password" id="private1" required>
   </label><br>
   <label>ยืนยันรหัสลับอีกครั้ง:<br>
     <input type="password" id="private2" required>
   </label><br>
-  <button type="submit">สร้าง QR Genesis</button>
+  <button type="submit">สร้าง Genesis QR</button>
 </form>
 <script>
 function validateForm() {
   var key1 = document.getElementById('private1').value;
   var key2 = document.getElementById('private2').value;
   if(key1 !== key2) {
-    alert('รหัสลับทั้ง 2 ช่องไม่ตรง
+    alert('รหัสลับทั้ง 2 ช่องไม่ตรงกัน กรุณาลองใหม่!');
+    return false;
+  }
+  alert('สร้าง Genesis QR สำเร็จ! (Demo)');
+  return true;
+}
+</script>
