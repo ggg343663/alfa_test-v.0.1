@@ -1,33 +1,21 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8">
-  <title>ลงทะเบียน Genesis (Master)</title>
-</head>
-<body>
-  <h2>ลงทะเบียน Genesis QR</h2>
-  <form>
-    <label>Genesis Key (ชื่อ/รหัส): <input type="text" name="genesis_key" placeholder="เช่น master123"></label><br>
-    <label>จำนวน QR Genesis: <input type="number" name="count" min="1" max="1000" value="1"></label><br>
-    <button type="submit">สร้าง QR Genesis</button>
-  </form>
-  <div id="result"></div>
-  <script>
-    document.querySelector("form").onsubmit = function(e) {
-      e.preventDefault();
-      const genesis_key = this.genesis_key.value.trim();
-      const count = Number(this.count.value);
-      if(!genesis_key || count < 1) {
-        alert("กรุณากรอก Genesis Key และจำนวนที่ถูกต้อง");
-        return;
-      }
-      let output = "<h3>Genesis QR ที่สร้าง:</h3><ul>";
-      for(let i=1;i<=count;i++){
-        output += `<li>${genesis_key}_G${String(i).padStart(3,'0')}</li>`;
-      }
-      output += "</ul>";
-      document.getElementById('result').innerHTML = output;
-    };
-  </script>
-</body>
-</html>
+<form onsubmit="return validateForm();">
+  <label>Genesis Key (ชื่อ/รหัส):<br>
+    <input type="text" id="genesis_key" placeholder="เช่น master123" required>
+  </label><br>
+  <label>จำนวน QR Genesis:<br>
+    <input type="number" id="amount" value="1" min="1" required>
+  </label><br>
+  <label>ตั้งรหัสลับ (Private Key):<br>
+    <input type="password" id="private1" required>
+  </label><br>
+  <label>ยืนยันรหัสลับอีกครั้ง:<br>
+    <input type="password" id="private2" required>
+  </label><br>
+  <button type="submit">สร้าง QR Genesis</button>
+</form>
+<script>
+function validateForm() {
+  var key1 = document.getElementById('private1').value;
+  var key2 = document.getElementById('private2').value;
+  if(key1 !== key2) {
+    alert('รหัสลับทั้ง 2 ช่องไม่ตรง
