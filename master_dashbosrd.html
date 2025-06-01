@@ -6,8 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: Arial, sans-serif; background: #f7f8fa; margin:0; padding:2em;}
-    .container { background:#fff; max-width:700px; margin:auto; border-radius:14px; box-shadow:0 2px 16px #ccd7e8; padding:2.4em 1.5em;}
+    .container { background:#fff; max-width:750px; margin:auto; border-radius:14px; box-shadow:0 2px 16px #ccd7e8; padding:2.4em 1.5em;}
     h2 { color:#f59e42; margin-bottom:0.2em; letter-spacing:0.03em;}
+    .progress-section {
+      margin-bottom:2.4em; 
+      padding:1.4em 1.2em 1.1em 1.2em;
+      background:#f3f5ff;
+      border-radius:13px;
+      box-shadow:0 1px 6px #e3e5f7;
+      font-size:1.08em;
+      color:#24344c;
+    }
+    .progress-block {
+      margin-bottom: 1.2em;
+      padding-bottom: 1em;
+      border-bottom: 1.2px dashed #e0e7ef;
+    }
+    .progress-block:last-child { border-bottom: none; }
+    .progress-title { font-weight:bold; color:#246bfd;}
+    .progress-stats { margin-top:0.2em; color:#3b416c;}
+    .progress-next {
+      color: #f59e42;
+      font-size: 1.04em;
+      margin-top: 0.16em;
+    }
     .summary {
       margin: 1em 0 2.3em 0; font-size: 1.11em; color:#24404c;
       display: flex; gap: 2.8em; justify-content:center;
@@ -34,12 +56,13 @@
     .status-transferred { color:#f59e42; font-weight:700;}
     .back-btn { position: fixed; top: 18px; left: 18px; background: #e3eaf8; color: #232a3e; border: 1.5px solid #b7c5df; border-radius: 7px; font-size: 1em; padding: 0.36em 1.18em; cursor: pointer; transition: background 0.18s; z-index:99;}
     .back-btn:hover { background: #c7f7fa; }
-    @media(max-width:600px){
+    @media(max-width:700px){
       .container{padding:1em 0.3em;}
       .summary{flex-direction:column;gap:0.7em;}
       th, td{font-size:0.98em;}
       .back-btn { position: static; margin-bottom: 1em;}
       .search-box input[type="text"] { width:95%; max-width:unset; margin-bottom:0.7em; }
+      .progress-section {padding:0.8em 0.5em;}
     }
   </style>
 </head>
@@ -47,6 +70,12 @@
   <button class="back-btn" onclick="history.back()">← Back</button>
   <div class="container">
     <h2>🔑 Master QR Dashboard</h2>
+
+    <!-- Unlock progress by batch -->
+    <div class="progress-section" id="batchProgress">
+      <!-- Rendered by JS -->
+    </div>
+
     <div class="summary">
       <div>Total<br><span id="totalQR">0</span></div>
       <div>Registered<br><span id="regQR">0</span></div>
@@ -60,6 +89,7 @@
       <thead>
         <tr>
           <th>No.</th>
+          <th>Batch</th>
           <th>QR Hash</th>
           <th>Status</th>
           <th>Owner</th>
@@ -69,23 +99,52 @@
     </table>
   </div>
 <script>
-// QR list for master (replace this with actual fetch if available)
-let qrList = [];
+// Example QR data including batch, can replace with fetch for actual system
+let qrList = [
+  {index:1, batch:1, hash:"A9F1...1CDE", status:"registered", owner:"0x0fA...123"},
+  {index:2, batch:1, hash:"B8A2...3BAF", status:"available", owner:""},
+  {index:3, batch:1, hash:"C4EE...1AF0", status:"registered", owner:"0xB4A...999"},
+  {index:4, batch:1, hash:"A013...11AA", status:"available", owner:""},
+  {index:5, batch:1, hash:"0A4D...F1B2", status:"transferred", owner:"0x123...DEF"},
+  // Batch 2 (example)
+  {index:101, batch:2, hash:"C800...BBB2", status:"available", owner:""},
+  {index:102, batch:2, hash:"C800...BBB3", status:"registered", owner:"0x5bc...D12"},
+  // Batch 3
+  {index:2001, batch:3, hash:"D800...BBE4", status:"available", owner:""},
+];
 
-// Load data from JSON or API
-async function loadData() {
-  // Example: use fetch for real data
-  // const res = await fetch('master_qr_list.json');
-  // qrList = await res.json();
+// For demo: batch setup
+const batchConfig = [
+  {batch:1, label:"Batch 1 (Limited)", size:100, unlockPercent:0.5, nextBatch:2, nextAmount:2000},
+  {batch:2, label:"Batch 2", size:2000, unlockPercent:0.5, nextBatch:3, nextAmount:2000},
+  {batch:3, label:"Batch 3", size:2000, unlockPercent:0.5, nextBatch:null, nextAmount:null},
+];
 
-  // Demo/mock data for UI test
-  qrList = [
-    {index:1, hash:"A9F1...1CDE", status:"registered", owner:"0x0fA...123"},
-    {index:2, hash:"B8A2...3BAF", status:"available", owner:""},
-    {index:3, hash:"C4EE...1AF0", status:"registered", owner:"0xB4A...999"},
-    {index:4, hash:"A013...11AA", status:"available", owner:""},
-    {index:5, hash:"0A4D...F1B2", status:"transferred", owner:"0x123...DEF"},
-  ];
+// Render progress for each batch
+function renderBatchProgress() {
+  const section = document.getElementById('batchProgress');
+  let html = "";
+  batchConfig.forEach(cfg => {
+    const batchQrs = qrList.filter(q=>q.batch===cfg.batch);
+    const reg = batchQrs.filter(q=>q.status==="registered").length;
+    const percent = ((reg/cfg.size)*100).toFixed(1);
+    html += `<div class="progress-block">
+      <span class="progress-title">${cfg.label}:</span>
+      <div class="progress-stats">Registered: <b>${reg}/${cfg.size}</b> &nbsp;|&nbsp; <b>${percent}%</b></div>
+      ${
+        cfg.nextBatch && (reg<cfg.size)
+          ? `<div class="progress-next">Next unlock: ${cfg.nextAmount} QR when registered ≥ ${Math.ceil(cfg.size*cfg.unlockPercent)} (${(cfg.unlockPercent*100).toFixed(0)}%)</div>`
+          : (cfg.nextBatch?`<div class="progress-next" style="color:#16a34a">Unlocked. Next: Batch ${cfg.nextBatch} (${cfg.nextAmount} QR)</div>`:"")
+      }
+    </div>`;
+  });
+  section.innerHTML = html;
+}
+
+// Load data (mock or fetch)
+function loadData() {
+  // fetch and update qrList here if needed
+  renderBatchProgress();
   renderTable();
 }
 loadData();
@@ -95,7 +154,6 @@ function renderTable() {
   const search = (document.getElementById('searchBox')?.value || "").toLowerCase();
   let total = qrList.length;
   let reg = 0, avail = 0;
-
   let html = qrList.filter(q =>
       q.hash.toLowerCase().includes(search) ||
       (q.owner && q.owner.toLowerCase().includes(search)) ||
@@ -105,12 +163,13 @@ function renderTable() {
       if(q.status === "available") avail++;
       return `<tr>
         <td>${q.index}</td>
+        <td>${q.batch}</td>
         <td><code>${q.hash}</code></td>
         <td class="status-${q.status}">${q.status.charAt(0).toUpperCase()+q.status.slice(1)}</td>
         <td>${q.owner ? `<code>${q.owner}</code>` : '-'}</td>
       </tr>`;
     }).join('');
-  qrTable.innerHTML = html || `<tr><td colspan="4" style="text-align:center;color:#888;">No data found.</td></tr>`;
+  qrTable.innerHTML = html || `<tr><td colspan="5" style="text-align:center;color:#888;">No data found.</td></tr>`;
   document.getElementById('totalQR').textContent = total;
   document.getElementById('regQR').textContent = reg;
   document.getElementById('availQR').textContent = avail;
