@@ -2,159 +2,184 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Transfer QR (with Passphrase & Sign Code)</title>
+  <title>Transfer QR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: sans-serif; max-width: 400px; margin: 2em auto; }
-    h2 { margin-top: 1em; text-align: center; }
-    label { margin: 1em 0 0.5em; display: block; }
-    input, button { width: 100%; padding: 0.7em; margin-bottom: 0.7em; border-radius: 5px; border: 1px solid #ccc; font-size: 1em;}
-    .input-status { font-size: 0.95em; margin-bottom: 0.6em;}
-    .valid { color: green; }
-    .invalid { color: red; }
-    #successMsg {
-      background: #e8f5e9; color: #2e7d32; border-left: 5px solid #66bb6a; border-radius: 5px;
-      margin-top: 1em; padding: 1em;
+    body {
+      font-family: 'Inter', Arial, sans-serif;
+      max-width: 700px;
+      margin: 2em auto;
+      padding: 1em;
+      background: #f8fafc;
+      color: #232a3e;
     }
-    #previewBox { background: #f8f8f8; border-radius: 5px; margin-top: 1em; padding: 1em; }
-    button { background: #2563eb; color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 0.2em;}
-    button:disabled { background: #ccc; color: #999; cursor: not-allowed;}
-    .back-btn { position: fixed; top: 16px; left: 16px; width: auto; background: #eee; color: #222; border: 1px solid #aaa; z-index: 100;}
-    .back-btn:hover { background: #ffd; }
+    h2 {
+      text-align: center;
+      font-size: 1.4em;
+      margin-bottom: 1.4em;
+      letter-spacing: 0.01em;
+    }
+    .flex-container {
+      display: flex;
+      gap: 1.5em;
+      justify-content: space-between;
+      background: #fff;
+      padding: 2em 1em 1.2em;
+      border-radius: 16px;
+      box-shadow: 0 2px 14px rgba(44,62,80,0.07);
+      margin-bottom: 2em;
+    }
+    .column {
+      flex: 1 1 0;
+      display: flex;
+      flex-direction: column;
+      gap: 1em;
+      min-width: 0;
+    }
+    .sender {
+      border-right: 1.5px dashed #b8c6e9;
+      padding-right: 1em;
+      color: #6366f1;
+    }
+    .recipient {
+      padding-left: 1em;
+      color: #22d3ee;
+    }
+    label {
+      font-weight: 600;
+      margin-bottom: 0.3em;
+      font-size: 1em;
+    }
+    input[type="text"], input[type="password"] {
+      padding: 0.55em 0.7em;
+      font-size: 1em;
+      border-radius: 8px;
+      border: 1px solid #d3d9ec;
+      margin-bottom: 0.3em;
+      background: #f7faff;
+      transition: border-color 0.2s;
+    }
+    input:focus { border-color: #6366f1; outline: none; }
+    .btn-row {
+      margin-top: 1.3em;
+      display: flex;
+      flex-direction: column;
+      gap: 0.7em;
+    }
+    button {
+      font-family: inherit;
+      font-weight: bold;
+      font-size: 1.05em;
+      padding: 0.68em 0;
+      border-radius: 8px;
+      border: none;
+      background: linear-gradient(90deg, #6366f1, #22d3ee);
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+      cursor: pointer;
+      letter-spacing: 0.02em;
+      transition: background 0.16s, box-shadow 0.16s;
+    }
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: #e4e9f7;
+      color: #7c8ca7;
+    }
+    .back-btn {
+      position: fixed;
+      top: 18px;
+      left: 16px;
+      background: #e0e7ef;
+      color: #363f5c;
+      border: 1px solid #cdd2df;
+      border-radius: 7px;
+      font-size: 1em;
+      padding: 0.36em 1.2em;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.03);
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background: #c7f7fa; color: #232a3e; }
+    @media (max-width: 600px) {
+      .flex-container {
+        flex-direction: column;
+        padding: 1em 0.4em 0.7em;
+        gap: 0.9em;
+      }
+      .sender, .recipient {
+        border: none;
+        padding: 0;
+      }
+    }
   </style>
 </head>
 <body>
   <button class="back-btn" onclick="history.back()">← Back</button>
   <h2>Transfer QR</h2>
-  <form id="transferForm" autocomplete="off">
-    <label>QR Hash (64 chars):</label>
-    <input type="text" id="qrHash" maxlength="64" placeholder="Enter QR Hash" />
-    <span id="qrStatus" class="input-status"></span>
-    
-    <label>Recipient Public Key (40 chars):</label>
-    <input type="text" id="recipientKey" maxlength="40" placeholder="Enter recipient's public key" />
-    <span id="recipientStatus" class="input-status"></span>
-    
-    <label>Your Passphrase (6-12 letters & numbers):</label>
-    <input type="password" id="passphrase" minlength="6" maxlength="12" placeholder="Enter your passphrase" autocomplete="off" />
-    <span id="passStatus" class="input-status"></span>
+  <div class="flex-container">
+    <!-- Sender (left) -->
+    <div class="column sender">
+      <label for="qrhash">QR Hash (64 chars):</label>
+      <input type="text" id="qrhash" maxlength="64" autocomplete="off" placeholder="Enter QR Hash" />
 
-    <label>4-digit Sign Code:</label>
-    <input type="password" id="signCode" maxlength="4" pattern="\d{4}" placeholder="Enter sign code (numbers only)" autocomplete="off" />
-    <span id="signStatus" class="input-status"></span>
-    
-    <button type="button" id="previewBtn" onclick="preview()" disabled>Preview</button>
-    <div id="previewBox"></div>
+      <label for="passphrase">Your Passphrase<br/>(6-12 letters & numbers):</label>
+      <input type="password" id="passphrase" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your passphrase" />
 
-    <button type="submit" id="confirmBtn" disabled>Confirm Transfer</button>
-    <div id="successMsg" style="display:none;"></div>
-  </form>
+      <label for="signcode">4-digit Sign Code:</label>
+      <input type="password" id="signcode" maxlength="4" minlength="4" autocomplete="off" pattern="\d{4}" placeholder="Enter sign code (numbers only)" />
+    </div>
+    <!-- Recipient (right) -->
+    <div class="column recipient">
+      <label for="recipientpk">Recipient Public Key<br/>(40 chars):</label>
+      <input type="text" id="recipientpk" maxlength="40" autocomplete="off" placeholder="Enter recipient's public key" />
+    </div>
+  </div>
+  <div class="btn-row" style="max-width:360px;margin:0 auto;">
+    <button id="previewBtn" onclick="preview()" type="button">Preview</button>
+    <button id="confirmBtn" onclick="confirmTransfer()" type="button" disabled>Confirm Transfer</button>
+  </div>
+  <div id="previewBox" style="margin-top:1.5em;text-align:center;color:#232a3e;"></div>
 
   <script>
-    const qrHash = document.getElementById('qrHash');
-    const recipientKey = document.getElementById('recipientKey');
-    const passphrase = document.getElementById('passphrase');
-    const signCode = document.getElementById('signCode');
-    const qrStatus = document.getElementById('qrStatus');
-    const recipientStatus = document.getElementById('recipientStatus');
-    const passStatus = document.getElementById('passStatus');
-    const signStatus = document.getElementById('signStatus');
-    const previewBtn = document.getElementById('previewBtn');
-    const confirmBtn = document.getElementById('confirmBtn');
-    const previewBox = document.getElementById('previewBox');
-    const successMsg = document.getElementById('successMsg');
-
     function validateInputs() {
+      const hash = document.getElementById('qrhash').value.trim();
+      const pub = document.getElementById('recipientpk').value.trim();
+      const pass = document.getElementById('passphrase').value.trim();
+      const sign = document.getElementById('signcode').value.trim();
+
       let valid = true;
-      // QR Hash
-      if (qrHash.value.trim().length === 64) {
-        qrStatus.textContent = "✓ Length OK";
-        qrStatus.className = "input-status valid";
-      } else {
-        qrStatus.textContent = "⚠ Must be 64 characters";
-        qrStatus.className = "input-status invalid";
-        valid = false;
-      }
-      // Recipient
-      if (recipientKey.value.trim().length === 40) {
-        recipientStatus.textContent = "✓ Length OK";
-        recipientStatus.className = "input-status valid";
-      } else {
-        recipientStatus.textContent = "⚠ Must be 40 characters";
-        recipientStatus.className = "input-status invalid";
-        valid = false;
-      }
-      // Passphrase
-      const pw = passphrase.value;
-      const rePW = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,12}$/;
-      if (rePW.test(pw)) {
-        passStatus.textContent = "✓ Valid";
-        passStatus.className = "input-status valid";
-      } else {
-        passStatus.textContent = "⚠ 6-12 characters, must include both letters and numbers";
-        passStatus.className = "input-status invalid";
-        valid = false;
-      }
-      // Sign Code
-      if (/^\d{4}$/.test(signCode.value)) {
-        signStatus.textContent = "✓ Valid";
-        signStatus.className = "input-status valid";
-      } else {
-        signStatus.textContent = "⚠ Must be 4 digits (numbers only)";
-        signStatus.className = "input-status invalid";
-        valid = false;
-      }
-      previewBtn.disabled = !valid;
+      if (hash.length !== 64) valid = false;
+      if (pub.length !== 40) valid = false;
+      if (pass.length < 6 || pass.length > 12 || !/[A-Za-z]/.test(pass) || !/\d/.test(pass)) valid = false;
+      if (!/^\d{4}$/.test(sign)) valid = false;
       return valid;
     }
 
-    qrHash.oninput = recipientKey.oninput = passphrase.oninput = signCode.oninput = validateInputs;
-
-    function sha256Hex(str) {
-      // Simple JS SHA256 (browser, only for demo)
-      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(b =>
-        [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('')
-      );
-    }
-
-    async function preview() {
-      if (!validateInputs()) return;
-      const senderHash = await sha256Hex(passphrase.value);
-      const senderAddress = '0x' + senderHash.slice(-40);
-      // สร้าง signature โดยใช้ passphrase + signcode + qrhash + recipient
-      const txRaw = passphrase.value + signCode.value + qrHash.value.trim() + recipientKey.value.trim();
-      const signature = await sha256Hex(txRaw);
-      previewBox.innerHTML =
-        `<b>Please confirm your transaction:</b><br><br>` +
-        `QR Hash: <code>${qrHash.value.trim()}</code><br>` +
-        `Recipient Key: <code>${recipientKey.value.trim()}</code><br>` +
-        `Your Address: <code>${senderAddress}</code><br>` +
-        `Sign Code: <code>${signCode.value}</code><br>` +
-        `Signature: <code>${signature}</code><br>`;
+    function preview() {
+      const isValid = validateInputs();
+      const previewBtn = document.getElementById('previewBtn');
+      const confirmBtn = document.getElementById('confirmBtn');
+      const previewBox = document.getElementById('previewBox');
+      if (!isValid) {
+        previewBox.textContent = "⚠️ Please check and complete all input fields correctly.";
+        confirmBtn.disabled = true;
+        return;
+      }
+      const hash = document.getElementById('qrhash').value.trim();
+      const pub = document.getElementById('recipientpk').value.trim();
+      previewBox.innerHTML = `<b>Preview Transfer</b><br>
+        <b>QR Hash:</b> <code>${hash}</code><br>
+        <b>Recipient Public Key:</b> <code>${pub}</code>`;
       confirmBtn.disabled = false;
-      successMsg.style.display = "none";
     }
 
-    document.getElementById('transferForm').onsubmit = async function(e) {
-      e.preventDefault();
-      if (!validateInputs()) return;
-      // popup confirm
-      if (!window.confirm("Are you sure you want to confirm this QR transfer?")) return;
-      const senderHash = await sha256Hex(passphrase.value);
-      const senderAddress = '0x' + senderHash.slice(-40);
-      const signature = await sha256Hex(passphrase.value + signCode.value + qrHash.value.trim() + recipientKey.value.trim());
-      successMsg.innerHTML = `
-        🎉 <b>Transfer successful!</b><br>
-        Your transaction has been recorded.<br><br>
-        🛡️ QR Hash: <code>${qrHash.value.trim()}</code><br>
-        👤 Your Address: <code>${senderAddress}</code><br>
-        👥 Recipient Key: <code>${recipientKey.value.trim()}</code><br>
-        🔐 Signature: <code>${signature}</code>
-      `;
-      successMsg.style.display = "block";
-      previewBox.innerHTML = "";
-      confirmBtn.disabled = true;
-      // (TODO: ส่งข้อมูลไป backend หรือเก็บ log)
-    };
+    function confirmTransfer() {
+      alert('✅ Transfer submitted! (Add your backend logic here)');
+      document.getElementById('previewBox').textContent = "";
+      document.getElementById('confirmBtn').disabled = true;
+    }
   </script>
 </body>
 </html>
