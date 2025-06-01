@@ -41,6 +41,20 @@
       background: #f5f7fa;
       font-size: 0.99em;
     }
+    .scan-btn {
+      background: #4f8cfb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 1em;
+      width: 100%;
+      padding: 0.62em 0;
+      margin-top: 0.5em;
+      cursor: pointer;
+      transition: background 0.13s;
+    }
+    .scan-btn:hover { background: #2563eb; }
     button {
       width: 100%; margin-top: 1em; padding: 0.7em 0; font-size: 1.03em;
       background: #219150; color: #fff; border: none; border-radius: 8px;
@@ -77,6 +91,12 @@
     }
     .btn-back { background: #dbeafe; color: #324275; margin-top: 1.2em;}
     .btn-back:hover { background: #bae6fd;}
+    #qr-reader {
+      margin: 0.7em auto;
+      display: none;
+      width: 100% !important;
+      max-width: 320px;
+    }
   </style>
 </head>
 <body>
@@ -86,7 +106,9 @@
     <input type="text" id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" />
 
     <input type="file" id="imgInput" accept="image/*" />
+    <button class="scan-btn" onclick="toggleCameraScan()">Scan by Camera</button>
     <div id="scanMsg" class="scan-box"></div>
+    <div id="qr-reader"></div>
 
     <button onclick="checkQR()">Check</button>
     <div id="resultArea"></div>
@@ -123,6 +145,34 @@
         scanMsg.innerHTML = "<span style='color:#b80000'>❌ ไม่พบ QR ในภาพนี้</span>";
       });
   });
+
+  // Scan QR by camera (live)
+  let qrScanner = null;
+  function toggleCameraScan() {
+    const qrReader = document.getElementById('qr-reader');
+    if (qrReader.style.display === "block") {
+      // Stop and hide
+      qrScanner && qrScanner.stop().then(()=>{});
+      qrReader.style.display = "none";
+      document.querySelector('.scan-btn').textContent = "Scan by Camera";
+    } else {
+      qrReader.style.display = "block";
+      document.querySelector('.scan-btn').textContent = "Stop Camera";
+      qrScanner = new Html5Qrcode("qr-reader");
+      qrScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 220 },
+        decodedText => {
+          document.getElementById('qrhash').value = decodedText;
+          document.getElementById('scanMsg').innerHTML = "✔️ QR hash scanned from camera!";
+          qrScanner.stop();
+          qrReader.style.display = "none";
+          document.querySelector('.scan-btn').textContent = "Scan by Camera";
+        },
+        err => {}
+      );
+    }
+  }
 
   function checkQR() {
     const hash = document.getElementById('qrhash').value.trim();
