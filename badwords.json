@@ -1,0 +1,44 @@
+{
+  "หยาบคาย (ตัวอย่าง)": [
+    "fuck",
+    "shit",
+    "bitch",
+    "bastard"
+  ],
+  "รุนแรง (ตัวอย่าง)": [
+    "kill",
+    "murder",
+    "bomb",
+    "terror"
+  ],
+  "ศาสนา (ตัวอย่าง)": [
+    "jew",
+    "muslim",
+    "christian",
+    "buddha",
+    "allah"
+  ],
+  "เชื้อชาติ (ตัวอย่าง)": [
+    "nazi",
+    "racist",
+    "slave"
+  ],
+  "การเมือง/ชาติ (ตัวอย่าง)": [
+    "russia",
+    "china",
+    "usa",
+    "trump",
+    "hitler"
+  ],
+  "ยาเสพติด (ตัวอย่าง)": [
+    "drug",
+    "cocaine",
+    "heroin",
+    "meth",
+    "lsd",
+    "ecstasy",
+    "weed",
+    "marijuana",
+    "opium"
+  ]
+}
