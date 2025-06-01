@@ -18,6 +18,22 @@
       position: relative;
       text-align: center;
     }
+    .back-btn {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      background: #eafaf0;
+      color: #219150;
+      border: 1.5px solid #b8e1cb;
+      border-radius: 7px;
+      font-size: 1em;
+      padding: 0.38em 1.3em;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 8px #21915013;
+      transition: background 0.18s, color 0.13s;
+    }
+    .back-btn:hover { background: #d1fae5; color: #117737;}
     h2 {
       color: #219150;
       margin-bottom: 1.3em;
@@ -78,10 +94,15 @@
       transition: background 0.13s;
     }
     .copy-btn:hover { background: #219150;}
+    @media (max-width: 500px) {
+      .container { padding: 1.1em 0.4em 1.5em 0.4em;}
+      .back-btn { left: 7px; top: 7px; font-size: 0.98em;}
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="back-btn" onclick="history.back()">← Back</button>
     <h2>🟩 Generate QR Code from Hash</h2>
     <input type="text" id="qrHash" placeholder="Paste QR Hash here..." maxlength="128" autocomplete="off" />
     <button onclick="generateQR()">Generate QR Code</button>
