@@ -1,24 +1,96 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>โอนกรรมสิทธิ์ QR</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 2em auto;
+      padding: 1em;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-top: 1em;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 0.5em;
+      font-size: 1em;
+      margin-top: 0.3em;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    button {
+      margin-top: 1.5em;
+      padding: 0.7em 1.2em;
+      font-size: 1em;
+      background-color: #2196F3;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0b7dda;
+    }
+    #result {
+      margin-top: 1.5em;
+      padding: 1em;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
 </head>
 <body>
   <h2>โอนกรรมสิทธิ์ QR</h2>
-  <form>
-    <label>QR Code: <input type="text" name="qr" placeholder="กรอกรหัส QR"></label><br>
-    <label>Public Key ใหม่: <input type="text" name="new_public_key" placeholder="public key ใหม่"></label><br>
-    <label>Private Input (ของเจ้าของเดิม): <input type="password" name="private_input" placeholder="ความลับส่วนตัว"></label><br>
+  <form id="transferForm">
+    <label for="qr">QR Code:</label>
+    <input type="text" id="qr" name="qr" placeholder="กรอกรหัส QR" required />
+
+    <label for="newPublicKey">Public Key ใหม่:</label>
+    <input type="text" id="newPublicKey" name="new_public_key" placeholder="public key ใหม่" required />
+
+    <label for="privateInput">Private Input (ของเจ้าของเดิม):</label>
+    <input type="password" id="privateInput" name="private_input" placeholder="ความลับส่วนตัว" required />
+
     <button type="submit">โอนกรรมสิทธิ์</button>
   </form>
+
+  <div id="result"></div>
+
+  <button onclick="window.history.back()" style="margin-top: 1em;">ย้อนกลับ</button>
+
   <script>
-    document.querySelector("form").onsubmit = function(e) {
+    document.getElementById('transferForm').onsubmit = function(e) {
       e.preventDefault();
-      const qr = this.qr.value;
-      const newPub = this.new_public_key.value;
-      const priv = this.private_input.value;
-      alert(`QR: ${qr}\nPublic Key ใหม่: ${newPub}\nPrivate Input: ${priv}`);
+
+      const qr = this.qr.value.trim();
+      const newPub = this.newPublicKey.value.trim();
+      const priv = this.privateInput.value.trim();
+
+      if (!qr || !newPub || !priv) {
+        alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+        return;
+      }
+
+      // แสดงผลลัพธ์ (แทนส่งข้อมูลจริง)
+      document.getElementById('result').textContent = 
+        `โอนกรรมสิทธิ์สำเร็จ!\n\n` +
+        `QR Code: ${qr}\n` +
+        `Public Key ใหม่: ${newPub}\n` +
+        `Private Input ของเจ้าของเดิม: ${priv}`;
+      
+      // TODO: เชื่อมต่อ backend ส่งข้อมูลโอนกรรมสิทธิ์จริง
     };
   </script>
 </body>
