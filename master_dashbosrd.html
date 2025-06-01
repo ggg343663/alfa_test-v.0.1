@@ -5,27 +5,41 @@
   <title>Master QR Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial,sans-serif; background: #f7f8fa; margin:0; padding:2em;}
-    .container { background:#fff; max-width:660px; margin:auto; border-radius:12px; box-shadow:0 2px 14px #ccd7e8; padding:2em 1.4em;}
-    h2 { color:#f59e42; margin-bottom:0.3em; }
-    .summary { margin: 1em 0 2em 0; font-size: 1.06em; color:#365; display: flex; gap: 2.5em;}
-    .summary > div { font-weight:bold; }
-    .search-box { margin-bottom:1em;}
-    input[type=text] {padding:0.45em; border-radius:5px; border:1px solid #dbeafe;}
-    table { width:100%; border-collapse:collapse; background:#f8fafc;}
-    th, td { padding:0.62em 0.32em; text-align:left; }
+    body { font-family: Arial, sans-serif; background: #f7f8fa; margin:0; padding:2em;}
+    .container { background:#fff; max-width:700px; margin:auto; border-radius:14px; box-shadow:0 2px 16px #ccd7e8; padding:2.4em 1.5em;}
+    h2 { color:#f59e42; margin-bottom:0.2em; letter-spacing:0.03em;}
+    .summary {
+      margin: 1em 0 2.3em 0; font-size: 1.11em; color:#24404c;
+      display: flex; gap: 2.8em; justify-content:center;
+    }
+    .summary > div {
+      font-weight:bold; background:#f4f4ff; border-radius: 8px; padding:0.7em 1.2em; box-shadow:0 1px 6px #eee;
+      min-width:100px; text-align:center;
+    }
+    .summary span { font-size: 1.16em; font-weight: bold; color: #3949ab;}
+    .search-box { margin-bottom:1.3em; text-align:center;}
+    input[type=text] {
+      padding:0.55em 0.9em; border-radius:7px; border:1.5px solid #dbeafe; font-size:1em; width:68%; max-width:340px;
+      margin-right:0.5em;
+      transition: border 0.16s;
+    }
+    input[type=text]:focus { border-color: #6366f1; outline:none;}
+    table { width:100%; border-collapse:collapse; background:#f8fafc; font-size:1.08em;}
+    th, td { padding:0.75em 0.38em; text-align:left; }
     th { background:#facc15; color:#222; }
-    tr:nth-child(even) { background:#f1f5fa; }
-    .status-available { color:#1a7f3c; font-weight:600;}
-    .status-registered { color:#2563eb; font-weight:600;}
-    .status-transferred { color:#f59e42; font-weight:600;}
-    .back-btn { position: absolute; top: 18px; left: 18px; background: #eee; color: #232a3e; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; padding: 0.36em 1.1em; cursor: pointer; transition: background 0.18s;}
-    .back-btn:hover { background: #d6f5d6; }
-    @media(max-width:500px){
+    tr:nth-child(even) { background:#f3f6fa; }
+    tr:hover { background:#fffbe5; }
+    .status-available { color:#16a34a; font-weight:700;}
+    .status-registered { color:#2563eb; font-weight:700;}
+    .status-transferred { color:#f59e42; font-weight:700;}
+    .back-btn { position: fixed; top: 18px; left: 18px; background: #e3eaf8; color: #232a3e; border: 1.5px solid #b7c5df; border-radius: 7px; font-size: 1em; padding: 0.36em 1.18em; cursor: pointer; transition: background 0.18s; z-index:99;}
+    .back-btn:hover { background: #c7f7fa; }
+    @media(max-width:600px){
       .container{padding:1em 0.3em;}
       .summary{flex-direction:column;gap:0.7em;}
-      th, td{font-size:0.95em;}
+      th, td{font-size:0.98em;}
       .back-btn { position: static; margin-bottom: 1em;}
+      .search-box input[type="text"] { width:95%; max-width:unset; margin-bottom:0.7em; }
     }
   </style>
 </head>
@@ -34,16 +48,14 @@
   <div class="container">
     <h2>🔑 Master QR Dashboard</h2>
     <div class="summary">
-      <div>Total QR: <span id="totalQR">0</span></div>
-      <div>Registered: <span id="regQR">0</span></div>
-      <div>Available: <span id="availQR">0</span></div>
+      <div>Total<br><span id="totalQR">0</span></div>
+      <div>Registered<br><span id="regQR">0</span></div>
+      <div>Available<br><span id="availQR">0</span></div>
     </div>
-
     <div class="search-box">
-      <input type="text" id="searchBox" placeholder="Search QR Hash, Owner, or Status..." oninput="renderTable()" />
+      <input type="text" id="searchBox" placeholder="Search QR hash, owner, or status..." oninput="renderTable()" />
       <button onclick="loadData()">Refresh</button>
     </div>
-
     <table>
       <thead>
         <tr>
@@ -57,16 +69,16 @@
     </table>
   </div>
 <script>
-// ข้อมูล QR ของ master (mock หรือเชื่อมต่อกับ json จริง)
+// QR list for master (replace this with actual fetch if available)
 let qrList = [];
 
-// ดึงข้อมูลจริงจากไฟล์ json (เปลี่ยน path เป็นของจริงในระบบคุณ)
+// Load data from JSON or API
 async function loadData() {
-  // ตัวอย่างเชื่อมต่อ API/JSON จริง (uncomment ถ้ามี)
+  // Example: use fetch for real data
   // const res = await fetch('master_qr_list.json');
   // qrList = await res.json();
 
-  // [DEMO] mock data (ลบออกเมื่อใช้กับ json จริง)
+  // Demo/mock data for UI test
   qrList = [
     {index:1, hash:"A9F1...1CDE", status:"registered", owner:"0x0fA...123"},
     {index:2, hash:"B8A2...3BAF", status:"available", owner:""},
