@@ -3,13 +3,38 @@
 <head>
 <meta charset="UTF-8" />
 <title>ลงทะเบียน QR</title>
+<style>
+  .button-row {
+    display: flex;
+    justify-content: space-between;
+    max-width: 320px;
+    margin-top: 1em;
+  }
+  button {
+    padding: 0.5em 1.5em;
+    font-size: 1em;
+    cursor: pointer;
+  }
+  #registerBtn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+  }
+  #registerBtn:hover {
+    background-color: #45a049;
+  }
+</style>
 </head>
 <body>
   <h1>ลงทะเบียน QR</h1>
   <form id="registerForm">
     <label>hash QR: <input type="text" id="hashQr" required /></label><br />
     <label>Public Key: <input type="text" id="pubKey" required /></label><br />
-    <button type="submit">ลงทะเบียน</button>
+    <div class="button-row">
+      <button type="submit" id="registerBtn">ลงทะเบียน</button>
+      <button type="button" onclick="window.history.back()">ย้อนกลับ</button>
+    </div>
   </form>
   <div id="result"></div>
 
@@ -31,6 +56,5 @@
       // TODO: แทนที่ด้วยโค้ดส่งข้อมูลไปเก็บจริง เช่น fetch API หรือบันทึกในไฟล์ JSON
     };
   </script>
-<button onclick="window.history.back()">ย้อนกลับ</button>
 </body>
 </html>
