@@ -1,122 +1,159 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>ขอ Master ใหม่ (DTC)</title>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+  <title>Transfer QR (with Passphrase & Sign Code)</title>
   <style>
     body { font-family: sans-serif; max-width: 400px; margin: 2em auto; }
-    label, input, button { display: block; margin: 0.6em 0; width: 100%; }
-    pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; }
-    .warning {
-      background: linear-gradient(90deg, yellow, red);
-      padding: 0.5em; color: black; font-weight: bold;
-      animation: flash 1s infinite alternate;
-      text-align: center; border-radius: 4px;
+    h2 { margin-top: 1em; text-align: center; }
+    label { margin: 1em 0 0.5em; display: block; }
+    input, button { width: 100%; padding: 0.7em; margin-bottom: 0.7em; border-radius: 5px; border: 1px solid #ccc; font-size: 1em;}
+    .input-status { font-size: 0.95em; margin-bottom: 0.6em;}
+    .valid { color: green; }
+    .invalid { color: red; }
+    #successMsg {
+      background: #e8f5e9; color: #2e7d32; border-left: 5px solid #66bb6a; border-radius: 5px;
+      margin-top: 1em; padding: 1em;
     }
-    @keyframes flash {
-      0% { background-color: yellow; }
-      100% { background-color: red; }
-    }
-    small { font-size: 0.9em; color: #555; display: block; margin-top: -0.5em; margin-bottom: 0.8em; }
+    #previewBox { background: #f8f8f8; border-radius: 5px; margin-top: 1em; padding: 1em; }
+    button { background: #2563eb; color: #fff; font-weight: bold; border: none; cursor: pointer; margin-top: 0.2em;}
+    button:disabled { background: #ccc; color: #999; cursor: not-allowed;}
+    .back-btn { position: fixed; top: 16px; left: 16px; width: auto; background: #eee; color: #222; border: 1px solid #aaa; z-index: 100;}
+    .back-btn:hover { background: #ffd; }
   </style>
 </head>
 <body>
-  <h2>ขอ Master ใหม่</h2>
-  <div id="warningBox" class="warning" style="display:none;"></div>
+  <button class="back-btn" onclick="history.back()">← Back</button>
+  <h2>Transfer QR</h2>
+  <form id="transferForm" autocomplete="off">
+    <label>QR Hash (64 chars):</label>
+    <input type="text" id="qrHash" maxlength="64" placeholder="Enter QR Hash" />
+    <span id="qrStatus" class="input-status"></span>
+    
+    <label>Recipient Public Key (40 chars):</label>
+    <input type="text" id="recipientKey" maxlength="40" placeholder="Enter recipient's public key" />
+    <span id="recipientStatus" class="input-status"></span>
+    
+    <label>Your Passphrase (6-12 letters & numbers):</label>
+    <input type="password" id="passphrase" minlength="6" maxlength="12" placeholder="Enter your passphrase" autocomplete="off" />
+    <span id="passStatus" class="input-status"></span>
 
-  <form id="requestMasterForm">
-    <label>ชื่อ Master (พิมพ์ใหญ่ A-Z เท่านั้น): <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required></label>
-    <label>ยืนยันชื่อ Master: <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required></label>
-    <label>Public Key (42 ตัวอักษร): <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" required></label>
-    <label>ยืนยัน Public Key: <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" required></label>
-    <small>📌 ผู้ขอควรส่ง Public Key นี้ให้ผู้รับ เพื่อใช้ยืนยันในกระบวนการโอนกรรมสิทธิ์</small>
-    <label>เหตุผล: <input type="text" id="reason"></label>
-    <label><input type="checkbox" id="agreePolicy" required> ฉันยอมรับว่าข้อมูลนี้จะเปิดเผยต่อสาธารณะ</label>
-    <button type="submit">ขอสิทธิ์ Master</button>
+    <label>4-digit Sign Code:</label>
+    <input type="password" id="signCode" maxlength="4" pattern="\d{4}" placeholder="Enter sign code (numbers only)" autocomplete="off" />
+    <span id="signStatus" class="input-status"></span>
+    
+    <button type="button" id="previewBtn" onclick="preview()" disabled>Preview</button>
+    <div id="previewBox"></div>
+
+    <button type="submit" id="confirmBtn" disabled>Confirm Transfer</button>
+    <div id="successMsg" style="display:none;"></div>
   </form>
 
-  <pre id="hashResult"></pre>
-
   <script>
-    let badwordList = {};
-    fetch('badwords.json')
-      .then(res => res.json())
-      .then(data => badwordList = data)
-      .catch(() => {
-        document.getElementById('warningBox').innerText = '⚠ ไม่สามารถโหลดคำต้องห้ามได้ โปรดตรวจสอบการเชื่อมต่อ';
-        document.getElementById('warningBox').style.display = 'block';
-      });
+    const qrHash = document.getElementById('qrHash');
+    const recipientKey = document.getElementById('recipientKey');
+    const passphrase = document.getElementById('passphrase');
+    const signCode = document.getElementById('signCode');
+    const qrStatus = document.getElementById('qrStatus');
+    const recipientStatus = document.getElementById('recipientStatus');
+    const passStatus = document.getElementById('passStatus');
+    const signStatus = document.getElementById('signStatus');
+    const previewBtn = document.getElementById('previewBtn');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const previewBox = document.getElementById('previewBox');
+    const successMsg = document.getElementById('successMsg');
 
-    function checkBadwords(inputValue) {
-      const input = inputValue.toLowerCase();
-      let found = [];
-      for (const group of Object.values(badwordList)) {
-        group.forEach(word => {
-          if (input.includes(word)) found.push(word);
-        });
-      }
-      if (found.length > 0) {
-        document.getElementById('warningBox').style.display = 'block';
-        document.getElementById('warningBox').innerHTML =
-          `⚠ พบคำที่ไม่เหมาะสม: <span style="color:red;">${found.join(', ')}</span>`;
+    function validateInputs() {
+      let valid = true;
+      // QR Hash
+      if (qrHash.value.trim().length === 64) {
+        qrStatus.textContent = "✓ Length OK";
+        qrStatus.className = "input-status valid";
       } else {
-        document.getElementById('warningBox').style.display = 'none';
+        qrStatus.textContent = "⚠ Must be 64 characters";
+        qrStatus.className = "input-status invalid";
+        valid = false;
       }
+      // Recipient
+      if (recipientKey.value.trim().length === 40) {
+        recipientStatus.textContent = "✓ Length OK";
+        recipientStatus.className = "input-status valid";
+      } else {
+        recipientStatus.textContent = "⚠ Must be 40 characters";
+        recipientStatus.className = "input-status invalid";
+        valid = false;
+      }
+      // Passphrase
+      const pw = passphrase.value;
+      const rePW = /^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,12}$/;
+      if (rePW.test(pw)) {
+        passStatus.textContent = "✓ Valid";
+        passStatus.className = "input-status valid";
+      } else {
+        passStatus.textContent = "⚠ 6-12 characters, must include both letters and numbers";
+        passStatus.className = "input-status invalid";
+        valid = false;
+      }
+      // Sign Code
+      if (/^\d{4}$/.test(signCode.value)) {
+        signStatus.textContent = "✓ Valid";
+        signStatus.className = "input-status valid";
+      } else {
+        signStatus.textContent = "⚠ Must be 4 digits (numbers only)";
+        signStatus.className = "input-status invalid";
+        valid = false;
+      }
+      previewBtn.disabled = !valid;
+      return valid;
     }
 
-    document.getElementById('masterName').addEventListener('input', function () {
-      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
-      checkBadwords(this.value);
-    });
+    qrHash.oninput = recipientKey.oninput = passphrase.oninput = signCode.oninput = validateInputs;
 
-    document.getElementById('reason').addEventListener('input', function () {
-      checkBadwords(this.value);
-    });
+    function sha256Hex(str) {
+      // Simple JS SHA256 (browser, only for demo)
+      return crypto.subtle.digest("SHA-256", new TextEncoder().encode(str)).then(b =>
+        [...new Uint8Array(b)].map(x => x.toString(16).padStart(2, '0')).join('')
+      );
+    }
 
-    document.getElementById('requestMasterForm').onsubmit = function (e) {
+    async function preview() {
+      if (!validateInputs()) return;
+      const senderHash = await sha256Hex(passphrase.value);
+      const senderAddress = '0x' + senderHash.slice(-40);
+      // สร้าง signature โดยใช้ passphrase + signcode + qrhash + recipient
+      const txRaw = passphrase.value + signCode.value + qrHash.value.trim() + recipientKey.value.trim();
+      const signature = await sha256Hex(txRaw);
+      previewBox.innerHTML =
+        `<b>Please confirm your transaction:</b><br><br>` +
+        `QR Hash: <code>${qrHash.value.trim()}</code><br>` +
+        `Recipient Key: <code>${recipientKey.value.trim()}</code><br>` +
+        `Your Address: <code>${senderAddress}</code><br>` +
+        `Sign Code: <code>${signCode.value}</code><br>` +
+        `Signature: <code>${signature}</code><br>`;
+      confirmBtn.disabled = false;
+      successMsg.style.display = "none";
+    }
+
+    document.getElementById('transferForm').onsubmit = async function(e) {
       e.preventDefault();
-
-      const name = document.getElementById('masterName').value.trim();
-      const confirm = document.getElementById('confirmName').value.trim();
-      const pubkey = document.getElementById('pubkey').value.trim();
-      const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
-      const reason = document.getElementById('reason').value;
-      const agreed = document.getElementById('agreePolicy').checked;
-
-      if (name !== confirm) {
-        alert('⚠ ชื่อ Master ไม่ตรงกัน กรุณาตรวจสอบ');
-        return;
-      }
-      if (pubkey !== confirmPubkey) {
-        alert('⚠ Public Key ไม่ตรงกัน กรุณาตรวจสอบ');
-        return;
-      }
-      if (!agreed) {
-        alert('⚠ กรุณายอมรับข้อตกลงก่อนส่งคำขอ');
-        return;
-      }
-
-      const confirmMsg = `📌 กรุณาตรวจสอบความถูกต้องก่อนส่ง:\n\n` +
-                         `ชื่อ Master: ${name}\n` +
-                         `Public Key: ${pubkey}\n` +
-                         `เหตุผล: ${reason || "(ไม่ระบุ)"}`;
-      if (!confirm(confirmMsg)) return;
-
-      const timestamp = new Date().toISOString();
-      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8)))
-                         .map(b => b.toString(16).padStart(2, "0")).join('');
-      const s = name + pubkey + reason + timestamp + nonce;
-      const hash = sha256(s);
-
-      document.getElementById('hashResult').innerText = `
-📌 คัดลอกข้อมูลนี้ส่งให้ Genesis/Admin หรือบันทึกใน log
-
-Hash คำขอ  : ${hash}
-Public Key : ${pubkey}
-Timestamp  : ${timestamp}
-Nonce      : ${nonce}
-เหตุผล     : ${reason}`.trim();
+      if (!validateInputs()) return;
+      // popup confirm
+      if (!window.confirm("Are you sure you want to confirm this QR transfer?")) return;
+      const senderHash = await sha256Hex(passphrase.value);
+      const senderAddress = '0x' + senderHash.slice(-40);
+      const signature = await sha256Hex(passphrase.value + signCode.value + qrHash.value.trim() + recipientKey.value.trim());
+      successMsg.innerHTML = `
+        🎉 <b>Transfer successful!</b><br>
+        Your transaction has been recorded.<br><br>
+        🛡️ QR Hash: <code>${qrHash.value.trim()}</code><br>
+        👤 Your Address: <code>${senderAddress}</code><br>
+        👥 Recipient Key: <code>${recipientKey.value.trim()}</code><br>
+        🔐 Signature: <code>${signature}</code>
+      `;
+      successMsg.style.display = "block";
+      previewBox.innerHTML = "";
+      confirmBtn.disabled = true;
+      // (TODO: ส่งข้อมูลไป backend หรือเก็บ log)
     };
   </script>
 </body>
