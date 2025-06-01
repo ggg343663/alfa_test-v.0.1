@@ -5,9 +5,11 @@
   <title>Genesis อนุมัติ Master Request</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 460px; margin: 2em auto; }
-    label, input, button { display: block; margin: 0.6em 0; width: 100%; }
-    pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; }
+    body { font-family: sans-serif; max-width: 500px; margin: 2em auto; }
+    label, input, button { display: block; margin: 0.7em 0; width: 100%; }
+    pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; border: 1px solid #ccc; border-radius: 5px; }
+    .hidden { display: none; }
+    button { cursor: pointer; }
   </style>
 </head>
 <body>
@@ -17,24 +19,37 @@
     <label>Public Key (Genesis): <input type="text" id="adminPubkey" required /></label>
     <label>Private Key 1: <input type="password" id="privKey1" required /></label>
     <label>Private Key 2: <input type="password" id="privKey2" required /></label>
-    <button type="submit">สร้างลายเซ็นอนุมัติ</button>
+    <button type="button" onclick="previewApprove()">📋 แสดงข้อมูลก่อนอนุมัติ</button>
   </form>
+
+  <div id="previewBox" class="hidden">
+    <h4>📋 ข้อมูลที่ใช้เซ็นอนุมัติ:</h4>
+    <pre id="previewContent"></pre>
+    <button onclick="confirmApprove()">✅ ยืนยันการอนุมัติ</button>
+    <button onclick="document.getElementById('previewBox').classList.add('hidden')">❌ ยกเลิก</button>
+  </div>
 
   <pre id="approveResult"></pre>
 
   <script>
-    document.getElementById('approveForm').onsubmit = function (e) {
-      e.preventDefault();
+    let finalLog = null;
+
+    function previewApprove() {
       const hash = document.getElementById('requestHash').value.trim();
       const pubkey = document.getElementById('adminPubkey').value.trim();
       const priv1 = document.getElementById('privKey1').value.trim();
       const priv2 = document.getElementById('privKey2').value.trim();
-      const timestamp = new Date().toISOString();
 
+      if (!hash || !pubkey || !priv1 || !priv2) {
+        alert("⚠ กรุณากรอกข้อมูลให้ครบทุกช่อง");
+        return;
+      }
+
+      const timestamp = new Date().toISOString();
       const sig1 = sha256(priv1 + hash);
       const sig2 = sha256(priv2 + sig1);
 
-      const log = {
+      finalLog = {
         type: "master_approve",
         request_hash: hash,
         approved_by: pubkey,
@@ -44,9 +59,18 @@
         status: "approved"
       };
 
+      document.getElementById('previewContent').innerText = JSON.stringify(finalLog, null, 2);
+      document.getElementById('previewBox').classList.remove('hidden');
+    }
+
+    function confirmApprove() {
+      if (!finalLog) return;
+
       document.getElementById('approveResult').innerText =
-        `คัดลอกข้อมูลนี้ไปใส่ logs.json\n\n${JSON.stringify(log, null, 2)}`;
-    };
+        `📌 คัดลอกข้อมูลนี้ไปใส่ logs.json\n\n${JSON.stringify(finalLog, null, 2)}`;
+
+      document.getElementById('previewBox').classList.add('hidden');
+    }
   </script>
 </body>
 </html>
