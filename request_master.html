@@ -1,11 +1,13 @@
-<!DOCTYPE html><html lang="th"><head>
+<!DOCTYPE html>
+<html lang="th">
+<head>
   <meta charset="UTF-8">
   <title>ขอ Master ใหม่ (DTC)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 400px; margin:2em auto; }
-    label, input, button { display:block; margin:0.6em 0; width:100%; }
-    pre { background:#f8f8f8; padding:1em; white-space:pre-wrap; }
+    body { font-family: sans-serif; max-width: 400px; margin: 2em auto; }
+    label, input, button { display: block; margin: 0.6em 0; width: 100%; }
+    pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; }
     .warning {
       background: linear-gradient(90deg, yellow, red);
       padding: 0.5em; color: black; font-weight: bold;
@@ -22,6 +24,7 @@
 <body>
   <h2>ขอ Master ใหม่</h2>
   <div id="warningBox" class="warning" style="display:none;"></div>
+
   <form id="requestMasterForm">
     <label>ชื่อ Master (พิมพ์ใหญ่): <input type="text" id="masterName" maxlength="8" required></label>
     <label>ยืนยันชื่อ Master: <input type="text" id="confirmName" maxlength="8" required></label>
@@ -32,73 +35,89 @@
     <label><input type="checkbox" id="agreePolicy" required> ฉันยอมรับว่าข้อมูลนี้จะเปิดเผยต่อสาธารณะ</label>
     <button type="submit">ขอสิทธิ์ Master</button>
   </form>
+
   <pre id="hashResult"></pre>
+
   <script>
-    let badwordList = {};fetch('badwords.json')
-  .then(res => res.json())
-  .then(data => badwordList = data)
-  .catch(() => {
-    document.getElementById('warningBox').innerText = '⚠ ไม่สามารถโหลดคำต้องห้ามได้ โปรดตรวจสอบการเชื่อมต่อ';
-    document.getElementById('warningBox').style.display = 'block';
-  });
+    let badwordList = {};
+    fetch('badwords.json')
+      .then(res => res.json())
+      .then(data => badwordList = data)
+      .catch(() => {
+        document.getElementById('warningBox').innerText = '⚠ ไม่สามารถโหลดคำต้องห้ามได้ โปรดตรวจสอบการเชื่อมต่อ';
+        document.getElementById('warningBox').style.display = 'block';
+      });
 
-function checkBadwords(inputValue) {
-  const input = inputValue.toLowerCase();
-  let found = [];
-  for (const group of Object.values(badwordList)) {
-    group.forEach(word => {
-      if (input.includes(word)) found.push(word);
+    function checkBadwords(inputValue) {
+      const input = inputValue.toLowerCase();
+      let found = [];
+      for (const group of Object.values(badwordList)) {
+        group.forEach(word => {
+          if (input.includes(word)) found.push(word);
+        });
+      }
+      if (found.length > 0) {
+        document.getElementById('warningBox').style.display = 'block';
+        document.getElementById('warningBox').innerHTML =
+          `⚠ พบคำที่ไม่เหมาะสม: <span style="color:red;">${found.join(', ')}</span>`;
+      } else {
+        document.getElementById('warningBox').style.display = 'none';
+      }
+    }
+
+    document.getElementById('masterName').addEventListener('input', function () {
+      this.value = this.value.toUpperCase();
+      checkBadwords(this.value);
     });
-  }
-  if (found.length > 0) {
-    document.getElementById('warningBox').style.display = 'block';
-    document.getElementById('warningBox').innerHTML =
-      `⚠ พบคำที่ไม่เหมาะสม: <span style="color:red;">${found.join(', ')}</span>`;
-  } else {
-    document.getElementById('warningBox').style.display = 'none';
-  }
-}
 
-document.getElementById('masterName').addEventListener('input', function () {
-  this.value = this.value.toUpperCase();
-  checkBadwords(this.value);
-});
+    document.getElementById('reason').addEventListener('input', function () {
+      checkBadwords(this.value);
+    });
 
-document.getElementById('reason').addEventListener('input', function () {
-  checkBadwords(this.value);
-});
+    document.getElementById('requestMasterForm').onsubmit = function (e) {
+      e.preventDefault();
 
-document.getElementById('requestMasterForm').onsubmit = function (e) {
-  e.preventDefault();
-  const name = document.getElementById('masterName').value.toUpperCase();
-  const confirm = document.getElementById('confirmName').value.toUpperCase();
-  const pubkey = document.getElementById('pubkey').value.trim();
-  const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
-  const reason = document.getElementById('reason').value;
+      const name = document.getElementById('masterName').value.toUpperCase();
+      const confirm = document.getElementById('confirmName').value.toUpperCase();
+      const pubkey = document.getElementById('pubkey').value.trim();
+      const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
+      const reason = document.getElementById('reason').value;
+      const agreed = document.getElementById('agreePolicy').checked;
 
-  if (name !== confirm) {
-    alert('⚠ ชื่อ Master ไม่ตรงกัน กรุณาตรวจสอบ');
-    return;
-  }
-  if (pubkey !== confirmPubkey) {
-    alert('⚠ Public Key ไม่ตรงกัน กรุณาตรวจสอบ');
-    return;
-  }
-  if (!document.getElementById('agreePolicy').checked) {
-    alert('⚠ กรุณายอมรับข้อตกลงก่อนส่งคำขอ');
-    return;
-  }
+      if (name !== confirm) {
+        alert('⚠ ชื่อ Master ไม่ตรงกัน กรุณาตรวจสอบ');
+        return;
+      }
+      if (pubkey !== confirmPubkey) {
+        alert('⚠ Public Key ไม่ตรงกัน กรุณาตรวจสอบ');
+        return;
+      }
+      if (!agreed) {
+        alert('⚠ กรุณายอมรับข้อตกลงก่อนส่งคำขอ');
+        return;
+      }
 
-  const timestamp = new Date().toISOString();
-  const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, "0")).join('');
-  const s = name + pubkey + reason + timestamp + nonce;
-  const hash = sha256(s);
+      const confirmMsg = `📌 กรุณาตรวจสอบความถูกต้องก่อนส่ง:\n\n` +
+                         `ชื่อ Master: ${name}\n` +
+                         `Public Key: ${pubkey}\n` +
+                         `เหตุผล: ${reason || "(ไม่ระบุ)"}`;
+      if (!confirm(confirmMsg)) return;
 
-  document.getElementById('hashResult').innerText = `
+      const timestamp = new Date().toISOString();
+      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8)))
+                         .map(b => b.toString(16).padStart(2, "0")).join('');
+      const s = name + pubkey + reason + timestamp + nonce;
+      const hash = sha256(s);
 
-คัดลอกข้อมูลนี้ส่งให้ Genesis/Admin หรือบันทึกใน log
+      document.getElementById('hashResult').innerText = `
+📌 คัดลอกข้อมูลนี้ส่งให้ Genesis/Admin หรือบันทึกใน log
 
-Hash คำขอ: ${hash} Public Key: ${pubkey} timestamp: ${timestamp} nonce: ${nonce} เหตุผล: ${reason}`.trim(); }; </script>
-
+Hash คำขอ  : ${hash}
+Public Key : ${pubkey}
+Timestamp  : ${timestamp}
+Nonce      : ${nonce}
+เหตุผล     : ${reason}`.trim();
+    };
+  </script>
 </body>
 </html>
