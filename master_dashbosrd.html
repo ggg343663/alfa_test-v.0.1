@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Master QR Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial,sans-serif; background: #f7f8fa; margin:0; padding:2em;}
+    .container { background:#fff; max-width:660px; margin:auto; border-radius:12px; box-shadow:0 2px 14px #ccd7e8; padding:2em 1.4em;}
+    h2 { color:#f59e42; margin-bottom:0.3em; }
+    .summary { margin: 1em 0 2em 0; font-size: 1.06em; color:#365; display: flex; gap: 2.5em;}
+    .summary > div { font-weight:bold; }
+    .search-box { margin-bottom:1em;}
+    input[type=text] {padding:0.45em; border-radius:5px; border:1px solid #dbeafe;}
+    table { width:100%; border-collapse:collapse; background:#f8fafc;}
+    th, td { padding:0.62em 0.32em; text-align:left; }
+    th { background:#facc15; color:#222; }
+    tr:nth-child(even) { background:#f1f5fa; }
+    .status-available { color:#1a7f3c; font-weight:600;}
+    .status-registered { color:#2563eb; font-weight:600;}
+    .status-transferred { color:#f59e42; font-weight:600;}
+    .back-btn { position: absolute; top: 18px; left: 18px; background: #eee; color: #232a3e; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; padding: 0.36em 1.1em; cursor: pointer; transition: background 0.18s;}
+    .back-btn:hover { background: #d6f5d6; }
+    @media(max-width:500px){
+      .container{padding:1em 0.3em;}
+      .summary{flex-direction:column;gap:0.7em;}
+      th, td{font-size:0.95em;}
+      .back-btn { position: static; margin-bottom: 1em;}
+    }
+  </style>
+</head>
+<body>
+  <button class="back-btn" onclick="history.back()">← Back</button>
+  <div class="container">
+    <h2>🔑 Master QR Dashboard</h2>
+    <div class="summary">
+      <div>Total QR: <span id="totalQR">0</span></div>
+      <div>Registered: <span id="regQR">0</span></div>
+      <div>Available: <span id="availQR">0</span></div>
+    </div>
+
+    <div class="search-box">
+      <input type="text" id="searchBox" placeholder="Search QR Hash, Owner, or Status..." oninput="renderTable()" />
+      <button onclick="loadData()">Refresh</button>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>QR Hash</th>
+          <th>Status</th>
+          <th>Owner</th>
+        </tr>
+      </thead>
+      <tbody id="qrTable"></tbody>
+    </table>
+  </div>
+<script>
+// ข้อมูล QR ของ master (mock หรือเชื่อมต่อกับ json จริง)
+let qrList = [];
+
+// ดึงข้อมูลจริงจากไฟล์ json (เปลี่ยน path เป็นของจริงในระบบคุณ)
+async function loadData() {
+  // ตัวอย่างเชื่อมต่อ API/JSON จริง (uncomment ถ้ามี)
+  // const res = await fetch('master_qr_list.json');
+  // qrList = await res.json();
+
+  // [DEMO] mock data (ลบออกเมื่อใช้กับ json จริง)
+  qrList = [
+    {index:1, hash:"A9F1...1CDE", status:"registered", owner:"0x0fA...123"},
+    {index:2, hash:"B8A2...3BAF", status:"available", owner:""},
+    {index:3, hash:"C4EE...1AF0", status:"registered", owner:"0xB4A...999"},
+    {index:4, hash:"A013...11AA", status:"available", owner:""},
+    {index:5, hash:"0A4D...F1B2", status:"transferred", owner:"0x123...DEF"},
+  ];
+  renderTable();
+}
+loadData();
+
+function renderTable() {
+  const qrTable = document.getElementById('qrTable');
+  const search = (document.getElementById('searchBox')?.value || "").toLowerCase();
+  let total = qrList.length;
+  let reg = 0, avail = 0;
+
+  let html = qrList.filter(q =>
+      q.hash.toLowerCase().includes(search) ||
+      (q.owner && q.owner.toLowerCase().includes(search)) ||
+      q.status.toLowerCase().includes(search)
+    ).map(q => {
+      if(q.status === "registered") reg++;
+      if(q.status === "available") avail++;
+      return `<tr>
+        <td>${q.index}</td>
+        <td><code>${q.hash}</code></td>
+        <td class="status-${q.status}">${q.status.charAt(0).toUpperCase()+q.status.slice(1)}</td>
+        <td>${q.owner ? `<code>${q.owner}</code>` : '-'}</td>
+      </tr>`;
+    }).join('');
+  qrTable.innerHTML = html || `<tr><td colspan="4" style="text-align:center;color:#888;">No data found.</td></tr>`;
+  document.getElementById('totalQR').textContent = total;
+  document.getElementById('regQR').textContent = reg;
+  document.getElementById('availQR').textContent = avail;
+}
+</script>
+</body>
+</html>
