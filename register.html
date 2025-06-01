@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>ลงทะเบียน QR</title>
+  <title>Register QR</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -56,6 +56,12 @@
     #backBtn {
       background: #ddd;
       color: #333;
+      position: absolute;
+      top: 18px;
+      left: 18px;
+      padding: 0.5em 1.4em;
+      font-size: 1em;
+      border-radius: 6px;
     }
     #backBtn:hover {
       background: #bbb;
@@ -75,110 +81,15 @@
       border-left: 5px solid #66bb6a;
       border-radius: 5px;
     }
+    .hide {
+      display: none;
+    }
   </style>
 </head>
 <body>
-  <h2>ลงทะเบียน QR</h2>
+  <button type="button" id="backBtn" onclick="window.history.back()">← Back</button>
+  <h2>Register QR</h2>
   <form id="registerForm" autocomplete="off">
     <label>
       hash QR:
-      <input type="text" id="hashQr" placeholder="กรอก hash QR (64 ตัวอักษร)" />
-      <span id="hashStatus" class="input-status"></span>
-    </label>
-
-    <label>
-      Public Key:
-      <input type="text" id="pubKey" placeholder="กรอก Public Key (40 ตัวอักษร)" />
-      <span id="pubStatus" class="input-status"></span>
-    </label>
-
-    <div class="button-row">
-      <button type="button" id="backBtn" onclick="window.history.back()">ย้อนกลับ</button>
-      <button type="button" id="previewBtn" onclick="preview()">ดูข้อมูล</button>
-    </div>
-    
-    <div id="previewBox"></div>
-
-    <div class="button-row" style="margin-top: 1em;">
-      <button type="submit" id="confirmBtn" disabled>ยืนยันลงทะเบียน</button>
-    </div>
-
-    <div id="successMsg" style="display:none;"></div>
-  </form>
-
-  <script>
-    const hashInput = document.getElementById('hashQr');
-    const pubInput = document.getElementById('pubKey');
-    const hashStatus = document.getElementById('hashStatus');
-    const pubStatus = document.getElementById('pubStatus');
-    const previewBox = document.getElementById('previewBox');
-    const confirmBtn = document.getElementById('confirmBtn');
-    const successMsg = document.getElementById('successMsg');
-
-    function validateInputs() {
-      const hash = hashInput.value.trim();
-      const pub = pubInput.value.trim();
-      let valid = true;
-
-      if (hash.length === 64) {
-        hashStatus.textContent = "✓ ความยาวถูกต้อง";
-        hashStatus.className = "input-status valid";
-      } else {
-        hashStatus.textContent = "⚠ ต้องมีความยาว 64 ตัวอักษร";
-        hashStatus.className = "input-status invalid";
-        valid = false;
-      }
-
-      if (pub.length === 40) {
-        pubStatus.textContent = "✓ ความยาวถูกต้อง";
-        pubStatus.className = "input-status valid";
-      } else {
-        pubStatus.textContent = "⚠ ต้องมีความยาว 40 ตัวอักษร";
-        pubStatus.className = "input-status invalid";
-        valid = false;
-      }
-
-      return valid;
-    }
-
-    function preview() {
-      const isValid = validateInputs();
-      if (!isValid) {
-        previewBox.textContent = "⚠ ข้อมูลไม่ถูกต้อง ไม่สามารถแสดงตัวอย่างได้";
-        confirmBtn.disabled = true;
-        successMsg.style.display = "none";
-        return;
-      }
-
-      const hash = hashInput.value.trim();
-      const pub = pubInput.value.trim();
-      previewBox.textContent =
-        `📋 โปรดตรวจสอบข้อมูลก่อนยืนยัน:\n\n` +
-        `🔐 hash QR   : ${hash}\n` +
-        `📌 Public Key: ${pub}`;
-      confirmBtn.disabled = false;
-      successMsg.style.display = "none";
-    }
-
-    document.getElementById('registerForm').onsubmit = function(e) {
-      e.preventDefault();
-
-      const hash = hashInput.value.trim();
-      const pub = pubInput.value.trim();
-
-      successMsg.style.display = "block";
-      successMsg.innerHTML = `
-        🎉 <strong>ลงทะเบียนสำเร็จแล้ว!</strong><br>
-        ข้อมูลของคุณถูกบันทึกไว้เรียบร้อย.<br><br>
-        🛡️ hash QR: <code>${hash}</code><br>
-        🔑 Public Key: <code>${pub}</code>
-      `;
-
-      previewBox.textContent = "";
-      confirmBtn.disabled = true;
-
-      // TODO: ส่งข้อมูลไป backend หรือเก็บไว้ในไฟล์ JSON
-    };
-  </script>
-</body>
-</html>
+      <input type="text" id="
