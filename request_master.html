@@ -1,13 +1,26 @@
-<!DOCTYPE html>
-<html lang="th">
+<!DOCTYPE html><html lang="th">
 <head>
   <meta charset="UTF-8">
   <title>ขอ Master ใหม่ (DTC)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 400px; margin:2em auto;}
-    label, input, button { display:block; margin:0.6em 0; width:100%; }
-    pre { background:#f8f8f8; padding:1em; }
+    body { font-family: sans-serif; max-width: 400px; margin:2em auto; }
+    label, input, button, textarea { display:block; margin:0.6em 0; width:100%; }
+    pre { background:#f8f8f8; padding:1em; white-space:pre-wrap; word-wrap:break-word; }
+    #warningBox {
+      margin-top: 10px;
+      padding: 0.8em;
+      border: 1px solid #d32f2f;
+      border-radius: 6px;
+      background-color: #fff3cd;
+      font-size: 0.95em;
+      display: none;
+    }
+    @keyframes flash {
+      0%   { background-color: #fff3cd; }
+      50%  { background-color: #f8d7da; }
+      100% { background-color: #fff3cd; }
+    }
   </style>
 </head>
 <body>
@@ -15,18 +28,46 @@
   <form id="requestMasterForm">
     <label>ชื่อ Master (พิมพ์ใหญ่): <input type="text" id="masterName" maxlength="8" required></label>
     <label>Public Key: <input type="text" id="pubkey" required></label>
-    <label>เหตุผล: <input type="text" id="reason"></label>
+    <label>เหตุผล: <textarea id="reason" rows="4" placeholder="กรุณากรอกเหตุผลในการขอ Master"></textarea></label>
+    <div id="warningBox"></div>
     <button type="submit">ขอสิทธิ์ Master</button>
   </form>
-  <pre id="hashResult"></pre>
-  <script>
+  <pre id="hashResult"></pre>  <script>
+    const badwords = [
+      "kill", "rape", "terror", "bomb", "nazi", "hitler", "suicide", "fuck", "shit",
+      "asshole", "bitch", "cunt", "slut", "dick", "bastard", "damn", "piss", "crap",
+      "abuse", "bully", "violence", "murder", "drugs", "porn", "genocide", "hang",
+      "stab", "burn", "explode", "gun", "knife"
+    ];
+
+    const warningBox = document.getElementById("warningBox");
+    const reasonInput = document.getElementById("reason");
+
+    reasonInput.addEventListener("input", () => {
+      const value = reasonInput.value.toLowerCase();
+      let found = [];
+      badwords.forEach(word => {
+        if (value.includes(word)) found.push(word);
+      });
+
+      if (found.length > 0) {
+        warningBox.style.display = "block";
+        warningBox.innerHTML = `⚠ พบคำไม่เหมาะสม: <span style="color:red;font-weight:bold">${found.join(", ")}</span>`;
+        warningBox.style.animation = "flash 0.7s infinite";
+      } else {
+        warningBox.style.display = "none";
+        warningBox.innerHTML = "";
+        warningBox.style.animation = "none";
+      }
+    });
+
     document.getElementById('requestMasterForm').onsubmit = function(e) {
       e.preventDefault();
       const name = document.getElementById('masterName').value.toUpperCase();
       const pubkey = document.getElementById('pubkey').value;
-      const reason = document.getElementById('reason').value;
+      const reason = reasonInput.value;
       const timestamp = new Date().toISOString();
-      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b=>b.toString(16).padStart(2,"0")).join('');
+      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, "0")).join('');
 
       const s = name + pubkey + reason + timestamp + nonce;
       const hash = sha256(s);
@@ -41,6 +82,5 @@ nonce: ${nonce}
 เหตุผล: ${reason}
 `.trim();
     };
-  </script>
-</body>
+  </script></body>
 </html>
