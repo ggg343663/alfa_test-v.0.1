@@ -16,47 +16,67 @@
     h2 {
       text-align: center;
       font-size: 1.4em;
-      margin-bottom: 1.4em;
+      margin-bottom: 1.6em;
       letter-spacing: 0.01em;
     }
-    .flex-container {
+    .transfer-flex {
       display: flex;
-      gap: 1.5em;
-      justify-content: space-between;
+      align-items: center;
+      gap: 0.5em;
+      justify-content: center;
       background: #fff;
-      padding: 2em 1em 1.2em;
-      border-radius: 16px;
+      border-radius: 22px;
       box-shadow: 0 2px 14px rgba(44,62,80,0.07);
+      padding: 1.5em 0.7em 1.3em 0.7em;
       margin-bottom: 2em;
     }
-    .column {
+    .transfer-col {
       flex: 1 1 0;
+      min-width: 0;
       display: flex;
       flex-direction: column;
-      gap: 1em;
-      min-width: 0;
+      gap: 1.2em;
+      padding: 1em 1.2em;
+      border-radius: 14px;
+      background: #f7fafd;
     }
     .sender {
-      border-right: 1.5px dashed #b8c6e9;
-      padding-right: 1em;
+      border: 2px solid #246bfd22;
+      box-shadow: 0 1px 8px #246bfd13;
+      margin-right: 0.7em;
+    }
+    .receiver {
+      border: 2px solid #22d3ee33;
+      box-shadow: 0 1px 8px #22d3ee11;
+      margin-left: 0.7em;
+    }
+    .transfer-arrow {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.3em;
       color: #6366f1;
+      width: 60px;
+      height: 60px;
+      background: linear-gradient(135deg,#e0e7ff,#e0f7fa);
+      border-radius: 50%;
+      margin: 0 0.4em;
+      box-shadow: 0 2px 10px #6366f120;
+      border: 2px solid #e0e7ef;
+      flex-shrink: 0;
     }
-    .recipient {
-      padding-left: 1em;
-      color: #22d3ee;
-    }
-    label {
+    .transfer-label {
       font-weight: 600;
-      margin-bottom: 0.3em;
+      margin-bottom: 0.21em;
       font-size: 1em;
+      letter-spacing: 0.01em;
     }
     input[type="text"], input[type="password"] {
-      padding: 0.55em 0.7em;
-      font-size: 1em;
+      padding: 0.62em 0.85em;
+      font-size: 1.08em;
       border-radius: 8px;
       border: 1px solid #d3d9ec;
-      margin-bottom: 0.3em;
-      background: #f7faff;
+      background: #f9fbff;
       transition: border-color 0.2s;
     }
     input:focus { border-color: #6366f1; outline: none; }
@@ -65,12 +85,15 @@
       display: flex;
       flex-direction: column;
       gap: 0.7em;
+      max-width: 360px;
+      margin-left: auto;
+      margin-right: auto;
     }
     button {
       font-family: inherit;
       font-weight: bold;
-      font-size: 1.05em;
-      padding: 0.68em 0;
+      font-size: 1.1em;
+      padding: 0.76em 0;
       border-radius: 8px;
       border: none;
       background: linear-gradient(90deg, #6366f1, #22d3ee);
@@ -81,7 +104,7 @@
       transition: background 0.16s, box-shadow 0.16s;
     }
     button:disabled {
-      opacity: 0.5;
+      opacity: 0.52;
       cursor: not-allowed;
       background: #e4e9f7;
       color: #7c8ca7;
@@ -102,41 +125,39 @@
       transition: background 0.2s;
     }
     .back-btn:hover { background: #c7f7fa; color: #232a3e; }
-    @media (max-width: 600px) {
-      .flex-container {
-        flex-direction: column;
-        padding: 1em 0.4em 0.7em;
-        gap: 0.9em;
-      }
-      .sender, .recipient {
-        border: none;
-        padding: 0;
-      }
+    @media (max-width: 800px) {
+      .transfer-flex { flex-direction: column; gap: 0.3em; padding: 0.8em 0.1em 0.6em;}
+      .transfer-arrow { margin: 0.6em auto; }
+      .sender, .receiver { margin: 0; }
     }
   </style>
 </head>
 <body>
   <button class="back-btn" onclick="history.back()">← Back</button>
   <h2>Transfer QR</h2>
-  <div class="flex-container">
+  <div class="transfer-flex">
     <!-- Sender (left) -->
-    <div class="column sender">
-      <label for="qrhash">QR Hash (64 chars):</label>
+    <div class="transfer-col sender">
+      <div class="transfer-label" style="color:#246bfd">Sender</div>
+      <label class="transfer-label" for="qrhash">QR Hash (64 chars):</label>
       <input type="text" id="qrhash" maxlength="64" autocomplete="off" placeholder="Enter QR Hash" />
 
-      <label for="passphrase">Your Passphrase<br/>(6-12 letters & numbers):</label>
+      <label class="transfer-label" for="passphrase">Your Passphrase (6-12 letters & numbers):</label>
       <input type="password" id="passphrase" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your passphrase" />
 
-      <label for="signcode">4-digit Sign Code:</label>
+      <label class="transfer-label" for="signcode">4-digit Sign Code:</label>
       <input type="password" id="signcode" maxlength="4" minlength="4" autocomplete="off" pattern="\d{4}" placeholder="Enter sign code (numbers only)" />
     </div>
+    <!-- Arrow send -->
+    <div class="transfer-arrow" aria-label="send">&#8594;</div>
     <!-- Recipient (right) -->
-    <div class="column recipient">
-      <label for="recipientpk">Recipient Public Key<br/>(40 chars):</label>
+    <div class="transfer-col receiver">
+      <div class="transfer-label" style="color:#22d3ee">Receiver</div>
+      <label class="transfer-label" for="recipientpk">Recipient Public Key (40 chars):</label>
       <input type="text" id="recipientpk" maxlength="40" autocomplete="off" placeholder="Enter recipient's public key" />
     </div>
   </div>
-  <div class="btn-row" style="max-width:360px;margin:0 auto;">
+  <div class="btn-row">
     <button id="previewBtn" onclick="preview()" type="button">Preview</button>
     <button id="confirmBtn" onclick="confirmTransfer()" type="button" disabled>Confirm Transfer</button>
   </div>
