@@ -11,6 +11,29 @@
       padding: 1em;
       background-color: #f9f9f9;
       border-radius: 8px;
+      position: relative;
+    }
+    .back-btn {
+      position: fixed;
+      top: 18px;
+      left: 16px;
+      background: #eee;
+      color: #222;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 1em;
+      padding: 0.4em 1.1em;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+      transition: background 0.2s;
+    }
+    .back-btn:hover {
+      background: #d6f5d6;
+      color: #1a7f3c;
+    }
+    @media (max-width: 600px) {
+      .back-btn { top: 10px; left: 8px; font-size: 0.97em; padding: 0.34em 0.9em;}
     }
     input, textarea {
       width: 100%;
@@ -23,7 +46,7 @@
     }
     input.invalid { border-color: red; }
     input.valid { border-color: green; }
-    button {
+    button:not(.back-btn) {
       margin-top: 1em;
       padding: 0.7em 1.2em;
       font-size: 1em;
@@ -33,7 +56,7 @@
       border-radius: 4px;
       cursor: pointer;
     }
-    button:hover { background-color: #45a049; }
+    button:not(.back-btn):hover { background-color: #45a049; }
     .toggle-password {
       position: absolute;
       right: 10px;
@@ -57,7 +80,8 @@
   </style>
 </head>
 <body>
-  <h2>🔐 สร้าง Address (Web3-style) จากรหัสผ่าน</h2>
+  <button class="back-btn" onclick="history.back()">← กลับ</button>
+  <h2 style="margin-top:1.5em;">🔐 สร้าง Address (Web3-style) จากรหัสผ่าน</h2>
 
   <label>รหัสผ่าน (6-12 ตัวอักษร):
     <input type="password" id="privateKey1" maxlength="12" minlength="6" />
@@ -79,8 +103,6 @@
 
   <button onclick="copyAddress()">📋 คัดลอก Address</button>
   <div id="copyStatus" class="status">✅ คัดลอกสำเร็จ!</div>
-
-  <p><a href="index.html">← กลับหน้าหลัก</a></p>
 
   <script>
     const toggleSpans = document.querySelectorAll(".toggle-password");
