@@ -50,17 +50,33 @@
     }
     label {
       font-weight: bold;
+      display: block;
+      margin-top: 1em;
+      position: relative;
+    }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 35px;
+      cursor: pointer;
+      user-select: none;
+      font-size: 0.9em;
+      color: #555;
     }
   </style>
 </head>
 <body>
   <h1>สร้าง Address (Web3-style) จากรหัสผ่าน</h1>
 
-  <label for="privateKey1">รหัสผ่าน (6-12 ตัวอักษร):</label>
-  <input type="password" id="privateKey1" maxlength="12" minlength="6" autocomplete="off" />
+  <label for="privateKey1">รหัสผ่าน (6-12 ตัวอักษร):
+    <input type="password" id="privateKey1" maxlength="12" minlength="6" autocomplete="off" />
+    <span class="toggle-password" data-target="privateKey1">แสดง</span>
+  </label>
 
-  <label for="privateKey2">ยืนยันรหัสผ่าน:</label>
-  <input type="password" id="privateKey2" maxlength="12" minlength="6" autocomplete="off" />
+  <label for="privateKey2">ยืนยันรหัสผ่าน:
+    <input type="password" id="privateKey2" maxlength="12" minlength="6" autocomplete="off" />
+    <span class="toggle-password" data-target="privateKey2">แสดง</span>
+  </label>
 
   <button onclick="generateAddress()">สร้าง Address</button>
 
@@ -74,6 +90,21 @@
   <script>
     const privateKey1Input = document.getElementById("privateKey1");
     const privateKey2Input = document.getElementById("privateKey2");
+
+    // Toggle password visibility
+    document.querySelectorAll('.toggle-password').forEach(span => {
+      span.addEventListener('click', () => {
+        const targetId = span.getAttribute('data-target');
+        const input = document.getElementById(targetId);
+        if (input.type === "password") {
+          input.type = "text";
+          span.textContent = "ซ่อน";
+        } else {
+          input.type = "password";
+          span.textContent = "แสดง";
+        }
+      });
+    });
 
     function validatePrivateKeyInput(input) {
       if (input.value.trim().length >= 6) {
