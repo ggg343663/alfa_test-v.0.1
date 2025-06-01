@@ -27,8 +27,8 @@
       border-radius: 4px;
     }
     button {
-      margin-top: 1.5em;
-      padding: 0.7em 1.2em;
+      margin-top: 1.2em;
+      padding: 0.7em;
       font-size: 1em;
       background-color: #2196F3;
       color: white;
@@ -39,7 +39,7 @@
     button:hover {
       background-color: #0b7dda;
     }
-    #result {
+    #previewBox, #result {
       margin-top: 1.5em;
       padding: 1em;
       background: #fff;
@@ -49,6 +49,7 @@
       white-space: pre-wrap;
       word-break: break-word;
     }
+    .hidden { display: none; }
   </style>
 </head>
 <body>
@@ -66,21 +67,27 @@
     <label for="privateInput">Private Input (ของเจ้าของเดิม):</label>
     <input type="password" id="privateInput" name="private_input" placeholder="ความลับส่วนตัว" required />
 
-    <button type="submit">โอนกรรมสิทธิ์</button>
+    <button type="button" onclick="previewTransfer()">📋 แสดงข้อมูลก่อนโอน</button>
   </form>
 
-  <div id="result"></div>
+  <div id="previewBox" class="hidden">
+    <h4>📋 ตรวจสอบข้อมูลก่อนยืนยัน:</h4>
+    <pre id="previewContent"></pre>
+    <button onclick="confirmTransfer()">✅ ยืนยันโอนกรรมสิทธิ์</button>
+    <button onclick="document.getElementById('previewBox').classList.add('hidden')">❌ ยกเลิก</button>
+  </div>
 
+  <div id="result"></div>
   <button onclick="window.history.back()" style="margin-top: 1em;">ย้อนกลับ</button>
 
   <script>
-    document.getElementById('transferForm').onsubmit = function(e) {
-      e.preventDefault();
+    let previewData = null;
 
-      const qr = this.qr.value.trim();
-      const newPub = this.newPublicKey.value.trim();
-      const confirmPub = this.confirmPublicKey.value.trim();
-      const priv = this.privateInput.value.trim();
+    function previewTransfer() {
+      const qr = document.getElementById('qr').value.trim();
+      const newPub = document.getElementById('newPublicKey').value.trim();
+      const confirmPub = document.getElementById('confirmPublicKey').value.trim();
+      const priv = document.getElementById('privateInput').value.trim();
 
       if (!qr || !newPub || !confirmPub || !priv) {
         alert('⚠ กรุณากรอกข้อมูลให้ครบทุกช่อง');
@@ -97,12 +104,24 @@
         return;
       }
 
-      document.getElementById('result').textContent = 
-        `✅ โอนกรรมสิทธิ์สำเร็จ!\n\n` +
-        `QR Code: ${qr}\n` +
-        `Public Key ใหม่: ${newPub}\n` +
-        `Private Input ของเจ้าของเดิม: ${priv}`;
-    };
+      previewData = {
+        type: "transfer",
+        qr_code: qr,
+        new_public_key: newPub,
+        private_input: priv,
+        timestamp: new Date().toISOString()
+      };
+
+      document.getElementById('previewContent').innerText = JSON.stringify(previewData, null, 2);
+      document.getElementById('previewBox').classList.remove('hidden');
+    }
+
+    function confirmTransfer() {
+      if (!previewData) return;
+      document.getElementById('result').innerText =
+        `✅ โอนกรรมสิทธิ์สำเร็จ\n\n` + JSON.stringify(previewData, null, 2);
+      document.getElementById('previewBox').classList.add('hidden');
+    }
   </script>
 </body>
 </html>
