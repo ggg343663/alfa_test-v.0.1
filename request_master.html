@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>ขอ Master ใหม่ (DTC)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 400px; margin:2em auto;}
+    label, input, button { display:block; margin:0.6em 0; width:100%; }
+    pre { background:#f8f8f8; padding:1em; }
+  </style>
+</head>
+<body>
+  <h2>ขอ Master ใหม่</h2>
+  <form id="requestMasterForm">
+    <label>ชื่อ Master (พิมพ์ใหญ่): <input type="text" id="masterName" maxlength="8" required></label>
+    <label>Public Key: <input type="text" id="pubkey" required></label>
+    <label>เหตุผล: <input type="text" id="reason"></label>
+    <button type="submit">ขอสิทธิ์ Master</button>
+  </form>
+  <pre id="hashResult"></pre>
+  <script>
+    document.getElementById('requestMasterForm').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('masterName').value.toUpperCase();
+      const pubkey = document.getElementById('pubkey').value;
+      const reason = document.getElementById('reason').value;
+      const timestamp = new Date().toISOString();
+      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b=>b.toString(16).padStart(2,"0")).join('');
+
+      const s = name + pubkey + reason + timestamp + nonce;
+      const hash = sha256(s);
+
+      document.getElementById('hashResult').innerText = `
+คัดลอกข้อมูลนี้ส่งให้ Genesis/Admin หรือบันทึกใน log
+
+Hash คำขอ: ${hash}
+Public Key: ${pubkey}
+timestamp: ${timestamp}
+nonce: ${nonce}
+เหตุผล: ${reason}
+`.trim();
+    };
+  </script>
+</body>
+</html>
