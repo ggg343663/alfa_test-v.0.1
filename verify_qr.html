@@ -1,64 +1,91 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>ตรวจสอบ QR</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 500px;
-      margin: 2em auto;
-      padding: 1em;
-      background: #f9f9f9;
-      border-radius: 8px;
-    }
-    label {
-      display: block;
-      margin-top: 1em;
-      font-weight: bold;
-    }
-    input {
-      width: 100%;
-      padding: 0.5em;
-      font-size: 1em;
-      margin-top: 0.3em;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      margin-top: 1.5em;
-      padding: 0.7em 1.2em;
-      font-size: 1em;
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-    }
-    button:hover {
-      background-color: #0b7dda;
-    }
-    #result {
-      margin-top: 1.5em;
-      padding: 1em;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-weight: bold;
-      text-align: center;
-      font-size: 1.2em;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>ตรวจสอบ QR</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    max-width: 500px;
+    margin: 2em auto;
+    padding: 1em;
+    background: #f9f9f9;
+    border-radius: 8px;
+  }
+  label {
+    display: block;
+    margin-top: 1em;
+    font-weight: bold;
+  }
+  input {
+    width: 100%;
+    padding: 0.5em;
+    font-size: 1em;
+    margin-top: 0.3em;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s ease;
+  }
+  input.valid {
+    border-color: green;
+  }
+  input.invalid {
+    border-color: red;
+  }
+  button {
+    margin-top: 1.5em;
+    padding: 0.7em 1.2em;
+    font-size: 1em;
+    background-color: #2196F3;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  button:disabled {
+    background-color: #a0c4ff;
+    cursor: not-allowed;
+  }
+  button:hover:not(:disabled) {
+    background-color: #0b7dda;
+  }
+  #result {
+    margin-top: 1.5em;
+    padding: 1em;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 1.2em;
+    user-select: text;
+    white-space: pre-wrap;
+  }
+  #copyResultBtn {
+    background-color: #4CAF50;
+    margin-top: 0.5em;
+  }
+  #copyResultBtn:hover {
+    background-color: #3e8e41;
+  }
+  #qr-reader {
+    width: 100%;
+    margin-top: 2em;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+  }
+</style>
 </head>
 <body>
   <h1>ตรวจสอบ QR</h1>
+
   <label for="hash">QR hash:</label>
-  <input id="hash" size="64" placeholder="กรอก QR hash" />
+  <input id="hash" maxlength="64" placeholder="กรอก QR hash 64 ตัวอักษร" />
 
   <label for="pubkey">Public Key:</label>
-  <input id="pubkey" size="64" placeholder="กรอก Public Key" />
+  <input id="pubkey" maxlength="40" placeholder="กรอก Public Key 40 ตัวอักษร" />
 
   <label for="timestamp">Timestamp:</label>
   <input id="timestamp" placeholder="กรอก Timestamp" />
@@ -66,44 +93,128 @@
   <label for="nonce">Nonce:</label>
   <input id="nonce" placeholder="กรอก Nonce" />
 
-  <button onclick="verifyHash()">ตรวจสอบ</button>
-
+  <button id="verifyBtn" onclick="verifyHash()" disabled>ตรวจสอบ</button>
   <div id="result"></div>
+  <button id="copyResultBtn" onclick="copyResult()" disabled>คัดลอกผลลัพธ์</button>
 
   <button onclick="window.history.back()" style="margin-top: 1em;">ย้อนกลับ</button>
 
+  <h3>สแกน QR Code (ใส่ค่า QR hash อัตโนมัติ):</h3>
+  <div id="qr-reader"></div>
+
+  <!-- โหลดไลบรารี html5-qrcode -->
+  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
   <script>
+    const hashInput = document.getElementById("hash");
+    const pubkeyInput = document.getElementById("pubkey");
+    const timestampInput = document.getElementById("timestamp");
+    const nonceInput = document.getElementById("nonce");
+    const verifyBtn = document.getElementById("verifyBtn");
+    const resultDiv = document.getElementById("result");
+    const copyResultBtn = document.getElementById("copyResultBtn");
+
+    function validateInputLength(input, expectedLength) {
+      if (input.value.trim().length === expectedLength) {
+        input.classList.add("valid");
+        input.classList.remove("invalid");
+        return true;
+      } else {
+        input.classList.add("invalid");
+        input.classList.remove("valid");
+        return false;
+      }
+    }
+
+    function validateForm() {
+      const validHash = validateInputLength(hashInput, 64);
+      const validPubkey = validateInputLength(pubkeyInput, 40);
+      const validTimestamp = timestampInput.value.trim().length > 0;
+      const validNonce = nonceInput.value.trim().length > 0;
+
+      verifyBtn.disabled = !(validHash && validPubkey && validTimestamp && validNonce);
+
+      if (validTimestamp) {
+        timestampInput.classList.add("valid");
+        timestampInput.classList.remove("invalid");
+      } else {
+        timestampInput.classList.add("invalid");
+        timestampInput.classList.remove("valid");
+      }
+      if (validNonce) {
+        nonceInput.classList.add("valid");
+        nonceInput.classList.remove("invalid");
+      } else {
+        nonceInput.classList.add("invalid");
+        nonceInput.classList.remove("valid");
+      }
+
+      resultDiv.textContent = "";
+      copyResultBtn.disabled = true;
+    }
+
+    [hashInput, pubkeyInput, timestampInput, nonceInput].forEach(input => {
+      input.addEventListener("input", validateForm);
+    });
+
     async function sha256Hex(str) {
       const buffer = new TextEncoder().encode(str);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
       return Array.from(new Uint8Array(hashBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
+        .map(b => b.toString(16).padStart(2, "0"))
+        .join("");
     }
 
     async function verifyHash() {
-      const pub = document.getElementById("pubkey").value.trim();
-      const t = document.getElementById("timestamp").value.trim();
-      const n = document.getElementById("nonce").value.trim();
-      const hashInput = document.getElementById("hash").value.trim();
-      const resultDiv = document.getElementById("result");
+      const pub = pubkeyInput.value.trim();
+      const t = timestampInput.value.trim();
+      const n = nonceInput.value.trim();
+      const hashInputValue = hashInput.value.trim();
 
-      if (!hashInput || !pub || !t || !n) {
-        resultDiv.textContent = "⚠️ กรุณากรอกข้อมูลให้ครบทุกช่องก่อนตรวจสอบ";
-        resultDiv.style.color = "#d93025";
-        return;
-      }
+      const calculatedHash = await sha256Hex(pub + "|" + t + "|" + n);
 
-      const hash = await sha256Hex(pub + "|" + t + "|" + n);
-
-      if (hash === hashInput) {
+      if (calculatedHash === hashInputValue) {
         resultDiv.textContent = "✔ ถูกต้อง!";
         resultDiv.style.color = "#1a7300";
       } else {
         resultDiv.textContent = "✘ ไม่ตรง";
         resultDiv.style.color = "#d93025";
       }
+      copyResultBtn.disabled = false;
     }
+
+    function copyResult() {
+      if (!resultDiv.textContent) {
+        alert("ไม่มีผลลัพธ์ให้คัดลอก");
+        return;
+      }
+      navigator.clipboard.writeText(resultDiv.textContent).then(() => {
+        alert("คัดลอกผลลัพธ์เรียบร้อยแล้ว");
+      }).catch(() => {
+        alert("ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง");
+      });
+    }
+
+    // สแกน QR แล้วเอาค่ามาใส่ช่อง hash QR
+    function onScanSuccess(decodedText, decodedResult) {
+      hashInput.value = decodedText;
+      hashInput.classList.add("valid");
+      hashInput.classList.remove("invalid");
+      validateForm();
+      alert("สแกน QR hash สำเร็จ:\n" + decodedText);
+      html5QrcodeScanner.clear();
+    }
+    function onScanFailure(error) {
+      // ไม่แสดงข้อความ error เพื่อลดความรบกวน
+    }
+
+    var html5QrcodeScanner = new Html5QrcodeScanner(
+      "qr-reader", { fps: 10, qrbox: 250 }
+    );
+    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
+    // เริ่มต้น validate ฟอร์ม
+    validateForm();
   </script>
 </body>
 </html>
