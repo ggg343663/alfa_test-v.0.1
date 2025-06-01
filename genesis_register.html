@@ -2,7 +2,8 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>สร้าง Genesis QR (เฉพาะ hash) พร้อมสแกน QR</title>
+  <title>สร้าง Genesis QR (เฉพาะ hash)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -12,212 +13,99 @@
       background: #f9f9f9;
       border-radius: 8px;
     }
-    label {
-      display: block;
-      margin-top: 1em;
-      font-weight: bold;
-    }
+    label { display: block; margin-top: 1em; font-weight: bold; }
     input {
-      width: 100%;
-      padding: 0.5em;
-      font-size: 1em;
-      margin-top: 0.3em;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      transition: border-color 0.3s ease;
+      width: 100%; padding: 0.5em; font-size: 1em;
+      margin-top: 0.3em; box-sizing: border-box;
+      border: 1px solid #ccc; border-radius: 4px;
     }
-    input.invalid {
-      border-color: red;
-    }
-    input.valid {
-      border-color: green;
-    }
-    input[readonly] {
-      background: #e0e0e0;
-      color: #555;
-    }
+    input[readonly] { background: #eee; }
+    .status { font-size: 0.9em; margin-left: 5px; }
+    .valid { color: green; }
+    .invalid { color: red; }
     button {
-      padding: 0.7em 1.2em;
-      font-size: 1em;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 5px;
+      margin-top: 1.2em; padding: 0.7em 1.2em;
+      font-size: 1em; background: #4CAF50;
+      color: white; border: none; border-radius: 5px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      margin-top: 1.5em;
     }
-    button:hover {
-      background-color: #45a049;
-    }
-    #result {
-      margin-top: 1.5em;
-      padding: 1em;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .button-row {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 1.5em;
-    }
-    #copyHashBtn {
-      background-color: #2196F3;
-    }
-    #copyHashBtn:hover {
-      background-color: #0b7dda;
-    }
-    .input-status {
-      font-size: 0.9em;
-      margin-left: 5px;
-    }
-    .valid-status {
-      color: green;
-    }
-    .invalid-status {
-      color: red;
-    }
-    #qr-reader {
-      width: 100%;
-      margin-top: 2em;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+    button:hover { background: #45a049; }
+    #previewBox {
+      margin-top: 1.5em; background: #fff;
+      border: 1px solid #ccc; padding: 1em;
+      border-radius: 4px; font-family: monospace;
+      white-space: pre-wrap; word-break: break-word;
     }
   </style>
 </head>
 <body>
-  <h1>สร้าง Genesis QR (เฉพาะ hash) พร้อมสแกน QR</h1>
+  <h2>สร้าง Genesis QR (เฉพาะ Hash)</h2>
 
-  <label for="pubkey">Public Key:</label>
-  <input id="pubkey" size="64" placeholder="กรอก Public Key ที่นี่ (กรอกเอง)" autocomplete="off" />
-  <span id="pubKeyStatus" class="input-status"></span>
+  <label>Public Key (42 ตัวอักษร):</label>
+  <input type="text" id="pubkey" placeholder="0x..." />
+  <span id="keyStatus" class="status"></span>
 
-  <label for="timestamp">Timestamp (เวลาปัจจุบัน):</label>
-  <input id="timestamp" readonly />
+  <label>Timestamp (เวลาปัจจุบัน):</label>
+  <input type="text" id="timestamp" readonly />
 
-  <label for="nonce">Nonce (เลขสุ่ม):</label>
-  <input id="nonce" readonly />
+  <label>Nonce (สุ่ม):</label>
+  <input type="text" id="nonce" readonly />
 
-  <label for="hashQr">Hash QR (สแกนจาก QR code):</label>
-  <input id="hashQr" readonly placeholder="ผลลัพธ์จากการสแกน QR" />
-  <span id="hashStatus" class="input-status"></span>
+  <button onclick="generateHash()">สร้าง Hash</button>
 
-  <div class="button-row">
-    <button id="genHashBtn" onclick="genHash()">สร้าง hash สำหรับ QR</button>
-    <button id="copyHashBtn" onclick="copyHash()" disabled>คัดลอก Hash</button>
-    <button onclick="window.history.back()" style="background-color:#ddd; color:#333; border:none; border-radius:5px;">ย้อนกลับ</button>
-  </div>
-
-  <div id="result"></div>
-
-  <h3>สแกน QR Code (อ่าน hash QR เท่านั้น):</h3>
-  <div id="qr-reader"></div>
-
-  <!-- โหลดไลบรารี html5-qrcode -->
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <div id="previewBox"></div>
 
   <script>
-    function currentTimestamp() {
-      return new Date().toISOString();
+    const pubkeyEl = document.getElementById('pubkey');
+    const keyStatusEl = document.getElementById('keyStatus');
+    const timestampEl = document.getElementById('timestamp');
+    const nonceEl = document.getElementById('nonce');
+    const previewBox = document.getElementById('previewBox');
+
+    function updateTimestampNonce() {
+      timestampEl.value = new Date().toISOString();
+      nonceEl.value = Math.floor(Math.random() * 1e12).toString();
     }
 
-    document.getElementById("timestamp").value = currentTimestamp();
-    document.getElementById("nonce").value = Math.floor(Math.random() * 1e12).toString();
+    function validatePubkey(key) {
+      return /^0x[a-fA-F0-9]{40}$/.test(key);
+    }
 
-    const pubkeyInput = document.getElementById('pubkey');
-    const pubKeyStatus = document.getElementById('pubKeyStatus');
-    const hashInput = document.getElementById('hashQr');
-    const hashStatus = document.getElementById('hashStatus');
-    const copyHashBtn = document.getElementById('copyHashBtn');
-    const resultDiv = document.getElementById('result');
-
-    function checkPubKey() {
-      const val = pubkeyInput.value.trim();
-      if(val.length === 40) {
-        pubKeyStatus.textContent = "ความยาวถูกต้อง (40 ตัวอักษร)";
-        pubKeyStatus.className = "input-status valid-status";
-        return true;
+    pubkeyEl.addEventListener('input', () => {
+      const key = pubkeyEl.value.trim();
+      if (validatePubkey(key)) {
+        keyStatusEl.textContent = "✓ ถูกต้อง";
+        keyStatusEl.className = "status valid";
       } else {
-        pubKeyStatus.textContent = `ความยาวไม่ถูกต้อง (${val.length} / 40 ตัวอักษร)`;
-        pubKeyStatus.className = "input-status invalid-status";
-        return false;
+        keyStatusEl.textContent = "⚠ ต้องเป็น 0x และยาว 42 ตัวอักษร";
+        keyStatusEl.className = "status invalid";
       }
-    }
-
-    pubkeyInput.addEventListener('input', () => {
-      checkPubKey();
-      resetResult();
     });
 
-    function resetResult() {
-      resultDiv.textContent = '';
-      copyHashBtn.disabled = true;
-      hashInput.value = '';
-      hashStatus.textContent = '';
-      hashStatus.className = 'input-status';
-    }
-
-    async function sha256Hex(str) {
-      const buffer = new TextEncoder().encode(str);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-      return Array.from(new Uint8Array(hashBuffer))
-        .map(b => b.toString(16).padStart(2, '0'))
-        .join('');
-    }
-
-    async function genHash() {
-      if(!checkPubKey()) {
-        alert("กรุณากรอก Public Key ให้ถูกต้องก่อนสร้าง hash");
+    async function generateHash() {
+      const pubkey = pubkeyEl.value.trim();
+      if (!validatePubkey(pubkey)) {
+        alert("⚠ Public Key ไม่ถูกต้อง");
         return;
       }
-      const pub = pubkeyInput.value.trim();
-      const t = document.getElementById("timestamp").value.trim();
-      const n = document.getElementById("nonce").value.trim();
-      const hash = await sha256Hex(pub + "|" + t + "|" + n);
-      resultDiv.textContent = `QR hash:\n${hash}\ntimestamp: ${t}\nnonce: ${n}`;
-      hashInput.value = hash;
-      hashStatus.textContent = "hash QR สร้างสำเร็จ";
-      hashStatus.className = "input-status valid-status";
-      copyHashBtn.disabled = false;
+
+      const t = timestampEl.value;
+      const n = nonceEl.value;
+      const raw = `${pubkey}|${t}|${n}`;
+      const hash = sha256(raw);
+
+      previewBox.innerText =
+`✅ สร้าง Hash เรียบร้อยแล้ว
+
+Public Key: ${pubkey}
+Timestamp : ${t}
+Nonce     : ${n}
+Hash QR   : ${hash}
+
+🔗 ใช้ Hash นี้ในการสร้าง QR หรือลงทะเบียน`;
     }
 
-    function copyHash() {
-      if(!hashInput.value) {
-        alert("ยังไม่มี hash ให้คัดลอก");
-        return;
-      }
-      navigator.clipboard.writeText(hashInput.value).then(() => {
-        alert("คัดลอก hash เรียบร้อยแล้ว");
-      }).catch(() => {
-        alert("ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง");
-      });
-    }
-
-    // สแกน QR (อ่าน hash QR) เท่านั้น
-    function onScanSuccess(decodedText, decodedResult) {
-      // ใส่ค่าที่อ่านได้ลงช่อง hash QR เท่านั้น
-      hashInput.value = decodedText;
-      hashStatus.textContent = "สแกน QR hash สำเร็จ";
-      hashStatus.className = "input-status valid-status";
-      resetResult(); // ล้างผลลัพธ์อื่นๆ
-      alert("สแกน QR hash สำเร็จ:\n" + decodedText);
-      html5QrcodeScanner.clear(); // หยุดสแกนหลังเสร็จ
-    }
-
-    function onScanFailure(error) {
-      // ไม่ต้องแสดงข้อความล้มเหลวเพื่อไม่รบกวนผู้ใช้
-    }
-
-    var html5QrcodeScanner = new Html5QrcodeScanner(
-      "qr-reader", { fps: 10, qrbox: 250 }
-    );
-
-    html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+    updateTimestampNonce();
   </script>
 </body>
 </html>
