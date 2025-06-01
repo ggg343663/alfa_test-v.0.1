@@ -7,7 +7,12 @@
     body { font-family: sans-serif; max-width: 400px; margin:2em auto; }
     label, input, button { display:block; margin:0.6em 0; width:100%; }
     pre { background:#f8f8f8; padding:1em; white-space:pre-wrap; }
-    .warning { background: linear-gradient(90deg, yellow, red); padding: 0.5em; color: black; font-weight: bold; animation: flash 1s infinite alternate; text-align: center; border-radius: 4px; }
+    .warning {
+      background: linear-gradient(90deg, yellow, red);
+      padding: 0.5em; color: black; font-weight: bold;
+      animation: flash 1s infinite alternate;
+      text-align: center; border-radius: 4px;
+    }
     @keyframes flash {
       0% { background-color: yellow; }
       100% { background-color: red; }
@@ -16,40 +21,52 @@
 </head>
 <body>
   <h2>ขอ Master ใหม่</h2>
-  <div id="warningBox" class="warning" style="display:none;">⚠ พบคำที่ไม่เหมาะสม กรุณาตรวจสอบชื่อ Master</div>
+  <div id="warningBox" class="warning" style="display:none;"></div>
   <form id="requestMasterForm">
     <label>ชื่อ Master (พิมพ์ใหญ่): <input type="text" id="masterName" maxlength="8" required></label>
     <label>Public Key: <input type="text" id="pubkey" required></label>
     <label>เหตุผล: <input type="text" id="reason"></label>
     <button type="submit">ขอสิทธิ์ Master</button>
   </form>
-  <pre id="hashResult"></pre>  <script>
+  <pre id="hashResult"></pre>
+
+  <script>
     let badwordList = {};
 
     fetch('badwords.json')
       .then(res => res.json())
       .then(data => badwordList = data)
-      .catch(() => console.warn('⚠ โหลด badwords.json ไม่สำเร็จ'));
+      .catch(() => {
+        document.getElementById('warningBox').innerText = '⚠ ไม่สามารถโหลดคำต้องห้ามได้ โปรดตรวจสอบการเชื่อมต่อ';
+        document.getElementById('warningBox').style.display = 'block';
+      });
 
-    document.getElementById('masterName').addEventListener('input', function() {
+    document.getElementById('masterName').addEventListener('input', function () {
       const input = this.value.toLowerCase();
-      let flagged = false;
+      let found = [];
+
       for (const group of Object.values(badwordList)) {
-        if (group.some(word => input.includes(word))) {
-          flagged = true;
-          break;
-        }
+        group.forEach(word => {
+          if (input.includes(word)) found.push(word);
+        });
       }
-      document.getElementById('warningBox').style.display = flagged ? 'block' : 'none';
+
+      if (found.length > 0) {
+        document.getElementById('warningBox').style.display = 'block';
+        document.getElementById('warningBox').innerHTML =
+          `⚠ พบคำที่ไม่เหมาะสม: <span style="color:red;">${found.join(', ')}</span>`;
+      } else {
+        document.getElementById('warningBox').style.display = 'none';
+      }
     });
 
-    document.getElementById('requestMasterForm').onsubmit = function(e) {
+    document.getElementById('requestMasterForm').onsubmit = function (e) {
       e.preventDefault();
       const name = document.getElementById('masterName').value.toUpperCase();
       const pubkey = document.getElementById('pubkey').value;
       const reason = document.getElementById('reason').value;
       const timestamp = new Date().toISOString();
-      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b=>b.toString(16).padStart(2,"0")).join('');
+      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, "0")).join('');
 
       const s = name + pubkey + reason + timestamp + nonce;
       const hash = sha256(s);
@@ -63,5 +80,6 @@ timestamp: ${timestamp}
 nonce: ${nonce}
 เหตุผล: ${reason}`.trim();
     };
-  </script></body>
+  </script>
+</body>
 </html>
