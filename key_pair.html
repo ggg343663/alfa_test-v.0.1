@@ -77,20 +77,37 @@
       color: green;
       display: none;
     }
+    .error {
+      color: red;
+      font-size: 0.95em;
+      margin-top: 0.2em;
+    }
   </style>
 </head>
 <body>
   <button class="back-btn" onclick="history.back()">← กลับ</button>
   <h2 style="margin-top:1.5em;">🔐 สร้าง Address (Web3-style) จากรหัสผ่าน</h2>
 
-  <label>รหัสผ่าน (6-12 ตัวอักษร):
-    <input type="password" id="privateKey1" maxlength="12" minlength="6" />
+  <label>รหัสผ่าน (6-12 ตัวอักษร ตัวเลข+ตัวอักษร):
+    <input type="password" id="privateKey1" maxlength="12" minlength="6" autocomplete="off"/>
     <span class="toggle-password" data-target="privateKey1">แสดง</span>
+    <div id="pw1Err" class="error"></div>
   </label>
 
   <label>ยืนยันรหัสผ่าน:
-    <input type="password" id="privateKey2" maxlength="12" minlength="6" />
+    <input type="password" id="privateKey2" maxlength="12" minlength="6" autocomplete="off"/>
     <span class="toggle-password" data-target="privateKey2">แสดง</span>
+    <div id="pw2Err" class="error"></div>
+  </label>
+
+  <label>Sign Code (4 digits):
+    <input type="password" id="signCode1" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off"/>
+    <div id="sign1Err" class="error"></div>
+  </label>
+
+  <label>Confirm Sign Code:
+    <input type="password" id="signCode2" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off"/>
+    <div id="sign2Err" class="error"></div>
   </label>
 
   <button onclick="generateAddress()">🚀 สร้าง Address</button>
@@ -105,9 +122,8 @@
   <div id="copyStatus" class="status">✅ คัดลอกสำเร็จ!</div>
 
   <script>
-    const toggleSpans = document.querySelectorAll(".toggle-password");
-
-    toggleSpans.forEach(span => {
+    // Toggle show/hide password
+    document.querySelectorAll(".toggle-password").forEach(span => {
       span.addEventListener("click", () => {
         const id = span.getAttribute("data-target");
         const input = document.getElementById(id);
@@ -121,6 +137,19 @@
       });
     });
 
+    function validatePassword(pw) {
+      return (
+        pw.length >= 6 &&
+        pw.length <= 12 &&
+        /[A-Za-z]/.test(pw) &&
+        /\d/.test(pw)
+      );
+    }
+
+    function validateSign(sign) {
+      return /^\d{4}$/.test(sign);
+    }
+
     async function sha256Hex(str) {
       const buffer = new TextEncoder().encode(str);
       const hash = await crypto.subtle.digest("SHA-256", buffer);
@@ -128,22 +157,46 @@
     }
 
     async function generateAddress() {
+      // Inputs
       const pw1 = document.getElementById("privateKey1").value.trim();
       const pw2 = document.getElementById("privateKey2").value.trim();
+      const sign1 = document.getElementById("signCode1").value.trim();
+      const sign2 = document.getElementById("signCode2").value.trim();
       const fullHashEl = document.getElementById("fullHash");
       const addressEl = document.getElementById("addressOutput");
       const status = document.getElementById("copyStatus");
+      // Errors
+      const pw1Err = document.getElementById("pw1Err");
+      const pw2Err = document.getElementById("pw2Err");
+      const sign1Err = document.getElementById("sign1Err");
+      const sign2Err = document.getElementById("sign2Err");
 
-      if (pw1.length < 6 || pw1.length > 12) {
-        alert("⚠ กรุณากรอกรหัสผ่าน 6-12 ตัวอักษร");
-        return;
+      let valid = true;
+      pw1Err.textContent = "";
+      pw2Err.textContent = "";
+      sign1Err.textContent = "";
+      sign2Err.textContent = "";
+
+      if (!validatePassword(pw1)) {
+        pw1Err.textContent = "ต้อง 6-12 ตัว และมีทั้งตัวเลข+ตัวอักษร";
+        valid = false;
       }
       if (pw1 !== pw2) {
-        alert("⚠ รหัสผ่านไม่ตรงกัน");
-        return;
+        pw2Err.textContent = "รหัสผ่านไม่ตรงกัน";
+        valid = false;
       }
+      if (!validateSign(sign1)) {
+        sign1Err.textContent = "ต้องเป็นตัวเลข 4 หลัก";
+        valid = false;
+      }
+      if (sign1 !== sign2) {
+        sign2Err.textContent = "Sign Code ไม่ตรงกัน";
+        valid = false;
+      }
+      if (!valid) return;
 
-      const hash = await sha256Hex(pw1);
+      // ใช้ password + sign code รวมกันสร้าง address
+      const hash = await sha256Hex(pw1 + sign1);
       const address = "0x" + hash.slice(-40);
 
       fullHashEl.value = hash;
