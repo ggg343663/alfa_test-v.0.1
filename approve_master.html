@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin: อนุมัติ Master Request</title>
+  <style>
+    body { font-family: sans-serif; max-width: 450px; margin:2em auto;}
+    label, input, textarea, button { display:block; margin:0.7em 0; width:100%; }
+    pre { background:#f8f8f8; padding:1em; }
+  </style>
+</head>
+<body>
+  <h2>อนุมัติ Master Request</h2>
+  <form id="approveForm">
+    <label>Hash คำขอ Master:<input type="text" id="requestHash" required maxlength="64"></label>
+    <label>Public Key (Admin/Genesis):<input type="text" id="adminPubkey" required></label>
+    <button type="submit">อนุมัติ</button>
+  </form>
+  <pre id="approveResult"></pre>
+  <script>
+    document.getElementById('approveForm').onsubmit = function(e) {
+      e.preventDefault();
+      const requestHash = document.getElementById('requestHash').value.trim();
+      const approvedBy = document.getElementById('adminPubkey').value.trim();
+      const timestamp = new Date().toISOString();
+
+      // สร้าง log สำหรับบันทึก/ประกาศผลอนุมัติ (manual copy ไปใส่ logs.json)
+      const log = {
+        type: "master_approve",
+        request_hash: requestHash,
+        approved_by: approvedBy,
+        timestamp: timestamp,
+        status: "approved"
+      };
+
+      document.getElementById('approveResult').innerText = `
+คัดลอกข้อมูลนี้ไปใส่ logs.json
+
+${JSON.stringify(log, null, 2)}
+      `.trim();
+    }
+  </script>
+</body>
+</html>
