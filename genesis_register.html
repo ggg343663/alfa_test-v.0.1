@@ -1,35 +1,104 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>สร้าง Genesis QR (เฉพาะ hash)</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 2em auto;
+      padding: 1em;
+      background: #f9f9f9;
+      border-radius: 8px;
+    }
+    label {
+      display: block;
+      margin-top: 1em;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 0.5em;
+      font-size: 1em;
+      margin-top: 0.3em;
+      box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+    input[readonly] {
+      background: #eee;
+    }
+    button {
+      margin-top: 1.5em;
+      padding: 0.7em 1.2em;
+      font-size: 1em;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #result {
+      margin-top: 1.5em;
+      padding: 1em;
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+  </style>
 </head>
 <body>
-  <h1>สร้าง Genesis QR (ได้เฉพาะ hash)</h1>
-  <label>Public Key: <input id="pubkey" size="64"></label><br>
-  <label>Timestamp: <input id="timestamp"></label><br>
-  <label>Nonce: <input id="nonce"></label><br>
+  <h1>สร้าง Genesis QR (เฉพาะ hash)</h1>
+
+  <label for="pubkey">Public Key:</label>
+  <input id="pubkey" size="64" placeholder="กรอก Public Key ที่นี่" />
+
+  <label for="timestamp">Timestamp (เวลาปัจจุบัน):</label>
+  <input id="timestamp" readonly />
+
+  <label for="nonce">Nonce (เลขสุ่ม):</label>
+  <input id="nonce" readonly />
+
   <button onclick="genHash()">สร้าง hash สำหรับ QR</button>
+
   <div id="result"></div>
+
+  <button onclick="window.history.back()" style="margin-top: 1em;">ย้อนกลับ</button>
+
   <script>
     function currentTimestamp() {
       return new Date().toISOString();
     }
+
     document.getElementById("timestamp").value = currentTimestamp();
     document.getElementById("nonce").value = Math.floor(Math.random()*1e12).toString();
 
     async function sha256Hex(str) {
       const buffer = new TextEncoder().encode(str);
       const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
-      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return Array.from(new Uint8Array(hashBuffer))
+        .map(b => b.toString(16).padStart(2, '0'))
+        .join('');
     }
+
     async function genHash() {
       const pub = document.getElementById("pubkey").value.trim();
+      if (!pub) {
+        alert("กรุณากรอก Public Key");
+        return;
+      }
       const t = document.getElementById("timestamp").value.trim();
       const n = document.getElementById("nonce").value.trim();
       const hash = await sha256Hex(pub + "|" + t + "|" + n);
-      document.getElementById("result").innerHTML =
-        `<b>QR hash:</b><br><code>${hash}</code><br>timestamp: ${t}<br>nonce: ${n}`;
+      document.getElementById("result").textContent =
+        `QR hash:\n${hash}\ntimestamp: ${t}\nnonce: ${n}`;
     }
   </script>
 </body>
