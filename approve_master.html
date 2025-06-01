@@ -1,44 +1,52 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>Admin: อนุมัติ Master Request</title>
+  <meta charset="UTF-8" />
+  <title>Genesis อนุมัติ Master Request</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 450px; margin:2em auto;}
-    label, input, textarea, button { display:block; margin:0.7em 0; width:100%; }
-    pre { background:#f8f8f8; padding:1em; }
+    body { font-family: sans-serif; max-width: 460px; margin: 2em auto; }
+    label, input, button { display: block; margin: 0.6em 0; width: 100%; }
+    pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; }
   </style>
 </head>
 <body>
-  <h2>อนุมัติ Master Request</h2>
+  <h2>Genesis อนุมัติ Master</h2>
   <form id="approveForm">
-    <label>Hash คำขอ Master:<input type="text" id="requestHash" required maxlength="64"></label>
-    <label>Public Key (Admin/Genesis):<input type="text" id="adminPubkey" required></label>
-    <button type="submit">อนุมัติ</button>
+    <label>Hash คำขอ Master: <input type="text" id="requestHash" maxlength="64" required /></label>
+    <label>Public Key (Genesis): <input type="text" id="adminPubkey" required /></label>
+    <label>Private Key 1: <input type="password" id="privKey1" required /></label>
+    <label>Private Key 2: <input type="password" id="privKey2" required /></label>
+    <button type="submit">สร้างลายเซ็นอนุมัติ</button>
   </form>
+
   <pre id="approveResult"></pre>
+
   <script>
-    document.getElementById('approveForm').onsubmit = function(e) {
+    document.getElementById('approveForm').onsubmit = function (e) {
       e.preventDefault();
-      const requestHash = document.getElementById('requestHash').value.trim();
-      const approvedBy = document.getElementById('adminPubkey').value.trim();
+      const hash = document.getElementById('requestHash').value.trim();
+      const pubkey = document.getElementById('adminPubkey').value.trim();
+      const priv1 = document.getElementById('privKey1').value.trim();
+      const priv2 = document.getElementById('privKey2').value.trim();
       const timestamp = new Date().toISOString();
 
-      // สร้าง log สำหรับบันทึก/ประกาศผลอนุมัติ (manual copy ไปใส่ logs.json)
+      const sig1 = sha256(priv1 + hash);
+      const sig2 = sha256(priv2 + sig1);
+
       const log = {
         type: "master_approve",
-        request_hash: requestHash,
-        approved_by: approvedBy,
+        request_hash: hash,
+        approved_by: pubkey,
+        sig1: sig1,
+        sig2: sig2,
         timestamp: timestamp,
         status: "approved"
       };
 
-      document.getElementById('approveResult').innerText = `
-คัดลอกข้อมูลนี้ไปใส่ logs.json
-
-${JSON.stringify(log, null, 2)}
-      `.trim();
-    }
+      document.getElementById('approveResult').innerText =
+        `คัดลอกข้อมูลนี้ไปใส่ logs.json\n\n${JSON.stringify(log, null, 2)}`;
+    };
   </script>
 </body>
 </html>
