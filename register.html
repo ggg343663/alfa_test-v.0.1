@@ -20,6 +20,7 @@
   #backBtn {
     background-color: #ddd;
     color: #333;
+    transition: background-color 0.3s ease;
   }
   #backBtn:hover {
     background-color: #bbb;
@@ -27,9 +28,14 @@
   #registerBtn {
     background-color: #4CAF50;
     color: white;
+    transition: background-color 0.3s ease;
   }
-  #registerBtn:hover {
+  #registerBtn:hover:not(:disabled) {
     background-color: #45a049;
+  }
+  #registerBtn:disabled {
+    background-color: #a5d6a7;
+    cursor: not-allowed;
   }
   .valid {
     color: green;
@@ -41,21 +47,33 @@
     font-size: 0.9em;
     margin-left: 8px;
   }
+  label {
+    display: flex;
+    align-items: center;
+    margin-top: 1em;
+  }
+  input[type="text"] {
+    flex: 1;
+    padding: 0.4em 0.6em;
+    font-size: 1em;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+  }
 </style>
 </head>
 <body>
   <h1>ลงทะเบียน QR</h1>
   <form id="registerForm" autocomplete="off">
     <label>
-      hash QR: 
-      <input type="text" id="hashQr" required />
+      hash QR:
+      <input type="text" id="hashQr" required placeholder="กรอก hash QR 64 ตัวอักษร" />
       <span id="hashStatus" class="input-status"></span>
-    </label><br />
+    </label>
     <label>
-      Public Key: 
-      <input type="text" id="pubKey" required maxlength="40" />
+      Public Key:
+      <input type="text" id="pubKey" required maxlength="40" placeholder="กรอก Public Key 40 ตัวอักษร" />
       <span id="pubKeyCount" class="input-status"></span>
-    </label><br />
+    </label>
     <div class="button-row">
       <button type="button" id="backBtn" onclick="window.history.back()">ย้อนกลับ</button>
       <button type="submit" id="registerBtn" disabled>ลงทะเบียน</button>
@@ -74,7 +92,7 @@
       const len = pubKeyInput.value.trim().length;
       const requiredLength = 40;
 
-      if(len === requiredLength) {
+      if (len === requiredLength) {
         pubKeyCount.textContent = `จำนวนตัวอักษร: ${len} (ถูกต้อง)`;
         pubKeyCount.className = 'input-status valid';
         return true;
@@ -89,7 +107,7 @@
       const len = hashInput.value.trim().length;
       const requiredLength = 64; // SHA-256 hash length
 
-      if(len === requiredLength) {
+      if (len === requiredLength) {
         hashStatus.textContent = `ความยาว: ${len} (ถูกต้อง)`;
         hashStatus.className = 'input-status valid';
         return true;
@@ -114,25 +132,26 @@
       const hashQr = hashInput.value.trim();
       const pubKey = pubKeyInput.value.trim();
 
-      if(!hashQr || !pubKey) {
+      if (!hashQr || !pubKey) {
         alert('กรุณากรอกทั้ง hash QR และ Public Key');
         return;
       }
-      if(pubKey.length !== 40) {
+      if (pubKey.length !== 40) {
         alert(`Public Key ต้องมีความยาว ${40} ตัวอักษร`);
         return;
       }
-      if(hashQr.length !== 64) {
+      if (hashQr.length !== 64) {
         alert(`hash QR ต้องมีความยาว ${64} ตัวอักษร`);
         return;
       }
-      // แสดงผล
+
+      // แสดงผลสำเร็จ
       document.getElementById('result').innerHTML = 
-        `<p>ลงทะเบียนสำเร็จ!</p>
+        `<p>✅ ลงทะเบียนสำเร็จ!</p>
          <p>hash QR: <b>${hashQr}</b></p>
          <p>Public Key: <b>${pubKey}</b></p>`;
 
-      // TODO: ส่งข้อมูลไปเก็บจริง (API, JSON ฯลฯ)
+      // TODO: ส่งข้อมูลไป backend หรือเก็บในไฟล์ JSON ตามระบบจริง
     };
 
     // เรียกตรวจสอบครั้งแรก
