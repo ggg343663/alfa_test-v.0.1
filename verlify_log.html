@@ -12,32 +12,40 @@
     background: #f9f9f9;
     border-radius: 8px;
   }
-  h1 {
+  h1, h2 {
     text-align: center;
   }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 1em;
-  }
-  th, td {
-    padding: 0.5em;
-    border: 1px solid #ccc;
-    text-align: left;
-    font-size: 0.9em;
-  }
-  th {
-    background-color: #4CAF50;
-    color: white;
-  }
-  input[type="text"] {
-    padding: 0.5em;
-    width: 250px;
-    font-size: 1em;
-    margin-top: 1em;
+  label {
+    font-weight: bold;
   }
   #searchRow {
     margin-bottom: 1em;
+    text-align: center;
+  }
+  #qrSearchInput {
+    padding: 0.5em;
+    width: 300px;
+    font-size: 1em;
+  }
+  #ownerStatus {
+    margin-top: 1em;
+    font-weight: bold;
+    text-align: center;
+  }
+  #logList {
+    margin-top: 1em;
+    border-collapse: collapse;
+    width: 100%;
+  }
+  #logList th, #logList td {
+    border: 1px solid #ccc;
+    padding: 0.5em;
+    font-size: 0.9em;
+    text-align: left;
+  }
+  #logList th {
+    background-color: #4CAF50;
+    color: white;
   }
   .no-data {
     text-align: center;
@@ -47,30 +55,32 @@
 </style>
 </head>
 <body>
-  <h1>ตรวจสอบประวัติการลงทะเบียน QR</h1>
+  <h1>ตรวจสอบประวัติการลงทะเบียน QR (Log Viewer)</h1>
 
   <div id="searchRow">
-    <label for="searchInput">ค้นหา (QR hash, Public Key): </label>
-    <input type="text" id="searchInput" placeholder="พิมพ์คำค้นหา..." />
+    <label for="qrSearchInput">ค้นหา QR Hash:</label>
+    <input type="text" id="qrSearchInput" placeholder="พิมพ์ QR hash เพื่อดูสายโซ่" />
   </div>
 
-  <table id="logTable">
+  <div id="ownerStatus"></div>
+
+  <table id="logList" style="display:none;">
     <thead>
       <tr>
         <th>วันที่-เวลา</th>
-        <th>QR Hash</th>
-        <th>Public Key</th>
         <th>กิจกรรม</th>
         <th>รายละเอียด</th>
+        <th>Public Key (เจ้าของ)</th>
       </tr>
     </thead>
-    <tbody id="logBody">
-      <!-- รายการ log จะถูกเพิ่มที่นี่ -->
+    <tbody id="logListBody">
     </tbody>
   </table>
 
+  <div id="noDataMsg" class="no-data" style="display:none;">กรุณาค้นหา QR hash เพื่อดูประวัติ</div>
+
   <script>
-    // สมมติข้อมูล Log แบบ JSON (ในระบบจริงจะดึงจาก backend หรือไฟล์)
+    // ตัวอย่างข้อมูล Log จริง ควรโหลดจาก backend หรือไฟล์ JSON
     const logs = [
       {
         datetime: "2025-06-01T10:15:00Z",
@@ -92,50 +102,72 @@
         pubKey: "1234567890abcdef1234567890abcdef12345678",
         action: "ปลดล็อก Master",
         detail: "Master ปลดล็อก QR"
+      },
+      {
+        datetime: "2025-06-04T15:00:00Z",
+        qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+        pubKey: "9999999999999999999999999999999999999999",
+        action: "โอนกรรมสิทธิ์",
+        detail: "โอนกรรมสิทธิ์ QR ไปยัง Public Key ใหม่"
       }
-      // เพิ่มรายการ log ตามจริงได้เรื่อย ๆ
+      // เพิ่ม log ตามจริงเรื่อยๆ
     ];
 
-    const logBody = document.getElementById('logBody');
-    const searchInput = document.getElementById('searchInput');
+    const qrSearchInput = document.getElementById('qrSearchInput');
+    const ownerStatusDiv = document.getElementById('ownerStatus');
+    const logList = document.getElementById('logList');
+    const logListBody = document.getElementById('logListBody');
+    const noDataMsg = document.getElementById('noDataMsg');
 
-    // ฟังก์ชันแสดง log ในตาราง
-    function renderLogs(filterText = "") {
-      const filter = filterText.toLowerCase();
-      logBody.innerHTML = "";
+    function renderChain(qrHash) {
+      const filtered = logs
+        .filter(log => log.qrHash.toLowerCase() === qrHash.toLowerCase())
+        .sort((a,b) => new Date(a.datetime) - new Date(b.datetime));
 
-      const filteredLogs = logs.filter(log => 
-        log.qrHash.toLowerCase().includes(filter) || 
-        log.pubKey.toLowerCase().includes(filter) || 
-        log.action.toLowerCase().includes(filter) ||
-        log.detail.toLowerCase().includes(filter)
-      );
-
-      if (filteredLogs.length === 0) {
-        logBody.innerHTML = `<tr><td colspan="5" class="no-data">ไม่พบข้อมูลที่ตรงกับคำค้นหา</td></tr>`;
+      if(filtered.length === 0) {
+        logList.style.display = 'none';
+        ownerStatusDiv.textContent = '';
+        noDataMsg.style.display = 'block';
+        noDataMsg.textContent = 'ไม่พบประวัติสำหรับ QR hash นี้';
         return;
       }
 
-      filteredLogs.forEach(log => {
+      noDataMsg.style.display = 'none';
+      logList.style.display = 'table';
+
+      // หาผู้ถือครองปัจจุบัน (ล่าสุด)
+      const latest = filtered[filtered.length - 1];
+      ownerStatusDiv.textContent = `เจ้าของปัจจุบัน: ${latest.pubKey}`;
+
+      // แสดงรายการเหตุการณ์
+      logListBody.innerHTML = '';
+      filtered.forEach(log => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td>${new Date(log.datetime).toLocaleString()}</td>
-          <td><code>${log.qrHash}</code></td>
-          <td><code>${log.pubKey}</code></td>
           <td>${log.action}</td>
           <td>${log.detail}</td>
+          <td><code>${log.pubKey}</code></td>
         `;
-        logBody.appendChild(tr);
+        logListBody.appendChild(tr);
       });
     }
 
-    // เรียกแสดง log ครั้งแรก
-    renderLogs();
-
-    // กรอง log ขณะพิมพ์ค้นหา
-    searchInput.addEventListener('input', e => {
-      renderLogs(e.target.value);
+    qrSearchInput.addEventListener('input', () => {
+      const val = qrSearchInput.value.trim();
+      if(val.length === 64) {
+        renderChain(val);
+      } else {
+        logList.style.display = 'none';
+        ownerStatusDiv.textContent = '';
+        noDataMsg.style.display = 'block';
+        noDataMsg.textContent = 'กรุณากรอก QR hash ให้ครบ 64 ตัวอักษร';
+        logListBody.innerHTML = '';
+      }
     });
+
+    // เริ่มต้นแสดงข้อความแนะนำ
+    noDataMsg.style.display = 'block';
   </script>
 </body>
 </html>
