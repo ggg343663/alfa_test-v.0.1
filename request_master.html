@@ -24,13 +24,13 @@
   <div id="warningBox" class="warning" style="display:none;"></div>
   <form id="requestMasterForm">
     <label>ชื่อ Master (พิมพ์ใหญ่): <input type="text" id="masterName" maxlength="8" required></label>
+    <label>ยืนยันชื่อ Master: <input type="text" id="confirmName" maxlength="8" required></label>
     <label>Public Key: <input type="text" id="pubkey" required></label>
     <label>เหตุผล: <input type="text" id="reason"></label>
+    <label><input type="checkbox" id="agreePolicy" required> ฉันยอมรับว่าข้อมูลนี้จะเปิดเผยต่อสาธารณะ</label>
     <button type="submit">ขอสิทธิ์ Master</button>
   </form>
-  <pre id="hashResult"></pre>
-
-  <script>
+  <pre id="hashResult"></pre>  <script>
     let badwordList = {};
 
     fetch('badwords.json')
@@ -41,16 +41,14 @@
         document.getElementById('warningBox').style.display = 'block';
       });
 
-    document.getElementById('masterName').addEventListener('input', function () {
-      const input = this.value.toLowerCase();
+    function checkBadwords(inputValue) {
+      const input = inputValue.toLowerCase();
       let found = [];
-
       for (const group of Object.values(badwordList)) {
         group.forEach(word => {
           if (input.includes(word)) found.push(word);
         });
       }
-
       if (found.length > 0) {
         document.getElementById('warningBox').style.display = 'block';
         document.getElementById('warningBox').innerHTML =
@@ -58,16 +56,36 @@
       } else {
         document.getElementById('warningBox').style.display = 'none';
       }
+    }
+
+    document.getElementById('masterName').addEventListener('input', function () {
+      this.value = this.value.toUpperCase();
+      checkBadwords(this.value);
+    });
+
+    document.getElementById('reason').addEventListener('input', function () {
+      checkBadwords(this.value);
     });
 
     document.getElementById('requestMasterForm').onsubmit = function (e) {
       e.preventDefault();
       const name = document.getElementById('masterName').value.toUpperCase();
+      const confirm = document.getElementById('confirmName').value.toUpperCase();
       const pubkey = document.getElementById('pubkey').value;
       const reason = document.getElementById('reason').value;
+
+      if (name !== confirm) {
+        alert('⚠ ชื่อ Master ไม่ตรงกัน กรุณาตรวจสอบ');
+        return;
+      }
+
+      if (!document.getElementById('agreePolicy').checked) {
+        alert('⚠ กรุณายอมรับข้อตกลงก่อนส่งคำขอ');
+        return;
+      }
+
       const timestamp = new Date().toISOString();
       const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, "0")).join('');
-
       const s = name + pubkey + reason + timestamp + nonce;
       const hash = sha256(s);
 
@@ -80,6 +98,5 @@ timestamp: ${timestamp}
 nonce: ${nonce}
 เหตุผล: ${reason}`.trim();
     };
-  </script>
-</body>
+  </script></body>
 </html>
