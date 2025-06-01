@@ -7,44 +7,90 @@
   .button-row {
     display: flex;
     justify-content: space-between;
-    max-width: 320px;
+    max-width: 400px;
     margin-top: 1em;
   }
   button {
     padding: 0.5em 1.5em;
     font-size: 1em;
     cursor: pointer;
+    border-radius: 4px;
+    border: none;
+  }
+  #backBtn {
+    background-color: #ddd;
+    color: #333;
+  }
+  #backBtn:hover {
+    background-color: #bbb;
   }
   #registerBtn {
     background-color: #4CAF50;
     color: white;
-    border: none;
-    border-radius: 4px;
   }
   #registerBtn:hover {
     background-color: #45a049;
+  }
+  #pubKeyCount {
+    font-size: 0.9em;
+    margin-left: 5px;
+  }
+  .valid {
+    color: green;
+  }
+  .invalid {
+    color: red;
   }
 </style>
 </head>
 <body>
   <h1>ลงทะเบียน QR</h1>
-  <form id="registerForm">
+  <form id="registerForm" autocomplete="off">
     <label>hash QR: <input type="text" id="hashQr" required /></label><br />
-    <label>Public Key: <input type="text" id="pubKey" required /></label><br />
+    <label>
+      Public Key: 
+      <input type="text" id="pubKey" required maxlength="40" />
+      <span id="pubKeyCount"></span>
+    </label><br />
     <div class="button-row">
-      <button type="submit" id="registerBtn">ลงทะเบียน</button>
-      <button type="button" onclick="window.history.back()">ย้อนกลับ</button>
+      <button type="button" id="backBtn" onclick="window.history.back()">ย้อนกลับ</button>
+      <button type="submit" id="registerBtn" disabled>ลงทะเบียน</button>
     </div>
   </form>
   <div id="result"></div>
 
   <script>
+    const pubKeyInput = document.getElementById('pubKey');
+    const pubKeyCount = document.getElementById('pubKeyCount');
+    const registerBtn = document.getElementById('registerBtn');
+
+    function checkPubKeyLength() {
+      const len = pubKeyInput.value.trim().length;
+      const requiredLength = 40; // กำหนดจำนวนตัวอักษรที่ต้องการ
+
+      if(len === requiredLength) {
+        pubKeyCount.textContent = `จำนวนตัวอักษร: ${len} (ถูกต้อง)`;
+        pubKeyCount.className = 'valid';
+        registerBtn.disabled = false;
+      } else {
+        pubKeyCount.textContent = `จำนวนตัวอักษร: ${len} (ไม่ครบ ${requiredLength})`;
+        pubKeyCount.className = 'invalid';
+        registerBtn.disabled = true;
+      }
+    }
+
+    pubKeyInput.addEventListener('input', checkPubKeyLength);
+
     document.getElementById('registerForm').onsubmit = function(e) {
       e.preventDefault();
       const hashQr = document.getElementById('hashQr').value.trim();
-      const pubKey = document.getElementById('pubKey').value.trim();
+      const pubKey = pubKeyInput.value.trim();
       if(!hashQr || !pubKey) {
         alert('กรุณากรอกทั้ง hash QR และ Public Key');
+        return;
+      }
+      if(pubKey.length !== 40) {
+        alert(`Public Key ต้องมีความยาว ${40} ตัวอักษร`);
         return;
       }
       // ตัวอย่างการแสดงผล (แทนส่งไป backend)
@@ -55,6 +101,9 @@
       
       // TODO: แทนที่ด้วยโค้ดส่งข้อมูลไปเก็บจริง เช่น fetch API หรือบันทึกในไฟล์ JSON
     };
+
+    // เรียกเช็คครั้งแรกเผื่อมีค่า default
+    checkPubKeyLength();
   </script>
 </body>
 </html>
