@@ -2,10 +2,10 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>ขอ Master ใหม่ (DTC)</title>
+  <title>Request Master (DTC)</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 400px; margin: 2em auto; }
+    body { font-family: sans-serif; max-width: 400px; margin: 2em auto; position: relative; }
     label, input, button { display: block; margin: 0.6em 0; width: 100%; }
     pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; }
     .warning {
@@ -13,40 +13,74 @@
       padding: 0.5em; color: black; font-weight: bold;
       animation: flash 1s infinite alternate;
       text-align: center; border-radius: 4px;
+      margin-bottom: 1em;
     }
     @keyframes flash {
       0% { background-color: yellow; }
       100% { background-color: red; }
     }
     small { font-size: 0.9em; color: #555; display: block; margin-top: -0.5em; margin-bottom: 0.8em; }
+    .back-btn {
+      position: fixed;
+      left: 20px;
+      bottom: 20px;
+      width: auto;
+      background: #eee;
+      border: 1px solid #ccc;
+      padding: 0.4em 1.2em;
+      border-radius: 5px;
+      color: #444;
+      cursor: pointer;
+      transition: background 0.2s;
+      z-index: 10;
+      font-size: 1em;
+      box-shadow: 1px 2px 8px rgba(0,0,0,0.07);
+    }
+    .back-btn:hover {
+      background: #ffd;
+    }
   </style>
 </head>
 <body>
-  <h2>ขอ Master ใหม่</h2>
+  <h2>Request Master</h2>
   <div id="warningBox" class="warning" style="display:none;"></div>
 
   <form id="requestMasterForm">
-    <label>ชื่อ Master (พิมพ์ใหญ่ A-Z เท่านั้น): <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required></label>
-    <label>ยืนยันชื่อ Master: <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required></label>
-    <label>Public Key (42 ตัวอักษร): <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" required></label>
-    <label>ยืนยัน Public Key: <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" required></label>
-    <small>📌 ผู้ขอควรส่ง Public Key นี้ให้ผู้รับ เพื่อใช้ยืนยันในกระบวนการโอนกรรมสิทธิ์</small>
-    <label>เหตุผล: <input type="text" id="reason"></label>
-    <label><input type="checkbox" id="agreePolicy" required> ฉันยอมรับว่าข้อมูลนี้จะเปิดเผยต่อสาธารณะ</label>
-    <button type="submit">ขอสิทธิ์ Master</button>
+    <label>Master Name (A-Z only): <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required autocomplete="off"></label>
+    <label>Confirm Master Name: <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required autocomplete="off"></label>
+    <label>Public Key (42 characters): <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" required autocomplete="off"></label>
+    <label>Confirm Public Key: <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" required autocomplete="off"></label>
+    <small>📌 You should give this Public Key to the recipient for ownership transfer verification.</small>
+    <label>Reason: <input type="text" id="reason" autocomplete="off"></label>
+    <label><input type="checkbox" id="agreePolicy" required> I acknowledge this information will be public</label>
+    <button type="submit">Request Master</button>
   </form>
 
   <pre id="hashResult"></pre>
 
+  <!-- Back button bottom left -->
+  <button class="back-btn" onclick="history.back()">← Back</button>
+
   <script>
     let badwordList = {};
+    let hasBadword = false;
+
     fetch('badwords.json')
       .then(res => res.json())
       .then(data => badwordList = data)
       .catch(() => {
-        document.getElementById('warningBox').innerText = '⚠ ไม่สามารถโหลดคำต้องห้ามได้ โปรดตรวจสอบการเชื่อมต่อ';
-        document.getElementById('warningBox').style.display = 'block';
+        showWarning('⚠ Failed to load badword list. Please check your connection.');
       });
+
+    function showWarning(msg) {
+      const warnBox = document.getElementById('warningBox');
+      warnBox.style.display = 'block';
+      warnBox.innerHTML = msg;
+    }
+
+    function hideWarning() {
+      document.getElementById('warningBox').style.display = 'none';
+    }
 
     function checkBadwords(inputValue) {
       const input = inputValue.toLowerCase();
@@ -57,11 +91,11 @@
         });
       }
       if (found.length > 0) {
-        document.getElementById('warningBox').style.display = 'block';
-        document.getElementById('warningBox').innerHTML =
-          `⚠ พบคำที่ไม่เหมาะสม: <span style="color:red;">${found.join(', ')}</span>`;
+        showWarning(`⚠ <span style="color:red; font-weight:bold;">Badword detected: ${found.join(', ')}</span> Please avoid these words, or confirm if you really want to use them.`);
+        hasBadword = true;
       } else {
-        document.getElementById('warningBox').style.display = 'none';
+        showWarning('Please avoid using bad or reserved words in Master Name or Reason. Use public-appropriate language.');
+        hasBadword = false;
       }
     }
 
@@ -85,23 +119,23 @@
       const agreed = document.getElementById('agreePolicy').checked;
 
       if (name !== confirm) {
-        alert('⚠ ชื่อ Master ไม่ตรงกัน กรุณาตรวจสอบ');
+        alert('⚠ Master Name mismatch. Please check.');
         return;
       }
       if (pubkey !== confirmPubkey) {
-        alert('⚠ Public Key ไม่ตรงกัน กรุณาตรวจสอบ');
+        alert('⚠ Public Key mismatch. Please check.');
         return;
       }
       if (!agreed) {
-        alert('⚠ กรุณายอมรับข้อตกลงก่อนส่งคำขอ');
+        alert('⚠ Please accept the policy before submitting.');
         return;
       }
 
-      const confirmMsg = `📌 กรุณาตรวจสอบความถูกต้องก่อนส่ง:\n\n` +
-                         `ชื่อ Master: ${name}\n` +
-                         `Public Key: ${pubkey}\n` +
-                         `เหตุผล: ${reason || "(ไม่ระบุ)"}`;
-      if (!confirm(confirmMsg)) return;
+      if (hasBadword) {
+        if (!confirm('⚠ This Master Name or Reason contains reserved or inappropriate words.\n\nIf you really want to proceed, press OK.')) {
+          return;
+        }
+      }
 
       const timestamp = new Date().toISOString();
       const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8)))
@@ -110,13 +144,13 @@
       const hash = sha256(s);
 
       document.getElementById('hashResult').innerText = `
-📌 คัดลอกข้อมูลนี้ส่งให้ Genesis/Admin หรือบันทึกใน log
+📌 Copy this data and send to Genesis/Admin or keep for your log
 
-Hash คำขอ  : ${hash}
-Public Key : ${pubkey}
-Timestamp  : ${timestamp}
-Nonce      : ${nonce}
-เหตุผล     : ${reason}`.trim();
+Request Hash: ${hash}
+Public Key  : ${pubkey}
+Timestamp   : ${timestamp}
+Nonce       : ${nonce}
+Reason      : ${reason}`.trim();
     };
   </script>
 </body>
