@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>เปิดเผยชื่อ Master จริง (Reveal)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+  <style>
+    body { font-family: sans-serif; max-width: 440px; margin:2em auto;}
+    label, input, textarea, button { display:block; margin:0.7em 0; width:100%; }
+    pre { background:#f8f8f8; padding:1em; }
+    code { background: #f3f3f3; padding:2px 5px;}
+  </style>
+</head>
+<body>
+  <h2>เปิดเผย (reveal) ข้อมูล Master ที่ได้รับอนุมัติ</h2>
+  <form id="revealForm">
+    <label>ชื่อ Master (พิมพ์ใหญ่): <input type="text" id="masterName" maxlength="8" required></label>
+    <label>Public Key: <input type="text" id="pubkey" required></label>
+    <label>เหตุผล: <input type="text" id="reason"></label>
+    <label>timestamp (ตามที่ขอ): <input type="text" id="timestamp" required></label>
+    <label>nonce (ตามที่ขอ): <input type="text" id="nonce" required></label>
+    <label>Hash ที่ได้รับอนุมัติ: <input type="text" id="approvedHash" required maxlength="64"></label>
+    <button type="submit">ตรวจสอบ/เผยข้อมูลจริง</button>
+  </form>
+  <pre id="revealResult"></pre>
+  <script>
+    document.getElementById('revealForm').onsubmit = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('masterName').value.toUpperCase();
+      const pubkey = document.getElementById('pubkey').value;
+      const reason = document.getElementById('reason').value;
+      const timestamp = document.getElementById('timestamp').value;
+      const nonce = document.getElementById('nonce').value;
+      const approvedHash = document.getElementById('approvedHash').value.trim();
+
+      const s = name + pubkey + reason + timestamp + nonce;
+      const hash = sha256(s);
+
+      let msg = '';
+      if(hash === approvedHash) {
+        msg = "✅ ข้อมูลตรงกับ hash ที่ได้รับอนุมัติ สามารถเพิ่มลง whitelist/master_list ได้";
+      } else {
+        msg = "❌ ข้อมูลนี้ <b>ไม่ตรงกับ hash ที่อนุมัติ!</b> กรุณาตรวจสอบใหม่";
+      }
+
+      const log = {
+        type: "master_reveal",
+        name,
+        pubkey,
+        reason,
+        timestamp,
+        nonce,
+        hash,
+        status: hash === approvedHash ? "revealed" : "error"
+      };
+
+      document.getElementById('revealResult').innerHTML = `
+<b>ผลการตรวจสอบ:</b> <br>${msg}<br><br>
+คัดลอกข้อมูลนี้ไปใส่ logs.json<br>
+<code>${JSON.stringify(log, null, 2)}</code>
+      `.trim();
+    }
+  </script>
+</body>
+</html>
