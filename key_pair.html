@@ -1,8 +1,8 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>สร้าง Address จากรหัสผ่าน</title>
+  <title>Generate Address from Passphrase</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -85,41 +85,45 @@
   </style>
 </head>
 <body>
-  <button class="back-btn" onclick="history.back()">← กลับ</button>
-  <h2 style="margin-top:1.5em;">🔐 สร้าง Address (Web3-style) จากรหัสผ่าน</h2>
+  <button class="back-btn" onclick="history.back()">← Back</button>
+  <h2 style="margin-top:1.5em;">🔐 Generate Address (Web3-style) from Passphrase</h2>
 
-  <label>รหัสผ่าน (6-12 ตัวอักษร ตัวเลข+ตัวอักษร):
+  <label>
+    Passphrase (6-12 chars, must include letters & numbers):
     <input type="password" id="privateKey1" maxlength="12" minlength="6" autocomplete="off"/>
-    <span class="toggle-password" data-target="privateKey1">แสดง</span>
+    <span class="toggle-password" data-target="privateKey1">Show</span>
     <div id="pw1Err" class="error"></div>
   </label>
 
-  <label>ยืนยันรหัสผ่าน:
+  <label>
+    Confirm Passphrase:
     <input type="password" id="privateKey2" maxlength="12" minlength="6" autocomplete="off"/>
-    <span class="toggle-password" data-target="privateKey2">แสดง</span>
+    <span class="toggle-password" data-target="privateKey2">Show</span>
     <div id="pw2Err" class="error"></div>
   </label>
 
-  <label>Sign Code (4 digits):
+  <label>
+    Sign Code (4 digits):
     <input type="password" id="signCode1" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off"/>
     <div id="sign1Err" class="error"></div>
   </label>
 
-  <label>Confirm Sign Code:
+  <label>
+    Confirm Sign Code:
     <input type="password" id="signCode2" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off"/>
     <div id="sign2Err" class="error"></div>
   </label>
 
-  <button onclick="generateAddress()">🚀 สร้าง Address</button>
+  <button onclick="generateAddress()">🚀 Generate Address</button>
 
   <h3>🔑 Private Key (SHA-256):</h3>
   <textarea id="fullHash" rows="2" readonly></textarea>
 
-  <h3>📮 Address (ใช้ 40 หลักท้าย):</h3>
+  <h3>📮 Address (last 40 chars):</h3>
   <textarea id="addressOutput" rows="2" readonly></textarea>
 
-  <button onclick="copyAddress()">📋 คัดลอก Address</button>
-  <div id="copyStatus" class="status">✅ คัดลอกสำเร็จ!</div>
+  <button onclick="copyAddress()">📋 Copy Address</button>
+  <div id="copyStatus" class="status">✅ Address copied!</div>
 
   <script>
     // Toggle show/hide password
@@ -129,10 +133,10 @@
         const input = document.getElementById(id);
         if (input.type === "password") {
           input.type = "text";
-          span.textContent = "ซ่อน";
+          span.textContent = "Hide";
         } else {
           input.type = "password";
-          span.textContent = "แสดง";
+          span.textContent = "Show";
         }
       });
     });
@@ -178,37 +182,37 @@
       sign2Err.textContent = "";
 
       if (!validatePassword(pw1)) {
-        pw1Err.textContent = "ต้อง 6-12 ตัว และมีทั้งตัวเลข+ตัวอักษร";
+        pw1Err.textContent = "Must be 6-12 chars, include letters & numbers.";
         valid = false;
       }
       if (pw1 !== pw2) {
-        pw2Err.textContent = "รหัสผ่านไม่ตรงกัน";
+        pw2Err.textContent = "Passphrases do not match.";
         valid = false;
       }
       if (!validateSign(sign1)) {
-        sign1Err.textContent = "ต้องเป็นตัวเลข 4 หลัก";
+        sign1Err.textContent = "Sign code must be 4 digits.";
         valid = false;
       }
       if (sign1 !== sign2) {
-        sign2Err.textContent = "Sign Code ไม่ตรงกัน";
+        sign2Err.textContent = "Sign codes do not match.";
         valid = false;
       }
       if (!valid) return;
 
-      // ใช้ password + sign code รวมกันสร้าง address
+      // Use password + sign code together to generate address
       const hash = await sha256Hex(pw1 + sign1);
       const address = "0x" + hash.slice(-40);
 
       fullHashEl.value = hash;
       addressEl.value = address;
       status.style.display = "none";
-      alert("✅ Address สร้างเรียบร้อย กรุณาสำรองข้อมูลไว้ให้ปลอดภัย");
+      alert("✅ Address generated. Please back up your private info securely.");
     }
 
     function copyAddress() {
       const addressEl = document.getElementById("addressOutput");
       if (!addressEl.value) {
-        alert("⚠ กรุณาสร้าง Address ก่อน");
+        alert("⚠ Please generate Address first.");
         return;
       }
       addressEl.select();
