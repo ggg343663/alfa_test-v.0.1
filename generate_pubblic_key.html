@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <title>สร้าง Address จากรหัสผ่าน</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2em auto;
+      padding: 1em;
+      background-color: #f9f9f9;
+      border-radius: 8px;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 0.5em;
+      font-size: 1em;
+      margin-top: 0.3em;
+      box-sizing: border-box;
+    }
+    button {
+      margin-top: 1em;
+      padding: 0.7em 1.2em;
+      font-size: 1em;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #copyStatus {
+      margin-top: 0.5em;
+      color: green;
+      font-weight: bold;
+      display: none;
+    }
+    label {
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>สร้าง Address (Web3-style) จากรหัสผ่าน</h1>
+  <label for="privateKey1">รหัสผ่าน (6-12 ตัวอักษร):</label>
+  <input type="password" id="privateKey1" maxlength="12" minlength="6" />
+
+  <label for="privateKey2">ยืนยันรหัสผ่าน:</label>
+  <input type="password" id="privateKey2" maxlength="12" minlength="6" />
+
+  <button onclick="generateAddress()">สร้าง Address</button>
+
+  <h3>Address:</h3>
+  <textarea id="addressOutput" rows="2" readonly></textarea>
+  <button onclick="copyAddress()">คัดลอก Address</button>
+  <div id="copyStatus">คัดลอกสำเร็จ!</div>
+
+  <p><a href="index.html">กลับสู่หน้าหลัก</a></p>
+
+  <script>
+    async function sha256Hex(str) {
+      const buffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+      return Array.from(new Uint8Array(hashBuffer))
+        .map((b) => b.toString(16).padStart(2, "0"))
+        .join("");
+    }
+
+    async function generateAddress() {
+      const pw1 = document.getElementById("privateKey1").value.trim();
+      const pw2 = document.getElementById("privateKey2").value.trim();
+
+      if (pw1.length < 6 || pw1.length > 12) {
+        alert("กรุณากรอกรหัสผ่าน 6-12 ตัวอักษร");
+        return;
+      }
+      if (pw1 !== pw2) {
+        alert("รหัสผ่านไม่ตรงกัน กรุณากรอกใหม่");
+        return;
+      }
+
+      const fullHash = await sha256Hex(pw1);
+      const address = "0x" + fullHash.slice(-40);
+      document.getElementById("addressOutput").value = address;
+      document.getElementById("copyStatus").style.display = "none";
+    }
+
+    function copyAddress() {
+      const addressField = document.getElementById("addressOutput");
+      if (!addressField.value) {
+        alert("กรุณาสร้าง Address ก่อนคัดลอก");
+        return;
+      }
+      addressField.select();
+      addressField.setSelectionRange(0, 99999); // สำหรับมือถือ
+
+      navigator.clipboard.writeText(addressField.value).then(() => {
+        const status = document.getElementById("copyStatus");
+        status.style.display = "block";
+        setTimeout(() => { status.style.display = "none"; }, 2000);
+      }).catch(() => {
+        alert("ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง");
+      });
+    }
+  </script>
+</body>
+</html>
