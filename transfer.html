@@ -58,7 +58,10 @@
     <input type="text" id="qr" name="qr" placeholder="กรอกรหัส QR" required />
 
     <label for="newPublicKey">Public Key ใหม่:</label>
-    <input type="text" id="newPublicKey" name="new_public_key" placeholder="public key ใหม่" required />
+    <input type="text" id="newPublicKey" name="new_public_key" placeholder="0x..." required />
+
+    <label for="confirmPublicKey">ยืนยัน Public Key ใหม่:</label>
+    <input type="text" id="confirmPublicKey" placeholder="ยืนยันอีกครั้ง" required />
 
     <label for="privateInput">Private Input (ของเจ้าของเดิม):</label>
     <input type="password" id="privateInput" name="private_input" placeholder="ความลับส่วนตัว" required />
@@ -76,21 +79,29 @@
 
       const qr = this.qr.value.trim();
       const newPub = this.newPublicKey.value.trim();
+      const confirmPub = this.confirmPublicKey.value.trim();
       const priv = this.privateInput.value.trim();
 
-      if (!qr || !newPub || !priv) {
-        alert('กรุณากรอกข้อมูลให้ครบทุกช่อง');
+      if (!qr || !newPub || !confirmPub || !priv) {
+        alert('⚠ กรุณากรอกข้อมูลให้ครบทุกช่อง');
         return;
       }
 
-      // แสดงผลลัพธ์ (แทนส่งข้อมูลจริง)
+      if (newPub !== confirmPub) {
+        alert('⚠ Public Key ไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง');
+        return;
+      }
+
+      if (!/^0x[a-fA-F0-9]{40}$/.test(newPub)) {
+        alert('⚠ Public Key ต้องขึ้นต้นด้วย 0x และมีความยาว 42 ตัวอักษร');
+        return;
+      }
+
       document.getElementById('result').textContent = 
-        `โอนกรรมสิทธิ์สำเร็จ!\n\n` +
+        `✅ โอนกรรมสิทธิ์สำเร็จ!\n\n` +
         `QR Code: ${qr}\n` +
         `Public Key ใหม่: ${newPub}\n` +
         `Private Input ของเจ้าของเดิม: ${priv}`;
-      
-      // TODO: เชื่อมต่อ backend ส่งข้อมูลโอนกรรมสิทธิ์จริง
     };
   </script>
 </body>
