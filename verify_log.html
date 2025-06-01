@@ -1,48 +1,21 @@
-// ตัวอย่าง logs ที่มี slot, hash, prevHash
-const logs = [
-  {
-    slot: 1,
-    hash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    prevHash: "0".repeat(64),
-    datetime: "2025-06-01T10:15:00Z",
-    qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    pubKey: "1234567890abcdef1234567890abcdef12345678",
-    action: "ลงทะเบียน",
-    detail: "ลงทะเบียน QR ครั้งแรก"
-  },
-  {
-    slot: 1,
-    hash: "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
-    prevHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    datetime: "2025-06-03T09:45:00Z",
-    qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    pubKey: "1234567890abcdef1234567890abcdef12345678",
-    action: "ปลดล็อก Master",
-    detail: "Master ปลดล็อก QR"
-  },
-  {
-    slot: 1,
-    hash: "eacbeaeaceeeeeaaaaaaaaaaaacbeacbeacbeacbeacbeacbeacbeacbeacbeacbe",
-    prevHash: "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
-    datetime: "2025-06-04T15:00:00Z",
-    qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    pubKey: "9999999999999999999999999999999999999999",
-    action: "โอนกรรมสิทธิ์",
-    detail: "โอนกรรมสิทธิ์ QR ไปยัง Public Key ใหม่"
-  },
-  // branch (double spend)
-  {
-    slot: 1,
-    hash: "branchbranchbranchbranchbranchbranchbranchbranchbranchbranchbranc",
-    prevHash: "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
-    datetime: "2025-06-05T18:00:00Z",
-    qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    pubKey: "8888888888888888888888888888888888888888",
-    action: "โอนกรรมสิทธิ์",
-    detail: "สาย branch กรรมสิทธิ์ซ้อน (double spend)"
-  }
-];
+<script>
+let logs = [];
 
+// โหลดข้อมูล logs.json แบบอัตโนมัติ
+function fetchLogsAndRender(qrHash = "") {
+  fetch('logs.json')
+    .then(res => res.json())
+    .then(data => {
+      logs = data;
+      if (qrHash.length === 64) renderChain(qrHash);
+    })
+    .catch(e => {
+      logs = [];
+      document.getElementById('chainView').innerHTML = '<span style="color:red;">ไม่สามารถโหลด logs.json ได้</span>';
+    });
+}
+
+// (function นี้อัปเดต lineage tree ได้เหมือนของเดิม)
 function renderChain(qrHash) {
   const filtered = logs
     .filter(log => log.qrHash.toLowerCase() === qrHash.toLowerCase())
@@ -114,3 +87,32 @@ function renderChain(qrHash) {
     logListBody.appendChild(tr);
   });
 }
+
+// -- เพิ่ม event ให้ input อัตโนมัติ --
+document.getElementById('qrSearchInput').addEventListener('input', function() {
+  const val = this.value.trim();
+  if (val.length === 64) fetchLogsAndRender(val);
+  else {
+    document.getElementById('chainView').innerHTML = '';
+    logList.style.display = 'none';
+    ownerStatusDiv.textContent = '';
+    noDataMsg.style.display = 'block';
+    noDataMsg.textContent = val.length === 0
+      ? 'กรุณาค้นหา QR hash เพื่อดูประวัติ'
+      : 'กรุณากรอก QR hash ให้ครบ 64 ตัวอักษร';
+    logListBody.innerHTML = '';
+  }
+});
+
+// clear button
+clearBtn.addEventListener('click', () => {
+  document.getElementById('qrSearchInput').value = '';
+  ownerStatusDiv.textContent = '';
+  logList.style.display = 'none';
+  noDataMsg.style.display = 'block';
+  noDataMsg.textContent = 'กรุณาค้นหา QR hash เพื่อดูประวัติ';
+  logListBody.innerHTML = '';
+  document.getElementById('chainView').innerHTML = '';
+  document.getElementById('qrSearchInput').focus();
+});
+</script>
