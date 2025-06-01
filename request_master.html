@@ -8,22 +8,11 @@
     body { font-family: sans-serif; max-width: 400px; margin: 2em auto; position: relative; }
     label, input, button { display: block; margin: 0.6em 0; width: 100%; }
     pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; }
-    .warning {
-      background: linear-gradient(90deg, yellow, red);
-      padding: 0.5em; color: black; font-weight: bold;
-      animation: flash 1s infinite alternate;
-      text-align: center; border-radius: 4px;
-      margin-bottom: 1em;
-    }
-    @keyframes flash {
-      0% { background-color: yellow; }
-      100% { background-color: red; }
-    }
     small { font-size: 0.9em; color: #555; display: block; margin-top: -0.5em; margin-bottom: 0.8em; }
     .back-btn {
       position: fixed;
-      left: 20px;
-      bottom: 20px;
+      left: 16px;
+      top: 16px;
       width: auto;
       background: #eee;
       border: 1px solid #ccc;
@@ -36,50 +25,105 @@
       font-size: 1em;
       box-shadow: 1px 2px 8px rgba(0,0,0,0.07);
     }
-    .back-btn:hover {
-      background: #ffd;
+    .back-btn:hover { background: #ffd; }
+    .warning-flash {
+      background: linear-gradient(90deg, yellow, red);
+      color: #222; font-weight: bold;
+      animation: flash 1s infinite alternate;
+      text-align: center; border-radius: 4px;
+      margin-bottom: 1em;
+      padding: 0.7em 1em;
+      font-size: 1.07em;
+      display: none;
+    }
+    @keyframes flash {
+      0% { background-color: yellow; }
+      100% { background-color: red; }
+    }
+    .msg-warn { color: #b00; font-weight: bold; font-size: 1em; margin-bottom: 0.5em; }
+    .input-error { border: 2px solid #e44; background: #ffeaea; }
+    /* Popup */
+    .popup-overlay {
+      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.28); z-index: 9999; display: none;
+      align-items: center; justify-content: center;
+    }
+    .popup-content {
+      background: #fff3e8;
+      border-radius: 10px;
+      border: 2px solid #f56;
+      max-width: 90vw; width: 360px;
+      padding: 2em 1.2em 1.2em 1.2em;
+      box-shadow: 0 4px 22px #0002;
+      color: #a33;
+      font-size: 1.1em;
+      text-align: center;
+      position: relative;
+      animation: pop 0.25s;
+    }
+    .popup-content .close-popup {
+      position: absolute; right: 1em; top: 1em;
+      background: #ffd; border: 1px solid #fbb; border-radius: 100px;
+      padding: 0.2em 0.9em; cursor: pointer; color: #b00; font-size: 1em;
+    }
+    @keyframes pop {
+      0% { transform: scale(0.82);}
+      100% { transform: scale(1);}
     }
   </style>
 </head>
 <body>
+  <button class="back-btn" onclick="history.back()">← Back</button>
   <h2>Request Master</h2>
-  <div id="warningBox" class="warning" style="display:none;"></div>
 
-  <form id="requestMasterForm">
+  <div id="badwordWarn" class="warning-flash"></div>
+
+  <form id="requestMasterForm" autocomplete="off">
     <label>Master Name (A-Z only): <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required autocomplete="off"></label>
     <label>Confirm Master Name: <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required autocomplete="off"></label>
+    <div id="nameMatchWarn" class="msg-warn" style="display:none;"></div>
     <label>Public Key (42 characters): <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" required autocomplete="off"></label>
     <label>Confirm Public Key: <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" required autocomplete="off"></label>
     <small>📌 You should give this Public Key to the recipient for ownership transfer verification.</small>
     <label>Reason: <input type="text" id="reason" autocomplete="off"></label>
-    <label><input type="checkbox" id="agreePolicy" required> I acknowledge this information will be public</label>
     <button type="submit">Request Master</button>
   </form>
 
   <pre id="hashResult"></pre>
 
-  <!-- Back button bottom left -->
-  <button class="back-btn" onclick="history.back()">← Back</button>
+  <!-- Popup warn -->
+  <div class="popup-overlay" id="popupOverlay">
+    <div class="popup-content">
+      <button class="close-popup" onclick="hidePopup()">✖</button>
+      <div id="popupMsg"></div>
+    </div>
+  </div>
 
   <script>
     let badwordList = {};
     let hasBadword = false;
 
+    // Load badwords
     fetch('badwords.json')
       .then(res => res.json())
       .then(data => badwordList = data)
-      .catch(() => {
-        showWarning('⚠ Failed to load badword list. Please check your connection.');
-      });
+      .catch(() => showPopup('⚠ Failed to load badword list. Please check your connection.'));
 
-    function showWarning(msg) {
-      const warnBox = document.getElementById('warningBox');
-      warnBox.style.display = 'block';
-      warnBox.innerHTML = msg;
+    function showPopup(msg) {
+      document.getElementById('popupMsg').innerHTML = msg;
+      document.getElementById('popupOverlay').style.display = 'flex';
+    }
+    function hidePopup() {
+      document.getElementById('popupOverlay').style.display = 'none';
     }
 
-    function hideWarning() {
-      document.getElementById('warningBox').style.display = 'none';
+    function showBadwordWarn(msg) {
+      const warn = document.getElementById('badwordWarn');
+      warn.style.display = 'block';
+      warn.innerHTML = msg;
+    }
+    function hideBadwordWarn() {
+      document.getElementById('badwordWarn').style.display = 'none';
     }
 
     function checkBadwords(inputValue) {
@@ -91,19 +135,42 @@
         });
       }
       if (found.length > 0) {
-        showWarning(`⚠ <span style="color:red; font-weight:bold;">Badword detected: ${found.join(', ')}</span> Please avoid these words, or confirm if you really want to use them.`);
+        showBadwordWarn(`⚠ <span style="color:red; font-weight:bold;">Badword detected: ${found.join(', ')}</span> Please avoid these words, or confirm if you really want to use them.`);
         hasBadword = true;
       } else {
-        showWarning('Please avoid using bad or reserved words in Master Name or Reason. Use public-appropriate language.');
+        hideBadwordWarn();
         hasBadword = false;
       }
     }
 
+    // Force UPPERCASE for both masterName and confirmName
     document.getElementById('masterName').addEventListener('input', function () {
       this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
       checkBadwords(this.value);
+      checkNameMatch();
+    });
+    document.getElementById('confirmName').addEventListener('input', function () {
+      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+      checkNameMatch();
     });
 
+    // Warn if Master Name and Confirm Master Name do not match
+    function checkNameMatch() {
+      const name = document.getElementById('masterName').value.trim();
+      const confirm = document.getElementById('confirmName').value.trim();
+      const warn = document.getElementById('nameMatchWarn');
+      if (name && confirm && name !== confirm) {
+        warn.innerText = '⚠ Master Name and Confirm Master Name do not match!';
+        warn.style.display = 'block';
+        document.getElementById('confirmName').classList.add('input-error');
+      } else {
+        warn.innerText = '';
+        warn.style.display = 'none';
+        document.getElementById('confirmName').classList.remove('input-error');
+      }
+    }
+
+    // Badword check for Reason
     document.getElementById('reason').addEventListener('input', function () {
       checkBadwords(this.value);
     });
@@ -116,18 +183,13 @@
       const pubkey = document.getElementById('pubkey').value.trim();
       const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
       const reason = document.getElementById('reason').value;
-      const agreed = document.getElementById('agreePolicy').checked;
 
       if (name !== confirm) {
-        alert('⚠ Master Name mismatch. Please check.');
+        showPopup('⚠ Master Name and Confirm Master Name do not match. Please check.');
         return;
       }
       if (pubkey !== confirmPubkey) {
-        alert('⚠ Public Key mismatch. Please check.');
-        return;
-      }
-      if (!agreed) {
-        alert('⚠ Please accept the policy before submitting.');
+        showPopup('⚠ Public Key and Confirm Public Key do not match. Please check.');
         return;
       }
 
@@ -135,6 +197,10 @@
         if (!confirm('⚠ This Master Name or Reason contains reserved or inappropriate words.\n\nIf you really want to proceed, press OK.')) {
           return;
         }
+      }
+
+      if (!confirm("ยืนยันว่าข้อมูลนี้จะเปิดเผยต่อสาธารณะ และเข้าใจเงื่อนไขทั้งหมด\n\n(Confirm to proceed: All information will be public.)")) {
+        return;
       }
 
       const timestamp = new Date().toISOString();
