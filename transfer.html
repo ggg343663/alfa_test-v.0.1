@@ -2,126 +2,122 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>โอนกรรมสิทธิ์ QR</title>
+  <title>ขอ Master ใหม่ (DTC)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 500px;
-      margin: 2em auto;
-      padding: 1em;
-      background: #f9f9f9;
-      border-radius: 8px;
+    body { font-family: sans-serif; max-width: 400px; margin: 2em auto; }
+    label, input, button { display: block; margin: 0.6em 0; width: 100%; }
+    pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; }
+    .warning {
+      background: linear-gradient(90deg, yellow, red);
+      padding: 0.5em; color: black; font-weight: bold;
+      animation: flash 1s infinite alternate;
+      text-align: center; border-radius: 4px;
     }
-    label {
-      display: block;
-      margin-top: 1em;
-      font-weight: bold;
+    @keyframes flash {
+      0% { background-color: yellow; }
+      100% { background-color: red; }
     }
-    input {
-      width: 100%;
-      padding: 0.5em;
-      font-size: 1em;
-      margin-top: 0.3em;
-      box-sizing: border-box;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      margin-top: 1.2em;
-      padding: 0.7em;
-      font-size: 1em;
-      background-color: #2196F3;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0b7dda;
-    }
-    #previewBox, #result {
-      margin-top: 1.5em;
-      padding: 1em;
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      font-family: monospace;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .hidden { display: none; }
+    small { font-size: 0.9em; color: #555; display: block; margin-top: -0.5em; margin-bottom: 0.8em; }
   </style>
 </head>
 <body>
-  <h2>โอนกรรมสิทธิ์ QR</h2>
-  <form id="transferForm">
-    <label for="qr">QR Code:</label>
-    <input type="text" id="qr" name="qr" placeholder="กรอกรหัส QR" required />
+  <h2>ขอ Master ใหม่</h2>
+  <div id="warningBox" class="warning" style="display:none;"></div>
 
-    <label for="newPublicKey">Public Key ใหม่:</label>
-    <input type="text" id="newPublicKey" name="new_public_key" placeholder="0x..." required />
-
-    <label for="confirmPublicKey">ยืนยัน Public Key ใหม่:</label>
-    <input type="text" id="confirmPublicKey" placeholder="ยืนยันอีกครั้ง" required />
-
-    <label for="privateInput">Private Input (ของเจ้าของเดิม):</label>
-    <input type="password" id="privateInput" name="private_input" placeholder="ความลับส่วนตัว" required />
-
-    <button type="button" onclick="previewTransfer()">📋 แสดงข้อมูลก่อนโอน</button>
+  <form id="requestMasterForm">
+    <label>ชื่อ Master (พิมพ์ใหญ่ A-Z เท่านั้น): <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required></label>
+    <label>ยืนยันชื่อ Master: <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required></label>
+    <label>Public Key (42 ตัวอักษร): <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" required></label>
+    <label>ยืนยัน Public Key: <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" required></label>
+    <small>📌 ผู้ขอควรส่ง Public Key นี้ให้ผู้รับ เพื่อใช้ยืนยันในกระบวนการโอนกรรมสิทธิ์</small>
+    <label>เหตุผล: <input type="text" id="reason"></label>
+    <label><input type="checkbox" id="agreePolicy" required> ฉันยอมรับว่าข้อมูลนี้จะเปิดเผยต่อสาธารณะ</label>
+    <button type="submit">ขอสิทธิ์ Master</button>
   </form>
 
-  <div id="previewBox" class="hidden">
-    <h4>📋 ตรวจสอบข้อมูลก่อนยืนยัน:</h4>
-    <pre id="previewContent"></pre>
-    <button onclick="confirmTransfer()">✅ ยืนยันโอนกรรมสิทธิ์</button>
-    <button onclick="document.getElementById('previewBox').classList.add('hidden')">❌ ยกเลิก</button>
-  </div>
-
-  <div id="result"></div>
-  <button onclick="window.history.back()" style="margin-top: 1em;">ย้อนกลับ</button>
+  <pre id="hashResult"></pre>
 
   <script>
-    let previewData = null;
+    let badwordList = {};
+    fetch('badwords.json')
+      .then(res => res.json())
+      .then(data => badwordList = data)
+      .catch(() => {
+        document.getElementById('warningBox').innerText = '⚠ ไม่สามารถโหลดคำต้องห้ามได้ โปรดตรวจสอบการเชื่อมต่อ';
+        document.getElementById('warningBox').style.display = 'block';
+      });
 
-    function previewTransfer() {
-      const qr = document.getElementById('qr').value.trim();
-      const newPub = document.getElementById('newPublicKey').value.trim();
-      const confirmPub = document.getElementById('confirmPublicKey').value.trim();
-      const priv = document.getElementById('privateInput').value.trim();
-
-      if (!qr || !newPub || !confirmPub || !priv) {
-        alert('⚠ กรุณากรอกข้อมูลให้ครบทุกช่อง');
-        return;
+    function checkBadwords(inputValue) {
+      const input = inputValue.toLowerCase();
+      let found = [];
+      for (const group of Object.values(badwordList)) {
+        group.forEach(word => {
+          if (input.includes(word)) found.push(word);
+        });
       }
-
-      if (newPub !== confirmPub) {
-        alert('⚠ Public Key ไม่ตรงกัน กรุณาตรวจสอบอีกครั้ง');
-        return;
+      if (found.length > 0) {
+        document.getElementById('warningBox').style.display = 'block';
+        document.getElementById('warningBox').innerHTML =
+          `⚠ พบคำที่ไม่เหมาะสม: <span style="color:red;">${found.join(', ')}</span>`;
+      } else {
+        document.getElementById('warningBox').style.display = 'none';
       }
-
-      if (!/^0x[a-fA-F0-9]{40}$/.test(newPub)) {
-        alert('⚠ Public Key ต้องขึ้นต้นด้วย 0x และมีความยาว 42 ตัวอักษร');
-        return;
-      }
-
-      previewData = {
-        type: "transfer",
-        qr_code: qr,
-        new_public_key: newPub,
-        private_input: priv,
-        timestamp: new Date().toISOString()
-      };
-
-      document.getElementById('previewContent').innerText = JSON.stringify(previewData, null, 2);
-      document.getElementById('previewBox').classList.remove('hidden');
     }
 
-    function confirmTransfer() {
-      if (!previewData) return;
-      document.getElementById('result').innerText =
-        `✅ โอนกรรมสิทธิ์สำเร็จ\n\n` + JSON.stringify(previewData, null, 2);
-      document.getElementById('previewBox').classList.add('hidden');
-    }
+    document.getElementById('masterName').addEventListener('input', function () {
+      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
+      checkBadwords(this.value);
+    });
+
+    document.getElementById('reason').addEventListener('input', function () {
+      checkBadwords(this.value);
+    });
+
+    document.getElementById('requestMasterForm').onsubmit = function (e) {
+      e.preventDefault();
+
+      const name = document.getElementById('masterName').value.trim();
+      const confirm = document.getElementById('confirmName').value.trim();
+      const pubkey = document.getElementById('pubkey').value.trim();
+      const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
+      const reason = document.getElementById('reason').value;
+      const agreed = document.getElementById('agreePolicy').checked;
+
+      if (name !== confirm) {
+        alert('⚠ ชื่อ Master ไม่ตรงกัน กรุณาตรวจสอบ');
+        return;
+      }
+      if (pubkey !== confirmPubkey) {
+        alert('⚠ Public Key ไม่ตรงกัน กรุณาตรวจสอบ');
+        return;
+      }
+      if (!agreed) {
+        alert('⚠ กรุณายอมรับข้อตกลงก่อนส่งคำขอ');
+        return;
+      }
+
+      const confirmMsg = `📌 กรุณาตรวจสอบความถูกต้องก่อนส่ง:\n\n` +
+                         `ชื่อ Master: ${name}\n` +
+                         `Public Key: ${pubkey}\n` +
+                         `เหตุผล: ${reason || "(ไม่ระบุ)"}`;
+      if (!confirm(confirmMsg)) return;
+
+      const timestamp = new Date().toISOString();
+      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8)))
+                         .map(b => b.toString(16).padStart(2, "0")).join('');
+      const s = name + pubkey + reason + timestamp + nonce;
+      const hash = sha256(s);
+
+      document.getElementById('hashResult').innerText = `
+📌 คัดลอกข้อมูลนี้ส่งให้ Genesis/Admin หรือบันทึกใน log
+
+Hash คำขอ  : ${hash}
+Public Key : ${pubkey}
+Timestamp  : ${timestamp}
+Nonce      : ${nonce}
+เหตุผล     : ${reason}`.trim();
+    };
   </script>
 </body>
 </html>
