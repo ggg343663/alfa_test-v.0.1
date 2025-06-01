@@ -110,13 +110,34 @@
       background: #fde047;
       color: #21211d;
     }
+    .hash-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+      margin-bottom: 0.4em;
+      margin-top: 1.7em;
+    }
+    .hash-status.ready {
+      color: #13a137;
+      font-weight: bold;
+      font-size: 1em;
+      margin-left: 6px;
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 0.2em;
+      margin-left: 0.2em;
+    }
+    .copy-btn:active svg { opacity: 0.65; }
     pre {
       background: #f9f6e3;
       border-radius: 8px;
       padding: 1.2em 0.9em;
       color: #8a6903;
       font-size: 1.07em;
-      margin-top: 2em;
+      margin-top: 0.2em;
       white-space: pre-wrap;
       word-break: break-all;
       border: 1.5px solid #fde047;
@@ -175,7 +196,20 @@
       <button type="submit">Request Master</button>
     </form>
 
-    <pre id="hashResult"></pre>
+    <!-- Hash + Copy UI -->
+    <div id="hashBox" style="display:none;">
+      <div class="hash-row">
+        <input type="text" id="qrHashInput" value="" readonly style="width:72%;">
+        <span class="hash-status ready">QR hash ready</span>
+        <button class="copy-btn" onclick="copyHash()" title="Copy to clipboard">
+          <svg width="22" height="22" viewBox="0 0 24 24">
+            <path fill="#24c48b" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19" />
+            <path fill="#24c48b" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z" />
+          </svg>
+        </button>
+      </div>
+      <pre id="hashResult"></pre>
+    </div>
   </div>
 
   <!-- Popup warn -->
@@ -296,6 +330,9 @@
       const s = name + pubkey + reason + timestamp + nonce;
       const hash = sha256(s);
 
+      // Show QR hash ready + copy button + full log
+      document.getElementById('hashBox').style.display = "block";
+      document.getElementById('qrHashInput').value = hash;
       document.getElementById('hashResult').innerText = `
 📌 Copy this data and send to Genesis/Admin or keep for your log
 
@@ -305,6 +342,14 @@ Timestamp   : ${timestamp}
 Nonce       : ${nonce}
 Reason      : ${reason}`.trim();
     };
+
+    function copyHash() {
+      const input = document.getElementById('qrHashInput');
+      input.select();
+      input.setSelectionRange(0, 99999); // mobile
+      navigator.clipboard.writeText(input.value);
+      alert('Copied!');
+    }
   </script>
 </body>
 </html>
