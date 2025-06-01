@@ -18,6 +18,15 @@
       font-size: 1em;
       margin-top: 0.3em;
       box-sizing: border-box;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      transition: border-color 0.3s ease;
+    }
+    input.invalid {
+      border-color: red;
+    }
+    input.valid {
+      border-color: green;
     }
     button {
       margin-top: 1em;
@@ -28,6 +37,7 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
+      transition: background-color 0.3s ease;
     }
     button:hover {
       background-color: #45a049;
@@ -45,11 +55,12 @@
 </head>
 <body>
   <h1>สร้าง Address (Web3-style) จากรหัสผ่าน</h1>
+
   <label for="privateKey1">รหัสผ่าน (6-12 ตัวอักษร):</label>
-  <input type="password" id="privateKey1" maxlength="12" minlength="6" />
+  <input type="password" id="privateKey1" maxlength="12" minlength="6" autocomplete="off" />
 
   <label for="privateKey2">ยืนยันรหัสผ่าน:</label>
-  <input type="password" id="privateKey2" maxlength="12" minlength="6" />
+  <input type="password" id="privateKey2" maxlength="12" minlength="6" autocomplete="off" />
 
   <button onclick="generateAddress()">สร้าง Address</button>
 
@@ -61,6 +72,22 @@
   <p><a href="index.html">กลับสู่หน้าหลัก</a></p>
 
   <script>
+    const privateKey1Input = document.getElementById("privateKey1");
+    const privateKey2Input = document.getElementById("privateKey2");
+
+    function validatePrivateKeyInput(input) {
+      if (input.value.trim().length >= 6) {
+        input.classList.remove("invalid");
+        input.classList.add("valid");
+      } else {
+        input.classList.remove("valid");
+        input.classList.add("invalid");
+      }
+    }
+
+    privateKey1Input.addEventListener("input", () => validatePrivateKeyInput(privateKey1Input));
+    privateKey2Input.addEventListener("input", () => validatePrivateKeyInput(privateKey2Input));
+
     async function sha256Hex(str) {
       const buffer = new TextEncoder().encode(str);
       const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
@@ -70,8 +97,8 @@
     }
 
     async function generateAddress() {
-      const pw1 = document.getElementById("privateKey1").value.trim();
-      const pw2 = document.getElementById("privateKey2").value.trim();
+      const pw1 = privateKey1Input.value.trim();
+      const pw2 = privateKey2Input.value.trim();
 
       if (pw1.length < 6 || pw1.length > 12) {
         alert("กรุณากรอกรหัสผ่าน 6-12 ตัวอักษร");
