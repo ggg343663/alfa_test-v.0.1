@@ -1,206 +1,116 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-<meta charset="UTF-8" />
-<title>ตรวจสอบประวัติการลงทะเบียน QR (Log Viewer)</title>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    max-width: 900px;
-    margin: 2em auto;
-    padding: 1em;
-    background: #f9f9f9;
-    border-radius: 8px;
+// ตัวอย่าง logs ที่มี slot, hash, prevHash
+const logs = [
+  {
+    slot: 1,
+    hash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    prevHash: "0".repeat(64),
+    datetime: "2025-06-01T10:15:00Z",
+    qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    pubKey: "1234567890abcdef1234567890abcdef12345678",
+    action: "ลงทะเบียน",
+    detail: "ลงทะเบียน QR ครั้งแรก"
+  },
+  {
+    slot: 1,
+    hash: "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+    prevHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    datetime: "2025-06-03T09:45:00Z",
+    qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    pubKey: "1234567890abcdef1234567890abcdef12345678",
+    action: "ปลดล็อก Master",
+    detail: "Master ปลดล็อก QR"
+  },
+  {
+    slot: 1,
+    hash: "eacbeaeaceeeeeaaaaaaaaaaaacbeacbeacbeacbeacbeacbeacbeacbeacbeacbe",
+    prevHash: "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+    datetime: "2025-06-04T15:00:00Z",
+    qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    pubKey: "9999999999999999999999999999999999999999",
+    action: "โอนกรรมสิทธิ์",
+    detail: "โอนกรรมสิทธิ์ QR ไปยัง Public Key ใหม่"
+  },
+  // branch (double spend)
+  {
+    slot: 1,
+    hash: "branchbranchbranchbranchbranchbranchbranchbranchbranchbranchbranc",
+    prevHash: "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
+    datetime: "2025-06-05T18:00:00Z",
+    qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    pubKey: "8888888888888888888888888888888888888888",
+    action: "โอนกรรมสิทธิ์",
+    detail: "สาย branch กรรมสิทธิ์ซ้อน (double spend)"
   }
-  h1, h2 {
-    text-align: center;
-  }
-  label {
-    font-weight: bold;
-  }
-  #searchRow {
-    margin-bottom: 1em;
-    text-align: center;
-  }
-  #qrSearchInput {
-    padding: 0.5em;
-    width: 300px;
-    font-size: 1em;
-  }
-  #clearBtn {
-    margin-left: 10px;
-    padding: 0.5em 1em;
-    font-size: 1em;
-    cursor: pointer;
-    border-radius: 5px;
-    border: none;
-    background-color: #f44336;
-    color: white;
-    transition: background-color 0.3s ease;
-  }
-  #clearBtn:hover {
-    background-color: #d32f2f;
-  }
-  #ownerStatus {
-    margin-top: 1em;
-    font-weight: bold;
-    text-align: center;
-  }
-  #logList {
-    margin-top: 1em;
-    border-collapse: collapse;
-    width: 100%;
-  }
-  #logList th, #logList td {
-    border: 1px solid #ccc;
-    padding: 0.5em;
-    font-size: 0.9em;
-    text-align: left;
-  }
-  #logList th {
-    background-color: #4CAF50;
-    color: white;
-  }
-  #logList tbody tr:nth-child(even) {
-    background-color: #f2f2f2;
-  }
-  .no-data {
-    text-align: center;
-    padding: 1em;
-    color: #999;
-  }
-</style>
-</head>
-<body>
-  <h1>ตรวจสอบประวัติการลงทะเบียน QR (Log Viewer)</h1>
+];
 
-  <div id="searchRow">
-    <label for="qrSearchInput">ค้นหา QR Hash:</label>
-    <input type="text" id="qrSearchInput" placeholder="พิมพ์ QR hash 64 ตัวอักษร เพื่อดูสายโซ่" maxlength="64" />
-    <button id="clearBtn" type="button">ล้างข้อมูล</button>
-  </div>
+function renderChain(qrHash) {
+  const filtered = logs
+    .filter(log => log.qrHash.toLowerCase() === qrHash.toLowerCase())
+    .sort((a,b) => new Date(a.datetime) - new Date(b.datetime));
 
-  <div id="ownerStatus"></div>
-
-  <table id="logList" style="display:none;">
-    <thead>
-      <tr>
-        <th>วันที่-เวลา</th>
-        <th>กิจกรรม</th>
-        <th>รายละเอียด</th>
-        <th>Public Key (เจ้าของ)</th>
-      </tr>
-    </thead>
-    <tbody id="logListBody">
-    </tbody>
-  </table>
-
-  <div id="noDataMsg" class="no-data" style="display:block;">กรุณาค้นหา QR hash เพื่อดูประวัติ</div>
-
-  <script>
-    const logs = [
-      {
-        datetime: "2025-06-01T10:15:00Z",
-        qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-        pubKey: "1234567890abcdef1234567890abcdef12345678",
-        action: "ลงทะเบียน",
-        detail: "ลงทะเบียน QR ครั้งแรก"
-      },
-      {
-        datetime: "2025-06-02T12:30:00Z",
-        qrHash: "fedcba0987654321fedcba0987654321fedcba0987654321fedcba0987654321",
-        pubKey: "abcdef1234567890abcdef1234567890abcdef12",
-        action: "โอนกรรมสิทธิ์",
-        detail: "โอนกรรมสิทธิ์ QR ไปยัง Public Key ใหม่"
-      },
-      {
-        datetime: "2025-06-03T09:45:00Z",
-        qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-        pubKey: "1234567890abcdef1234567890abcdef12345678",
-        action: "ปลดล็อก Master",
-        detail: "Master ปลดล็อก QR"
-      },
-      {
-        datetime: "2025-06-04T15:00:00Z",
-        qrHash: "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-        pubKey: "9999999999999999999999999999999999999999",
-        action: "โอนกรรมสิทธิ์",
-        detail: "โอนกรรมสิทธิ์ QR ไปยัง Public Key ใหม่"
-      }
-    ];
-
-    const qrSearchInput = document.getElementById('qrSearchInput');
-    const clearBtn = document.getElementById('clearBtn');
-    const ownerStatusDiv = document.getElementById('ownerStatus');
-    const logList = document.getElementById('logList');
-    const logListBody = document.getElementById('logListBody');
-    const noDataMsg = document.getElementById('noDataMsg');
-
-    function renderChain(qrHash) {
-      const filtered = logs
-        .filter(log => log.qrHash.toLowerCase() === qrHash.toLowerCase())
-        .sort((a,b) => new Date(a.datetime) - new Date(b.datetime));
-
-      if(filtered.length === 0) {
-        logList.style.display = 'none';
-        ownerStatusDiv.textContent = '';
-        noDataMsg.style.display = 'block';
-        noDataMsg.textContent = 'ไม่พบประวัติสำหรับ QR hash นี้';
-        return;
-      }
-
-      noDataMsg.style.display = 'none';
-      logList.style.display = 'table';
-
-      const latest = filtered[filtered.length - 1];
-      ownerStatusDiv.textContent = `เจ้าของปัจจุบัน: ${latest.pubKey}`;
-
-      logListBody.innerHTML = '';
-      filtered.forEach(log => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td>${new Date(log.datetime).toLocaleString()}</td>
-          <td>${log.action}</td>
-          <td>${log.detail}</td>
-          <td><code>${log.pubKey}</code></td>
-        `;
-        logListBody.appendChild(tr);
-      });
-    }
-
-    function validateInput() {
-      const val = qrSearchInput.value.trim();
-      if (val.length === 64) {
-        renderChain(val);
-      } else if(val.length === 0) {
-        logList.style.display = 'none';
-        ownerStatusDiv.textContent = '';
-        noDataMsg.style.display = 'block';
-        noDataMsg.textContent = 'กรุณาค้นหา QR hash เพื่อดูประวัติ';
-        logListBody.innerHTML = '';
-      } else {
-        logList.style.display = 'none';
-        ownerStatusDiv.textContent = '';
-        noDataMsg.style.display = 'block';
-        noDataMsg.textContent = 'กรุณากรอก QR hash ให้ครบ 64 ตัวอักษร';
-        logListBody.innerHTML = '';
-      }
-    }
-
-    qrSearchInput.addEventListener('input', validateInput);
-
-    clearBtn.addEventListener('click', () => {
-      qrSearchInput.value = '';
-      ownerStatusDiv.textContent = '';
-      logList.style.display = 'none';
-      noDataMsg.style.display = 'block';
-      noDataMsg.textContent = 'กรุณาค้นหา QR hash เพื่อดูประวัติ';
-      logListBody.innerHTML = '';
-      qrSearchInput.focus();
+  // ---- วาดสาย lineage แสดง slot, hash, prevHash แบบ tree ----
+  let chainHTML = "";
+  if (filtered.length) {
+    // map prevHash => [log...]
+    const chainMap = {};
+    filtered.forEach(log => {
+      if (!chainMap[log.prevHash]) chainMap[log.prevHash] = [];
+      chainMap[log.prevHash].push(log);
     });
+    // recursive เริ่มจาก genesis (prevHash == "000...")
+    function printChain(prevHash, depth = 0) {
+      if (!chainMap[prevHash]) return "";
+      return chainMap[prevHash].map(log => {
+        return `<div style="margin-left:${depth*24}px; border-left:${depth? '2px solid #eee' : 'none'}; padding-left:4px;">
+          <b>Slot:</b> <span style="color:#2196f3">${log.slot}</span>
+          &nbsp; <b>Hash:</b> <code style="font-size:0.92em;">${log.hash.slice(0,10)}...${log.hash.slice(-6)}</code><br>
+          <b>Prev:</b> <code style="font-size:0.92em;">${log.prevHash.slice(0,10)}...${log.prevHash.slice(-6)}</code><br>
+          <b>${log.action}</b> <span style="color:#999;font-size:0.90em;">[${new Date(log.datetime).toLocaleDateString()}]</span><br>
+          <span style="color:#555;">${log.pubKey}</span>
+        </div>`
+        + (chainMap[log.hash]?.length
+            ? `<div style="font-size:1.6em;color:#bbb;">&#8628;</div>`
+            : "")
+        + printChain(log.hash, depth+1);
+      }).join('');
+    }
+    chainHTML = `<div><b>สายโซ่กรรมสิทธิ์ (Lineage Chain):</b><br><br>`
+              + printChain("0".repeat(64))
+              + "</div>";
+  }
+  document.getElementById('chainView').innerHTML = chainHTML;
 
-    // เริ่มต้นแสดงข้อความแนะนำ
+  // ... ส่วนตรวจสอบ owner และ log (เหมือนเดิม) ...
+  if(filtered.length === 0) {
+    logList.style.display = 'none';
+    ownerStatusDiv.textContent = '';
     noDataMsg.style.display = 'block';
-  </script>
-</body>
-</html>
+    noDataMsg.textContent = 'ไม่พบประวัติสำหรับ QR hash นี้';
+    document.getElementById('chainView').innerHTML = '';
+    return;
+  }
+
+  noDataMsg.style.display = 'none';
+  logList.style.display = 'table';
+
+  // owner ซ้อน
+  const latestOwners = [...new Set(filtered.reverse().map(x => x.pubKey))];
+  if(latestOwners.length === 1) {
+    ownerStatusDiv.innerHTML = `เจ้าของปัจจุบัน: <span style="color:#2196f3">${latestOwners[0]}</span>`;
+  } else {
+    ownerStatusDiv.innerHTML = `<span style="color:#d32f2f">⚠ พบกรรมสิทธิ์ซ้ำ/สายซ้อน<br>เจ้าของที่อาจเป็นไปได้: <br>${latestOwners.map(k=>`<code>${k}</code>`).join("<br>")}</span>`;
+  }
+
+  logListBody.innerHTML = '';
+  filtered.reverse().forEach((log, idx) => {
+    const tr = document.createElement('tr');
+    if(idx === 0) tr.classList.add('highlight');
+    tr.innerHTML = `
+      <td>${new Date(log.datetime).toLocaleString()}</td>
+      <td>${log.action}</td>
+      <td>${log.detail}</td>
+      <td><code>${log.pubKey}</code></td>
+    `;
+    logListBody.appendChild(tr);
+  });
+}
