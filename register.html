@@ -67,6 +67,14 @@
       border-radius: 5px;
       white-space: pre-wrap;
     }
+    #successMsg {
+      margin-top: 1em;
+      padding: 1em;
+      background-color: #e8f5e9;
+      color: #2e7d32;
+      border-left: 5px solid #66bb6a;
+      border-radius: 5px;
+    }
   </style>
 </head>
 <body>
@@ -94,6 +102,8 @@
     <div class="button-row" style="margin-top: 1em;">
       <button type="submit" id="confirmBtn" disabled>ยืนยันลงทะเบียน</button>
     </div>
+
+    <div id="successMsg" style="display:none;"></div>
   </form>
 
   <script>
@@ -103,6 +113,7 @@
     const pubStatus = document.getElementById('pubStatus');
     const previewBox = document.getElementById('previewBox');
     const confirmBtn = document.getElementById('confirmBtn');
+    const successMsg = document.getElementById('successMsg');
 
     function validateInputs() {
       const hash = hashInput.value.trim();
@@ -135,16 +146,18 @@
       if (!isValid) {
         previewBox.textContent = "⚠ ข้อมูลไม่ถูกต้อง ไม่สามารถแสดงตัวอย่างได้";
         confirmBtn.disabled = true;
+        successMsg.style.display = "none";
         return;
       }
 
       const hash = hashInput.value.trim();
       const pub = pubInput.value.trim();
       previewBox.textContent =
-        `โปรดตรวจสอบข้อมูลก่อนยืนยัน:\n\n` +
-        `hash QR   : ${hash}\n` +
-        `Public Key: ${pub}`;
+        `📋 โปรดตรวจสอบข้อมูลก่อนยืนยัน:\n\n` +
+        `🔐 hash QR   : ${hash}\n` +
+        `📌 Public Key: ${pub}`;
       confirmBtn.disabled = false;
+      successMsg.style.display = "none";
     }
 
     document.getElementById('registerForm').onsubmit = function(e) {
@@ -153,11 +166,18 @@
       const hash = hashInput.value.trim();
       const pub = pubInput.value.trim();
 
-      alert("✅ ลงทะเบียนสำเร็จ\n\nHash QR: " + hash + "\nPublic Key: " + pub);
+      successMsg.style.display = "block";
+      successMsg.innerHTML = `
+        🎉 <strong>ลงทะเบียนสำเร็จแล้ว!</strong><br>
+        ข้อมูลของคุณถูกบันทึกไว้เรียบร้อย.<br><br>
+        🛡️ hash QR: <code>${hash}</code><br>
+        🔑 Public Key: <code>${pub}</code>
+      `;
 
-      // ส่งไป backend หรือบันทึก JSON ในระบบจริง
-      previewBox.textContent = "🎉 ลงทะเบียนเสร็จสมบูรณ์";
+      previewBox.textContent = "";
       confirmBtn.disabled = true;
+
+      // TODO: ส่งข้อมูลไป backend หรือเก็บไว้ในไฟล์ JSON
     };
   </script>
 </body>
