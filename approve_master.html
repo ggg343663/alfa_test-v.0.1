@@ -1,32 +1,114 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Genesis อนุมัติ Master Request</title>
+  <title>Genesis Approve Master</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body { font-family: sans-serif; max-width: 500px; margin: 2em auto; }
-    label, input, button { display: block; margin: 0.7em 0; width: 100%; }
-    pre { background: #f8f8f8; padding: 1em; white-space: pre-wrap; border: 1px solid #ccc; border-radius: 5px; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 480px;
+      margin: 2.2em auto 1.5em;
+      padding: 1.2em;
+      background: #f9fafb;
+      border-radius: 12px;
+      box-shadow: 0 2px 16px #ececec60;
+    }
+    .back-btn {
+      position: fixed;
+      top: 18px;
+      left: 16px;
+      background: #e0e7ef;
+      color: #363f5c;
+      border: 1px solid #cdd2df;
+      border-radius: 7px;
+      font-size: 1em;
+      padding: 0.38em 1.2em;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 8px rgba(99,102,241,0.04);
+      transition: background 0.2s;
+    }
+    .back-btn:hover { background: #c7f7fa; color: #232a3e; }
+    h2 { text-align: center; color: #332c5a; margin-bottom: 1.4em; }
+    label { font-weight: 600; margin-top: 1em; display: block; }
+    input[type="text"], input[type="password"] {
+      width: 100%;
+      padding: 0.52em 0.7em;
+      margin-top: 0.25em;
+      font-size: 1em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+    button:not(.back-btn) {
+      margin-top: 1.4em;
+      padding: 0.65em 0;
+      width: 100%;
+      font-size: 1.09em;
+      background: linear-gradient(90deg, #6366f1, #22d3ee);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 0.01em;
+    }
+    button:not(.back-btn):hover {
+      background: linear-gradient(90deg, #22d3ee, #6366f1);
+    }
+    .preview-box {
+      background: #f5f7fa;
+      margin-top: 1.4em;
+      padding: 1em;
+      border-radius: 7px;
+      font-size: 0.98em;
+      box-shadow: 0 1px 4px #ececec90;
+    }
     .hidden { display: none; }
-    button { cursor: pointer; }
+    .btn-row {
+      margin-top: 0.9em;
+      display: flex;
+      gap: 0.8em;
+      justify-content: center;
+    }
+    @media (max-width: 520px) {
+      body { margin: 1.1em 0.2em; padding: 1.1em 0.3em;}
+      .back-btn { top: 8px; left: 4px; font-size: 0.96em;}
+    }
   </style>
 </head>
 <body>
-  <h2>Genesis อนุมัติ Master</h2>
-  <form id="approveForm">
-    <label>Hash คำขอ Master: <input type="text" id="requestHash" maxlength="64" required /></label>
-    <label>Public Key (Genesis): <input type="text" id="adminPubkey" required /></label>
-    <label>Private Key 1: <input type="password" id="privKey1" required /></label>
-    <label>Private Key 2: <input type="password" id="privKey2" required /></label>
-    <button type="button" onclick="previewApprove()">📋 แสดงข้อมูลก่อนอนุมัติ</button>
+  <button class="back-btn" onclick="history.back()">← Back</button>
+  <h2>Genesis Approve Master</h2>
+  <form id="approveForm" autocomplete="off">
+    <label>
+      Master Request Hash:
+      <input type="text" id="requestHash" maxlength="64" placeholder="Enter master request hash" required />
+    </label>
+    <label>
+      Genesis Public Key:
+      <input type="text" id="adminPubkey" maxlength="40" placeholder="Enter Genesis public key" required />
+    </label>
+    <label>
+      Password (6-12 letters & numbers):
+      <input type="password" id="password" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your password" required />
+    </label>
+    <label>
+      4-digit Sign Code:
+      <input type="password" id="signcode" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off" placeholder="Enter sign code" required />
+    </label>
+    <button type="button" onclick="previewApprove()">Preview Approval</button>
   </form>
 
-  <div id="previewBox" class="hidden">
-    <h4>📋 ข้อมูลที่ใช้เซ็นอนุมัติ:</h4>
+  <div id="previewBox" class="preview-box hidden">
+    <div><b>Approval Payload:</b></div>
     <pre id="previewContent"></pre>
-    <button onclick="confirmApprove()">✅ ยืนยันการอนุมัติ</button>
-    <button onclick="document.getElementById('previewBox').classList.add('hidden')">❌ ยกเลิก</button>
+    <div class="btn-row">
+      <button onclick="confirmApprove()" style="background:#34d399;color:#155f3c;">Confirm & Copy</button>
+      <button onclick="document.getElementById('previewBox').classList.add('hidden')" style="background:#d1d5db;color:#222;">Cancel</button>
+    </div>
   </div>
 
   <pre id="approveResult"></pre>
@@ -37,24 +119,31 @@
     function previewApprove() {
       const hash = document.getElementById('requestHash').value.trim();
       const pubkey = document.getElementById('adminPubkey').value.trim();
-      const priv1 = document.getElementById('privKey1').value.trim();
-      const priv2 = document.getElementById('privKey2').value.trim();
+      const pw = document.getElementById('password').value.trim();
+      const sign = document.getElementById('signcode').value.trim();
 
-      if (!hash || !pubkey || !priv1 || !priv2) {
-        alert("⚠ กรุณากรอกข้อมูลให้ครบทุกช่อง");
+      if (!hash || !pubkey || !pw || !sign) {
+        alert("Please fill in all fields.");
+        return;
+      }
+      if (!(pw.length >= 6 && pw.length <= 12 && /[A-Za-z]/.test(pw) && /\d/.test(pw))) {
+        alert("Password must be 6-12 characters with both letters and numbers.");
+        return;
+      }
+      if (!/^\d{4}$/.test(sign)) {
+        alert("Sign code must be 4 digits.");
         return;
       }
 
       const timestamp = new Date().toISOString();
-      const sig1 = sha256(priv1 + hash);
-      const sig2 = sha256(priv2 + sig1);
+      // Sign: hash = sha256(password + signcode + requestHash)
+      const sig = sha256(pw + sign + hash);
 
       finalLog = {
         type: "master_approve",
         request_hash: hash,
         approved_by: pubkey,
-        sig1: sig1,
-        sig2: sig2,
+        sig: sig,
         timestamp: timestamp,
         status: "approved"
       };
@@ -65,10 +154,9 @@
 
     function confirmApprove() {
       if (!finalLog) return;
-
+      navigator.clipboard.writeText(JSON.stringify(finalLog, null, 2));
       document.getElementById('approveResult').innerText =
-        `📌 คัดลอกข้อมูลนี้ไปใส่ logs.json\n\n${JSON.stringify(finalLog, null, 2)}`;
-
+        `Copied payload to clipboard:\n\n${JSON.stringify(finalLog, null, 2)}`;
       document.getElementById('previewBox').classList.add('hidden');
     }
   </script>
