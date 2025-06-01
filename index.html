@@ -5,64 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DTC: Magic Chain System</title>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 640px; margin: 2em auto; padding: 1em; background: #f5f7fa; color: #333;}
-    h1, h2 { text-align: center; color: #2c3e50;}
-    .subtitle { text-align: center; color: #789; font-size: 1.04em; margin-top: 0.1em; margin-bottom: 2em; }
-    ul { list-style: none; padding: 0; margin: 2em 0;}
-    ul li { margin: 0.7em 0;}
-    /* USER */
-    .user-section li a {
-      background-color: #246bfd;
-      color: #fff;
-      font-weight: bold;
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 2em auto;
+      padding: 1em;
+      background: #f5f7fa;
+      color: #333;
     }
-    .user-section li a:hover, .user-section li a:focus {
-      background-color: #1747a1;
-    }
-    /* MASTER (YELLOW) */
-    .master-section li a {
-      background-color: #facc15;
-      color: #222;
-      font-weight: bold;
-    }
-    .master-section li a:hover, .master-section li a:focus {
-      background-color: #eab308;
-      color: #111;
-    }
-    /* GENESIS */
-    .genesis-section li a {
-      background-color: #a78bfa;
-      color: #fff;
-      font-weight: bold;
-    }
-    .genesis-section li a:hover, .genesis-section li a:focus {
-      background-color: #7c3aed;
-    }
-    .section { margin: 2em 0;}
-    /* GENERAL */
-    .general-section {
+    h1 {
       text-align: center;
-      margin-bottom: 2.2em;
-      margin-top: 1.6em;
+      color: #2c3e50;
+      margin-bottom: 1.3em;
+      letter-spacing: 0.02em;
     }
-    .general-section h2 {
+    .section {
+      border-radius: 18px;
+      box-shadow: 0 2px 12px rgba(30, 80, 170, 0.06);
+      padding: 1.3em 1em 1.4em 1em;
+      margin: 2em 0;
+    }
+    /* General Section */
+    .general-section {
+      background: #eafaf0;
+      border-left: 7px solid #219150;
+    }
+    .general-title {
+      color: #26733e;
       display: flex;
       align-items: center;
-      gap: 0.6em;
-      justify-content: center;
-      color: #26733e;
-      margin-bottom: 0.3em;
-      font-size: 1.35em;
+      gap: 0.55em;
+      font-size: 1.33em;
+      margin-bottom: 0.5em;
     }
-    .general-section .general-list {
+    .general-list {
       display: flex;
       flex-direction: column;
-      gap: 1.05em;
-      align-items: center;
-      margin: 0 auto;
-      max-width: 340px;
+      gap: 1em;
+      margin: 1.1em 0 0 0;
     }
-    .general-section .general-list a {
+    .general-list a {
       display: block;
       width: 100%;
       padding: 1em 0.5em;
@@ -72,28 +54,141 @@
       border-radius: 8px;
       font-size: 1.12em;
       text-decoration: none;
-      box-shadow: 0 2px 8px rgba(39,174,96,0.08);
-      transition: background 0.18s;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(39,174,96,0.07);
+      transition: background 0.15s;
     }
-    .general-section .general-list a:hover {
+    .general-list a:hover {
       background: #176d38;
     }
-    p.small { display: block; text-align: center; margin-top: 2.5em; color: #999;}
-    @media (max-width: 480px) {
-      body { margin: 1em; padding: 0.5em;}
-      ul li a { padding: 0.6em 0.8em; font-size: 1em;}
-      .general-section .general-list a { font-size: 1em; padding: 0.8em 0.3em;}
+    /* User Section */
+    .user-section {
+      background: #eaf2fd;
+      border-left: 7px solid #246bfd;
+    }
+    .user-title {
+      color: #2450ad;
+      display: flex;
+      align-items: center;
+      gap: 0.55em;
+      font-size: 1.25em;
+      margin-bottom: 0.45em;
+    }
+    .user-list a {
+      display: block;
+      width: 100%;
+      padding: 1em 0.5em;
+      background: #246bfd;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 7px;
+      font-size: 1.11em;
+      text-align: center;
+      text-decoration: none;
+      margin-bottom: 0.5em;
+      transition: background 0.14s;
+    }
+    .user-list a:hover {
+      background: #1747a1;
+    }
+    .user-desc {
+      color: #457;
+      margin-bottom: 0.7em;
+      font-size: 1.01em;
+      text-align: center;
+    }
+    /* Master Section */
+    .master-section {
+      background: #fffbe8;
+      border-left: 7px solid #eab308;
+    }
+    .master-title {
+      color: #b58900;
+      display: flex;
+      align-items: center;
+      gap: 0.55em;
+      font-size: 1.25em;
+      margin-bottom: 0.45em;
+    }
+    .master-list a {
+      display: block;
+      width: 100%;
+      padding: 1em 0.5em;
+      background: #facc15;
+      color: #222;
+      font-weight: bold;
+      border-radius: 7px;
+      font-size: 1.11em;
+      text-align: center;
+      text-decoration: none;
+      margin-bottom: 0.5em;
+      transition: background 0.13s;
+    }
+    .master-list a:hover {
+      background: #eab308;
+      color: #111;
+    }
+    .master-desc {
+      color: #875e00;
+      margin-bottom: 0.7em;
+      font-size: 1.01em;
+      text-align: center;
+    }
+    /* Genesis Section */
+    .genesis-section {
+      background: #f7f4fe;
+      border-left: 7px solid #a78bfa;
+    }
+    .genesis-title {
+      color: #7c3aed;
+      display: flex;
+      align-items: center;
+      gap: 0.55em;
+      font-size: 1.25em;
+      margin-bottom: 0.45em;
+    }
+    .genesis-list a {
+      display: block;
+      width: 100%;
+      padding: 1em 0.5em;
+      background: #a78bfa;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 7px;
+      font-size: 1.11em;
+      text-align: center;
+      text-decoration: none;
+      margin-bottom: 0.5em;
+      transition: background 0.13s;
+    }
+    .genesis-list a:hover {
+      background: #7c3aed;
+    }
+    .genesis-desc {
+      color: #714ab6;
+      margin-bottom: 0.7em;
+      font-size: 1.01em;
+      text-align: center;
+    }
+    /* Footer */
+    .footer-note {
+      display: block;
+      text-align: center;
+      margin-top: 2.5em;
+      color: #aaa;
+      font-size: 0.97em;
+    }
+    @media (max-width: 600px) {
+      body { margin: 0.5em; padding: 0.1em;}
+      .section { padding: 1em 0.5em 1em 0.8em; }
     }
   </style>
 </head>
 <body>
-  <h1>ระบบ DTC: สายโซ่กายสิทธิ์</h1>
-  <div class="subtitle">The Decentralized Tokenized Chain for verified QR rights management.<br>เครือข่ายสายโซ่กายสิทธิ์เพื่อการจัดการกรรมสิทธิ์ QR อย่างมั่นคง</div>
+  <h1>DTC: Magic Chain System</h1>
 
-  <!-- General Section -->
-  <div class="general-section">
-    <h2>🟩 General</h2>
-    <div class="subtitle">ฟังก์ชันทั่วไปที่ทุกคนเข้าถึงได้</div>
+  <div class="section general-section">
+    <div class="general-title">🟩 General</div>
     <div class="general-list">
       <a href="key_pair.html">Generate public key</a>
       <a href="transfer.html">Transfer QR code</a>
@@ -102,31 +197,31 @@
   </div>
 
   <div class="section user-section">
-    <h2>🟦 user</h2>
-    <div class="subtitle">สำหรับผู้ใช้งาน ลงทะเบียนสิทธิ์ QR ของคุณ<br>User role: Register your QR ownership easily.</div>
-    <ul>
-      <li><a href="register.html">Register QR</a></li>
-    </ul>
+    <div class="user-title">🟦 User</div>
+    <div class="user-desc">Register your QR ownership easily.</div>
+    <div class="user-list">
+      <a href="register.html">Register QR</a>
+    </div>
   </div>
 
   <div class="section master-section">
-    <h2>🟨 master</h2>
-    <div class="subtitle">สำหรับ Master ผู้ดูแลสิทธิ์/การปลดล็อก QR<br>Master role: Unlock advanced QR and manage rights.</div>
-    <ul>
-      <li><a href="request_master.html">Request Master (Commit-Hash)</a></li>
-      <li><a href="master_unlock.html">Unlock Master</a></li>
-    </ul>
+    <div class="master-title">🟨 Master</div>
+    <div class="master-desc">Unlock advanced QR and manage rights.</div>
+    <div class="master-list">
+      <a href="request_master.html">Request Master (Commit-Hash)</a>
+      <a href="master_unlock.html">Unlock Master</a>
+    </div>
   </div>
 
   <div class="section genesis-section">
-    <h2>🟪 genesis</h2>
-    <div class="subtitle">สำหรับ Genesis ผู้เริ่มต้นและอนุมัติ Master<br>Genesis role: Register and approve Master, root authority.</div>
-    <ul>
-      <li><a href="genesis_register.html">Register Genesis</a></li>
-      <li><a href="approve_master.html">Genesis/Admin Approve Master</a></li>
-    </ul>
+    <div class="genesis-title">🟪 Genesis</div>
+    <div class="genesis-desc">Register and approve Master, root authority.</div>
+    <div class="genesis-list">
+      <a href="genesis_register.html">Register Genesis</a>
+      <a href="approve_master.html">Genesis/Admin Approve Master</a>
+    </div>
   </div>
 
-  <p class="small">Develop &amp; Deploy on GitHub Pages • 100% Mobile-Friendly System</p>
+  <p class="footer-note">Develop &amp; Deploy on GitHub Pages • 100% Mobile-Friendly System</p>
 </body>
 </html>
