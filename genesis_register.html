@@ -84,6 +84,27 @@
       box-shadow: 0 2px 6px #e8daff19;
     }
     button.gen-btn:hover { background: linear-gradient(90deg, #facc15 40%, #a78bfa 90%);}
+    .hash-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      margin-top: 1.1em;
+      margin-bottom: 0.5em;
+    }
+    .hash-status.ready {
+      color: #13a137;
+      font-weight: bold;
+      font-size: 1em;
+      margin-left: 6px;
+    }
+    .copy-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0 0.2em;
+      margin-left: 0.2em;
+    }
+    .copy-btn:active svg { opacity: 0.65; }
     #previewBox {
       margin-top: 1.3em;
       background: #f7f4fe;
@@ -155,6 +176,9 @@
       }
     });
 
+    // Save hash for copy
+    let latestHash = "";
+
     async function generateHash() {
       const pubkey = pubkeyEl.value.trim();
       if (!validatePubkey(pubkey)) {
@@ -165,20 +189,40 @@
       const n = nonceEl.value;
       const raw = `${pubkey}|${t}|${n}`;
       const hash = sha256(raw);
+      latestHash = hash;
 
-      previewBox.innerText =
-`📦 ข้อมูลที่ใช้สร้าง Hash
+      previewBox.innerHTML = `
+<div class="hash-row">
+  <input type="text" id="qrHashInput" value="${hash}" readonly style="width:72%;">
+  <span class="hash-status ready">QR hash ready</span>
+  <button class="copy-btn" onclick="copyHash()" title="Copy to clipboard">
+    <svg width="22" height="22" viewBox="0 0 24 24">
+      <path fill="#24c48b" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19" />
+      <path fill="#24c48b" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z" />
+    </svg>
+  </button>
+</div>
+<pre>
+📦 ข้อมูลที่ใช้สร้าง Hash
 
 🔑 Public Key: ${pubkey}
 ⏰ Timestamp : ${t}
 🔢 Nonce     : ${n}
-📌 Hash QR   : ${hash}`;
-
+📌 Hash QR   : ${hash}
+</pre>`;
       successMsg.innerHTML = `
         🎉 <strong>สร้าง Hash สำเร็จ!</strong><br>
         กรุณาคัดลอก Hash นี้ไปใช้ในขั้นตอนถัดไป เช่น การสร้าง QR หรือการลงทะเบียน
       `;
       successMsg.style.display = 'block';
+    }
+
+    function copyHash() {
+      const input = document.getElementById('qrHashInput');
+      input.select();
+      input.setSelectionRange(0, 99999); // mobile
+      navigator.clipboard.writeText(input.value);
+      alert('Copied!');
     }
 
     updateTimestampNonce();
