@@ -3,75 +3,105 @@
 <head>
   <meta charset="UTF-8" />
   <title>Register QR</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body {
-      font-family: Arial, sans-serif;
-      max-width: 500px;
-      margin: 2em auto;
+      font-family: 'Inter', Arial, sans-serif;
+      background: #f5f7fa;
+      max-width: 440px;
+      margin: 2.5em auto 0 auto;
+      padding: 2.5em 0.7em 1em;
+      border-radius: 22px;
+      color: #223;
+      box-shadow: 0 4px 36px #6398f011;
+      position: relative;
+      min-height: 100vh;
+    }
+    .back-btn {
+      position: fixed;
+      top: 18px;
+      left: 16px;
+      background: #eee;
+      color: #222;
+      border: 1px solid #ccc;
+      border-radius: 7px;
+      font-size: 1em;
+      padding: 0.38em 1.25em;
+      cursor: pointer;
+      z-index: 1000;
+      box-shadow: 0 2px 8px #246bfd08;
+      transition: background 0.18s;
+    }
+    .back-btn:hover { background: #dbf6fd; color: #1747a1; }
+    h2 {
+      text-align: center;
+      font-size: 1.45em;
+      margin-bottom: 1.2em;
+      letter-spacing: 0.02em;
+    }
+    .main-form {
+      background: #fff;
+      border-radius: 18px;
+      padding: 2.1em 1.3em 1.4em 1.3em;
+      box-shadow: 0 2px 14px #246bfd08;
     }
     label {
-      display: flex;
-      flex-direction: column;
-      margin-top: 1em;
+      font-weight: 600;
+      margin-bottom: 0.42em;
+      font-size: 1.05em;
+      letter-spacing: 0.01em;
     }
     input[type="text"] {
-      padding: 0.5em;
-      font-size: 1em;
-      border-radius: 4px;
-      border: 1px solid #ccc;
+      padding: 0.73em 0.9em;
+      font-size: 1.1em;
+      border-radius: 8px;
+      border: 1.5px solid #cbd5e1;
+      background: #f6fbff;
+      margin-bottom: 0.5em;
+      transition: border-color 0.2s;
     }
+    input:focus { border-color: #246bfd; outline: none; }
     .input-status {
-      font-size: 0.9em;
-      margin-top: 0.2em;
+      font-size: 0.97em;
+      margin-bottom: 0.8em;
     }
-    .valid { color: green; }
-    .invalid { color: red; }
-    .button-row {
+    .valid { color: #22b573; }
+    .invalid { color: #e53935; }
+    .btn-row {
+      margin-top: 1.6em;
       display: flex;
       justify-content: space-between;
-      margin-top: 1.5em;
+      gap: 0.9em;
     }
-    button {
-      padding: 0.6em 1.5em;
-      font-size: 1em;
-      border: none;
-      border-radius: 5px;
+    button[type="button"], button[type="submit"] {
+      font-family: inherit;
+      font-size: 1.08em;
+      font-weight: 600;
+      border-radius: 8px;
+      padding: 0.65em 1.4em;
       cursor: pointer;
+      border: none;
+      background: linear-gradient(90deg,#246bfd 40%,#22d3ee 100%);
+      color: #fff;
+      box-shadow: 0 1px 8px #246bfd08;
+      transition: background 0.15s;
     }
-    #previewBtn {
-      background: #2196F3;
-      color: white;
-    }
-    #previewBtn:hover {
-      background: #0b7dda;
-    }
-    #confirmBtn {
-      background: #4CAF50;
-      color: white;
-    }
-    #confirmBtn:disabled {
+    button[type="button"]:disabled, button[type="submit"]:disabled {
       background: #a5d6a7;
+      color: #fff;
       cursor: not-allowed;
-    }
-    #backBtn {
-      background: #ddd;
-      color: #333;
-      position: absolute;
-      top: 18px;
-      left: 18px;
-      padding: 0.5em 1.4em;
-      font-size: 1em;
-      border-radius: 6px;
-    }
-    #backBtn:hover {
-      background: #bbb;
+      opacity: 0.67;
     }
     #previewBox {
-      margin-top: 1em;
+      margin-top: 1.5em;
       padding: 1em;
       background: #f8f8f8;
-      border-radius: 5px;
+      border-radius: 8px;
+      font-size: 1.06em;
       white-space: pre-wrap;
+      color: #234;
+      box-shadow: 0 1px 4px #246bfd0a;
+      text-align: left;
     }
     #successMsg {
       margin-top: 1em;
@@ -81,15 +111,103 @@
       border-left: 5px solid #66bb6a;
       border-radius: 5px;
     }
-    .hide {
-      display: none;
+    @media (max-width: 520px) {
+      .main-form { padding: 1.2em 0.4em 1.2em 0.4em; }
+      body { margin: 0.4em; padding-top: 2.9em; }
     }
   </style>
 </head>
 <body>
-  <button type="button" id="backBtn" onclick="window.history.back()">← Back</button>
+  <button class="back-btn" onclick="window.history.back()">← Back</button>
   <h2>Register QR</h2>
-  <form id="registerForm" autocomplete="off">
-    <label>
-      hash QR:
-      <input type="text" id="
+  <form class="main-form" id="registerForm" autocomplete="off">
+    <label for="hashQr">QR Hash (64 chars):</label>
+    <input type="text" id="hashQr" maxlength="64" placeholder="Enter QR Hash" />
+    <span id="hashStatus" class="input-status"></span>
+
+    <label for="publicKey">Your Public Key (40 chars):</label>
+    <input type="text" id="publicKey" maxlength="40" placeholder="Enter your public key" />
+    <span id="pubStatus" class="input-status"></span>
+
+    <div class="btn-row">
+      <button type="button" id="previewBtn" onclick="preview()">Preview</button>
+      <button type="submit" id="confirmBtn" disabled>Confirm Register</button>
+    </div>
+
+    <div id="previewBox"></div>
+    <div id="successMsg" style="display:none;"></div>
+  </form>
+  <script>
+    const hashInput = document.getElementById('hashQr');
+    const pubInput = document.getElementById('publicKey');
+    const hashStatus = document.getElementById('hashStatus');
+    const pubStatus = document.getElementById('pubStatus');
+    const previewBox = document.getElementById('previewBox');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const successMsg = document.getElementById('successMsg');
+
+    function validateInputs() {
+      const hash = hashInput.value.trim();
+      const pub = pubInput.value.trim();
+      let valid = true;
+
+      if (hash.length === 64) {
+        hashStatus.textContent = "✓ 64 characters";
+        hashStatus.className = "input-status valid";
+      } else {
+        hashStatus.textContent = "⚠ Must be 64 characters";
+        hashStatus.className = "input-status invalid";
+        valid = false;
+      }
+
+      if (pub.length === 40) {
+        pubStatus.textContent = "✓ 40 characters";
+        pubStatus.className = "input-status valid";
+      } else {
+        pubStatus.textContent = "⚠ Must be 40 characters";
+        pubStatus.className = "input-status invalid";
+        valid = false;
+      }
+
+      return valid;
+    }
+
+    function preview() {
+      const isValid = validateInputs();
+      if (!isValid) {
+        previewBox.textContent = "⚠ Please complete the information correctly.";
+        confirmBtn.disabled = true;
+        successMsg.style.display = "none";
+        return;
+      }
+
+      const hash = hashInput.value.trim();
+      const pub = pubInput.value.trim();
+      previewBox.innerHTML =
+        `<b>Preview registration:</b>\n\n` +
+        `<b>QR Hash:</b> <code>${hash}</code>\n` +
+        `<b>Public Key:</b> <code>${pub}</code>`;
+      confirmBtn.disabled = false;
+      successMsg.style.display = "none";
+    }
+
+    document.getElementById('registerForm').onsubmit = function(e) {
+      e.preventDefault();
+
+      const hash = hashInput.value.trim();
+      const pub = pubInput.value.trim();
+
+      successMsg.style.display = "block";
+      successMsg.innerHTML = `
+        ✅ <strong>Registration successful!</strong><br>
+        Your data is saved.<br><br>
+        <b>QR Hash:</b> <code>${hash}</code><br>
+        <b>Public Key:</b> <code>${pub}</code>
+      `;
+
+      previewBox.textContent = "";
+      confirmBtn.disabled = true;
+    };
+  </script>
+</body>
+</html>
