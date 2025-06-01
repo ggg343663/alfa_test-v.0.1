@@ -20,14 +20,9 @@
       box-sizing: border-box;
       border: 1px solid #ccc;
       border-radius: 4px;
-      transition: border-color 0.3s ease;
     }
-    input.invalid {
-      border-color: red;
-    }
-    input.valid {
-      border-color: green;
-    }
+    input.invalid { border-color: red; }
+    input.valid { border-color: green; }
     button {
       margin-top: 1em;
       padding: 0.7em 1.2em;
@@ -37,16 +32,15 @@
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s ease;
     }
-    button:hover {
-      background-color: #45a049;
-    }
-    #copyStatus {
-      margin-top: 0.5em;
-      color: green;
-      font-weight: bold;
-      display: none;
+    button:hover { background-color: #45a049; }
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      top: 36px;
+      cursor: pointer;
+      font-size: 0.9em;
+      color: #555;
     }
     label {
       font-weight: bold;
@@ -54,48 +48,47 @@
       margin-top: 1em;
       position: relative;
     }
-    .toggle-password {
-      position: absolute;
-      right: 10px;
-      top: 35px;
-      cursor: pointer;
-      user-select: none;
+    .status {
       font-size: 0.9em;
-      color: #555;
+      margin-top: 0.3em;
+      color: green;
+      display: none;
     }
   </style>
 </head>
 <body>
-  <h1>สร้าง Address (Web3-style) จากรหัสผ่าน</h1>
+  <h2>🔐 สร้าง Address (Web3-style) จากรหัสผ่าน</h2>
 
-  <label for="privateKey1">รหัสผ่าน (6-12 ตัวอักษร):
-    <input type="password" id="privateKey1" maxlength="12" minlength="6" autocomplete="off" />
+  <label>รหัสผ่าน (6-12 ตัวอักษร):
+    <input type="password" id="privateKey1" maxlength="12" minlength="6" />
     <span class="toggle-password" data-target="privateKey1">แสดง</span>
   </label>
 
-  <label for="privateKey2">ยืนยันรหัสผ่าน:
-    <input type="password" id="privateKey2" maxlength="12" minlength="6" autocomplete="off" />
+  <label>ยืนยันรหัสผ่าน:
+    <input type="password" id="privateKey2" maxlength="12" minlength="6" />
     <span class="toggle-password" data-target="privateKey2">แสดง</span>
   </label>
 
-  <button onclick="generateAddress()">สร้าง Address</button>
+  <button onclick="generateAddress()">🚀 สร้าง Address</button>
 
-  <h3>Address:</h3>
+  <h3>🔑 Private Key (SHA-256):</h3>
+  <textarea id="fullHash" rows="2" readonly></textarea>
+
+  <h3>📮 Address (ใช้ 40 หลักท้าย):</h3>
   <textarea id="addressOutput" rows="2" readonly></textarea>
-  <button onclick="copyAddress()">คัดลอก Address</button>
-  <div id="copyStatus">คัดลอกสำเร็จ!</div>
 
-  <p><a href="index.html">กลับสู่หน้าหลัก</a></p>
+  <button onclick="copyAddress()">📋 คัดลอก Address</button>
+  <div id="copyStatus" class="status">✅ คัดลอกสำเร็จ!</div>
+
+  <p><a href="index.html">← กลับหน้าหลัก</a></p>
 
   <script>
-    const privateKey1Input = document.getElementById("privateKey1");
-    const privateKey2Input = document.getElementById("privateKey2");
+    const toggleSpans = document.querySelectorAll(".toggle-password");
 
-    // Toggle password visibility
-    document.querySelectorAll('.toggle-password').forEach(span => {
-      span.addEventListener('click', () => {
-        const targetId = span.getAttribute('data-target');
-        const input = document.getElementById(targetId);
+    toggleSpans.forEach(span => {
+      span.addEventListener("click", () => {
+        const id = span.getAttribute("data-target");
+        const input = document.getElementById(id);
         if (input.type === "password") {
           input.type = "text";
           span.textContent = "ซ่อน";
@@ -106,61 +99,49 @@
       });
     });
 
-    function validatePrivateKeyInput(input) {
-      if (input.value.trim().length >= 6) {
-        input.classList.remove("invalid");
-        input.classList.add("valid");
-      } else {
-        input.classList.remove("valid");
-        input.classList.add("invalid");
-      }
-    }
-
-    privateKey1Input.addEventListener("input", () => validatePrivateKeyInput(privateKey1Input));
-    privateKey2Input.addEventListener("input", () => validatePrivateKeyInput(privateKey2Input));
-
     async function sha256Hex(str) {
       const buffer = new TextEncoder().encode(str);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-      return Array.from(new Uint8Array(hashBuffer))
-        .map((b) => b.toString(16).padStart(2, "0"))
-        .join("");
+      const hash = await crypto.subtle.digest("SHA-256", buffer);
+      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
     async function generateAddress() {
-      const pw1 = privateKey1Input.value.trim();
-      const pw2 = privateKey2Input.value.trim();
+      const pw1 = document.getElementById("privateKey1").value.trim();
+      const pw2 = document.getElementById("privateKey2").value.trim();
+      const fullHashEl = document.getElementById("fullHash");
+      const addressEl = document.getElementById("addressOutput");
+      const status = document.getElementById("copyStatus");
 
       if (pw1.length < 6 || pw1.length > 12) {
-        alert("กรุณากรอกรหัสผ่าน 6-12 ตัวอักษร");
+        alert("⚠ กรุณากรอกรหัสผ่าน 6-12 ตัวอักษร");
         return;
       }
       if (pw1 !== pw2) {
-        alert("รหัสผ่านไม่ตรงกัน กรุณากรอกใหม่");
+        alert("⚠ รหัสผ่านไม่ตรงกัน");
         return;
       }
 
-      const fullHash = await sha256Hex(pw1);
-      const address = "0x" + fullHash.slice(-40);
-      document.getElementById("addressOutput").value = address;
-      document.getElementById("copyStatus").style.display = "none";
+      const hash = await sha256Hex(pw1);
+      const address = "0x" + hash.slice(-40);
+
+      fullHashEl.value = hash;
+      addressEl.value = address;
+      status.style.display = "none";
+      alert("✅ Address สร้างเรียบร้อย กรุณาสำรองข้อมูลไว้ให้ปลอดภัย");
     }
 
     function copyAddress() {
-      const addressField = document.getElementById("addressOutput");
-      if (!addressField.value) {
-        alert("กรุณาสร้าง Address ก่อนคัดลอก");
+      const addressEl = document.getElementById("addressOutput");
+      if (!addressEl.value) {
+        alert("⚠ กรุณาสร้าง Address ก่อน");
         return;
       }
-      addressField.select();
-      addressField.setSelectionRange(0, 99999); // สำหรับมือถือ
-
-      navigator.clipboard.writeText(addressField.value).then(() => {
+      addressEl.select();
+      addressEl.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(addressEl.value).then(() => {
         const status = document.getElementById("copyStatus");
         status.style.display = "block";
-        setTimeout(() => { status.style.display = "none"; }, 2000);
-      }).catch(() => {
-        alert("ไม่สามารถคัดลอกได้ กรุณาคัดลอกด้วยตนเอง");
+        setTimeout(() => status.style.display = "none", 2000);
       });
     }
   </script>
