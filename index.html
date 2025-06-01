@@ -22,7 +22,7 @@
     .section {
       border-radius: 18px;
       box-shadow: 0 2px 12px rgba(30, 80, 170, 0.06);
-      padding: 1.3em 1em 1.4em 1em;
+      padding: 0.7em 0.7em 1em 0.7em; /* padding แคบลง */
       margin: 2em 0;
     }
     /* General Section */
@@ -41,13 +41,13 @@
     .general-list {
       display: flex;
       flex-direction: column;
-      gap: 1em;
-      margin: 1.1em 0 0 0;
+      gap: 0.5em;  /* ลดช่องว่างปุ่ม */
+      margin: 1em 0 0 0;
     }
     .general-list a {
       display: block;
       width: 100%;
-      padding: 1em 0.5em;
+      padding: 0.7em 0.5em; /* ปรับความสูงปุ่ม */
       background: #219150;
       color: #fff;
       font-weight: bold;
@@ -57,6 +57,9 @@
       text-align: center;
       box-shadow: 0 2px 8px rgba(39,174,96,0.07);
       transition: background 0.15s;
+    }
+    .general-list a:first-child {
+      background: #13a137;
     }
     .general-list a:hover {
       background: #176d38;
@@ -77,7 +80,7 @@
     .user-list a {
       display: block;
       width: 100%;
-      padding: 1em 0.5em;
+      padding: 0.7em 0.5em;
       background: #246bfd;
       color: #fff;
       font-weight: bold;
@@ -85,7 +88,7 @@
       font-size: 1.11em;
       text-align: center;
       text-decoration: none;
-      margin-bottom: 0.5em;
+      margin-bottom: 0.4em;
       transition: background 0.14s;
     }
     .user-list a:hover {
@@ -113,7 +116,7 @@
     .master-list a {
       display: block;
       width: 100%;
-      padding: 1em 0.5em;
+      padding: 0.7em 0.5em;
       background: #facc15;
       color: #222;
       font-weight: bold;
@@ -121,7 +124,7 @@
       font-size: 1.11em;
       text-align: center;
       text-decoration: none;
-      margin-bottom: 0.5em;
+      margin-bottom: 0.4em;
       transition: background 0.13s;
     }
     .master-list a:hover {
@@ -150,7 +153,7 @@
     .genesis-list a {
       display: block;
       width: 100%;
-      padding: 1em 0.5em;
+      padding: 0.7em 0.5em;
       background: #a78bfa;
       color: #fff;
       font-weight: bold;
@@ -158,7 +161,7 @@
       font-size: 1.11em;
       text-align: center;
       text-decoration: none;
-      margin-bottom: 0.5em;
+      margin-bottom: 0.4em;
       transition: background 0.13s;
     }
     .genesis-list a:hover {
@@ -180,7 +183,7 @@
     }
     @media (max-width: 600px) {
       body { margin: 0.5em; padding: 0.1em;}
-      .section { padding: 1em 0.5em 1em 0.8em; }
+      .section { padding: 0.5em 0.3em 0.7em 0.3em; }
     }
   </style>
 </head>
@@ -190,6 +193,7 @@
   <div class="section general-section">
     <div class="general-title">🟩 General</div>
     <div class="general-list">
+      <a href="generate_qr.html">Generate QR</a>
       <a href="key_pair.html">Generate public key</a>
       <a href="transfer.html">Transfer QR code</a>
       <a href="verify_log.html">Check QR</a>
