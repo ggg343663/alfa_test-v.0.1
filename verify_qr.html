@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Check QR - DTC System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -29,6 +30,16 @@
       border: 1.3px solid #cde4dc;
       font-size: 1em;
       margin-bottom: 0.6em;
+    }
+    #imgInput {
+      width: 100%;
+      margin-top: 0.7em;
+      margin-bottom: 0.8em;
+      padding: 0.45em 0.5em;
+      border-radius: 7px;
+      border: 1.3px solid #b1bac7;
+      background: #f5f7fa;
+      font-size: 0.99em;
     }
     button {
       width: 100%; margin-top: 1em; padding: 0.7em 0; font-size: 1.03em;
@@ -58,6 +69,12 @@
       word-break: break-word;
       min-height: 2em;
     }
+    .scan-box {
+      color: #15803d;
+      margin-bottom: 0.5em;
+      font-size: 0.98em;
+      text-align: center;
+    }
     .btn-back { background: #dbeafe; color: #324275; margin-top: 1.2em;}
     .btn-back:hover { background: #bae6fd;}
   </style>
@@ -66,7 +83,10 @@
   <div class="container">
     <h2>Check QR Code</h2>
     <label for="qrhash">QR Hash (64 chars):</label>
-    <input type="text" id="qrhash" maxlength="64" placeholder="Enter QR hash" />
+    <input type="text" id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" />
+
+    <input type="file" id="imgInput" accept="image/*" />
+    <div id="scanMsg" class="scan-box"></div>
 
     <button onclick="checkQR()">Check</button>
     <div id="resultArea"></div>
@@ -87,6 +107,23 @@
     { hash: "C4EE...1AF0", owner: "0xB4A...999", timestamp: "2024-06-01T13:22:00Z" }
   ];
 
+  // Scan QR from file
+  document.getElementById('imgInput').addEventListener('change', function(evt){
+    const file = evt.target.files[0];
+    const scanMsg = document.getElementById('scanMsg');
+    scanMsg.textContent = "";
+    if (!file) return;
+    Html5Qrcode.getCameras(); // preload library
+    Html5Qrcode.scanFile(file, true)
+      .then(decodedText => {
+        document.getElementById('qrhash').value = decodedText;
+        scanMsg.innerHTML = "✔️ QR hash scanned from image!";
+      })
+      .catch(err => {
+        scanMsg.innerHTML = "<span style='color:#b80000'>❌ ไม่พบ QR ในภาพนี้</span>";
+      });
+  });
+
   function checkQR() {
     const hash = document.getElementById('qrhash').value.trim();
     const result = document.getElementById('resultArea');
@@ -101,7 +138,7 @@
     }
     const reg = registered.find(q => q.hash === hash);
     if (reg) {
-      result.innerHTML = `<div class="result-box">✅ Registered!<br>Owner: <b>${reg.owner}</b><br>Timestamp: ${reg.timestamp}</div>`;
+      result.innerHTML = `<div class="result-box" style="color:#0ea5e9;">✅ Registered!<br>Owner: <b>${reg.owner}</b><br>Timestamp: ${reg.timestamp}</div>`;
     } else {
       result.innerHTML = `<div class="result-box" style="color:#188b16;">🟩 Not registered yet.<br>This QR can be registered.</div>`;
     }
