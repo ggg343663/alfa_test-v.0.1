@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>ระบบ DTC: สายโซ่กายสิทธิ์</title>
+  <title>DTC: Magic Chain System</title>
   <style>
     body { font-family: Arial, sans-serif; max-width: 640px; margin: 2em auto; padding: 1em; background: #f5f7fa; color: #333;}
     h1, h2 { text-align: center; color: #2c3e50;}
+    .subtitle { text-align: center; color: #789; font-size: 1.04em; margin-top: 0.1em; margin-bottom: 2em; }
     ul { list-style: none; padding: 0; margin: 2em 0;}
     ul li { margin: 0.7em 0;}
     /* USER */
@@ -50,7 +51,7 @@
       gap: 0.6em;
       justify-content: center;
       color: #26733e;
-      margin-bottom: 1em;
+      margin-bottom: 0.3em;
       font-size: 1.35em;
     }
     .general-section .general-list {
@@ -77,7 +78,7 @@
     .general-section .general-list a:hover {
       background: #176d38;
     }
-    p small { display: block; text-align: center; margin-top: 2.5em; color: #999;}
+    p.small { display: block; text-align: center; margin-top: 2.5em; color: #999;}
     @media (max-width: 480px) {
       body { margin: 1em; padding: 0.5em;}
       ul li a { padding: 0.6em 0.8em; font-size: 1em;}
@@ -87,10 +88,12 @@
 </head>
 <body>
   <h1>ระบบ DTC: สายโซ่กายสิทธิ์</h1>
+  <div class="subtitle">The Decentralized Tokenized Chain for verified QR rights management.<br>เครือข่ายสายโซ่กายสิทธิ์เพื่อการจัดการกรรมสิทธิ์ QR อย่างมั่นคง</div>
 
   <!-- General Section -->
   <div class="general-section">
     <h2>🟩 General</h2>
+    <div class="subtitle">ฟังก์ชันทั่วไปที่ทุกคนเข้าถึงได้</div>
     <div class="general-list">
       <a href="key_pair.html">Generate public key</a>
       <a href="transfer.html">Transfer QR code</a>
@@ -100,27 +103,30 @@
 
   <div class="section user-section">
     <h2>🟦 user</h2>
+    <div class="subtitle">สำหรับผู้ใช้งาน ลงทะเบียนสิทธิ์ QR ของคุณ<br>User role: Register your QR ownership easily.</div>
     <ul>
-      <li><a href="register.html">ลงทะเบียน QR</a></li>
+      <li><a href="register.html">Register QR</a></li>
     </ul>
   </div>
 
   <div class="section master-section">
     <h2>🟨 master</h2>
+    <div class="subtitle">สำหรับ Master ผู้ดูแลสิทธิ์/การปลดล็อก QR<br>Master role: Unlock advanced QR and manage rights.</div>
     <ul>
-      <li><a href="request_master.html">ขอ Request Master (Commit-Hash)</a></li>
-      <li><a href="master_unlock.html">ปลดล็อก Master</a></li>
+      <li><a href="request_master.html">Request Master (Commit-Hash)</a></li>
+      <li><a href="master_unlock.html">Unlock Master</a></li>
     </ul>
   </div>
 
   <div class="section genesis-section">
     <h2>🟪 genesis</h2>
+    <div class="subtitle">สำหรับ Genesis ผู้เริ่มต้นและอนุมัติ Master<br>Genesis role: Register and approve Master, root authority.</div>
     <ul>
-      <li><a href="genesis_register.html">ลงทะเบียน Genesis</a></li>
-      <li><a href="approve_master.html">Genesis/Admin อนุมัติ Master (Approve)</a></li>
+      <li><a href="genesis_register.html">Register Genesis</a></li>
+      <li><a href="approve_master.html">Genesis/Admin Approve Master</a></li>
     </ul>
   </div>
 
-  <p><small>Develop &amp; Deploy บน GitHub Pages • ระบบนี้รองรับมือถือ 100%</small></p>
+  <p class="small">Develop &amp; Deploy on GitHub Pages • 100% Mobile-Friendly System</p>
 </body>
 </html>
