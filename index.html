@@ -5,69 +5,50 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>ระบบ DTC: สายโซ่กายสิทธิ์</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 2em auto;
-      padding: 1em;
-      background-color: #f5f7fa;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 2em 0;
-    }
-    ul li {
-      margin: 0.8em 0;
-    }
-    ul li a {
-      display: block;
-      padding: 0.8em 1em;
-      background-color: #3498db;
-      color: white;
-      text-decoration: none;
-      border-radius: 6px;
-      transition: background-color 0.3s ease;
-    }
-    ul li a:hover,
-    ul li a:focus {
-      background-color: #2980b9;
-      outline: none;
-    }
-    p small {
-      display: block;
-      text-align: center;
-      margin-top: 3em;
-      color: #999;
-    }
+    body { font-family: Arial, sans-serif; max-width: 640px; margin: 2em auto; padding: 1em; background: #f5f7fa; color: #333;}
+    h1, h2 { text-align: center; color: #2c3e50;}
+    ul { list-style: none; padding: 0; margin: 2em 0;}
+    ul li { margin: 0.7em 0;}
+    ul li a { display: block; padding: 0.8em 1em; background-color: #3498db; color: white; text-decoration: none; border-radius: 6px; transition: background-color 0.3s;}
+    ul li a:hover, ul li a:focus { background-color: #2980b9; outline: none;}
+    .section { margin: 2em 0;}
+    p small { display: block; text-align: center; margin-top: 2.5em; color: #999;}
     @media (max-width: 480px) {
-      body {
-        margin: 1em;
-        padding: 0.5em;
-      }
-      ul li a {
-        padding: 0.6em 0.8em;
-        font-size: 1em;
-      }
+      body { margin: 1em; padding: 0.5em;}
+      ul li a { padding: 0.6em 0.8em; font-size: 1em;}
     }
   </style>
 </head>
 <body>
   <h1>ระบบ DTC: สายโซ่กายสิทธิ์</h1>
-  <ul>
-    <li><a href="key_pair.html">สร้าง public_key</a></li>
-    <li><a href="register.html">ลงทะเบียน QR</a></li>
-    <li><a href="transfer.html">โอนกรรมสิทธิ์ QR</a></li>
-    <li><a href="verify_qr.html">ตรวจสอบ QR</a></li>
-    <li><a href="genesis_register.html">ลงทะเบียน Genesis</a></li>
-    <li><a href="master_unlock.html">ปลดล็อก Master</a></li>
-    <li><a href="verify_log.html">ตรวจสอบประวัติการลงทะเบียน QR (Log Viewer)</a></li>
-  </ul>
-  <p><small>Develop & Deploy บน GitHub Pages</small></p>
+
+  <div class="section">
+    <h2>🟠 ขั้นตอน Genesis</h2>
+    <ul>
+      <li><a href="key_pair.html">สร้าง public_key (Genesis)</a></li>
+      <li><a href="genesis_register.html">ลงทะเบียน Genesis</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>🔵 ขั้นตอนขอ Master</h2>
+    <ul>
+      <li><a href="request_master.html">ขอ Master ใหม่ (Commit-Hash)</a></li>
+      <li><a href="approve_master.html">Genesis/Admin อนุมัติ Master (Approve)</a></li>
+      <li><a href="reveal_master.html">เปิดเผยข้อมูล Master จริง (Reveal)</a></li>
+      <li><a href="master_unlock.html">ปลดล็อก Master</a></li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2>🟢 ออก QR / กรรมสิทธิ์</h2>
+    <ul>
+      <li><a href="register.html">ลงทะเบียน QR</a></li>
+      <li><a href="transfer.html">โอนกรรมสิทธิ์ QR</a></li>
+      <li><a href="verify_log.html">ตรวจสอบประวัติการลงทะเบียน QR (Log Viewer)</a></li>
+    </ul>
+  </div>
+
+  <p><small>Develop & Deploy บน GitHub Pages • ระบบนี้รองรับมือถือ 100%</small></p>
 </body>
 </html>
