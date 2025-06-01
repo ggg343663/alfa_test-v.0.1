@@ -12,10 +12,29 @@
     ul li a { display: block; padding: 0.8em 1em; background-color: #3498db; color: white; text-decoration: none; border-radius: 6px; transition: background-color 0.3s;}
     ul li a:hover, ul li a:focus { background-color: #2980b9; outline: none;}
     .section { margin: 2em 0;}
+    .single-feature {
+      text-align: center;
+      margin-top: 2.2em;
+      margin-bottom: 0.5em;
+    }
+    .single-feature a {
+      display: inline-block;
+      padding: 0.85em 2em;
+      background-color: #27ae60;
+      color: #fff;
+      font-size: 1.15em;
+      border-radius: 7px;
+      text-decoration: none;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(39,174,96,0.08);
+      transition: background 0.2s;
+    }
+    .single-feature a:hover { background: #219150; }
     p small { display: block; text-align: center; margin-top: 2.5em; color: #999;}
     @media (max-width: 480px) {
       body { margin: 1em; padding: 0.5em;}
       ul li a { padding: 0.6em 0.8em; font-size: 1em;}
+      .single-feature a { padding: 0.6em 1em; font-size: 1em;}
     }
   </style>
 </head>
@@ -42,10 +61,14 @@
   <div class="section">
     <h2>🟠 genesis</h2>
     <ul>
-      <li><a href="key_pair.html">สร้าง public_key (Genesis)</a></li>
       <li><a href="genesis_register.html">ลงทะเบียน Genesis</a></li>
       <li><a href="approve_master.html">Genesis/Admin อนุมัติ Master (Approve)</a></li>
     </ul>
+  </div>
+
+  <!-- ปุ่มเดี่ยวล่างสุด -->
+  <div class="single-feature">
+    <a href="key_pair.html">สร้าง public key</a>
   </div>
 
   <p><small>Develop &amp; Deploy บน GitHub Pages • ระบบนี้รองรับมือถือ 100%</small></p>
