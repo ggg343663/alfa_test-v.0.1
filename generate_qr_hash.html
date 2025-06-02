@@ -13,7 +13,7 @@
     }
     .container {
       background: #fff;
-      max-width: 420px;
+      max-width: 430px;
       margin: 2.4em auto 1.5em auto;
       border-radius: 16px;
       box-shadow: 0 2px 15px #22c55e22;
@@ -65,8 +65,26 @@
     .status { font-size: 0.94em; margin-left: 6px;}
     .valid { color: #22c55e;}
     .invalid { color: #d93025;}
+    .count {
+      margin-left: 10px;
+      color: #666;
+      font-size: 0.97em;
+      letter-spacing: 0.02em;
+    }
+    .paste-btn {
+      background: #e0e7ef;
+      border: 1px solid #bcd;
+      color: #1e293b;
+      border-radius: 6px;
+      padding: 0.25em 0.7em;
+      margin-left: 7px;
+      font-size: 0.96em;
+      cursor: pointer;
+      transition: background 0.13s;
+    }
+    .paste-btn:hover { background: #c7f7fa; }
     .gen-btn {
-      margin-top: 1.35em;
+      margin-top: 1.2em;
       padding: 0.69em 0;
       width: 100%;
       font-size: 1.07em;
@@ -110,7 +128,6 @@
       transition: background 0.13s;
     }
     .copy-btn:hover { background: #0ea5e9; color: #fff;}
-    /* Timestamp & Nonce as black, minimal style */
     .input-black {
       width: 100%;
       padding: 0.44em 0.64em;
@@ -129,15 +146,35 @@
       .container { max-width: 97vw; padding: 1em 0.4em 1.5em 0.4em;}
       .btn-back { position: static; margin: 0 0 1em 0;}
     }
+    .error {
+      color: #d93025;
+      margin-top: 0.22em;
+      font-size: 0.98em;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <button class="btn-back" onclick="window.history.back()">← Back</button>
     <h2>🟩 Generate QR Hash</h2>
+
     <label>Public Key (42 ตัวอักษร):</label>
-    <input type="text" id="pubkey" class="input-green" placeholder="0x..." autocomplete="off" />
-    <span id="keyStatus" class="status"></span>
+    <div style="display:flex;align-items:center;gap:0.5em;">
+      <input type="text" id="pubkey1" class="input-green" placeholder="0x..." autocomplete="off" style="flex:1;" />
+      <button class="paste-btn" onclick="pasteClipboard('pubkey1')">Paste</button>
+      <span class="count" id="count1">0</span>
+    </div>
+    <span id="keyStatus1" class="status"></span>
+
+    <label>ยืนยัน Public Key อีกครั้ง:</label>
+    <div style="display:flex;align-items:center;gap:0.5em;">
+      <input type="text" id="pubkey2" class="input-green" placeholder="0x..." autocomplete="off" style="flex:1;" />
+      <button class="paste-btn" onclick="pasteClipboard('pubkey2')">Paste</button>
+      <span class="count" id="count2">0</span>
+    </div>
+    <span id="keyStatus2" class="status"></span>
+    <span id="errorMsg" class="error"></span>
+
     <button class="gen-btn" onclick="generateHash()">Generate QR Hash</button>
     <div class="hash-row">
       <input type="text" id="qrHashInput" class="input-blue" placeholder="QR Hash" readonly>
@@ -149,37 +186,55 @@
     <input type="text" id="nonce" class="input-black" readonly />
   </div>
   <script>
-    const pubkeyEl = document.getElementById('pubkey');
-    const keyStatusEl = document.getElementById('keyStatus');
+    // Clipboard paste
+    function pasteClipboard(id) {
+      navigator.clipboard.readText().then(txt => {
+        document.getElementById(id).value = txt;
+        updateCountAndStatus();
+      });
+    }
+    // Count length & live validate
+    function updateCountAndStatus() {
+      const v1 = pubkey1.value.trim();
+      const v2 = pubkey2.value.trim();
+      document.getElementById('count1').textContent = v1.length;
+      document.getElementById('count2').textContent = v2.length;
+      document.getElementById('keyStatus1').textContent = validatePubkey(v1) ? "✓ ถูกต้อง" : "";
+      document.getElementById('keyStatus2').textContent = validatePubkey(v2) ? "✓ ถูกต้อง" : "";
+      document.getElementById('keyStatus1').className = "status " + (validatePubkey(v1) ? "valid" : "invalid");
+      document.getElementById('keyStatus2').className = "status " + (validatePubkey(v2) ? "valid" : "invalid");
+      document.getElementById('errorMsg').textContent = (v1 && v2 && v1 !== v2) ? "Public Key ทั้งสองช่องไม่ตรงกัน" : "";
+    }
+    function validatePubkey(key) {
+      return /^0x[a-fA-F0-9]{40}$/.test(key);
+    }
+    const pubkey1 = document.getElementById('pubkey1');
+    const pubkey2 = document.getElementById('pubkey2');
+    pubkey1.addEventListener('input', updateCountAndStatus);
+    pubkey2.addEventListener('input', updateCountAndStatus);
+    // Timestamp/Nonce
     const timestampEl = document.getElementById('timestamp');
     const nonceEl = document.getElementById('nonce');
     function updateTimestampNonce() {
       timestampEl.value = new Date().toISOString();
       nonceEl.value = Math.floor(Math.random() * 1e12).toString();
     }
-    function validatePubkey(key) {
-      return /^0x[a-fA-F0-9]{40}$/.test(key);
-    }
-    pubkeyEl.addEventListener('input', () => {
-      const key = pubkeyEl.value.trim();
-      if (validatePubkey(key)) {
-        keyStatusEl.textContent = "✓ ถูกต้อง";
-        keyStatusEl.className = "status valid";
-      } else {
-        keyStatusEl.textContent = "⚠ ต้องขึ้นต้นด้วย 0x และยาว 42 ตัวอักษร";
-        keyStatusEl.className = "status invalid";
-      }
-    });
     function generateHash() {
-      const pubkey = pubkeyEl.value.trim();
-      if (!validatePubkey(pubkey)) {
-        alert("⚠ Public Key ไม่ถูกต้อง");
+      const pk1 = pubkey1.value.trim();
+      const pk2 = pubkey2.value.trim();
+      if (!validatePubkey(pk1) || !validatePubkey(pk2)) {
+        document.getElementById('errorMsg').textContent = "กรุณากรอก Public Key ให้ถูกต้องทั้งสองช่อง";
         return;
       }
+      if (pk1 !== pk2) {
+        document.getElementById('errorMsg').textContent = "Public Key ทั้งสองช่องไม่ตรงกัน";
+        return;
+      }
+      document.getElementById('errorMsg').textContent = "";
       updateTimestampNonce();
       const t = timestampEl.value;
       const n = nonceEl.value;
-      const raw = `${pubkey}|${t}|${n}`;
+      const raw = `${pk1}|${t}|${n}`;
       const hash = sha256(raw);
       document.getElementById('qrHashInput').value = hash;
     }
@@ -190,6 +245,7 @@
       navigator.clipboard.writeText(input.value);
     }
     updateTimestampNonce();
+    updateCountAndStatus();
   </script>
 </body>
 </html>
