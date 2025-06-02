@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <title>Generate QR Code (from Hash)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- ใช้ไลบรารี qrious สร้าง QR -->
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     body { background: #f4f8fb; font-family: Arial, sans-serif; margin: 0; padding: 0;}
     .container {
       background: #fff;
-      max-width: 380px;
+      max-width: 390px;
       margin: 2.1em auto 1.5em auto;
       border-radius: 15px;
       box-shadow: 0 2px 13px #3b82f620;
@@ -20,14 +20,14 @@
     }
     .back-btn {
       position: absolute;
-      left: 8px;
-      top: 9px;
+      left: 12px;
+      top: 13px;
       background: #e0f2fe;
       color: #2563eb;
       border: 1.2px solid #60a5fa;
       border-radius: 6px;
-      font-size: 0.98em;
-      padding: 0.22em 0.98em;
+      font-size: 0.99em;
+      padding: 0.26em 1.1em;
       cursor: pointer;
       z-index: 1000;
       box-shadow: 0 2px 7px #60a5fa22;
@@ -37,21 +37,44 @@
     .back-btn:hover { background: #bae6fd; color: #0a3283;}
     h2 {
       color: #2563eb;
-      margin-bottom: 1.1em;
-      font-size: 1.12em;
+      margin-bottom: 1.13em;
+      font-size: 1.13em;
       letter-spacing: 0.01em;
+      padding-top: 0.4em;
     }
-    input[type="text"] {
-      width: 100%;
-      padding: 0.62em 0.7em;
-      font-size: 1em;
-      border: 1.3px solid #60a5fa;
-      border-radius: 7px;
-      background: #e0f2fe;
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
       margin-bottom: 1em;
     }
-    input:focus { border-color: #2563eb; outline: none;}
-    button:not(.back-btn) {
+    input[type="text"] {
+      flex: 1 1 0;
+      padding: 0.62em 0.7em;
+      font-size: 1em;
+      border: 1.3px solid #22c55e;
+      border-radius: 7px;
+      background: #e0fbe8;
+      color: #14532d;
+      transition: border-color 0.13s;
+    }
+    input:focus { border-color: #22c55e; outline: none;}
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 0 0.13em;
+      cursor: pointer;
+      outline: none;
+      display: flex;
+      align-items: center;
+    }
+    .icon-btn img {
+      width: 28px; height: 28px;
+      filter: grayscale(40%) brightness(0.7);
+      transition: filter 0.15s;
+    }
+    .icon-btn:hover img { filter: none; }
+    button:not(.back-btn):not(.icon-btn) {
       background: linear-gradient(90deg, #3b82f6 60%, #38bdf8 100%);
       color: #fff;
       border: none;
@@ -65,7 +88,7 @@
       transition: background 0.16s;
       box-shadow: 0 1.5px 8px #60a5fa13;
     }
-    button:not(.back-btn):hover { background: linear-gradient(90deg, #2563eb 40%, #0ea5e9 100%);}
+    button:not(.back-btn):not(.icon-btn):hover { background: linear-gradient(90deg, #2563eb 40%, #0ea5e9 100%);}
     #qrcode {
       margin: 0 auto 1.1em auto;
       display: none;
@@ -106,7 +129,16 @@
   <div class="container">
     <button class="back-btn" onclick="history.back()">← Back</button>
     <h2>🟦 Generate QR Code from Hash</h2>
-    <input type="text" id="qrHash" placeholder="Paste QR Hash here..." maxlength="128" autocomplete="off" />
+    <div class="input-row">
+      <input type="text" id="qrHash" placeholder="Paste QR Hash here..." maxlength="128" autocomplete="off" />
+      <button class="icon-btn" title="Scan QR from camera" onclick="startScan()" tabindex="-1">
+        <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Scan QR" />
+      </button>
+      <input type="file" id="imgInput" accept="image/*" style="display:none;" />
+      <button class="icon-btn" title="Pick QR image from gallery" onclick="document.getElementById('imgInput').click()" tabindex="-1">
+        <img src="gallery.png" alt="Gallery" />
+      </button>
+    </div>
     <button onclick="generateQR()">Generate QR Code</button>
     <div id="readyMsg" class="ready" style="display:none;">
       &#10003; QR Ready
@@ -115,6 +147,7 @@
     <canvas id="qrcode" width="210" height="210"></canvas>
   </div>
   <script>
+    // ==== QR CODE GENERATE ====
     function generateQR() {
       const hash = document.getElementById('qrHash').value.trim();
       if (!hash) {
@@ -135,6 +168,67 @@
       if (!hash) return;
       navigator.clipboard.writeText(hash);
     }
+    // ==== Scan QR from Camera ====
+    let scannerDiv;
+    function startScan() {
+      if (scannerDiv) return;
+      scannerDiv = document.createElement('div');
+      scannerDiv.style.position = "fixed";
+      scannerDiv.style.left = "0"; scannerDiv.style.top = "0";
+      scannerDiv.style.width = "100vw"; scannerDiv.style.height = "100vh";
+      scannerDiv.style.background = "rgba(30,41,59,0.75)";
+      scannerDiv.style.display = "flex"; scannerDiv.style.alignItems = "center"; scannerDiv.style.justifyContent = "center";
+      scannerDiv.style.zIndex = "9999";
+      document.body.appendChild(scannerDiv);
+      const qrBox = document.createElement('div');
+      qrBox.id = "html5qr";
+      qrBox.style.width = "310px"; qrBox.style.height = "310px";
+      qrBox.style.background = "#fff"; qrBox.style.borderRadius = "18px";
+      qrBox.style.boxShadow = "0 4px 32px #0ea5e955";
+      qrBox.style.display = "flex"; qrBox.style.alignItems = "center"; qrBox.style.justifyContent = "center";
+      scannerDiv.appendChild(qrBox);
+      const closeBtn = document.createElement('button');
+      closeBtn.textContent = "✖";
+      closeBtn.style.position = "absolute"; closeBtn.style.top = "16px"; closeBtn.style.right = "32px";
+      closeBtn.style.background = "#bae6fd"; closeBtn.style.color = "#0a3283";
+      closeBtn.style.border = "none"; closeBtn.style.borderRadius = "8px";
+      closeBtn.style.fontSize = "1.18em"; closeBtn.style.padding = "0.24em 0.7em";
+      closeBtn.style.cursor = "pointer"; closeBtn.style.fontWeight = "bold";
+      closeBtn.onclick = function () {
+        Html5Qrcode.getCameras().then(() => {
+          if (window.html5QrcodeScanner) window.html5QrcodeScanner.stop();
+        });
+        scannerDiv.remove();
+        scannerDiv = null;
+      };
+      scannerDiv.appendChild(closeBtn);
+      window.html5QrcodeScanner = new Html5Qrcode("html5qr");
+      window.html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 250 },
+        (decodedText) => {
+          document.getElementById('qrHash').value = decodedText;
+          alert("✔️ QR hash scanned from camera!");
+          window.html5QrcodeScanner.stop();
+          scannerDiv.remove();
+          scannerDiv = null;
+        },
+        (err) => {}
+      );
+    }
+    // ==== Scan QR from Gallery (image file) ====
+    document.getElementById('imgInput').addEventListener('change', function(evt){
+      const file = evt.target.files[0];
+      if (!file) return;
+      Html5Qrcode.scanFile(file, true)
+        .then(decodedText => {
+          document.getElementById('qrHash').value = decodedText;
+          alert("✔️ QR hash scanned from image!");
+        })
+        .catch(() => {
+          alert("❌ ไม่พบ QR ในภาพนี้");
+        });
+    });
   </script>
 </body>
 </html>
