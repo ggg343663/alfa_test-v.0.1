@@ -1,377 +1,195 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>Generate Address from Passphrase</title>
+  <title>Generate QR Hash</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f8fb;
-      max-width: 430px;
-      margin: 2em auto;
-      padding: 1em;
-      color: #222;
+      background: #f7f7fa;
+      margin: 0; padding: 0;
     }
     .container {
       background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 2px 13px #22c55e25;
-      padding: 2em 1.1em 1.8em 1.1em;
+      max-width: 420px;
+      margin: 2.4em auto 1.5em auto;
+      border-radius: 16px;
+      box-shadow: 0 2px 15px #22c55e22;
+      padding: 2em 1.2em 2.1em 1.2em;
       position: relative;
+    }
+    .btn-back {
+      background: #e0e7ef;
+      color: #232a3e;
+      border: 1.2px solid #a7a7a7;
+      border-radius: 7px;
+      font-size: 1em;
+      padding: 0.41em 1.13em;
+      margin-bottom: 1.1em;
+      margin-top: -0.7em;
+      cursor: pointer;
+      transition: background 0.14s;
+      box-shadow: 0 1px 4px #0001;
+      position: absolute; left: 18px; top: 18px;
+    }
+    .btn-back:hover { background: #c7f7fa; color: #222;}
+    h2 {
       text-align: center;
+      color: #22c55e;
+      margin-bottom: 1.3em;
+      font-size: 1.18em;
+      letter-spacing: 0.01em;
     }
-    .back-btn {
-      position: absolute;
-      left: 16px; top: 18px;
-      background: #222;
-      color: #fff;
-      border: none;
-      border-radius: 7px;
-      font-size: 1em;
-      padding: 0.33em 1.13em;
-      cursor: pointer;
-      z-index: 1000;
-      font-weight: 500;
-      box-shadow: 0 2px 6px #2222;
-      transition: background 0.14s, color 0.13s;
-    }
-    .back-btn:hover { background: #555; color: #fff;}
-    h2 { color: #22c55e; margin-bottom: 2em; margin-top: 1.7em; font-size: 1.15em;}
-    .field-row {
-      display: flex;
-      align-items: center;
-      gap: 0.25em;
-      margin-bottom: 1.15em;
-      justify-content: center;
-    }
-    .field-label {
-      text-align: left;
-      font-weight: bold;
-      color: #15803d;
-      margin-bottom: 0.22em;
+    label {
+      display: block;
       margin-top: 1.12em;
-      font-size: 1.06em;
-      display: block;
+      font-weight: bold;
+      color: #16a34a;
+      letter-spacing: 0.01em;
     }
-    input[type="text"], input[type="password"] {
-      flex: 1 1 0;
-      padding: 0.68em 0.8em;
-      font-size: 1em;
-      border: 1.5px solid #22c55e;
-      border-radius: 7px;
-      background: #e7fbe8;
-      color: #14532d;
-      transition: border-color 0.13s;
-      margin-bottom: 0em;
-    }
-    input:focus { border-color: #16a34a; outline: none;}
-    textarea {
+    .input-green {
       width: 100%;
-      padding: 0.65em 0.8em;
-      font-size: 1em;
-      border: 1.5px solid #22c55e;
+      padding: 0.58em 0.74em;
+      font-size: 1.06em;
+      border: 1.4px solid #22c55e;
       border-radius: 7px;
       background: #e7fbe8;
       color: #14532d;
-      transition: border-color 0.13s;
-      margin-bottom: 0.18em;
-      resize: none;
-      font-family: inherit;
+      margin-top: 0.23em;
+      transition: border 0.16s;
+      box-sizing: border-box;
     }
-    .icon-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      outline: none;
-      border-radius: 5px;
-      display: flex;
-      align-items: center;
-      padding: 0 0.08em;
-      height: 32px; width: 32px;
-      justify-content: center;
-      transition: background 0.13s;
-    }
-    .icon-btn:active { background: #bbf7d0;}
-    .icon-btn img {
-      width: 25px; height: 25px;
-      display: block;
-      filter: grayscale(25%) brightness(0.92) contrast(1.1);
-    }
-    .icon-btn:hover img { filter: none; }
-    .copy-btn {
-      background: #16a34a;
+    .input-green:focus { border-color: #16a34a; outline: none;}
+    .status { font-size: 0.94em; margin-left: 6px;}
+    .valid { color: #22c55e;}
+    .invalid { color: #d93025;}
+    .gen-btn {
+      margin-top: 1.35em;
+      padding: 0.69em 0;
+      width: 100%;
+      font-size: 1.07em;
+      background: linear-gradient(90deg, #22c55e 70%, #0ea5e9 100%);
       color: #fff;
       border: none;
-      border-radius: 7px;
-      font-size: 0.97em;
-      padding: 0.3em 0.97em;
+      border-radius: 8px;
+      font-weight: bold;
+      letter-spacing: 0.02em;
       cursor: pointer;
-      margin-left: 0.22em;
-      margin-right: 0.1em;
+      transition: background 0.16s;
+      box-shadow: 0 1.5px 8px #22c55e18;
+    }
+    .gen-btn:hover { background: linear-gradient(90deg, #0ea5e9 40%, #22c55e 100%);}
+    .hash-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      margin-top: 1.1em;
+      margin-bottom: 0.6em;
+    }
+    .input-blue {
+      width: 100%;
+      padding: 0.52em 0.68em;
+      font-size: 1.06em;
+      border: 1.3px solid #0ea5e9;
+      border-radius: 7px;
+      background: #e0f2fe;
+      color: #0369a1;
+      transition: border 0.14s;
+    }
+    .copy-btn {
+      background: #bae6fd;
+      border: none;
+      color: #0369a1;
+      border-radius: 7px;
+      padding: 0.35em 0.9em;
+      cursor: pointer;
+      font-size: 1em;
+      margin-left: 0.18em;
       transition: background 0.13s;
     }
-    .copy-btn:hover { background: #22c55e;}
-    .show-btn {
-      background: #e7fbe8;
-      border: 1.5px solid #22c55e;
-      color: #198a39;
+    .copy-btn:hover { background: #0ea5e9; color: #fff;}
+    /* Timestamp & Nonce as black, minimal style */
+    .input-black {
+      width: 100%;
+      padding: 0.44em 0.64em;
+      font-size: 1em;
+      border: 1.15px solid #232a3e;
       border-radius: 6px;
-      font-size: 0.98em;
-      padding: 0.3em 0.97em;
-      cursor: pointer;
-      margin-left: 0.18em;
-      margin-right: 0.1em;
-      transition: background 0.13s, color 0.13s;
-      font-weight: bold;
+      background: #fff;
+      color: #222;
+      margin-top: 0.18em;
+      margin-bottom: 0.25em;
+      font-family: monospace;
     }
-    .show-btn:hover { background: #bbf7d0; color: #166534;}
-    .error { color: #dc2626; font-size: 0.96em; margin-top: 0.13em; margin-bottom: 0.22em;}
-    .status { color: #22c55e; font-size: 0.98em; margin-top: 0.23em; display: none;}
-    .blurred { filter: blur(6px); user-select: none; pointer-events: none;}
-    #qrcode { margin-left: 10px; }
-    .qr-modal-bg {
-      position: fixed;
-      left: 0; top: 0; width: 100vw; height: 100vh;
-      background: rgba(30,40,30,0.7); z-index: 9999;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .qr-modal-box {
-      background: #fff; border-radius: 17px; padding: 1.2em 1.1em;
-      box-shadow: 0 6px 28px #22c55e22;
-      display: flex; flex-direction: column; align-items: center;
-    }
-    .qr-modal-close {
-      background: #eee; color: #222;
-      border: none; border-radius: 8px;
-      font-size: 1.1em; font-weight: bold;
-      margin-top: 0.8em;
-      padding: 0.24em 0.75em; cursor: pointer;
-    }
-    @media (max-width: 500px) {
-      .container { padding: 1.1em 0.18em 1.1em 0.18em;}
-      .back-btn { left: 3px; top: 3px; font-size: 0.96em; padding: 0.18em 0.88em;}
+    .input-black[readonly] { background: #fff;}
+    .black-label { color: #222; font-weight: 600; margin-top: 0.5em;}
+    @media (max-width: 600px) {
+      .container { max-width: 97vw; padding: 1em 0.4em 1.5em 0.4em;}
+      .btn-back { position: static; margin: 0 0 1em 0;}
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="back-btn" onclick="history.back()">← Back</button>
-    <h2>🔐 Generate Address (Web3-style) from Passphrase</h2>
-
-    <!-- Address output and QR -->
-    <span class="field-label">📮 Address (last 40 chars):</span>
-    <div class="field-row" style="margin-bottom:1.7em;">
-      <input type="text" id="addressOutput" readonly style="margin-bottom:0;" />
-      <button class="icon-btn" title="Generate QR from Address" onclick="showAddressQR()">
-        <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="QR" />
-      </button>
-      <button class="copy-btn" onclick="copyAddress()">Copy</button>
+    <button class="btn-back" onclick="window.history.back()">← Back</button>
+    <h2>🟩 Generate QR Hash</h2>
+    <label>Public Key (42 ตัวอักษร):</label>
+    <input type="text" id="pubkey" class="input-green" placeholder="0x..." autocomplete="off" />
+    <span id="keyStatus" class="status"></span>
+    <button class="gen-btn" onclick="generateHash()">Generate QR Hash</button>
+    <div class="hash-row">
+      <input type="text" id="qrHashInput" class="input-blue" placeholder="QR Hash" readonly>
+      <button class="copy-btn" onclick="copyHash()">Copy</button>
     </div>
-    <div id="copyStatus" class="status">✅ Address copied!</div>
-
-    <span class="field-label">Scan Public Key (Address):</span>
-    <div class="field-row">
-      <input type="text" id="scanPublicKey" placeholder="Scan or paste Address here" maxlength="48" autocomplete="off" />
-      <button class="icon-btn" title="Scan QR" onclick="startScan()">
-        <img src="https://cdn-icons-png.flaticon.com/512/565/565547.png" alt="Scan" />
-      </button>
-    </div>
-
-    <!-- Passphrase fields -->
-    <span class="field-label">Passphrase (6-12 chars, must include letters & numbers):</span>
-    <input type="password" id="privateKey1" maxlength="12" minlength="6" autocomplete="off"/>
-    <div id="pw1Err" class="error"></div>
-
-    <span class="field-label">Confirm Passphrase:</span>
-    <input type="password" id="privateKey2" maxlength="12" minlength="6" autocomplete="off"/>
-    <div id="pw2Err" class="error"></div>
-
-    <span class="field-label">Sign Code (4 digits):</span>
-    <input type="password" id="signCode1" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off"/>
-    <div id="sign1Err" class="error"></div>
-
-    <span class="field-label">Confirm Sign Code:</span>
-    <input type="password" id="signCode2" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off"/>
-    <div id="sign2Err" class="error"></div>
-
-    <button onclick="generateAddress()" style="margin-top:1.5em;">🚀 Generate Address</button>
-
-    <!-- Private Key Output -->
-    <span class="field-label" style="margin-top:1.8em;">🔑 Private Key (SHA-256):</span>
-    <div class="field-row" style="margin-bottom:0;">
-      <input type="text" id="fullHash" class="blurred" readonly />
-      <button class="show-btn" onclick="toggleBlur()">Show</button>
-    </div>
-    <div id="pkStatus" class="status"></div>
-  </div>
-  <!-- Modal for Address QR -->
-  <div id="qrModal" style="display:none;">
-    <div class="qr-modal-bg" onclick="closeModal(event)">
-      <div class="qr-modal-box" onclick="event.stopPropagation()">
-        <canvas id="qrcode" width="190" height="190"></canvas>
-        <button class="qr-modal-close" onclick="closeModal(event)">✖ Close</button>
-      </div>
-    </div>
+    <label class="black-label">Timestamp (เวลาปัจจุบัน):</label>
+    <input type="text" id="timestamp" class="input-black" readonly />
+    <label class="black-label">Nonce (เลขสุ่ม):</label>
+    <input type="text" id="nonce" class="input-black" readonly />
   </div>
   <script>
-    // Blur & show private key
-    let isBlurred = true;
-    function toggleBlur() {
-      const el = document.getElementById("fullHash");
-      isBlurred = !isBlurred;
-      if (isBlurred) {
-        el.classList.add("blurred");
-        document.querySelector('.show-btn').textContent = "Show";
+    const pubkeyEl = document.getElementById('pubkey');
+    const keyStatusEl = document.getElementById('keyStatus');
+    const timestampEl = document.getElementById('timestamp');
+    const nonceEl = document.getElementById('nonce');
+    function updateTimestampNonce() {
+      timestampEl.value = new Date().toISOString();
+      nonceEl.value = Math.floor(Math.random() * 1e12).toString();
+    }
+    function validatePubkey(key) {
+      return /^0x[a-fA-F0-9]{40}$/.test(key);
+    }
+    pubkeyEl.addEventListener('input', () => {
+      const key = pubkeyEl.value.trim();
+      if (validatePubkey(key)) {
+        keyStatusEl.textContent = "✓ ถูกต้อง";
+        keyStatusEl.className = "status valid";
       } else {
-        el.classList.remove("blurred");
-        document.querySelector('.show-btn').textContent = "Hide";
+        keyStatusEl.textContent = "⚠ ต้องขึ้นต้นด้วย 0x และยาว 42 ตัวอักษร";
+        keyStatusEl.className = "status invalid";
       }
-    }
-    // Validate
-    function validatePassword(pw) {
-      return (
-        pw.length >= 6 &&
-        pw.length <= 12 &&
-        /[A-Za-z]/.test(pw) &&
-        /\d/.test(pw)
-      );
-    }
-    function validateSign(sign) {
-      return /^\d{4}$/.test(sign);
-    }
-    // SHA-256
-    async function sha256Hex(str) {
-      const buffer = new TextEncoder().encode(str);
-      const hash = await crypto.subtle.digest("SHA-256", buffer);
-      return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
-    }
-    // Generate Address
-    async function generateAddress() {
-      // Inputs
-      const pw1 = document.getElementById("privateKey1").value.trim();
-      const pw2 = document.getElementById("privateKey2").value.trim();
-      const sign1 = document.getElementById("signCode1").value.trim();
-      const sign2 = document.getElementById("signCode2").value.trim();
-      const fullHashEl = document.getElementById("fullHash");
-      const addressEl = document.getElementById("addressOutput");
-      // Errors
-      document.getElementById("pw1Err").textContent = "";
-      document.getElementById("pw2Err").textContent = "";
-      document.getElementById("sign1Err").textContent = "";
-      document.getElementById("sign2Err").textContent = "";
-
-      let valid = true;
-      if (!validatePassword(pw1)) {
-        document.getElementById("pw1Err").textContent = "Must be 6-12 chars, include letters & numbers.";
-        valid = false;
-      }
-      if (pw1 !== pw2) {
-        document.getElementById("pw2Err").textContent = "Passphrases do not match.";
-        valid = false;
-      }
-      if (!validateSign(sign1)) {
-        document.getElementById("sign1Err").textContent = "Sign code must be 4 digits.";
-        valid = false;
-      }
-      if (sign1 !== sign2) {
-        document.getElementById("sign2Err").textContent = "Sign codes do not match.";
-        valid = false;
-      }
-      if (!valid) return;
-
-      // Use password + sign code together to generate address
-      const hash = await sha256Hex(pw1 + sign1);
-      const address = "0x" + hash.slice(-40);
-
-      fullHashEl.value = hash;
-      fullHashEl.classList.add("blurred");
-      isBlurred = true;
-      document.querySelector('.show-btn').textContent = "Show";
-      addressEl.value = address;
-      document.getElementById("copyStatus").style.display = "none";
-      alert("✅ Address generated. Please back up your private info securely.");
-    }
-    // Copy Address
-    function copyAddress() {
-      const addressEl = document.getElementById("addressOutput");
-      if (!addressEl.value) {
-        alert("⚠ Please generate Address first.");
+    });
+    function generateHash() {
+      const pubkey = pubkeyEl.value.trim();
+      if (!validatePubkey(pubkey)) {
+        alert("⚠ Public Key ไม่ถูกต้อง");
         return;
       }
-      addressEl.select();
-      addressEl.setSelectionRange(0, 99999);
-      navigator.clipboard.writeText(addressEl.value).then(() => {
-        const status = document.getElementById("copyStatus");
-        status.style.display = "block";
-        setTimeout(() => status.style.display = "none", 1600);
-      });
+      updateTimestampNonce();
+      const t = timestampEl.value;
+      const n = nonceEl.value;
+      const raw = `${pubkey}|${t}|${n}`;
+      const hash = sha256(raw);
+      document.getElementById('qrHashInput').value = hash;
     }
-    // Show Address as QR
-    function showAddressQR() {
-      const address = document.getElementById('addressOutput').value;
-      if (!address) {
-        alert("⚠ Please generate Address first.");
-        return;
-      }
-      document.getElementById("qrModal").style.display = "";
-      setTimeout(() => {
-        const qr = new QRious({
-          element: document.getElementById('qrcode'),
-          value: address,
-          size: 190,
-          level: 'H'
-        });
-      }, 50);
+    function copyHash() {
+      const input = document.getElementById('qrHashInput');
+      input.select();
+      input.setSelectionRange(0, 99999); // mobile
+      navigator.clipboard.writeText(input.value);
     }
-    function closeModal(evt) {
-      document.getElementById("qrModal").style.display = "none";
-    }
-    // Scan QR for public key
-    let scannerDiv;
-    function startScan() {
-      if (scannerDiv) return;
-      scannerDiv = document.createElement('div');
-      scannerDiv.className = "qr-modal-bg";
-      document.body.appendChild(scannerDiv);
-      const qrBox = document.createElement('div');
-      qrBox.id = "html5qr";
-      qrBox.style.width = "300px"; qrBox.style.height = "300px";
-      qrBox.style.background = "#fff"; qrBox.style.borderRadius = "17px";
-      qrBox.style.boxShadow = "0 4px 24px #22c55e44";
-      qrBox.style.display = "flex"; qrBox.style.alignItems = "center"; qrBox.style.justifyContent = "center";
-      scannerDiv.appendChild(qrBox);
-      const closeBtn = document.createElement('button');
-      closeBtn.textContent = "✖";
-      closeBtn.style.position = "absolute"; closeBtn.style.top = "20px"; closeBtn.style.right = "32px";
-      closeBtn.style.background = "#eee"; closeBtn.style.color = "#222";
-      closeBtn.style.border = "none"; closeBtn.style.borderRadius = "8px";
-      closeBtn.style.fontSize = "1.13em"; closeBtn.style.padding = "0.22em 0.75em";
-      closeBtn.style.cursor = "pointer"; closeBtn.style.fontWeight = "bold";
-      closeBtn.onclick = function () {
-        Html5Qrcode.getCameras().then(() => {
-          if (window.html5QrcodeScanner) window.html5QrcodeScanner.stop();
-        });
-        scannerDiv.remove();
-        scannerDiv = null;
-      };
-      scannerDiv.appendChild(closeBtn);
-      window.html5QrcodeScanner = new Html5Qrcode("html5qr");
-      window.html5QrcodeScanner.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 240 },
-        (decodedText) => {
-          document.getElementById('scanPublicKey').value = decodedText;
-          alert("✔️ Address scanned!");
-          window.html5QrcodeScanner.stop();
-          scannerDiv.remove();
-          scannerDiv = null;
-        },
-        (err) => {}
-      );
-    }
+    updateTimestampNonce();
   </script>
 </body>
 </html>
