@@ -4,84 +4,146 @@
   <meta charset="UTF-8" />
   <title>Transfer QR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <!-- เพิ่ม QR SCAN LIBRARY -->
   <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
   <style>
     body {
       font-family: 'Inter', Arial, sans-serif;
-      max-width: 700px;
-      margin: 2em auto;
-      padding: 1em;
-      background: #f8fafc;
+      background: #f6fafb;
       color: #232a3e;
+      margin: 0;
+      padding: 0;
     }
-    h2 { text-align: center; font-size: 1.4em; margin-bottom: 1.6em; letter-spacing: 0.01em; }
-    .transfer-flex {
-      display: flex; align-items: center; gap: 0.5em; justify-content: center;
-      background: #fff; border-radius: 22px;
-      box-shadow: 0 2px 14px rgba(44,62,80,0.07);
-      padding: 1.5em 0.7em 1.3em 0.7em; margin-bottom: 2em;
+    .container {
+      max-width: 410px;
+      margin: 2em auto 0 auto;
+      padding: 2em 1em 1.4em 1em;
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 2px 16px #22c55e25;
+      position: relative;
     }
-    .transfer-col { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 1.2em; padding: 1em 1.2em; border-radius: 14px; background: #f7fafd; }
-    .sender { border: 2px solid #246bfd22; box-shadow: 0 1px 8px #246bfd13; margin-right: 0.7em; }
-    .receiver { border: 2px solid #22d3ee33; box-shadow: 0 1px 8px #22d3ee11; margin-left: 0.7em; }
-    .transfer-arrow { display: flex; align-items: center; justify-content: center; font-size: 2.3em; color: #6366f1; width: 60px; height: 60px; background: linear-gradient(135deg,#e0e7ff,#e0f7fa); border-radius: 50%; margin: 0 0.4em; box-shadow: 0 2px 10px #6366f120; border: 2px solid #e0e7ef; flex-shrink: 0;}
-    .transfer-label { font-weight: 600; margin-bottom: 0.21em; font-size: 1em; letter-spacing: 0.01em; }
-    input[type="text"], input[type="password"] { padding: 0.62em 0.85em; font-size: 1.08em; border-radius: 8px; border: 1px solid #d3d9ec; background: #f9fbff; transition: border-color 0.2s; }
-    input:focus { border-color: #6366f1; outline: none; }
-    .btn-row { margin-top: 1.3em; display: flex; flex-direction: column; gap: 0.7em; max-width: 360px; margin-left: auto; margin-right: auto; }
-    button { font-family: inherit; font-weight: bold; font-size: 1.1em; padding: 0.76em 0; border-radius: 8px; border: none; background: linear-gradient(90deg, #6366f1, #22d3ee); color: #fff; box-shadow: 0 2px 8px rgba(44,62,80,0.08); cursor: pointer; letter-spacing: 0.02em; transition: background 0.16s, box-shadow 0.16s;}
-    button:disabled { opacity: 0.52; cursor: not-allowed; background: #e4e9f7; color: #7c8ca7;}
-    .back-btn { position: fixed; top: 18px; left: 16px; background: #e0e7ef; color: #363f5c; border: 1px solid #cdd2df; border-radius: 7px; font-size: 1em; padding: 0.36em 1.2em; cursor: pointer; z-index: 1000; box-shadow: 0 2px 8px rgba(99,102,241,0.03); transition: background 0.2s;}
-    .back-btn:hover { background: #c7f7fa; color: #232a3e; }
-    .qr-btns { display: flex; gap: 0.2em; margin-top: 0.3em;}
-    #qr-reader { display: none; width: 260px; margin: 1em 0; }
-    @media (max-width: 800px) { .transfer-flex { flex-direction: column; gap: 0.3em; padding: 0.8em 0.1em 0.6em;} .transfer-arrow { margin: 0.6em auto; } .sender, .receiver { margin: 0; } }
+    .back-btn {
+      position: absolute;
+      top: 18px; left: 12px;
+      background: #e0e7ef; color: #363f5c;
+      border: 1px solid #cdd2df; border-radius: 7px;
+      font-size: 1em; padding: 0.34em 1.1em; cursor: pointer;
+      z-index: 1000; box-shadow: 0 2px 8px #22c55e13;
+      font-weight: 500; transition: background 0.2s;
+    }
+    .back-btn:hover { background: #c7f7fa; color: #232a3e;}
+    h2 {
+      text-align: center; color: #22c55e; font-size: 1.23em;
+      margin-bottom: 1.6em; letter-spacing: 0.01em; margin-top: 0.5em;
+    }
+    .row {
+      display: flex; align-items: center;
+      background: #e7fbe8; border-radius: 8px;
+      border: 1.4px solid #22c55e;
+      margin-bottom: 1em; padding: 0.38em 0.58em 0.38em 0.7em;
+      gap: 0.22em;
+    }
+    .row input[type="text"] {
+      flex: 1 1 0;
+      font-size: 1em; padding: 0.56em 0.6em;
+      border: none; background: transparent;
+      color: #166534; font-weight: 500;
+      outline: none;
+    }
+    .row input[type="text"]:focus { background: #d1fadf;}
+    .icon-btn {
+      background: none; border: none; margin: 0 0 0 0.1em; padding: 0;
+      cursor: pointer; display: flex; align-items: center;
+    }
+    .icon-btn img { width: 26px; height: 26px; }
+    .receiver-group {
+      margin-bottom: 1.3em;
+    }
+    .receiver-group label {
+      font-size: 0.98em; color: #15803d; font-weight: bold; display: block;
+      margin-bottom: 0.18em; margin-left: 0.04em;
+    }
+    .input-green {
+      width: 100%; font-size: 1em; padding: 0.6em 0.6em;
+      border-radius: 8px; border: 1.3px solid #22c55e;
+      background: #e7fbe8; color: #166534; margin-bottom: 1em;
+      font-weight: 500; transition: border-color 0.13s;
+    }
+    .input-green:focus { border-color: #16a34a;}
+    .auth-section {
+      background: #e0f2fe;
+      border-radius: 10px;
+      border: 1.2px solid #38bdf8;
+      padding: 1.1em 0.95em 0.5em 0.95em;
+      margin-top: 1.15em;
+      margin-bottom: 0.6em;
+    }
+    .auth-section label {
+      font-size: 0.96em; color: #2563eb; font-weight: 500; margin-bottom: 0.22em; display: block;
+    }
+    .input-blue {
+      width: 100%; font-size: 1em; padding: 0.54em 0.62em;
+      border-radius: 8px; border: 1.1px solid #38bdf8;
+      background: #e0f2fe; color: #1e293b; margin-bottom: 0.72em;
+      font-weight: 500; transition: border-color 0.13s;
+    }
+    .input-blue:focus { border-color: #2563eb;}
+    .btn-main {
+      width: 100%; background: linear-gradient(90deg, #22c55e 60%, #16a34a 100%);
+      color: #fff; border: none; border-radius: 9px;
+      font-weight: bold; font-size: 1.11em; padding: 0.72em 0;
+      margin-top: 1.3em; margin-bottom: 0.6em; cursor: pointer;
+      box-shadow: 0 1.5px 8px #22c55e13; transition: background 0.16s;
+    }
+    .btn-main:active { background: linear-gradient(90deg, #16a34a 60%, #22c55e 100%);}
+    #qr-reader { display:none; width:250px; margin: 1em auto; }
+    @media (max-width: 520px) {
+      .container { padding: 1em 0.18em 1em 0.18em; }
+      .back-btn { left: 4px; top: 4px; font-size: 0.95em; padding: 0.2em 0.82em;}
+    }
   </style>
 </head>
 <body>
-  <button class="back-btn" onclick="history.back()">← Back</button>
-  <h2>Transfer QR</h2>
-  <div class="transfer-flex">
-    <!-- Sender (left) -->
-    <div class="transfer-col sender">
-      <div class="transfer-label" style="color:#246bfd">Sender</div>
-      <label class="transfer-label" for="qrhash">QR Hash (64 chars):</label>
-      <div class="qr-btns">
-        <input type="text" id="qrhash" maxlength="64" autocomplete="off" placeholder="Enter QR Hash" style="flex:1;"/>
-        <button type="button" title="Scan QR" onclick="openQRScanner()">📷</button>
-        <input type="file" accept="image/*" onchange="scanImageQR(this)" style="display:none;" id="imgQRInput">
-        <button type="button" title="Import QR Image" onclick="document.getElementById('imgQRInput').click()">🖼️</button>
-      </div>
-      <div id="qr-reader"></div>
-      <label class="transfer-label" for="passphrase">Your Passphrase (6-12 letters & numbers):</label>
-      <input type="password" id="passphrase" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your passphrase" />
-      <label class="transfer-label" for="signcode">4-digit Sign Code:</label>
-      <input type="password" id="signcode" maxlength="4" minlength="4" autocomplete="off" pattern="\d{4}" placeholder="Enter sign code (numbers only)" />
-    </div>
-    <!-- Arrow send -->
-    <div class="transfer-arrow" aria-label="send">&#8594;</div>
-    <!-- Recipient (right) -->
-    <div class="transfer-col receiver">
-      <div class="transfer-label" style="color:#22d3ee">Receiver</div>
-      <label class="transfer-label" for="recipientpk">Recipient Public Key (40 chars):</label>
-      <input type="text" id="recipientpk" maxlength="40" autocomplete="off" placeholder="Enter recipient's public key" />
-    </div>
-  </div>
-  <div class="btn-row">
-    <button id="previewBtn" onclick="preview()" type="button">Preview</button>
-    <button id="confirmBtn" onclick="confirmTransfer()" type="button" disabled>Confirm Transfer</button>
-  </div>
-  <div id="previewBox" style="margin-top:1.5em;text-align:center;color:#232a3e;"></div>
+  <div class="container">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <h2>Transfer QR</h2>
 
+    <div class="row">
+      <input type="text" id="qrhash" maxlength="64" autocomplete="off" placeholder="Enter QR Hash" />
+      <button class="icon-btn" title="Scan QR" onclick="openQRScanner()">
+        <img src="/mnt/data/file-L18xSxFu29P7XrcKg9bNSw" alt="Scan QR"/>
+      </button>
+      <input type="file" accept="image/*" style="display:none;" id="imgQRInput" onchange="scanImageQR(this)">
+      <button class="icon-btn" title="Import QR Image" onclick="document.getElementById('imgQRInput').click()">
+        <img src="/mnt/data/file-A7cyCpJAxSc3ji46qY5mrW" alt="Gallery"/>
+      </button>
+    </div>
+
+    <div class="receiver-group">
+      <label for="recipientpk">Receiver Public Key (40 chars):</label>
+      <input class="input-green" type="text" id="recipientpk" maxlength="40" autocomplete="off" placeholder="Enter recipient's public key" />
+    </div>
+
+    <div class="auth-section">
+      <label for="passphrase">Your Passphrase (6-12 letters & numbers):</label>
+      <input class="input-blue" type="password" id="passphrase" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your passphrase" />
+
+      <label for="signcode">4-digit Sign Code:</label>
+      <input class="input-blue" type="password" id="signcode" maxlength="4" minlength="4" autocomplete="off" pattern="\d{4}" placeholder="Enter sign code (numbers only)" />
+    </div>
+
+    <button class="btn-main" onclick="preview()" type="button">Preview</button>
+    <div id="previewBox" style="margin-top:0.3em;text-align:center;color:#15803d;"></div>
+    <button class="btn-main" onclick="confirmTransfer()" type="button" style="display:none;" id="confirmBtn">Confirm Transfer</button>
+
+    <div id="qr-reader"></div>
+  </div>
   <script>
     let qrReader = null;
     function openQRScanner() {
       const qrDiv = document.getElementById('qr-reader');
       qrDiv.style.display = 'block';
-      if (!qrReader) {
-        qrReader = new Html5Qrcode("qr-reader");
-      }
+      if (!qrReader) qrReader = new Html5Qrcode("qr-reader");
       qrReader.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 180 },
@@ -89,22 +151,18 @@
           document.getElementById('qrhash').value = qrCodeMessage;
           qrReader.stop();
           qrDiv.style.display = 'none';
-        },
-        errorMessage => {}
+        }
       ).catch(err => {
         alert("Cannot open camera: " + err);
         qrDiv.style.display = 'none';
       });
     }
-
     function scanImageQR(input) {
       if (input.files && input.files.length > 0) {
         const file = input.files[0];
         const qrDiv = document.getElementById('qr-reader');
         qrDiv.style.display = 'block';
-        if (!qrReader) {
-          qrReader = new Html5Qrcode("qr-reader");
-        }
+        if (!qrReader) qrReader = new Html5Qrcode("qr-reader");
         qrReader.scanFile(file, true)
           .then(qrCodeMessage => {
             document.getElementById('qrhash').value = qrCodeMessage;
@@ -117,7 +175,6 @@
           });
       }
     }
-
     function validateInputs() {
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
@@ -130,29 +187,26 @@
       if (!/^\d{4}$/.test(sign)) valid = false;
       return valid;
     }
-
     function preview() {
       const isValid = validateInputs();
-      const previewBtn = document.getElementById('previewBtn');
-      const confirmBtn = document.getElementById('confirmBtn');
       const previewBox = document.getElementById('previewBox');
+      const confirmBtn = document.getElementById('confirmBtn');
       if (!isValid) {
-        previewBox.textContent = "⚠️ Please check and complete all input fields correctly.";
-        confirmBtn.disabled = true;
+        previewBox.textContent = "⚠️ Please complete all fields correctly.";
+        confirmBtn.style.display = "none";
         return;
       }
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
       previewBox.innerHTML = `<b>Preview Transfer</b><br>
         <b>QR Hash:</b> <code>${hash}</code><br>
-        <b>Recipient Public Key:</b> <code>${pub}</code>`;
-      confirmBtn.disabled = false;
+        <b>Receiver Public Key:</b> <code>${pub}</code>`;
+      confirmBtn.style.display = "block";
     }
-
     function confirmTransfer() {
-      alert('✅ Transfer submitted! (Add your backend logic here)');
+      alert('✅ Transfer submitted! (เพิ่ม backend logic ได้ที่นี่)');
       document.getElementById('previewBox').textContent = "";
-      document.getElementById('confirmBtn').disabled = true;
+      document.getElementById('confirmBtn').style.display = "none";
     }
   </script>
 </body>
