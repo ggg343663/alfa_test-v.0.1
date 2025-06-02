@@ -48,16 +48,14 @@
       color: #166534; border-radius: 7px; width: 100%;
       outline: none;
     }
-    .address-btn, .qr-btn {
+    .address-btn {
       background: #22c55e; color: #fff; border: none;
       border-radius: 7px; padding: 0.37em 0.95em; margin-left: 0.2em;
       font-weight: 500; font-size: 0.98em; cursor: pointer;
       transition: background 0.14s;
       display: flex; align-items: center; height: 32px;
     }
-    .address-btn:hover, .qr-btn:hover { background: #16a34a;}
-    .qr-btn { padding: 0.37em 0.65em; background: #d1fadf; color: #059669;}
-    .qr-btn:hover { background: #bbf7d0; }
+    .address-btn:hover { background: #16a34a;}
     .qr-preview { display: none; text-align: center; margin-top: 0.6em; }
     /* Passphrase Section */
     .yellow-group {
@@ -127,7 +125,7 @@
     button:active { filter: brightness(0.98);}
     @media (max-width: 520px) {
       body { padding: 0.2em;}
-      .address-btn, .qr-btn, .show-btn, .show-red-btn { font-size: 0.93em; padding: 0.32em 0.79em;}
+      .address-btn, .show-btn, .show-red-btn { font-size: 0.93em; padding: 0.32em 0.79em;}
     }
   </style>
 </head>
@@ -137,11 +135,6 @@
   <div class="address-group">
     <input id="addressOutput" class="address-input" maxlength="40" readonly />
     <button class="address-btn" onclick="copyAddress()">Copy</button>
-    <button class="qr-btn" onclick="showQR()">QR</button>
-  </div>
-  <div id="qrCanvasWrap" class="qr-preview">
-    <canvas id="qrCanvas" width="120" height="120"></canvas><br>
-    <button class="mini-btn" onclick="hideQR()">Close QR</button>
   </div>
   <div class="yellow-group">
     <label>Passphrase (6-12 chars, must include letters & numbers):</label>
@@ -208,21 +201,6 @@
       document.getElementById('copyStatus').style.display = "block";
       setTimeout(()=>document.getElementById('copyStatus').style.display="none",1500);
     }
-    // Show QR
-    function showQR() {
-      const addr = document.getElementById('addressOutput').value;
-      if (!addr) return;
-      const qr = new QRious({
-        element: document.getElementById('qrCanvas'),
-        value: addr,
-        size: 120,
-        level: 'H'
-      });
-      document.getElementById('qrCanvasWrap').style.display = 'block';
-    }
-    function hideQR() {
-      document.getElementById('qrCanvasWrap').style.display = 'none';
-    }
     // Validate and generate address/privateKey
     function validatePassword(pw) {
       return pw.length >= 6 && pw.length <= 12 && /[A-Za-z]/.test(pw) && /\d/.test(pw);
@@ -267,7 +245,6 @@
       const address = "0x" + hash.slice(-40);
       fullHashEl.value = hash;
       addressEl.value = address;
-      hideQR();
     }
   </script>
 </body>
