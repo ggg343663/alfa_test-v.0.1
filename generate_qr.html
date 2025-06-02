@@ -21,8 +21,8 @@
     .back-btn {
       position: absolute;
       left: 10px;
-      top: 11px;
-      background: #222;   /* ดำ */
+      top: 12px;
+      background: #222;
       color: #fff;
       border: none;
       border-radius: 7px;
@@ -37,17 +37,25 @@
     .back-btn:hover { background: #555; color: #fff;}
     h2 {
       color: #22c55e;
-      margin-bottom: 1.1em;
+      margin-bottom: 1.15em;
       font-size: 1.15em;
       letter-spacing: 0.01em;
       padding-top: 0.5em;
     }
     .input-row {
       display: flex;
-      align-items: center;
-      gap: 0.36em;
+      align-items: flex-end;
+      gap: 0.24em;
       margin-bottom: 1.1em;
       justify-content: center;
+    }
+    .input-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.13em;
+      min-width: 44px;
+      max-width: 44px;
     }
     input[type="text"] {
       flex: 1 1 0;
@@ -63,22 +71,32 @@
     .icon-btn {
       background: none;
       border: none;
-      padding: 0 0.1em;
+      padding: 0;
       cursor: pointer;
       outline: none;
       display: flex;
+      flex-direction: column;
       align-items: center;
-      transition: background 0.13s;
       border-radius: 5px;
+      width: 44px; height: 44px;
+      justify-content: center;
     }
     .icon-btn:active { background: #bbf7d0;}
     .icon-btn img {
-      width: 27px; height: 27px;
+      width: 28px; height: 28px;
       display: block;
+      margin-bottom: 1px;
       filter: grayscale(25%) brightness(0.88) contrast(1.13);
       transition: filter 0.14s;
     }
     .icon-btn:hover img { filter: none; }
+    .icon-label {
+      font-size: 0.75em;
+      color: #198a39;
+      text-align: center;
+      margin-top: 0.1em;
+      user-select: none;
+    }
     button:not(.back-btn):not(.icon-btn) {
       background: linear-gradient(90deg, #22c55e 65%, #16a34a 100%);
       color: #fff;
@@ -136,13 +154,19 @@
     <h2>🟩 Generate QR Code from Hash</h2>
     <div class="input-row">
       <input type="text" id="qrHash" placeholder="Paste QR Hash here..." maxlength="128" autocomplete="off" />
-      <button class="icon-btn" title="Scan QR from camera" onclick="startScan()" tabindex="-1">
-        <img src="/mnt/data/file-Dw9h4La4do4cBH7su1K5yD" alt="Scan QR" />
-      </button>
+      <div class="input-col">
+        <button class="icon-btn" title="Scan QR from camera" onclick="startScan()" tabindex="-1">
+          <img src="/mnt/data/file-Dw9h4La4do4cBH7su1K5yD" alt="Scan QR" />
+          <span class="icon-label">Scan</span>
+        </button>
+      </div>
       <input type="file" id="imgInput" accept="image/*" style="display:none;" />
-      <button class="icon-btn" title="Pick QR image from gallery" onclick="document.getElementById('imgInput').click()" tabindex="-1">
-        <img src="/mnt/data/file-2mRd1VAUh69wouz2mX5RS1" alt="Gallery" />
-      </button>
+      <div class="input-col">
+        <button class="icon-btn" title="Pick QR image from gallery" onclick="document.getElementById('imgInput').click()" tabindex="-1">
+          <img src="/mnt/data/file-2mRd1VAUh69wouz2mX5RS1" alt="Gallery" />
+          <span class="icon-label">Gallery</span>
+        </button>
+      </div>
     </div>
     <button onclick="generateQR()">Generate QR Code</button>
     <div id="readyMsg" class="ready" style="display:none;">
