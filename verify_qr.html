@@ -116,17 +116,17 @@
   </div>
 
 <script>
-  // MOCK: Replace with fetch or JSON query in production
+  // DEMO: ใช้ hash 64 ตัวเต็ม (เปลี่ยน fetch JSON ได้)
   const whitelist = [
-    "A9F1...1CDE",
-    "B8A2...3BAF",
-    "C4EE...1AF0",
-    "A013...11AA",
-    "0A4D...F1B2"
+    "A9F1BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB1CDE",
+    "B8A2CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC3BAF",
+    "C4EEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1AF0",
+    "A013FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF11AA",
+    "0A4D1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890F1B2"
   ];
   const registered = [
-    { hash: "A9F1...1CDE", owner: "0x0fA...123", timestamp: "2024-06-01T12:01:00Z" },
-    { hash: "C4EE...1AF0", owner: "0xB4A...999", timestamp: "2024-06-01T13:22:00Z" }
+    { hash: "A9F1BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB1CDE", owner: "0x0fAba11A11111111111111111111111111111123", timestamp: "2024-06-01T12:01:00Z" },
+    { hash: "C4EEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1AF0", owner: "0xB4A998877665544332211000AABBCCDDEEFF999", timestamp: "2024-06-01T13:22:00Z" }
   ];
 
   // Scan QR from file
@@ -150,14 +150,14 @@
   let qrScanner = null;
   function toggleCameraScan() {
     const qrReader = document.getElementById('qr-reader');
+    const scanBtn = document.querySelector('.scan-btn');
     if (qrReader.style.display === "block") {
-      // Stop and hide
       qrScanner && qrScanner.stop().then(()=>{});
       qrReader.style.display = "none";
-      document.querySelector('.scan-btn').textContent = "Scan by Camera";
+      scanBtn.textContent = "Scan by Camera";
     } else {
       qrReader.style.display = "block";
-      document.querySelector('.scan-btn').textContent = "Stop Camera";
+      scanBtn.textContent = "Stop Camera";
       qrScanner = new Html5Qrcode("qr-reader");
       qrScanner.start(
         { facingMode: "environment" },
@@ -167,7 +167,7 @@
           document.getElementById('scanMsg').innerHTML = "✔️ QR hash scanned from camera!";
           qrScanner.stop();
           qrReader.style.display = "none";
-          document.querySelector('.scan-btn').textContent = "Scan by Camera";
+          scanBtn.textContent = "Scan by Camera";
         },
         err => {}
       );
