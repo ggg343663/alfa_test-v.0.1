@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <title>Transfer QR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     body {
       font-family: 'Inter', Arial, sans-serif;
@@ -70,33 +70,33 @@
       font-weight: 500; transition: border-color 0.13s;
     }
     .input-green:focus { border-color: #16a34a;}
-    .auth-section {
-      background: #e0f2fe;
+    .yellow-group {
+      background: #fef7e0;
+      border: 1.2px solid #eab308;
       border-radius: 10px;
-      border: 1.2px solid #38bdf8;
-      padding: 1.1em 0.95em 0.5em 0.95em;
-      margin-top: 1.15em;
+      padding: 1em 0.95em 0.6em 0.95em;
       margin-bottom: 0.6em;
+      margin-top: 1.15em;
     }
-    .auth-section label {
-      font-size: 0.96em; color: #2563eb; font-weight: 500; margin-bottom: 0.22em; display: block;
+    .yellow-group label {
+      color: #b58900;
+      font-size: 0.98em;
+      font-weight: 600;
     }
-    .input-blue {
-      width: 100%; font-size: 1em; padding: 0.54em 0.62em;
-      border-radius: 8px; border: 1.1px solid #38bdf8;
-      background: #e0f2fe; color: #1e293b; margin-bottom: 0.72em;
+    .pw-input {
+      width: 100%; font-size: 1em; padding: 0.58em 0.62em;
+      border-radius: 8px; border: 1.1px solid #eab308;
+      background: #fef9c3; color: #854d0e; margin-bottom: 0.72em;
       font-weight: 500; transition: border-color 0.13s;
+      letter-spacing: 0.11em;
     }
-    .input-blue:focus { border-color: #2563eb;}
-    .btn-main {
-      width: 100%; background: linear-gradient(90deg, #22c55e 60%, #16a34a 100%);
-      color: #fff; border: none; border-radius: 9px;
-      font-weight: bold; font-size: 1.11em; padding: 0.72em 0;
-      margin-top: 1.3em; margin-bottom: 0.6em; cursor: pointer;
-      box-shadow: 0 1.5px 8px #22c55e13; transition: background 0.16s;
+    .pw-input:focus { border-color: #eab308;}
+    .mini-btn {
+      background: #fff; color: #222; border: 1px solid #bbb; border-radius: 5px;
+      font-size: 0.95em; padding: 0.21em 0.6em; margin-left: 0.1em; cursor: pointer;
+      margin-top: 0.8em; width: 100%;
     }
-    .btn-main:active { background: linear-gradient(90deg, #16a34a 60%, #22c55e 100%);}
-    #qr-reader { display:none; width:250px; margin: 1em auto; }
+    .mini-btn:hover { background: #f0fdf4; }
     .input-err { color: #b91c1c; font-size: 0.97em; margin-bottom: 0.5em;}
     pre { text-align:left; background:#f3f6fa; padding:0.7em 1.2em; border-radius:8px; color:#166534;}
     @media (max-width: 520px) {
@@ -113,11 +113,11 @@
     <div class="row">
       <input type="text" id="qrhash" maxlength="64" autocomplete="off" placeholder="Enter QR Hash" />
       <button class="icon-btn" title="Scan QR" onclick="openQRScanner()">
-        <img src="/mnt/data/file-L18xSxFu29P7XrcKg9bNSw" alt="Scan QR"/>
+        <img src="/scan-qr-icon.png" alt="Scan QR"/>
       </button>
       <input type="file" accept="image/*" style="display:none;" id="imgQRInput" onchange="scanImageQR(this)">
       <button class="icon-btn" title="Import QR Image" onclick="document.getElementById('imgQRInput').click()">
-        <img src="/mnt/data/file-A7cyCpJAxSc3ji46qY5mrW" alt="Gallery"/>
+        <img src="/gallery-icon.png" alt="Gallery"/>
       </button>
     </div>
 
@@ -127,17 +127,17 @@
       <div class="input-err" id="pubkeyErr"></div>
     </div>
 
-    <div class="auth-section">
-      <label for="passphrase">Your Passphrase (6-12 letters & numbers):</label>
-      <input class="input-blue" type="password" id="passphrase" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your passphrase" />
+    <div class="yellow-group">
+      <label for="password">Your Password (6-12 chars, letters and numbers):</label>
+      <input class="pw-input" type="password" id="password" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your password" />
 
-      <label for="signcode">4-digit Sign Code:</label>
-      <input class="input-blue" type="password" id="signcode" maxlength="4" minlength="4" autocomplete="off" pattern="\d{4}" placeholder="Enter sign code (numbers only)" />
+      <label for="pin">Your PIN (6 digits, ATM-style):</label>
+      <input class="pw-input" type="password" id="pin" maxlength="6" minlength="6" pattern="\d{6}" autocomplete="off" placeholder="Enter your 6-digit PIN" />
     </div>
 
-    <button class="btn-main" onclick="preview()" type="button">Preview</button>
+    <button class="mini-btn" onclick="preview()" type="button">Preview Transfer</button>
     <div id="previewBox" style="margin-top:0.3em;text-align:center;color:#15803d;"></div>
-    <button class="btn-main" onclick="confirmTransfer()" type="button" style="display:none;" id="confirmBtn">Confirm Transfer</button>
+    <button class="mini-btn" onclick="confirmTransfer()" type="button" style="display:none;" id="confirmBtn">Confirm Transfer</button>
 
     <div id="qr-reader"></div>
   </div>
@@ -173,29 +173,28 @@
             qrDiv.style.display = 'none';
           })
           .catch(() => {
-            alert("ไม่พบ QR ในภาพนี้");
+            alert("QR not found in this image.");
             qrDiv.style.display = 'none';
           });
       }
     }
     function validatePubkey(pk) {
-      // 42 chars, start with 0x, 40 hex chars after
       return /^0x[a-fA-F0-9]{40}$/.test(pk);
     }
     function validateInputs() {
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
-      const pass = document.getElementById('passphrase').value.trim();
-      const sign = document.getElementById('signcode').value.trim();
+      const pw = document.getElementById('password').value.trim();
+      const pin = document.getElementById('pin').value.trim();
       let valid = true;
       document.getElementById('pubkeyErr').textContent = "";
       if (hash.length !== 64) valid = false;
       if (!validatePubkey(pub)) {
         valid = false;
-        if (pub) document.getElementById('pubkeyErr').textContent = "Public Key ต้องขึ้นต้น 0x และยาว 42 ตัวอักษร";
+        if (pub) document.getElementById('pubkeyErr').textContent = "Public Key must start with 0x and be 42 chars.";
       }
-      if (pass.length < 6 || pass.length > 12 || !/[A-Za-z]/.test(pass) || !/\d/.test(pass)) valid = false;
-      if (!/^\d{4}$/.test(sign)) valid = false;
+      if (pw.length < 6 || pw.length > 12 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw)) valid = false;
+      if (!/^\d{6}$/.test(pin)) valid = false;
       return valid;
     }
     function preview() {
@@ -209,26 +208,8 @@
       }
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
-      const pass = document.getElementById('passphrase').value.trim();
-      const sign = document.getElementById('signcode').value.trim();
 
-      // สร้าง signature mock (ใช้ sha256 แทน, สำหรับ demo/PoC)
-      function sha256(str) {
-        // สำหรับ PoC เท่านั้น
-        return Array.from(new Uint8Array(
-          window.crypto.subtle.digestSync ?
-            window.crypto.subtle.digestSync("SHA-256", new TextEncoder().encode(str)) :
-            [] // digestSync ใช้ได้บน Chrome บางเวอร์ชัน
-        )).map(b => b.toString(16).padStart(2, '0')).join('');
-      }
-      // fallback async
-      function sha256Async(str) {
-        return window.crypto.subtle.digest("SHA-256", new TextEncoder().encode(str))
-          .then(buf => Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join(''));
-      }
-      // สำหรับความปลอดภัยจริง ต้องใช้ signature ด้วย private key (ed25519/ECDSA)
-
-      // แสดง preview payload
+      // ใน production: ต้อง sign payload ด้วย privateKey (password+pin) จริง
       previewBox.innerHTML =
         `<b>Preview Transfer</b><br>
         <b>QR Hash:</b> <code>${hash}</code><br>
@@ -237,15 +218,15 @@
         <pre>{
   "qr_hash": "${hash}",
   "to_pubkey": "${pub}",
-  "signed_by": "(this_user_pubkey)",
+  "signed_by": "(your_address)",
   "sig": "(private_sign)",
   "timestamp": "${new Date().toISOString()}"
 }</pre>
-        <small style="color:#666;">(กรณี production ต้อง sign จริงด้วย private key แล้ว verify ย้อนกลับได้)</small>`;
+        <small style="color:#666;">(In production, sign this payload with your private key derived from password+PIN.)</small>`;
       confirmBtn.style.display = "block";
     }
     function confirmTransfer() {
-      alert('✅ Transfer submitted! (เพิ่ม backend logic ได้ที่นี่)');
+      alert('✅ Transfer submitted! (Add backend logic here)');
       document.getElementById('previewBox').textContent = "";
       document.getElementById('confirmBtn').style.display = "none";
     }
