@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register Agent (DTC)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
+  <style>
+    body { font-family: Arial,sans-serif; background: #f4f8fb; margin:0; padding:0;}
+    .container {
+      max-width: 420px; margin:2em auto; background:#fff;
+      padding:2.2em 1.1em 1.7em 1.1em; border-radius:15px;
+      box-shadow:0 2px 16px #22c55e22;
+    }
+    h2 { color:#22c55e; text-align:center; margin-bottom:1em;}
+    label { font-weight:600; margin-top:1em; display:block;}
+    input[type=text] {
+      width:100%; padding:0.62em 0.7em; font-size:1.05em;
+      border-radius:8px; border:1.3px solid #22c55e;
+      background:#e7fbe8; color:#166534; margin-bottom:0.42em;
+      margin-top:0.15em;
+    }
+    .warn { color:#d97706; margin-bottom:0.3em;}
+    .err { color:#e53935; margin-bottom:0.3em;}
+    .ok { color:#16a34a; margin-bottom:0.3em;}
+    .btn-main {
+      width:100%; padding:0.75em 0; background:#22c55e;
+      color:#fff; border:none; border-radius:9px; font-weight:700;
+      font-size:1.08em; margin-top:1.3em; cursor:pointer;
+      letter-spacing:0.01em; transition:background 0.17s;
+    }
+    .btn-main:hover { background:#16a34a;}
+    .hash-row {
+      margin-top:1.2em; word-break:break-all; font-family:monospace;
+      font-size:1.04em; color:#26733e; background:#e7fbe8;
+      border-radius:8px; padding:0.7em 1em;
+    }
+    .back-btn {
+      margin-bottom:1.3em; background:#dbeafe; color:#324275;
+      border-radius:7px; border:1.3px solid #b7c5df;
+      padding:0.38em 1.18em; font-size:1em; cursor:pointer;
+      transition:background 0.17s;
+    }
+    .back-btn:hover { background:#bae6fd;}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <button class="back-btn" onclick="history.back()">← Back</button>
+    <h2>Register Agent</h2>
+    <div id="unlockWarn" class="warn"></div>
+    <form id="agentForm" autocomplete="off">
+      <label>Agent Name (a-z, 0-9, ≤16):</label>
+      <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
+      <div id="nameStatus"></div>
+      <label>Nonce (random string):</label>
+      <input type="text" id="nonce" maxlength="20" required autocomplete="off" />
+      <button type="submit" class="btn-main">Register Agent</button>
+    </form>
+    <div id="hashResult" class="hash-row" style="display:none;"></div>
+  </div>
+  <script>
+    // --- CONFIG/DEMO DATA (replace with real data in production) ---
+    // master_hash: ต้องมาจาก master ที่ล็อกอิน/active
+    const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
+    // whitelist: object ที่ key เป็น qr_id, value มี registered:true/false
+    const whitelist = {};
+    // DEMO: ลงทะเบียน 50 QR
+    for (let i=1;i<=50;i++) whitelist['qr'+i] = {registered:true};
+    for (let i=51;i<=100;i++) whitelist['qr'+i] = {registered:false};
+    // agent_db: object สำหรับเก็บ agent ที่ถูกสร้าง
+    const agent_db = {};
+    // badwordList: ดึงจาก badwords.json ได้ (กรณีใช้)
+    let badwordList = {"profanity":["fuck","shit"],"offensive":["idiot"]};
+
+    // --- LOGIC ---
+    function canCreateAgent(whitelist) {
+      return Object.values(whitelist).filter(q=>q.registered).length >= 50;
+    }
+    function validateAgentName(name) {
+      return /^[a-z0-9]{1,16}$/.test(name);
+    }
+    function checkBadwords(str) {
+      str = str.toLowerCase();
+      let found = [];
+      for (const group of Object.values(badwordList))
+        group.forEach(word => { if(str.includes(word)) found.push(word); });
+      return found;
+    }
+
+    // --- UI Event ---
+    document.getElementById('agentName').addEventListener('input', function(){
+      this.value = this.value.replace(/[^a-z0-9]/g, '').slice(0,16);
+      const bads = checkBadwords(this.value);
+      const st = document.getElementById('nameStatus');
+      if (!validateAgentName(this.value)) {
+        st.innerHTML = "❌ Only a-z, 0-9 allowed (≤16 chars)";
+        st.className = "err";
+      } else if (bads.length>0) {
+        st.innerHTML = "⚠ Badword detected: " + bads.join(", ");
+        st.className = "warn";
+      } else {
+        st.innerHTML = "✓ Name OK";
+        st.className = "ok";
+      }
+    });
+
+    // --- Form Submission ---
+    document.getElementById('agentForm').onsubmit = function(e){
+      e.preventDefault();
+      // 1. Check unlock condition
+      if (!canCreateAgent(whitelist)) {
+        document.getElementById('unlockWarn').textContent = "ยังปลดล็อก master ไม่ได้ (ต้อง register 50 QR ก่อน)";
+        return;
+      } else {
+        document.getElementById('unlockWarn').textContent = "";
+      }
+      // 2. Validate name
+      const agentName = document.getElementById('agentName').value.trim();
+      const nonce = document.getElementById('nonce').value.trim();
+      if (!validateAgentName(agentName)) {
+        alert("ชื่อ agent ต้องเป็น a-z, 0-9, ≤16 ตัว");
+        return;
+      }
+      // 3. Check badword
+      const bads = checkBadwords(agentName);
+      if (bads.length>0 && !confirm("⚠ ชื่อ agent มีคำไม่เหมาะสม: " + bads.join(", ") + "\nดำเนินการต่อหรือไม่?")) {
+        return;
+      }
+      // 4. Duplicate check
+      if (Object.values(agent_db).some(a=>a.agent_name===agentName)) {
+        alert("Agent name นี้ถูกใช้แล้วในระบบ");
+        return;
+      }
+      // 5. Create agent hash
+      const timestamp = Math.floor(Date.now()/1000);
+      const s = `${master_hash}:${agentName}:${nonce}:${timestamp}`;
+      const agent_hash = sha256(s);
+      // 6. Save to agent_db
+      agent_db[agent_hash] = {
+        agent_name: agentName,
+        master_hash,
+        nonce,
+        timestamp,
+        agent_hash
+      };
+      // 7. Show result
+      document.getElementById('hashResult').style.display = "block";
+      document.getElementById('hashResult').innerHTML =
+        `<b>Agent Registered!</b><br>
+         Agent Name: <b>${agentName}</b><br>
+         Agent Hash: <code>${agent_hash}</code><br>
+         Timestamp: <b>${timestamp}</b><br>
+         Nonce: <b>${nonce}</b>`;
+      this.reset();
+      document.getElementById('nameStatus').innerHTML = "";
+    };
+  </script>
+</body>
+</html>
