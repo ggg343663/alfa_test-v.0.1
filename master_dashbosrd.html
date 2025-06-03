@@ -72,9 +72,7 @@
     <h2>🔑 Master QR Dashboard</h2>
 
     <!-- Unlock progress by batch -->
-    <div class="progress-section" id="batchProgress">
-      <!-- Rendered by JS -->
-    </div>
+    <div class="progress-section" id="batchProgress"></div>
 
     <div class="summary">
       <div>Total<br><span id="totalQR">0</span></div>
@@ -99,7 +97,6 @@
     </table>
   </div>
 <script>
-// Example QR data including batch, can replace with fetch for actual system
 let qrList = [
   {index:1, batch:1, hash:"A9F1...1CDE", status:"registered", owner:"0x0fA...123"},
   {index:2, batch:1, hash:"B8A2...3BAF", status:"available", owner:""},
@@ -112,15 +109,12 @@ let qrList = [
   // Batch 3
   {index:2001, batch:3, hash:"D800...BBE4", status:"available", owner:""},
 ];
-
-// For demo: batch setup
 const batchConfig = [
   {batch:1, label:"Batch 1 (Limited)", size:100, unlockPercent:0.5, nextBatch:2, nextAmount:2000},
   {batch:2, label:"Batch 2", size:2000, unlockPercent:0.5, nextBatch:3, nextAmount:2000},
   {batch:3, label:"Batch 3", size:2000, unlockPercent:0.5, nextBatch:null, nextAmount:null},
 ];
 
-// Render progress for each batch
 function renderBatchProgress() {
   const section = document.getElementById('batchProgress');
   let html = "";
@@ -132,7 +126,7 @@ function renderBatchProgress() {
       <span class="progress-title">${cfg.label}:</span>
       <div class="progress-stats">Registered: <b>${reg}/${cfg.size}</b> &nbsp;|&nbsp; <b>${percent}%</b></div>
       ${
-        cfg.nextBatch && (reg<cfg.size)
+        cfg.nextBatch && reg<Math.ceil(cfg.size*cfg.unlockPercent)
           ? `<div class="progress-next">Next unlock: ${cfg.nextAmount} QR when registered ≥ ${Math.ceil(cfg.size*cfg.unlockPercent)} (${(cfg.unlockPercent*100).toFixed(0)}%)</div>`
           : (cfg.nextBatch?`<div class="progress-next" style="color:#16a34a">Unlocked. Next: Batch ${cfg.nextBatch} (${cfg.nextAmount} QR)</div>`:"")
       }
@@ -141,9 +135,7 @@ function renderBatchProgress() {
   section.innerHTML = html;
 }
 
-// Load data (mock or fetch)
 function loadData() {
-  // fetch and update qrList here if needed
   renderBatchProgress();
   renderTable();
 }
@@ -152,13 +144,13 @@ loadData();
 function renderTable() {
   const qrTable = document.getElementById('qrTable');
   const search = (document.getElementById('searchBox')?.value || "").toLowerCase();
-  let total = qrList.length;
-  let reg = 0, avail = 0;
+  let total = 0, reg = 0, avail = 0;
   let html = qrList.filter(q =>
       q.hash.toLowerCase().includes(search) ||
       (q.owner && q.owner.toLowerCase().includes(search)) ||
       q.status.toLowerCase().includes(search)
     ).map(q => {
+      total++;
       if(q.status === "registered") reg++;
       if(q.status === "available") avail++;
       return `<tr>
