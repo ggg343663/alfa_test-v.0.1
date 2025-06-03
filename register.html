@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Register QR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     body {
       font-family: 'Inter', Arial, sans-serif;
@@ -36,6 +37,22 @@
       box-shadow: 0 2px 14px #246bfd08;
     }
     label { font-weight: 600; margin-bottom: 0.42em; font-size: 1.05em; letter-spacing: 0.01em;}
+    .qr-row {
+      display: flex; align-items: center; gap: 0.32em; margin-bottom: 0.4em;
+    }
+    .qr-row input[type="text"] { flex: 1 1 0; }
+    .scan-btn, .import-btn {
+      background: #22d3ee;
+      border: none;
+      color: #fff;
+      border-radius: 7px;
+      padding: 0.45em 1em;
+      font-size: 0.99em;
+      margin-left: 0.15em;
+      cursor: pointer;
+      transition: background 0.14s;
+    }
+    .scan-btn:hover, .import-btn:hover { background: #246bfd; }
     input[type="text"] {
       padding: 0.73em 0.9em;
       font-size: 1.1em;
@@ -80,6 +97,9 @@
       transition: background 0.14s;
     }
     .copy-btn:hover { background: #246bfd; }
+    #qr-reader {
+      width: 100%; max-width: 320px; margin: 1.2em auto 0 auto; display: none;
+    }
     @media (max-width: 520px) {
       .main-form { padding: 1.2em 0.4em 1.2em 0.4em; }
       body { margin: 0.4em; padding-top: 2.9em; }
@@ -91,8 +111,14 @@
   <h2>Register QR</h2>
   <form class="main-form" id="registerForm" autocomplete="off">
     <label for="hashQr">QR Hash (64 ตัวอักษร):</label>
-    <input type="text" id="hashQr" maxlength="64" placeholder="ใส่ QR Hash" />
+    <div class="qr-row">
+      <input type="text" id="hashQr" maxlength="64" placeholder="ใส่ QR Hash" />
+      <button type="button" class="scan-btn" onclick="scanQR()">Scan</button>
+      <input type="file" id="importImg" accept="image/*" style="display:none;" />
+      <button type="button" class="import-btn" onclick="document.getElementById('importImg').click()">Import Image</button>
+    </div>
     <span id="hashStatus" class="input-status"></span>
+    <div id="qr-reader"></div>
 
     <label for="publicKey">Public Key (42 ตัวอักษร):</label>
     <input type="text" id="publicKey" maxlength="42" placeholder="ใส่ Public Key (0x...)" />
@@ -109,6 +135,41 @@
     </div>
   </form>
   <script>
+    // --- QR SCAN LOGIC ---
+    let qrReader = null;
+    function scanQR() {
+      const qrDiv = document.getElementById('qr-reader');
+      qrDiv.style.display = 'block';
+      if (!qrReader) qrReader = new Html5Qrcode("qr-reader");
+      qrReader.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 220 },
+        qrCodeMessage => {
+          document.getElementById('hashQr').value = qrCodeMessage;
+          qrReader.stop();
+          qrDiv.style.display = 'none';
+          validateInputs();
+        },
+        err => {}
+      );
+    }
+    document.getElementById('importImg').addEventListener('change', function(evt){
+      const file = evt.target.files[0];
+      if (!file) return;
+      if (!qrReader) qrReader = new Html5Qrcode("qr-reader");
+      qrReader.scanFile(file, true)
+        .then(decodedText => {
+          document.getElementById('hashQr').value = decodedText;
+          document.getElementById('qr-reader').style.display = 'none';
+          validateInputs();
+        })
+        .catch(() => {
+          alert("ไม่พบ QR ในภาพนี้");
+          document.getElementById('qr-reader').style.display = 'none';
+        });
+    });
+
+    // ---- VALIDATION/LOGIC (ของเดิม) ----
     const hashInput = document.getElementById('hashQr');
     const pubInput = document.getElementById('publicKey');
     const hashStatus = document.getElementById('hashStatus');
