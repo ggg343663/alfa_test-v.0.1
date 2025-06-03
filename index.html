@@ -137,6 +137,43 @@
       font-size: 0.98em;
       text-align: center;
     }
+    /* Agent Section */
+    .agent-section {
+      background: #f3f7fd;
+      border-left: 6px solid #38bdf8;
+    }
+    .agent-title {
+      color: #2563eb;
+      display: flex;
+      align-items: center;
+      gap: 0.4em;
+      font-size: 1.13em;
+      margin-bottom: 0.36em;
+    }
+    .agent-desc {
+      color: #2563eb;
+      margin-bottom: 0.54em;
+      font-size: 0.98em;
+      text-align: center;
+    }
+    .agent-list a {
+      display: block;
+      width: 100%;
+      padding: 0.54em 0.4em;
+      background: #38bdf8;
+      color: #fff;
+      font-weight: bold;
+      border-radius: 6px;
+      font-size: 1.07em;
+      text-align: center;
+      text-decoration: none;
+      margin-bottom: 0.28em;
+      transition: background 0.11s;
+    }
+    .agent-list a:hover {
+      background: #2563eb;
+      color: #fff;
+    }
     /* Genesis Section */
     .genesis-section {
       background: #f7f4fe;
@@ -150,7 +187,6 @@
       font-size: 1.13em;
       margin-bottom: 0.36em;
     }
-    /* ไม่ต้องมี genesis-list และเมนู approve master */
     .genesis-desc {
       color: #714ab6;
       margin-bottom: 0.54em;
@@ -198,6 +234,15 @@
       <a href="request_master.html">Request Master (Commit-Hash)</a>
       <a href="master_unlock.html">Unlock Master</a>
       <a href="master_dashboard.html">Master Dashboard</a>
+    </div>
+  </div>
+
+  <div class="section agent-section">
+    <div class="agent-title">🟦 Agent</div>
+    <div class="agent-desc">Register and issue normal QR after unlocking condition.</div>
+    <div class="agent-list">
+      <a href="agent_register.html">Register Agent</a>
+      <a href="agent_dashboard.html">Agent Dashboard</a>
     </div>
   </div>
 
