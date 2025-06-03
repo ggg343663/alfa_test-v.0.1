@@ -10,64 +10,81 @@
       font-family: Arial, sans-serif;
       background: #f6fafb;
       padding: 2em;
-      max-width: 420px;
+      max-width: 430px;
       margin: auto;
     }
     .container {
       background: #fff;
       border-radius: 13px;
       box-shadow: 0 2px 12px #dde4f1;
-      padding: 2em 1.4em;
+      padding: 2em 1.4em 1.2em 1.4em;
       margin-top: 2em;
+      position: relative;
     }
+    .back-btn {
+      position: absolute;
+      top: 18px;
+      left: 14px;
+      background: #dbeafe;
+      color: #324275;
+      border-radius: 6px;
+      border: 1px solid #b3c4df;
+      font-size: 1em;
+      padding: 0.36em 1.15em;
+      cursor: pointer;
+      z-index: 1000;
+      transition: background 0.13s;
+    }
+    .back-btn:hover { background: #bae6fd; }
     h2 { color: #26733e; text-align: center; }
     label { font-weight: bold; margin-top: 1em; display: block; }
+    .input-row {
+      display: flex; align-items: center; gap: 0.4em; margin-bottom: 0.6em;
+    }
     input[type="text"] {
-      width: 100%;
+      flex: 1 1 0;
       padding: 0.53em 0.8em;
-      margin-top: 0.3em;
       border-radius: 7px;
       border: 1.3px solid #cde4dc;
       font-size: 1em;
-      margin-bottom: 0.6em;
+      margin-bottom: 0;
     }
-    #imgInput {
-      width: 100%;
-      margin-top: 0.7em;
-      margin-bottom: 0.8em;
-      padding: 0.45em 0.5em;
-      border-radius: 7px;
-      border: 1.3px solid #b1bac7;
-      background: #f5f7fa;
-      font-size: 0.99em;
-    }
-    .scan-btn {
+    .scan-btn, .import-btn {
+      padding: 0.51em 0.92em;
       background: #4f8cfb;
       color: #fff;
       border: none;
       border-radius: 8px;
       font-weight: bold;
       font-size: 1em;
-      width: 100%;
-      padding: 0.62em 0;
-      margin-top: 0.5em;
       cursor: pointer;
       transition: background 0.13s;
     }
-    .scan-btn:hover { background: #2563eb; }
-    button {
-      width: 100%; margin-top: 1em; padding: 0.7em 0; font-size: 1.03em;
-      background: #219150; color: #fff; border: none; border-radius: 8px;
-      font-weight: bold; cursor: pointer; letter-spacing: 0.01em;
+    .scan-btn { background: #22c55e; }
+    .scan-btn:hover { background: #16a34a; }
+    .import-btn { background: #4f8cfb; }
+    .import-btn:hover { background: #2563eb; }
+    #imgInput { display: none; }
+    .scan-box {
+      color: #15803d;
+      margin-bottom: 0.7em;
+      font-size: 0.98em;
+      text-align: center;
+      min-height: 1.1em;
     }
-    button:hover { background: #176d38;}
+    #qr-reader {
+      margin: 0.5em auto;
+      display: none;
+      width: 100% !important;
+      max-width: 320px;
+    }
     .result-box {
-      margin-top: 1.4em;
+      margin-top: 1.3em;
       background: #f4fff7;
       border-left: 6px solid #22d3ee;
       border-radius: 8px;
       padding: 1em 1.2em;
-      font-size: 1.04em;
+      font-size: 1.06em;
       color: #1a5a37;
       word-break: break-word;
       min-height: 2em;
@@ -78,45 +95,38 @@
       border-left: 6px solid #e03e3e;
       border-radius: 8px;
       padding: 1em 1.2em;
-      font-size: 1.04em;
+      font-size: 1.06em;
       color: #b80000;
       word-break: break-word;
       min-height: 2em;
     }
-    .scan-box {
-      color: #15803d;
-      margin-bottom: 0.5em;
-      font-size: 0.98em;
-      text-align: center;
-    }
-    .btn-back { background: #dbeafe; color: #324275; margin-top: 1.2em;}
-    .btn-back:hover { background: #bae6fd;}
-    #qr-reader {
-      margin: 0.7em auto;
-      display: none;
-      width: 100% !important;
-      max-width: 320px;
+    @media (max-width: 600px) {
+      body { padding: 0.5em;}
+      .container { padding: 1.1em 0.5em 0.9em 0.5em; margin-top: 1em;}
+      .back-btn { top: 10px; left: 6px; font-size: 0.97em; padding: 0.24em 0.9em;}
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <button class="back-btn" onclick="window.history.back()">← Back</button>
     <h2>Check QR Code</h2>
     <label for="qrhash">QR Hash (64 chars):</label>
-    <input type="text" id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" />
-
-    <input type="file" id="imgInput" accept="image/*" />
-    <button class="scan-btn" onclick="toggleCameraScan()">Scan by Camera</button>
+    <div class="input-row">
+      <input type="text" id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" autofocus />
+      <button class="scan-btn" onclick="toggleCameraScan()">📷</button>
+      <input type="file" id="imgInput" accept="image/*" onchange="importQR(this)" />
+      <button class="import-btn" onclick="document.getElementById('imgInput').click()">🖼️</button>
+    </div>
     <div id="scanMsg" class="scan-box"></div>
     <div id="qr-reader"></div>
 
     <button onclick="checkQR()">Check</button>
     <div id="resultArea"></div>
-    <button class="btn-back" onclick="window.history.back()">← Back</button>
   </div>
 
 <script>
-  // DEMO: ใช้ hash 64 ตัวเต็ม (เปลี่ยน fetch JSON ได้)
+  // DEMO DATA (Replace with JSON fetch)
   const whitelist = [
     "A9F1BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB1CDE",
     "B8A2CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC3BAF",
@@ -129,24 +139,7 @@
     { hash: "C4EEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1AF0", owner: "0xB4A998877665544332211000AABBCCDDEEFF999", timestamp: "2024-06-01T13:22:00Z" }
   ];
 
-  // Scan QR from file
-  document.getElementById('imgInput').addEventListener('change', function(evt){
-    const file = evt.target.files[0];
-    const scanMsg = document.getElementById('scanMsg');
-    scanMsg.textContent = "";
-    if (!file) return;
-    Html5Qrcode.getCameras(); // preload library
-    Html5Qrcode.scanFile(file, true)
-      .then(decodedText => {
-        document.getElementById('qrhash').value = decodedText;
-        scanMsg.innerHTML = "✔️ QR hash scanned from image!";
-      })
-      .catch(err => {
-        scanMsg.innerHTML = "<span style='color:#b80000'>❌ ไม่พบ QR ในภาพนี้</span>";
-      });
-  });
-
-  // Scan QR by camera (live)
+  // Camera QR Scan
   let qrScanner = null;
   function toggleCameraScan() {
     const qrReader = document.getElementById('qr-reader');
@@ -154,10 +147,12 @@
     if (qrReader.style.display === "block") {
       qrScanner && qrScanner.stop().then(()=>{});
       qrReader.style.display = "none";
-      scanBtn.textContent = "Scan by Camera";
+      scanBtn.textContent = "📷";
+      document.getElementById('scanMsg').textContent = "";
     } else {
       qrReader.style.display = "block";
-      scanBtn.textContent = "Stop Camera";
+      scanBtn.textContent = "✖️";
+      document.getElementById('scanMsg').textContent = "กำลังเปิดกล้อง...";
       qrScanner = new Html5Qrcode("qr-reader");
       qrScanner.start(
         { facingMode: "environment" },
@@ -167,13 +162,31 @@
           document.getElementById('scanMsg').innerHTML = "✔️ QR hash scanned from camera!";
           qrScanner.stop();
           qrReader.style.display = "none";
-          scanBtn.textContent = "Scan by Camera";
+          scanBtn.textContent = "📷";
         },
         err => {}
       );
     }
   }
 
+  // Import QR from image file
+  function importQR(input) {
+    const file = input.files[0];
+    const scanMsg = document.getElementById('scanMsg');
+    scanMsg.textContent = "";
+    if (!file) return;
+    Html5Qrcode.getCameras();
+    Html5Qrcode.scanFile(file, true)
+      .then(decodedText => {
+        document.getElementById('qrhash').value = decodedText;
+        scanMsg.innerHTML = "✔️ QR hash scanned from image!";
+      })
+      .catch(() => {
+        scanMsg.innerHTML = "<span style='color:#b80000'>❌ ไม่พบ QR ในภาพนี้</span>";
+      });
+  }
+
+  // Check QR
   function checkQR() {
     const hash = document.getElementById('qrhash').value.trim();
     const result = document.getElementById('resultArea');
