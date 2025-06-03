@@ -1,44 +1,22 @@
 {
-  "หยาบคาย (ตัวอย่าง)": [
-    "fuck",
-    "shit",
-    "bitch",
-    "bastard"
+  "หยาบคาย": [
+    "fuck", "shit", "bitch", "bastard", "asshole", "dick", "pussy", "slut",
+    "cunt", "fag", "wanker",
+    "เหี้ย", "ควาย", "สัส", "เย็ด", "มึง", "หี", "ควย", "เงี่ยน"
   ],
-  "รุนแรง (ตัวอย่าง)": [
-    "kill",
-    "murder",
-    "bomb",
-    "terror"
+  "รุนแรง": [
+    "kill", "murder", "bomb", "terror", "shoot", "stab", "rape", "attack",
+    "ฆ่า", "ข่มขืน", "ระเบิด", "แทง", "ยิง", "ปล้น", "จี้"
   ],
-  "ศาสนา (ตัวอย่าง)": [
-    "jew",
-    "muslim",
-    "christian",
-    "buddha",
-    "allah"
+  "เหยียดเชื้อชาติ": [
+    "nazi", "racist", "slave", "negro", "ching", "jap", "chink", "gook", "kike", "spic",
+    "ไอ้ยิว", "ไอ้แขก", "ไอ้จีน", "ไอ้ดำ", "ไอ้ฝรั่ง", "ควายอีสาน"
   ],
-  "เชื้อชาติ (ตัวอย่าง)": [
-    "nazi",
-    "racist",
-    "slave"
+  "การเมือง/ชาตินิยม": [
+    "hitler", "dictator", "communist", "fascist", "เผด็จการ", "คอมมิวนิสต์", "ชังชาติ", "ชิงชาติ"
   ],
-  "การเมือง/ชาติ (ตัวอย่าง)": [
-    "russia",
-    "china",
-    "usa",
-    "trump",
-    "hitler"
-  ],
-  "ยาเสพติด (ตัวอย่าง)": [
-    "drug",
-    "cocaine",
-    "heroin",
-    "meth",
-    "lsd",
-    "ecstasy",
-    "weed",
-    "marijuana",
-    "opium"
+  "ยาเสพติด": [
+    "drug", "cocaine", "heroin", "meth", "lsd", "ecstasy", "weed", "marijuana", "opium",
+    "ยาบ้า", "ยาไอซ์", "กัญชา", "ฝิ่น", "เฮโรอีน"
   ]
 }
