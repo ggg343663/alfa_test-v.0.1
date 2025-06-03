@@ -6,176 +6,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #fffbe8;
-      margin: 0; padding: 0;
-    }
-    .container {
-      background: #fff;
-      max-width: 430px;
-      margin: 2em auto 2em auto;
-      border-radius: 17px;
-      box-shadow: 0 2px 16px #eab30833;
-      padding: 2.1em 1.3em 1.6em 1.3em;
-    }
-    h2 {
-      color: #b58900;
-      margin-bottom: 1em;
-      text-align: center;
-      letter-spacing: 0.01em;
-      font-size: 1.35em;
-    }
-    label {
-      font-weight: 600;
-      margin-bottom: 0.3em;
-      display: block;
-      color: #684d00;
-      font-size: 1em;
-      margin-top: 1.1em;
-    }
-    input[type="text"], input[type="password"] {
-      width: 100%;
-      padding: 0.6em 0.7em;
-      font-size: 1em;
-      border-radius: 7px;
-      border: 1.5px solid #ffe066;
-      margin-bottom: 0.35em;
-      transition: border 0.17s;
-      background: #fffdf4;
-    }
-    input:focus {
-      border: 1.7px solid #facc15;
-      background: #fffde4;
-      outline: none;
-    }
-    small {
-      font-size: 0.96em;
-      color: #b58900;
-      display: block;
-      margin-top: -0.4em;
-      margin-bottom: 1em;
-    }
-    .form-warn {
-      color: #d97706;
-      background: #fffbe9;
-      border-left: 5px solid #facc15;
-      border-radius: 8px;
-      padding: 0.7em 1em;
-      margin: 1em 0 0.7em 0;
-      font-size: 1em;
-    }
-    .msg-warn {
-      color: #d32f2f;
-      font-weight: bold;
-      font-size: 1em;
-      margin-bottom: 0.3em;
-    }
-    .input-error {
-      border: 2px solid #eab308;
-      background: #fff9db;
-    }
-    button[type="submit"] {
-      width: 100%;
-      margin-top: 1.4em;
-      padding: 0.82em 0;
-      font-size: 1.08em;
-      background: linear-gradient(90deg, #ffe066 50%, #facc15 100%);
-      color: #4a3800;
-      border: none;
-      border-radius: 9px;
-      font-weight: bold;
-      letter-spacing: 0.01em;
-      box-shadow: 0 1px 8px #ffe0664a;
-      cursor: pointer;
-      transition: background 0.18s, color 0.18s;
-    }
-    button[type="submit"]:hover {
-      background: linear-gradient(90deg, #facc15 60%, #ffe066 100%);
-      color: #2b2401;
-    }
-    .back-btn {
-      margin-bottom: 1em;
-      background: #fef9c3;
-      color: #684d00;
-      border-radius: 7px;
-      border: 1.3px solid #fde047;
-      padding: 0.4em 1.3em;
-      font-size: 1em;
-      cursor: pointer;
-      box-shadow: 0 1px 5px #fde04740;
-      transition: background 0.18s;
-    }
-    .back-btn:hover {
-      background: #fde047;
-      color: #21211d;
-    }
-    .hash-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      margin-bottom: 0.4em;
-      margin-top: 1.7em;
-    }
-    .hash-status.ready {
-      color: #13a137;
-      font-weight: bold;
-      font-size: 1em;
-      margin-left: 6px;
-    }
-    .copy-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0 0.2em;
-      margin-left: 0.2em;
-    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #fffbe8; margin:0; padding:0;}
+    .container { background: #fff; max-width: 430px; margin: 2em auto 2em auto; border-radius: 17px; box-shadow: 0 2px 16px #eab30833; padding: 2.1em 1.3em 1.6em 1.3em; }
+    h2 { color: #b58900; margin-bottom: 1em; text-align: center; letter-spacing: 0.01em; font-size: 1.35em; }
+    label { font-weight: 600; margin-bottom: 0.3em; display: block; color: #684d00; font-size: 1em; margin-top: 1.1em;}
+    input[type="text"], input[type="password"] { width: 100%; padding: 0.6em 0.7em; font-size: 1em; border-radius: 7px; border: 1.5px solid #ffe066; margin-bottom: 0.35em; transition: border 0.17s; background: #fffdf4;}
+    input:focus { border: 1.7px solid #facc15; background: #fffde4; outline: none; }
+    small { font-size: 0.96em; color: #b58900; display: block; margin-top: -0.4em; margin-bottom: 1em; }
+    .form-warn { color: #d97706; background: #fffbe9; border-left: 5px solid #facc15; border-radius: 8px; padding: 0.7em 1em; margin: 1em 0 0.7em 0; font-size: 1em; }
+    .msg-warn { color: #d32f2f; font-weight: bold; font-size: 1em; margin-bottom: 0.3em;}
+    .input-error { border: 2px solid #eab308; background: #fff9db; }
+    button[type="submit"] { width: 100%; margin-top: 1.4em; padding: 0.82em 0; font-size: 1.08em; background: linear-gradient(90deg, #ffe066 50%, #facc15 100%); color: #4a3800; border: none; border-radius: 9px; font-weight: bold; letter-spacing: 0.01em; box-shadow: 0 1px 8px #ffe0664a; cursor: pointer; transition: background 0.18s, color 0.18s; }
+    button[type="submit"]:hover { background: linear-gradient(90deg, #facc15 60%, #ffe066 100%); color: #2b2401; }
+    .back-btn { margin-bottom: 1em; background: #fef9c3; color: #684d00; border-radius: 7px; border: 1.3px solid #fde047; padding: 0.4em 1.3em; font-size: 1em; cursor: pointer; box-shadow: 0 1px 5px #fde04740; transition: background 0.18s; }
+    .back-btn:hover { background: #fde047; color: #21211d; }
+    .hash-row { display: flex; align-items: center; gap: 0.5em; margin-bottom: 0.4em; margin-top: 1.7em;}
+    .hash-status.ready { color: #13a137; font-weight: bold; font-size: 1em; margin-left: 6px;}
+    .copy-btn { background: none; border: none; cursor: pointer; padding: 0 0.2em; margin-left: 0.2em;}
     .copy-btn:active svg { opacity: 0.65; }
-    pre {
-      background: #f9f6e3;
-      border-radius: 8px;
-      padding: 1.2em 0.9em;
-      color: #8a6903;
-      font-size: 1.07em;
-      margin-top: 0.2em;
-      white-space: pre-wrap;
-      word-break: break-all;
-      border: 1.5px solid #fde047;
-      box-shadow: 0 1px 10px #fde04718;
-    }
-    .popup-overlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(251, 224, 47, 0.32); z-index: 9999; display: none;
-      align-items: center; justify-content: center;
-    }
-    .popup-content {
-      background: #fffde4;
-      border-radius: 13px;
-      border: 2.5px solid #facc15;
-      max-width: 95vw; width: 340px;
-      padding: 2em 1em 1.2em 1em;
-      box-shadow: 0 4px 22px #facc1550;
-      color: #b58900;
-      font-size: 1.1em;
-      text-align: center;
-      position: relative;
-      animation: pop 0.22s;
-    }
-    .popup-content .close-popup {
-      position: absolute; right: 1em; top: 1em;
-      background: #fde047;
-      border: 1.4px solid #facc15;
-      border-radius: 100px;
-      padding: 0.22em 0.8em;
-      cursor: pointer; color: #b58900; font-size: 1em;
-    }
-    @keyframes pop {
-      0% { transform: scale(0.85);}
-      100% { transform: scale(1);}
-    }
-    @media (max-width: 600px) {
-      .container { padding: 1em 0.5em;}
-    }
+    pre { background: #f9f6e3; border-radius: 8px; padding: 1.2em 0.9em; color: #8a6903; font-size: 1.07em; margin-top: 0.2em; white-space: pre-wrap; word-break: break-all; border: 1.5px solid #fde047; box-shadow: 0 1px 10px #fde04718;}
+    .popup-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(251, 224, 47, 0.32); z-index: 9999; display: none; align-items: center; justify-content: center;}
+    .popup-content { background: #fffde4; border-radius: 13px; border: 2.5px solid #facc15; max-width: 95vw; width: 340px; padding: 2em 1em 1.2em 1em; box-shadow: 0 4px 22px #facc1550; color: #b58900; font-size: 1.1em; text-align: center; position: relative; animation: pop 0.22s;}
+    .popup-content .close-popup { position: absolute; right: 1em; top: 1em; background: #fde047; border: 1.4px solid #facc15; border-radius: 100px; padding: 0.22em 0.8em; cursor: pointer; color: #b58900; font-size: 1em;}
+    @keyframes pop { 0% { transform: scale(0.85);} 100% { transform: scale(1);} }
+    @media (max-width: 600px) { .container { padding: 1em 0.5em;} }
   </style>
 </head>
 <body>
@@ -189,11 +43,11 @@
       <label>Master Name (A-Z only): <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required autocomplete="off"></label>
       <label>Confirm Master Name: <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required autocomplete="off"></label>
       <div id="nameMatchWarn" class="msg-warn" style="display:none;"></div>
-      <label>Public Key (42 characters): <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" required autocomplete="off"></label>
-      <label>Confirm Public Key: <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" required autocomplete="off"></label>
-      <small>📌 You should give this Public Key to the recipient for ownership transfer verification.</small>
+      <label>Public Key (42 ตัวอักษร): <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" maxlength="42" required autocomplete="off"></label>
+      <label>Confirm Public Key: <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" maxlength="42" required autocomplete="off"></label>
+      <small>📌 กรุณาส่ง Public Key นี้ให้ผู้รับ เพื่อยืนยันสิทธิ์ภายหลัง</small>
       <label>Reason: <input type="text" id="reason" autocomplete="off"></label>
-      <button type="submit">Request Master</button>
+      <button type="submit" id="submitBtn">Request Master</button>
     </form>
 
     <!-- Hash + Copy UI -->
@@ -202,10 +56,7 @@
         <input type="text" id="qrHashInput" value="" readonly style="width:72%;">
         <span class="hash-status ready">QR hash ready</span>
         <button class="copy-btn" onclick="copyHash()" title="Copy to clipboard">
-          <svg width="22" height="22" viewBox="0 0 24 24">
-            <path fill="#24c48b" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19" />
-            <path fill="#24c48b" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z" />
-          </svg>
+          <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#24c48b" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19"/><path fill="#24c48b" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z"/></svg>
         </button>
       </div>
       <pre id="hashResult"></pre>
@@ -228,7 +79,7 @@
     fetch('badwords.json')
       .then(res => res.json())
       .then(data => badwordList = data)
-      .catch(() => showPopup('⚠ Failed to load badword list. Please check your connection.'));
+      .catch(() => showPopup('⚠ ไม่สามารถโหลดรายการ badword ได้ กรุณาตรวจสอบการเชื่อมต่อ'));
 
     function showPopup(msg) {
       document.getElementById('popupMsg').innerHTML = msg;
@@ -256,7 +107,7 @@
         });
       }
       if (found.length > 0) {
-        showBadwordWarn(`⚠ <span style="color:red; font-weight:bold;">Badword detected: ${found.join(', ')}</span> Please avoid these words, or confirm if you really want to use them.`);
+        showBadwordWarn(`⚠ <span style="color:red; font-weight:bold;">Badword: ${found.join(', ')}</span> พิจารณาก่อนกดยืนยัน หรือเปลี่ยนคำใหม่`);
         hasBadword = true;
       } else {
         hideBadwordWarn();
@@ -281,7 +132,7 @@
       const confirm = document.getElementById('confirmName').value.trim();
       const warn = document.getElementById('nameMatchWarn');
       if (name && confirm && name !== confirm) {
-        warn.innerText = '⚠ Master Name and Confirm Master Name do not match!';
+        warn.innerText = '⚠ Master Name และ Confirm Name ไม่ตรงกัน!';
         warn.style.display = 'block';
         document.getElementById('confirmName').classList.add('input-error');
       } else {
@@ -296,6 +147,17 @@
       checkBadwords(this.value);
     });
 
+    // Auto validate Public Key
+    document.getElementById('pubkey').addEventListener('input', validatePubKey);
+    document.getElementById('confirmPubkey').addEventListener('input', validatePubKey);
+
+    function validatePubKey() {
+      const pubkey = document.getElementById('pubkey').value.trim();
+      const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
+      document.getElementById('pubkey').classList.toggle('input-error', pubkey && !/^0x[a-fA-F0-9]{40}$/.test(pubkey));
+      document.getElementById('confirmPubkey').classList.toggle('input-error', confirmPubkey && (!/^0x[a-fA-F0-9]{40}$/.test(confirmPubkey) || (pubkey && confirmPubkey && pubkey !== confirmPubkey)));
+    }
+
     document.getElementById('requestMasterForm').onsubmit = function (e) {
       e.preventDefault();
 
@@ -306,16 +168,20 @@
       const reason = document.getElementById('reason').value;
 
       if (name !== confirm) {
-        showPopup('⚠ Master Name and Confirm Master Name do not match. Please check.');
+        showPopup('⚠ Master Name และ Confirm Name ไม่ตรงกัน กรุณาตรวจสอบ');
         return;
       }
       if (pubkey !== confirmPubkey) {
-        showPopup('⚠ Public Key and Confirm Public Key do not match. Please check.');
+        showPopup('⚠ Public Key และ Confirm Public Key ไม่ตรงกัน กรุณาตรวจสอบ');
+        return;
+      }
+      if (!/^0x[a-fA-F0-9]{40}$/.test(pubkey)) {
+        showPopup('⚠ Public Key ต้องเป็น 0x... และ 42 ตัวอักษร (hex)');
         return;
       }
 
       if (hasBadword) {
-        if (!confirm('⚠ This Master Name or Reason contains reserved or inappropriate words.\n\nIf you really want to proceed, press OK.')) {
+        if (!confirm('⚠ มีคำที่ไม่เหมาะสมใน Master Name หรือ Reason\n\nถ้ายืนยันจะดำเนินการต่อให้กด OK')) {
           return;
         }
       }
