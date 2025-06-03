@@ -2,13 +2,17 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Generate Address from Passphrase</title>
+  <title>Generate Address from Password & PIN</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: Arial, sans-serif; max-width: 430px; margin: 1.7em auto 0 auto; padding: 0.3em; background-color: #f9f9f9; border-radius: 8px;}
     .back-btn { position: fixed; top: 14px; left: 10px; background: #eee; color: #222; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; padding: 0.4em 1.1em; cursor: pointer; z-index: 1000; box-shadow: 0 2px 8px #0002; transition: background 0.2s;}
     .back-btn:hover { background: #d6f5d6; color: #1a7f3c;}
     h2 { margin-top: 1.2em; margin-bottom: 0.7em; color: #22c55e; font-size: 1.12em;}
+    .info-box {
+      background: #f9fbe7; border-left: 4px solid #b4ca06;
+      color: #7a7400; border-radius: 8px; margin-bottom: 1em; padding: 0.7em 1em; font-size: 1em;
+    }
     label { font-weight: bold; font-size: 1em; display: block; margin-top: 0.65em; }
     .address-group { background: #e7fbe8; border: 1.2px solid #22c55e; border-radius: 8px; padding: 0.58em 0.77em 0.65em 0.77em; margin-bottom: 0.5em; display: flex; align-items: center; gap: 0.18em;}
     .address-input { font-size: 0.97em; padding: 0.42em 0.6em; border: none; background: transparent; color: #166534; border-radius: 7px; width: 100%; outline: none;}
@@ -30,6 +34,13 @@
     .red-input.visible { filter: none;}
     .show-red-btn { background: #d20000; color: #fff; border: none; border-radius: 6px; padding: 0.33em 1.15em; font-size: 0.93em; cursor: pointer; font-weight: 500; margin-left: 0.15em; transition: background 0.13s;}
     .show-red-btn:hover { background: #b91c1c;}
+    .strength-bar { height: 7px; width: 100%; border-radius: 6px; background: #eee; margin-top: 0.10em; margin-bottom: 0.16em; overflow: hidden;}
+    .strength-bar-inner { height: 100%; border-radius: 6px; transition: width 0.22s;}
+    .strength-weak { background: #ef4444; }
+    .strength-fair { background: #facc15; }
+    .strength-good { background: #22d3ee; }
+    .strength-strong { background: #22c55e; }
+    .strength-label { font-size: 0.94em; color: #666; text-align: right; margin-bottom: 0.2em;}
     @media (max-width: 520px) {
       body { padding: 0.2em;}
       .address-btn, .show-btn, .show-red-btn { font-size: 0.93em; padding: 0.32em 0.79em;}
@@ -39,32 +50,55 @@
 <body>
   <button class="back-btn" onclick="history.back()">← Back</button>
   <h2>📮 Address (last 40 chars):</h2>
-  <div class="address-group">
-    <input id="addressOutput" class="address-input" maxlength="40" readonly />
-    <button class="address-btn" onclick="copyAddress()">Copy</button>
-  </div>
-  <div class="yellow-group">
-    <label>Passphrase (6 digits, ATM-style PIN):</label>
-    <div class="pw-row">
-      <input type="password" id="privateKey1" maxlength="6" minlength="6" class="pw-input" pattern="\d{6}" autocomplete="off" oninput="clearResult();" placeholder="กรอกเลข 6 หลัก"/>
-      <button class="show-btn" onclick="togglePw('privateKey1', this)">Show</button>
+  <form onsubmit="return false;">
+    <div class="address-group">
+      <input id="addressOutput" class="address-input" maxlength="40" readonly />
+      <button class="address-btn" onclick="copyAddress()" type="button">Copy</button>
     </div>
-    <label>Confirm Passphrase:</label>
-    <div class="pw-row">
-      <input type="password" id="privateKey2" maxlength="6" minlength="6" class="pw-input" pattern="\d{6}" autocomplete="off" oninput="clearResult();" placeholder="ยืนยันเลข 6 หลัก" />
-      <button class="show-btn" onclick="togglePw('privateKey2', this)">Show</button>
-    </div>
-    <button class="mini-btn" style="margin-top:0.42em;margin-bottom:0.15em;" onclick="generateAddress()">🚀 Generate Address</button>
-    <div id="pw1Err" class="error"></div>
-    <div id="pw2Err" class="error"></div>
     <div id="copyStatus" class="status">✅ Address copied!</div>
-  </div>
-  <div class="red-group">
-    <label class="red-label">🔑 Private Key (SHA-256):</label>
-    <input id="fullHash" class="red-input" readonly />
-    <button class="show-red-btn" onclick="togglePrivateKey(this)">Show</button>
-  </div>
+    <div class="info-box">
+      <b>⚠️ IMPORTANT:</b> Your <b>Password</b> + <b>PIN</b> are the only way to regenerate your private key and prove ownership.<br>
+      <b>Do not lose or share them.</b> If you lose them, your address cannot be recovered.
+    </div>
+    <div class="yellow-group">
+      <label>Password (6–12 chars, must include letters & numbers):</label>
+      <div class="pw-row">
+        <input type="password" id="password1" maxlength="12" minlength="6" class="pw-input" autocomplete="off" oninput="updatePwStrength(this.value); clearResult();" placeholder="Enter password"/>
+        <button class="show-btn" onclick="togglePw('password1', this)" type="button">Show</button>
+      </div>
+      <div class="strength-bar"><div id="pwStrengthBar" class="strength-bar-inner" style="width:0"></div></div>
+      <div id="pwStrengthLabel" class="strength-label"></div>
+      <label>Confirm Password:</label>
+      <div class="pw-row">
+        <input type="password" id="password2" maxlength="12" minlength="6" class="pw-input" autocomplete="off" oninput="clearResult();" placeholder="Confirm password"/>
+        <button class="show-btn" onclick="togglePw('password2', this)" type="button">Show</button>
+      </div>
+      <label>PIN (6 digits, ATM-style):</label>
+      <div class="pw-row">
+        <input type="password" id="pin1" maxlength="6" minlength="6" class="pw-input" pattern="\d{6}" autocomplete="off" oninput="updatePinStrength(this.value); clearResult();" placeholder="Enter 6 digits"/>
+        <button class="show-btn" onclick="togglePw('pin1', this)" type="button">Show</button>
+      </div>
+      <div class="strength-bar"><div id="pinStrengthBar" class="strength-bar-inner" style="width:0"></div></div>
+      <div id="pinStrengthLabel" class="strength-label"></div>
+      <label>Confirm PIN:</label>
+      <div class="pw-row">
+        <input type="password" id="pin2" maxlength="6" minlength="6" class="pw-input" pattern="\d{6}" autocomplete="off" oninput="clearResult();" placeholder="Confirm 6 digits"/>
+        <button class="show-btn" onclick="togglePw('pin2', this)" type="button">Show</button>
+      </div>
+      <button class="mini-btn" style="margin-top:0.42em;margin-bottom:0.15em;" onclick="generateAddress()" type="button">🚀 Generate Address</button>
+      <div id="pw1Err" class="error"></div>
+      <div id="pw2Err" class="error"></div>
+      <div id="pin1Err" class="error"></div>
+      <div id="pin2Err" class="error"></div>
+    </div>
+    <div class="red-group">
+      <label class="red-label">🔑 Private Key (SHA-256):</label>
+      <input id="fullHash" class="red-input" readonly />
+      <button class="show-red-btn" onclick="togglePrivateKey(this)" type="button">Show</button>
+    </div>
+  </form>
   <script>
+    // Toggle Show/Hide password fields
     function togglePw(id, btn) {
       const input = document.getElementById(id);
       if (input.type === "password") {
@@ -91,16 +125,58 @@
       el.select();
       document.execCommand('copy');
       document.getElementById('copyStatus').style.display = "block";
-      setTimeout(()=>document.getElementById('copyStatus').style.display="none",1500);
+      setTimeout(()=>document.getElementById('copyStatus').style.display="none",1200);
     }
     function clearResult() {
       document.getElementById("addressOutput").value = "";
       document.getElementById("fullHash").value = "";
       document.getElementById("fullHash").classList.remove("visible");
       document.querySelector(".show-red-btn").textContent = "Show";
+      document.getElementById("pw1Err").textContent = "";
+      document.getElementById("pw2Err").textContent = "";
+      document.getElementById("pin1Err").textContent = "";
+      document.getElementById("pin2Err").textContent = "";
+    }
+    function validatePassword(pw) {
+      return pw.length >= 6 && pw.length <= 12 && /[A-Za-z]/.test(pw) && /\d/.test(pw);
     }
     function validatePin(pin) {
       return /^\d{6}$/.test(pin);
+    }
+    // Password strength
+    function updatePwStrength(val) {
+      const bar = document.getElementById("pwStrengthBar");
+      const label = document.getElementById("pwStrengthLabel");
+      let score = 0;
+      if (val.length >= 6) score++;
+      if (/[A-Z]/.test(val)) score++;
+      if (/[a-z]/.test(val)) score++;
+      if (/\d/.test(val)) score++;
+      if (/[^A-Za-z0-9]/.test(val)) score++;
+      let width = [0, 25, 45, 65, 85, 100][score];
+      let cls = ["", "strength-weak", "strength-fair", "strength-good", "strength-good", "strength-strong"][score];
+      let txt = ["Too short", "Weak", "Fair", "Good", "Very Good", "Strong"][score];
+      if (!val) { width = 0; cls = ""; txt = ""; }
+      bar.style.width = width + "%";
+      bar.className = "strength-bar-inner " + cls;
+      label.textContent = txt;
+    }
+    // PIN strength (simple)
+    function updatePinStrength(val) {
+      const bar = document.getElementById("pinStrengthBar");
+      const label = document.getElementById("pinStrengthLabel");
+      const weakPins = ["000000","111111","123456","654321","222222","333333","444444","555555","666666","777777","888888","999999"];
+      let width = 0, cls = "strength-weak", txt = "";
+      if (val.length < 6) {
+        width = 0; cls = ""; txt = "";
+      } else if (weakPins.includes(val)) {
+        width = 20; cls = "strength-weak"; txt = "Too easy";
+      } else {
+        width = 100; cls = "strength-strong"; txt = "Strong";
+      }
+      bar.style.width = width + "%";
+      bar.className = "strength-bar-inner " + cls;
+      label.textContent = txt;
     }
     async function sha256Hex(str) {
       const buffer = new TextEncoder().encode(str);
@@ -108,22 +184,36 @@
       return [...new Uint8Array(hash)].map(b => b.toString(16).padStart(2, '0')).join('');
     }
     async function generateAddress() {
-      const pw1 = document.getElementById("privateKey1").value.trim();
-      const pw2 = document.getElementById("privateKey2").value.trim();
+      const password1 = document.getElementById("password1").value.trim();
+      const password2 = document.getElementById("password2").value.trim();
+      const pin1 = document.getElementById("pin1").value.trim();
+      const pin2 = document.getElementById("pin2").value.trim();
       const fullHashEl = document.getElementById("fullHash");
       const addressEl = document.getElementById("addressOutput");
       let valid = true;
       document.getElementById("pw1Err").textContent = "";
       document.getElementById("pw2Err").textContent = "";
-      if (!validatePin(pw1)) {
-        document.getElementById("pw1Err").textContent = "ต้องเป็นตัวเลข 6 หลักเท่านั้น"; valid = false;
+      document.getElementById("pin1Err").textContent = "";
+      document.getElementById("pin2Err").textContent = "";
+      if (!validatePassword(password1)) {
+        document.getElementById("pw1Err").textContent = "Password must be 6-12 chars, include both letters and numbers.";
+        valid = false;
       }
-      if (pw1 !== pw2) {
-        document.getElementById("pw2Err").textContent = "เลขไม่ตรงกัน"; valid = false;
+      if (password1 !== password2) {
+        document.getElementById("pw2Err").textContent = "Passwords do not match.";
+        valid = false;
+      }
+      if (!validatePin(pin1)) {
+        document.getElementById("pin1Err").textContent = "PIN must be exactly 6 digits.";
+        valid = false;
+      }
+      if (pin1 !== pin2) {
+        document.getElementById("pin2Err").textContent = "PINs do not match.";
+        valid = false;
       }
       if (!valid) return;
-      // Generate address from pin
-      const hash = await sha256Hex(pw1);
+      // Generate address from password + pin
+      const hash = await sha256Hex(password1 + pin1);
       const address = "0x" + hash.slice(-40);
       fullHashEl.value = hash;
       addressEl.value = address;
