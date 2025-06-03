@@ -6,139 +6,64 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f7fa;
-      margin: 0; padding: 0;
-    }
+    body { font-family: Arial, sans-serif; background: #f7f7fa; margin: 0; padding: 0; }
     .container {
-      background: #fff;
-      max-width: 430px;
-      margin: 2.4em auto 1.5em auto;
-      border-radius: 16px;
-      box-shadow: 0 2px 15px #22c55e22;
-      padding: 2em 1.2em 2.1em 1.2em;
-      position: relative;
+      background: #fff; max-width: 430px; margin: 2.4em auto 1.5em auto;
+      border-radius: 16px; box-shadow: 0 2px 15px #22c55e22;
+      padding: 2em 1.2em 2.1em 1.2em; position: relative;
     }
     .btn-back {
-      background: #e0e7ef;
-      color: #232a3e;
-      border: 1.2px solid #a7a7a7;
-      border-radius: 7px;
-      font-size: 1em;
-      padding: 0.41em 1.13em;
-      margin-bottom: 1.1em;
-      margin-top: -0.7em;
-      cursor: pointer;
-      transition: background 0.14s;
-      box-shadow: 0 1px 4px #0001;
+      background: #e0e7ef; color: #232a3e; border: 1.2px solid #a7a7a7;
+      border-radius: 7px; font-size: 1em; padding: 0.41em 1.13em;
+      margin-bottom: 1.1em; margin-top: -0.7em; cursor: pointer;
+      transition: background 0.14s; box-shadow: 0 1px 4px #0001;
       position: absolute; left: 18px; top: 18px;
     }
     .btn-back:hover { background: #c7f7fa; color: #222;}
-    h2 {
-      text-align: center;
-      color: #22c55e;
-      margin-bottom: 1.3em;
-      font-size: 1.18em;
-      letter-spacing: 0.01em;
-    }
-    label {
-      display: block;
-      margin-top: 1.12em;
-      font-weight: bold;
-      color: #16a34a;
-      letter-spacing: 0.01em;
-    }
+    h2 { text-align: center; color: #22c55e; margin-bottom: 1.3em; font-size: 1.18em; letter-spacing: 0.01em;}
+    label { display: block; margin-top: 1.12em; font-weight: bold; color: #16a34a; letter-spacing: 0.01em;}
     .input-green {
-      width: 100%;
-      padding: 0.58em 0.74em;
-      font-size: 1.06em;
-      border: 1.4px solid #22c55e;
-      border-radius: 7px;
-      background: #e7fbe8;
-      color: #14532d;
-      margin-top: 0.23em;
-      transition: border 0.16s;
-      box-sizing: border-box;
+      width: 100%; padding: 0.58em 0.74em; font-size: 1.06em; border: 1.4px solid #22c55e;
+      border-radius: 7px; background: #e7fbe8; color: #14532d; margin-top: 0.23em;
+      transition: border 0.16s; box-sizing: border-box;
     }
     .input-green:focus { border-color: #16a34a; outline: none;}
-    .status { font-size: 0.94em; margin-left: 6px;}
+    .status { font-size: 0.96em; margin-left: 6px;}
     .valid { color: #22c55e;}
     .invalid { color: #d93025;}
-    .count {
-      margin-left: 10px;
-      color: #666;
-      font-size: 0.97em;
-      letter-spacing: 0.02em;
-    }
+    .count { margin-left: 10px; color: #666; font-size: 0.97em; letter-spacing: 0.02em;}
     .paste-btn {
-      background: #e0e7ef;
-      border: 1px solid #bcd;
-      color: #1e293b;
-      border-radius: 6px;
-      padding: 0.25em 0.7em;
-      margin-left: 7px;
-      font-size: 0.96em;
-      cursor: pointer;
-      transition: background 0.13s;
+      background: #e0e7ef; border: 1px solid #bcd; color: #1e293b;
+      border-radius: 6px; padding: 0.25em 0.7em; margin-left: 7px; font-size: 0.96em;
+      cursor: pointer; transition: background 0.13s;
     }
     .paste-btn:hover { background: #c7f7fa; }
     .gen-btn {
-      margin-top: 1.2em;
-      padding: 0.69em 0;
-      width: 100%;
-      font-size: 1.07em;
+      margin-top: 1.2em; padding: 0.69em 0; width: 100%; font-size: 1.09em;
       background: linear-gradient(90deg, #22c55e 70%, #0ea5e9 100%);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-weight: bold;
-      letter-spacing: 0.02em;
-      cursor: pointer;
-      transition: background 0.16s;
+      color: #fff; border: none; border-radius: 8px; font-weight: bold;
+      letter-spacing: 0.02em; cursor: pointer; transition: background 0.16s;
       box-shadow: 0 1.5px 8px #22c55e18;
     }
-    .gen-btn:hover { background: linear-gradient(90deg, #0ea5e9 40%, #22c55e 100%);}
-    .hash-row {
-      display: flex;
-      align-items: center;
-      gap: 0.4em;
-      margin-top: 1.1em;
-      margin-bottom: 0.6em;
+    .gen-btn:disabled {
+      background: #c2e3cb; color: #93b8a5; cursor: not-allowed; box-shadow: none;
     }
+    .gen-btn:hover:enabled { background: linear-gradient(90deg, #0ea5e9 40%, #22c55e 100%);}
+    .hash-row { display: flex; align-items: center; gap: 0.4em; margin-top: 1.1em; margin-bottom: 0.6em;}
     .input-blue {
-      width: 100%;
-      padding: 0.52em 0.68em;
-      font-size: 1.06em;
-      border: 1.3px solid #0ea5e9;
-      border-radius: 7px;
-      background: #e0f2fe;
-      color: #0369a1;
-      transition: border 0.14s;
+      width: 100%; padding: 0.52em 0.68em; font-size: 1.06em;
+      border: 1.3px solid #0ea5e9; border-radius: 7px;
+      background: #e0f2fe; color: #0369a1; transition: border 0.14s;
     }
     .copy-btn {
-      background: #bae6fd;
-      border: none;
-      color: #0369a1;
-      border-radius: 7px;
-      padding: 0.35em 0.9em;
-      cursor: pointer;
-      font-size: 1em;
-      margin-left: 0.18em;
+      background: #bae6fd; border: none; color: #0369a1; border-radius: 7px;
+      padding: 0.35em 0.9em; cursor: pointer; font-size: 1em; margin-left: 0.18em;
       transition: background 0.13s;
     }
     .copy-btn:hover { background: #0ea5e9; color: #fff;}
     .input-black {
-      width: 100%;
-      padding: 0.44em 0.64em;
-      font-size: 1em;
-      border: 1.15px solid #232a3e;
-      border-radius: 6px;
-      background: #fff;
-      color: #222;
-      margin-top: 0.18em;
-      margin-bottom: 0.25em;
-      font-family: monospace;
+      width: 100%; padding: 0.44em 0.64em; font-size: 1em; border: 1.15px solid #232a3e;
+      border-radius: 6px; background: #fff; color: #222; margin-top: 0.18em; margin-bottom: 0.25em; font-family: monospace;
     }
     .input-black[readonly] { background: #fff;}
     .black-label { color: #222; font-weight: 600; margin-top: 0.5em;}
@@ -146,11 +71,8 @@
       .container { max-width: 97vw; padding: 1em 0.4em 1.5em 0.4em;}
       .btn-back { position: static; margin: 0 0 1em 0;}
     }
-    .error {
-      color: #d93025;
-      margin-top: 0.22em;
-      font-size: 0.98em;
-    }
+    .error { color: #d93025; margin-top: 0.22em; font-size: 0.98em;}
+    .success { color: #22c55e; font-size: 0.96em; margin-left: 0.15em;}
   </style>
 </head>
 <body>
@@ -161,7 +83,7 @@
     <label>Public Key (42 ตัวอักษร):</label>
     <div style="display:flex;align-items:center;gap:0.5em;">
       <input type="text" id="pubkey1" class="input-green" placeholder="0x..." autocomplete="off" style="flex:1;" />
-      <button class="paste-btn" onclick="pasteClipboard('pubkey1')">Paste</button>
+      <button class="paste-btn" type="button" onclick="pasteClipboard('pubkey1')">Paste</button>
       <span class="count" id="count1">0</span>
     </div>
     <span id="keyStatus1" class="status"></span>
@@ -169,16 +91,17 @@
     <label>ยืนยัน Public Key อีกครั้ง:</label>
     <div style="display:flex;align-items:center;gap:0.5em;">
       <input type="text" id="pubkey2" class="input-green" placeholder="0x..." autocomplete="off" style="flex:1;" />
-      <button class="paste-btn" onclick="pasteClipboard('pubkey2')">Paste</button>
+      <button class="paste-btn" type="button" onclick="pasteClipboard('pubkey2')">Paste</button>
       <span class="count" id="count2">0</span>
     </div>
     <span id="keyStatus2" class="status"></span>
     <span id="errorMsg" class="error"></span>
+    <span id="successMsg" class="success"></span>
 
-    <button class="gen-btn" onclick="generateHash()">Generate QR Hash</button>
+    <button class="gen-btn" id="genBtn" onclick="generateHash()" disabled>Generate QR Hash</button>
     <div class="hash-row">
       <input type="text" id="qrHashInput" class="input-blue" placeholder="QR Hash" readonly>
-      <button class="copy-btn" onclick="copyHash()">Copy</button>
+      <button class="copy-btn" type="button" onclick="copyHash()">Copy</button>
     </div>
     <label class="black-label">Timestamp (เวลาปัจจุบัน):</label>
     <input type="text" id="timestamp" class="input-black" readonly />
@@ -189,11 +112,15 @@
     // Clipboard paste
     function pasteClipboard(id) {
       navigator.clipboard.readText().then(txt => {
-        document.getElementById(id).value = txt;
+        document.getElementById(id).value = txt.trim();
         updateCountAndStatus();
       });
     }
-    // Count length & live validate
+    // Validate pubkey
+    function validatePubkey(key) {
+      return /^0x[a-fA-F0-9]{40}$/.test(key);
+    }
+    // Update status/count
     function updateCountAndStatus() {
       const v1 = pubkey1.value.trim();
       const v2 = pubkey2.value.trim();
@@ -203,47 +130,52 @@
       document.getElementById('keyStatus2').textContent = validatePubkey(v2) ? "✓ ถูกต้อง" : "";
       document.getElementById('keyStatus1').className = "status " + (validatePubkey(v1) ? "valid" : "invalid");
       document.getElementById('keyStatus2').className = "status " + (validatePubkey(v2) ? "valid" : "invalid");
-      document.getElementById('errorMsg').textContent = (v1 && v2 && v1 !== v2) ? "Public Key ทั้งสองช่องไม่ตรงกัน" : "";
+      document.getElementById('errorMsg').textContent = "";
+      document.getElementById('successMsg').textContent = "";
+      // Enable generate button only if valid and matched
+      document.getElementById('genBtn').disabled = !(validatePubkey(v1) && validatePubkey(v2) && v1 === v2);
+      if (v1 && v2 && v1 !== v2) {
+        document.getElementById('errorMsg').textContent = "Public Key ทั้งสองช่องไม่ตรงกัน";
+      }
     }
-    function validatePubkey(key) {
-      return /^0x[a-fA-F0-9]{40}$/.test(key);
-    }
+    // Timestamp/Nonce
     const pubkey1 = document.getElementById('pubkey1');
     const pubkey2 = document.getElementById('pubkey2');
     pubkey1.addEventListener('input', updateCountAndStatus);
     pubkey2.addEventListener('input', updateCountAndStatus);
-    // Timestamp/Nonce
+
     const timestampEl = document.getElementById('timestamp');
     const nonceEl = document.getElementById('nonce');
     function updateTimestampNonce() {
       timestampEl.value = new Date().toISOString();
       nonceEl.value = Math.floor(Math.random() * 1e12).toString();
     }
+    // Generate Hash
     function generateHash() {
       const pk1 = pubkey1.value.trim();
       const pk2 = pubkey2.value.trim();
-      if (!validatePubkey(pk1) || !validatePubkey(pk2)) {
-        document.getElementById('errorMsg').textContent = "กรุณากรอก Public Key ให้ถูกต้องทั้งสองช่อง";
-        return;
-      }
+      if (!validatePubkey(pk1) || !validatePubkey(pk2)) return;
       if (pk1 !== pk2) {
         document.getElementById('errorMsg').textContent = "Public Key ทั้งสองช่องไม่ตรงกัน";
         return;
       }
-      document.getElementById('errorMsg').textContent = "";
       updateTimestampNonce();
       const t = timestampEl.value;
       const n = nonceEl.value;
       const raw = `${pk1}|${t}|${n}`;
       const hash = sha256(raw);
       document.getElementById('qrHashInput').value = hash;
+      document.getElementById('successMsg').textContent = "QR Hash พร้อมคัดลอก";
     }
+    // Copy Hash
     function copyHash() {
       const input = document.getElementById('qrHashInput');
       input.select();
       input.setSelectionRange(0, 99999); // mobile
       navigator.clipboard.writeText(input.value);
+      document.getElementById('successMsg').textContent = "คัดลอก QR Hash สำเร็จ!";
     }
+    // Init
     updateTimestampNonce();
     updateCountAndStatus();
   </script>
