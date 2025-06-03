@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
   <title>Register QR</title>
@@ -19,38 +19,23 @@
     }
     .back-btn {
       position: fixed;
-      top: 18px;
-      left: 16px;
-      background: #eee;
-      color: #222;
+      top: 18px; left: 16px;
+      background: #eee; color: #222;
       border: 1px solid #ccc;
-      border-radius: 7px;
-      font-size: 1em;
-      padding: 0.38em 1.25em;
-      cursor: pointer;
-      z-index: 1000;
-      box-shadow: 0 2px 8px #246bfd08;
+      border-radius: 7px; font-size: 1em;
+      padding: 0.38em 1.25em; cursor: pointer;
+      z-index: 1000; box-shadow: 0 2px 8px #246bfd08;
       transition: background 0.18s;
     }
     .back-btn:hover { background: #dbf6fd; color: #1747a1; }
-    h2 {
-      text-align: center;
-      font-size: 1.45em;
-      margin-bottom: 1.2em;
-      letter-spacing: 0.02em;
-    }
+    h2 { text-align: center; font-size: 1.45em; margin-bottom: 1.2em; letter-spacing: 0.02em; }
     .main-form {
       background: #fff;
       border-radius: 18px;
       padding: 2.1em 1.3em 1.4em 1.3em;
       box-shadow: 0 2px 14px #246bfd08;
     }
-    label {
-      font-weight: 600;
-      margin-bottom: 0.42em;
-      font-size: 1.05em;
-      letter-spacing: 0.01em;
-    }
+    label { font-weight: 600; margin-bottom: 0.42em; font-size: 1.05em; letter-spacing: 0.01em;}
     input[type="text"] {
       padding: 0.73em 0.9em;
       font-size: 1.1em;
@@ -61,56 +46,40 @@
       transition: border-color 0.2s;
     }
     input:focus { border-color: #246bfd; outline: none; }
-    .input-status {
-      font-size: 0.97em;
-      margin-bottom: 0.8em;
-    }
+    .input-status { font-size: 0.97em; margin-bottom: 0.8em;}
     .valid { color: #22b573; }
     .invalid { color: #e53935; }
-    .btn-row {
-      margin-top: 1.6em;
-      display: flex;
-      justify-content: space-between;
-      gap: 0.9em;
-    }
+    .btn-row { margin-top: 1.6em; display: flex; justify-content: space-between; gap: 0.9em;}
     button[type="button"], button[type="submit"] {
-      font-family: inherit;
-      font-size: 1.08em;
-      font-weight: 600;
-      border-radius: 8px;
-      padding: 0.65em 1.4em;
-      cursor: pointer;
+      font-family: inherit; font-size: 1.08em; font-weight: 600;
+      border-radius: 8px; padding: 0.65em 1.4em; cursor: pointer;
       border: none;
       background: linear-gradient(90deg,#246bfd 40%,#22d3ee 100%);
-      color: #fff;
-      box-shadow: 0 1px 8px #246bfd08;
+      color: #fff; box-shadow: 0 1px 8px #246bfd08;
       transition: background 0.15s;
     }
     button[type="button"]:disabled, button[type="submit"]:disabled {
-      background: #a5d6a7;
-      color: #fff;
-      cursor: not-allowed;
-      opacity: 0.67;
+      background: #a5d6a7; color: #fff; cursor: not-allowed; opacity: 0.67;
     }
     #previewBox {
-      margin-top: 1.5em;
-      padding: 1em;
-      background: #f8f8f8;
-      border-radius: 8px;
-      font-size: 1.06em;
-      white-space: pre-wrap;
-      color: #234;
-      box-shadow: 0 1px 4px #246bfd0a;
-      text-align: left;
+      margin-top: 1.5em; padding: 1em;
+      background: #f8f8f8; border-radius: 8px;
+      font-size: 1.06em; white-space: pre-wrap;
+      color: #234; box-shadow: 0 1px 4px #246bfd0a; text-align: left;
     }
     #successMsg {
-      margin-top: 1em;
-      padding: 1em;
-      background-color: #e8f5e9;
-      color: #2e7d32;
-      border-left: 5px solid #66bb6a;
-      border-radius: 5px;
+      margin-top: 1em; padding: 1em;
+      background-color: #e8f5e9; color: #2e7d32;
+      border-left: 5px solid #66bb6a; border-radius: 5px;
     }
+    .copy-btn {
+      margin-left: 0.3em; padding: 0.38em 1.2em;
+      background: #22d3ee; color: #fff;
+      border-radius: 7px; border: none; cursor: pointer;
+      font-size: 1em; font-weight: 600;
+      transition: background 0.14s;
+    }
+    .copy-btn:hover { background: #246bfd; }
     @media (max-width: 520px) {
       .main-form { padding: 1.2em 0.4em 1.2em 0.4em; }
       body { margin: 0.4em; padding-top: 2.9em; }
@@ -121,21 +90,23 @@
   <button class="back-btn" onclick="window.history.back()">← Back</button>
   <h2>Register QR</h2>
   <form class="main-form" id="registerForm" autocomplete="off">
-    <label for="hashQr">QR Hash (64 chars):</label>
-    <input type="text" id="hashQr" maxlength="64" placeholder="Enter QR Hash" />
+    <label for="hashQr">QR Hash (64 ตัวอักษร):</label>
+    <input type="text" id="hashQr" maxlength="64" placeholder="ใส่ QR Hash" />
     <span id="hashStatus" class="input-status"></span>
 
-    <label for="publicKey">Your Public Key (40 chars):</label>
-    <input type="text" id="publicKey" maxlength="40" placeholder="Enter your public key" />
+    <label for="publicKey">Public Key (42 ตัวอักษร):</label>
+    <input type="text" id="publicKey" maxlength="42" placeholder="ใส่ Public Key (0x...)" />
     <span id="pubStatus" class="input-status"></span>
 
     <div class="btn-row">
-      <button type="button" id="previewBtn" onclick="preview()">Preview</button>
+      <button type="button" id="previewBtn" onclick="preview()" disabled>Preview</button>
       <button type="submit" id="confirmBtn" disabled>Confirm Register</button>
     </div>
 
     <div id="previewBox"></div>
-    <div id="successMsg" style="display:none;"></div>
+    <div id="successMsg" style="display:none;">
+      <button type="button" class="copy-btn" onclick="copySuccess()">Copy</button>
+    </div>
   </form>
   <script>
     const hashInput = document.getElementById('hashQr');
@@ -144,6 +115,7 @@
     const pubStatus = document.getElementById('pubStatus');
     const previewBox = document.getElementById('previewBox');
     const confirmBtn = document.getElementById('confirmBtn');
+    const previewBtn = document.getElementById('previewBtn');
     const successMsg = document.getElementById('successMsg');
 
     function validateInputs() {
@@ -151,40 +123,45 @@
       const pub = pubInput.value.trim();
       let valid = true;
 
-      if (hash.length === 64) {
-        hashStatus.textContent = "✓ 64 characters";
+      if (/^[a-fA-F0-9]{64}$/.test(hash)) {
+        hashStatus.textContent = "✓ 64 ตัวอักษร (ถูกต้อง)";
         hashStatus.className = "input-status valid";
       } else {
-        hashStatus.textContent = "⚠ Must be 64 characters";
+        hashStatus.textContent = "⚠ ต้องเป็น hash 64 ตัวอักษร";
         hashStatus.className = "input-status invalid";
         valid = false;
       }
 
-      if (pub.length === 40) {
-        pubStatus.textContent = "✓ 40 characters";
+      if (/^0x[a-fA-F0-9]{40}$/.test(pub)) {
+        pubStatus.textContent = "✓ 42 ตัวอักษร (ถูกต้อง)";
         pubStatus.className = "input-status valid";
       } else {
-        pubStatus.textContent = "⚠ Must be 40 characters";
+        pubStatus.textContent = "⚠ ต้องขึ้นต้นด้วย 0x และ 42 ตัวอักษร";
         pubStatus.className = "input-status invalid";
         valid = false;
       }
 
+      previewBtn.disabled = !valid;
+      confirmBtn.disabled = true; // ปิดไว้จนกด preview
+      previewBox.textContent = "";
+      successMsg.style.display = "none";
       return valid;
     }
 
+    hashInput.addEventListener('input', validateInputs);
+    pubInput.addEventListener('input', validateInputs);
+
     function preview() {
-      const isValid = validateInputs();
-      if (!isValid) {
-        previewBox.textContent = "⚠ Please complete the information correctly.";
+      if (!validateInputs()) {
+        previewBox.textContent = "⚠ กรุณากรอกข้อมูลให้ถูกต้อง";
         confirmBtn.disabled = true;
         successMsg.style.display = "none";
         return;
       }
-
       const hash = hashInput.value.trim();
       const pub = pubInput.value.trim();
       previewBox.innerHTML =
-        `<b>Preview registration:</b>\n\n` +
+        `<b>Preview ข้อมูลที่ลงทะเบียน:</b>\n\n` +
         `<b>QR Hash:</b> <code>${hash}</code>\n` +
         `<b>Public Key:</b> <code>${pub}</code>`;
       confirmBtn.disabled = false;
@@ -193,21 +170,27 @@
 
     document.getElementById('registerForm').onsubmit = function(e) {
       e.preventDefault();
-
       const hash = hashInput.value.trim();
       const pub = pubInput.value.trim();
-
-      successMsg.style.display = "block";
-      successMsg.innerHTML = `
-        ✅ <strong>Registration successful!</strong><br>
-        Your data is saved.<br><br>
-        <b>QR Hash:</b> <code>${hash}</code><br>
-        <b>Public Key:</b> <code>${pub}</code>
-      `;
-
       previewBox.textContent = "";
       confirmBtn.disabled = true;
+      successMsg.style.display = "block";
+      successMsg.innerHTML = `
+        <span>✅ <strong>บันทึกการลงทะเบียนสำเร็จ!</strong></span><br>
+        <b>QR Hash:</b> <code>${hash}</code><br>
+        <b>Public Key:</b> <code>${pub}</code>
+        <br><button type="button" class="copy-btn" onclick="copySuccess()">Copy</button>
+      `;
     };
+
+    function copySuccess() {
+      // Copy text to clipboard (for log)
+      const hash = hashInput.value.trim();
+      const pub = pubInput.value.trim();
+      const msg = `QR Hash: ${hash}\nPublic Key: ${pub}`;
+      navigator.clipboard.writeText(msg);
+      alert("คัดลอกข้อมูลสำเร็จ!");
+    }
   </script>
 </body>
 </html>
