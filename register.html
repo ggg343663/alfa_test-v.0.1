@@ -3,255 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <title>Register QR</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://unpkg.com/html5-qrcode"></script>
-  <style>
-    body {
-      font-family: 'Inter', Arial, sans-serif;
-      background: #f5f7fa;
-      max-width: 440px;
-      margin: 2.5em auto 0 auto;
-      padding: 2.5em 0.7em 1em;
-      border-radius: 22px;
-      color: #223;
-      box-shadow: 0 4px 36px #6398f011;
-      position: relative;
-      min-height: 100vh;
-    }
-    .back-btn {
-      position: fixed;
-      top: 18px; left: 16px;
-      background: #eee; color: #222;
-      border: 1px solid #ccc;
-      border-radius: 7px; font-size: 1em;
-      padding: 0.38em 1.25em; cursor: pointer;
-      z-index: 1000; box-shadow: 0 2px 8px #246bfd08;
-      transition: background 0.18s;
-    }
-    .back-btn:hover { background: #dbf6fd; color: #1747a1; }
-    h2 { text-align: center; font-size: 1.45em; margin-bottom: 1.2em; letter-spacing: 0.02em; }
-    .main-form {
-      background: #fff;
-      border-radius: 18px;
-      padding: 2.1em 1.3em 1.4em 1.3em;
-      box-shadow: 0 2px 14px #246bfd08;
-    }
-    label { font-weight: 600; margin-bottom: 0.42em; font-size: 1.05em; letter-spacing: 0.01em;}
-    .qr-row {
-      display: flex; align-items: center; gap: 0.32em; margin-bottom: 0.4em;
-    }
-    .qr-row input[type="text"] { flex: 1 1 0; }
-    .scan-btn, .import-btn {
-      background: #22d3ee;
-      border: none;
-      color: #fff;
-      border-radius: 7px;
-      padding: 0.45em 1em;
-      font-size: 0.99em;
-      margin-left: 0.15em;
-      cursor: pointer;
-      transition: background 0.14s;
-    }
-    .scan-btn:hover, .import-btn:hover { background: #246bfd; }
-    input[type="text"] {
-      padding: 0.73em 0.9em;
-      font-size: 1.1em;
-      border-radius: 8px;
-      border: 1.5px solid #cbd5e1;
-      background: #f6fbff;
-      margin-bottom: 0.5em;
-      transition: border-color 0.2s;
-    }
-    input:focus { border-color: #246bfd; outline: none; }
-    .input-status { font-size: 0.97em; margin-bottom: 0.8em;}
-    .valid { color: #22b573; }
-    .invalid { color: #e53935; }
-    .btn-row { margin-top: 1.6em; display: flex; justify-content: space-between; gap: 0.9em;}
-    button[type="button"], button[type="submit"] {
-      font-family: inherit; font-size: 1.08em; font-weight: 600;
-      border-radius: 8px; padding: 0.65em 1.4em; cursor: pointer;
-      border: none;
-      background: linear-gradient(90deg,#246bfd 40%,#22d3ee 100%);
-      color: #fff; box-shadow: 0 1px 8px #246bfd08;
-      transition: background 0.15s;
-    }
-    button[type="button"]:disabled, button[type="submit"]:disabled {
-      background: #a5d6a7; color: #fff; cursor: not-allowed; opacity: 0.67;
-    }
-    #previewBox {
-      margin-top: 1.5em; padding: 1em;
-      background: #f8f8f8; border-radius: 8px;
-      font-size: 1.06em; white-space: pre-wrap;
-      color: #234; box-shadow: 0 1px 4px #246bfd0a; text-align: left;
-    }
-    #successMsg {
-      margin-top: 1em; padding: 1em;
-      background-color: #e8f5e9; color: #2e7d32;
-      border-left: 5px solid #66bb6a; border-radius: 5px;
-    }
-    .copy-btn {
-      margin-left: 0.3em; padding: 0.38em 1.2em;
-      background: #22d3ee; color: #fff;
-      border-radius: 7px; border: none; cursor: pointer;
-      font-size: 1em; font-weight: 600;
-      transition: background 0.14s;
-    }
-    .copy-btn:hover { background: #246bfd; }
-    #qr-reader {
-      width: 100%; max-width: 320px; margin: 1.2em auto 0 auto; display: none;
-    }
-    @media (max-width: 520px) {
-      .main-form { padding: 1.2em 0.4em 1.2em 0.4em; }
-      body { margin: 0.4em; padding-top: 2.9em; }
-    }
-  </style>
 </head>
 <body>
-  <button class="back-btn" onclick="window.history.back()">← Back</button>
-  <h2>Register QR</h2>
-  <form class="main-form" id="registerForm" autocomplete="off">
-    <label for="hashQr">QR Hash (64 ตัวอักษร):</label>
-    <div class="qr-row">
-      <input type="text" id="hashQr" maxlength="64" placeholder="ใส่ QR Hash" />
-      <button type="button" class="scan-btn" onclick="scanQR()">Scan</button>
-      <input type="file" id="importImg" accept="image/*" style="display:none;" />
-      <button type="button" class="import-btn" onclick="document.getElementById('importImg').click()">Import Image</button>
-    </div>
-    <span id="hashStatus" class="input-status"></span>
-    <div id="qr-reader"></div>
+  <h2>3. ลงทะเบียน QR</h2>
+  <label>
+    Public Key:<br/>
+    <textarea id="pub-key-input" rows="2" cols="70" placeholder="Public Key จะถูกเติมอัตโนมัติ"></textarea>
+  </label>
+  <br/><br/>
+  <label>
+    QR Hash:<br/>
+    <textarea id="qr-hash-input" rows="2" cols="70" placeholder="QR Hash จะถูกเติมอัตโนมัติ"></textarea>
+  </label>
+  <br/><br/>
+  <label>
+    ชื่อผู้ขอ (optional):<br/>
+    <input id="owner-name" type="text" placeholder="ใส่ชื่อ (ไม่บังคับ)" />
+  </label>
+  <br/><br/>
+  <button id="reg-btn">ลงทะเบียน</button>
+  <p id="status-msg"></p>
 
-    <label for="publicKey">Public Key (42 ตัวอักษร):</label>
-    <input type="text" id="publicKey" maxlength="42" placeholder="ใส่ Public Key (0x...)" />
-    <span id="pubStatus" class="input-status"></span>
-
-    <div class="btn-row">
-      <button type="button" id="previewBtn" onclick="preview()" disabled>Preview</button>
-      <button type="submit" id="confirmBtn" disabled>Confirm Register</button>
-    </div>
-
-    <div id="previewBox"></div>
-    <div id="successMsg" style="display:none;">
-      <button type="button" class="copy-btn" onclick="copySuccess()">Copy</button>
-    </div>
-  </form>
   <script>
-    // --- QR SCAN LOGIC ---
-    let qrReader = null;
-    function scanQR() {
-      const qrDiv = document.getElementById('qr-reader');
-      qrDiv.style.display = 'block';
-      if (!qrReader) qrReader = new Html5Qrcode("qr-reader");
-      qrReader.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 220 },
-        qrCodeMessage => {
-          document.getElementById('hashQr').value = qrCodeMessage;
-          qrReader.stop();
-          qrDiv.style.display = 'none';
-          validateInputs();
-        },
-        err => {}
-      );
-    }
-    document.getElementById('importImg').addEventListener('change', function(evt){
-      const file = evt.target.files[0];
-      if (!file) return;
-      if (!qrReader) qrReader = new Html5Qrcode("qr-reader");
-      qrReader.scanFile(file, true)
-        .then(decodedText => {
-          document.getElementById('hashQr').value = decodedText;
-          document.getElementById('qr-reader').style.display = 'none';
-          validateInputs();
-        })
-        .catch(() => {
-          alert("ไม่พบ QR ในภาพนี้");
-          document.getElementById('qr-reader').style.display = 'none';
-        });
+    // เมื่อหน้าโหลด ให้อ่านค่า Public Key + QR Hash จาก localStorage มาเติม
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedPub = localStorage.getItem('dtc_publicKey');
+      const savedQr  = localStorage.getItem('dtc_qrHash');
+      if (savedPub) {
+        document.getElementById('pub-key-input').value = savedPub;
+      }
+      if (savedQr) {
+        document.getElementById('qr-hash-input').value = savedQr;
+      }
     });
 
-    // ---- VALIDATION/LOGIC (ของเดิม) ----
-    const hashInput = document.getElementById('hashQr');
-    const pubInput = document.getElementById('publicKey');
-    const hashStatus = document.getElementById('hashStatus');
-    const pubStatus = document.getElementById('pubStatus');
-    const previewBox = document.getElementById('previewBox');
-    const confirmBtn = document.getElementById('confirmBtn');
-    const previewBtn = document.getElementById('previewBtn');
-    const successMsg = document.getElementById('successMsg');
+    document.getElementById('reg-btn').addEventListener('click', async () => {
+      const pub       = document.getElementById('pub-key-input').value.trim();
+      const qr        = document.getElementById('qr-hash-input').value.trim();
+      const ownerName = document.getElementById('owner-name').value.trim();
 
-    function validateInputs() {
-      const hash = hashInput.value.trim();
-      const pub = pubInput.value.trim();
-      let valid = true;
-
-      if (/^[a-fA-F0-9]{64}$/.test(hash)) {
-        hashStatus.textContent = "✓ 64 ตัวอักษร (ถูกต้อง)";
-        hashStatus.className = "input-status valid";
-      } else {
-        hashStatus.textContent = "⚠ ต้องเป็น hash 64 ตัวอักษร";
-        hashStatus.className = "input-status invalid";
-        valid = false;
-      }
-
-      if (/^0x[a-fA-F0-9]{40}$/.test(pub)) {
-        pubStatus.textContent = "✓ 42 ตัวอักษร (ถูกต้อง)";
-        pubStatus.className = "input-status valid";
-      } else {
-        pubStatus.textContent = "⚠ ต้องขึ้นต้นด้วย 0x และ 42 ตัวอักษร";
-        pubStatus.className = "input-status invalid";
-        valid = false;
-      }
-
-      previewBtn.disabled = !valid;
-      confirmBtn.disabled = true; // ปิดไว้จนกด preview
-      previewBox.textContent = "";
-      successMsg.style.display = "none";
-      return valid;
-    }
-
-    hashInput.addEventListener('input', validateInputs);
-    pubInput.addEventListener('input', validateInputs);
-
-    function preview() {
-      if (!validateInputs()) {
-        previewBox.textContent = "⚠ กรุณากรอกข้อมูลให้ถูกต้อง";
-        confirmBtn.disabled = true;
-        successMsg.style.display = "none";
+      if (!pub || !qr) {
+        document.getElementById('status-msg').textContent = '📛 กรุณาใส่ Public Key และ QR Hash ให้ครบ';
         return;
       }
-      const hash = hashInput.value.trim();
-      const pub = pubInput.value.trim();
-      previewBox.innerHTML =
-        `<b>Preview ข้อมูลที่ลงทะเบียน:</b>\n\n` +
-        `<b>QR Hash:</b> <code>${hash}</code>\n` +
-        `<b>Public Key:</b> <code>${pub}</code>`;
-      confirmBtn.disabled = false;
-      successMsg.style.display = "none";
-    }
 
-    document.getElementById('registerForm').onsubmit = function(e) {
-      e.preventDefault();
-      const hash = hashInput.value.trim();
-      const pub = pubInput.value.trim();
-      previewBox.textContent = "";
-      confirmBtn.disabled = true;
-      successMsg.style.display = "block";
-      successMsg.innerHTML = `
-        <span>✅ <strong>บันทึกการลงทะเบียนสำเร็จ!</strong></span><br>
-        <b>QR Hash:</b> <code>${hash}</code><br>
-        <b>Public Key:</b> <code>${pub}</code>
-        <br><button type="button" class="copy-btn" onclick="copySuccess()">Copy</button>
-      `;
-    };
+      // เตรียม payload สำหรับส่งไปยัง backend
+      const payload = { publicKey: pub, qrHash: qr };
+      if (ownerName) payload.ownerName = ownerName;
 
-    function copySuccess() {
-      // Copy text to clipboard (for log)
-      const hash = hashInput.value.trim();
-      const pub = pubInput.value.trim();
-      const msg = `QR Hash: ${hash}\nPublic Key: ${pub}`;
-      navigator.clipboard.writeText(msg);
-      alert("คัดลอกข้อมูลสำเร็จ!");
-    }
+      try {
+        // สมมติ API endpoint ของคุณคือ /api/register
+        const response = await fetch('/api/register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+
+        if (response.ok) {
+          document.getElementById('status-msg').textContent = '✅ ลงทะเบียนสำเร็จแล้ว!';
+          // คุณอาจลบ qrHash ออกจาก localStorage เพื่อไม่ให้ใช้ซ้ำ
+          // localStorage.removeItem('dtc_qrHash');
+        } else {
+          document.getElementById('status-msg').textContent =
+            `❌ ลงทะเบียนไม่สำเร็จ: ${result.error || response.statusText}`;
+        }
+      } catch (err) {
+        document.getElementById('status-msg').textContent =
+          `❌ เกิดข้อผิดพลาด: ${err.message}`;
+      }
+    });
   </script>
 </body>
 </html>
