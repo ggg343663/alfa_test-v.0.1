@@ -2,19 +2,99 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Generate Public Key</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2em auto;
+      padding: 1em;
+      background: #f5f7fa;
+      color: #333;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 1em;
+    }
+    .output {
+      background: #eafaf0;
+      border-left: 5px solid #219150;
+      padding: 0.8em;
+      border-radius: 8px;
+      margin: 1em 0;
+      word-break: break-all;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.6em 1.2em;
+      margin: 0.5em 0.3em;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      text-align: center;
+    }
+    #gen-key-btn {
+      background: #219150;
+      color: #fff;
+    }
+    #gen-key-btn:hover {
+      background: #176d38;
+    }
+    #next-btn {
+      background: #246bfd;
+      color: #fff;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #next-btn.enabled {
+      opacity: 1;
+      cursor: pointer;
+    }
+    #next-btn.enabled:hover {
+      background: #1747a1;
+    }
+    .note {
+      font-size: 0.9em;
+      color: #777;
+      margin-top: 1em;
+      text-align: center;
+    }
+    @media (max-width: 480px) {
+      body { margin: 1em; padding: 0.5em; }
+      .btn { width: 100%; }
+    }
+  </style>
 </head>
 <body>
   <h2>1. สร้าง Public Key</h2>
-  <button id="gen-key-btn">Generate Key</button>
-  <p>Public Key: <span id="pub-key-output">ยังไม่ได้สร้าง</span></p>
+
+  <button id="gen-key-btn" class="btn">Generate Key</button>
+
+  <div id="output-container" class="output" style="display: none;">
+    <strong>Public Key:</strong>
+    <p id="pub-key-output">–</p>
+  </div>
+
+  <div style="text-align: center;">
+    <a id="next-btn" class="btn" href="generate_qr.html">ไปหน้าสร้าง QR Hash</a>
+  </div>
+
+  <p class="note">
+    (หลังจากสร้าง Public Key แล้ว ปุ่ม “ไปหน้าสร้าง QR Hash” จะใช้งานได้)
+  </p>
 
   <script>
     // สมมติฟังก์ชัน generateKeyPair() สร้างคู่คีย์ (Public/Private) แบบจำลอง
     function generateKeyPair() {
       // สร้าง private key แบบสุ่ม (ผู้ใช้ต้องจดไว้เอง หากต้องใช้จริง)
       const priv = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-      // แปลง private เป็น public ด้วยฟังก์ชัน hash (ตัวอย่างง่ายๆ)
+      // แปลง private เป็น public ด้วยฟังก์ชัน hash (ตัวอย่างจำลอง)
       const pub  = sha256(priv);
       return { publicKey: pub, privateKey: priv };
     }
@@ -29,27 +109,54 @@
       return hash.toString(16).padStart(64, '0');
     }
 
-    document.getElementById('gen-key-btn').addEventListener('click', () => {
+    const genBtn = document.getElementById('gen-key-btn');
+    const pubOutput = document.getElementById('pub-key-output');
+    const outputContainer = document.getElementById('output-container');
+    const nextBtn = document.getElementById('next-btn');
+
+    genBtn.addEventListener('click', () => {
       const { publicKey, privateKey } = generateKeyPair();
 
       // แสดง Public Key บนหน้า
-      document.getElementById('pub-key-output').textContent = publicKey;
+      pubOutput.textContent = publicKey;
+      outputContainer.style.display = 'block';
 
       // เก็บเฉพาะ Public Key ใน localStorage (ไม่เก็บ Private Key)
       localStorage.setItem('dtc_publicKey', publicKey);
 
-      // แจ้งผู้ใช้ให้จด Private Key เก็บไว้เอง (เช่นจดไว้ในกระดาษหรือไฟล์ส่วนตัว)
+      // แจ้งผู้ใช้ให้จด Private Key เก็บไว้เอง
       alert(
         'สร้าง Public Key เรียบร้อยแล้ว!\n\n' +
         'Public Key จะถูกเก็บไว้ในเบราว์เซอร์ (localStorage)\n' +
-        'ส่วน Private Key (ซึ่งจำเป็นถ้าต้องใช้งานขั้นสูง เช่น การโอนสิทธิ์) ' +
-        'จะปรากฏใน console ด้านล่าง กรุณาจดเก็บไว้ด้วยตัวท่านเอง:\n\n' +
+        'ส่วน Private Key (ใช้ในขั้นตอนโอน QR หากมี) ' +
+        'แสดงใน console กรุณาจดเก็บไว้นอกเบราว์เซอร์:\n\n' +
         privateKey
       );
-
-      // แสดง Private Key ใน console (ผู้ใช้ต้องจดเอง)
-      console.log('*** PRIVATE KEY (กรุณาจดเก็บไว้นอก browser) ***');
+      console.log('*** PRIVATE KEY (กรุณาจดเก็บไว้ภายนอก) ***');
       console.log(privateKey);
+
+      // เปิดใช้งานปุ่ม “ไปหน้าสร้าง QR Hash”
+      nextBtn.classList.add('enabled');
+      nextBtn.removeAttribute('aria-disabled');
+    });
+
+    // ป้องกันการคลิกก่อนสร้าง Public Key
+    nextBtn.addEventListener('click', (e) => {
+      if (!nextBtn.classList.contains('enabled')) {
+        e.preventDefault();
+        alert('กรุณาสร้าง Public Key ก่อนจึงจะไปยังหน้าสร้าง QR Hash ได้');
+      }
+    });
+
+    // เมื่อหน้าโหลด หากเคยสร้าง Public Key ไว้แล้ว ให้แสดงและเปิดปุ่มไปต่อ
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedPub = localStorage.getItem('dtc_publicKey');
+      if (savedPub) {
+        pubOutput.textContent = savedPub;
+        outputContainer.style.display = 'block';
+        nextBtn.classList.add('enabled');
+        nextBtn.removeAttribute('aria-disabled');
+      }
     });
   </script>
 </body>
