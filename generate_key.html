@@ -99,7 +99,8 @@
     // ฟังก์ชันสุ่มสร้างคู่คีย์ (Public+Private) แบบจำลอง
     function generateKeyPair() {
       // สร้าง private key แบบสุ่ม (ผู้ใช้ต้องเก็บเอง)
-      const priv = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      const priv = Math.random().toString(36).slice(2) +
+                   Math.random().toString(36).slice(2);
       // สร้าง public key ด้วยการ hash แบบจำลอง
       const pub  = sha256(priv);
       return { publicKey: pub, privateKey: priv };
@@ -166,19 +167,17 @@
     });
 
     // เมื่อโหลดหน้า ให้ตรวจว่ามี Public Key ใน localStorage หรือไม่
+    // แต่ง่ายๆ คือถ้ามี สั่ง pre-fill ให้เห็น แต่ถ้าไม่มีก็ปล่อยให้กดสร้างได้ปกติ
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
-      if (!savedPub) {
-        // ถ้าไม่มี ให้แจ้งแล้วย้อนกลับไปหน้า index.html
-        alert('ยังไม่มี Public Key กรุณาสร้างที่หน้าแรก');
-        window.location.href = 'index.html';
-        return;
+      if (savedPub) {
+        // ถ้ามีคีย์เก่า ให้แสดงผลและเปิดปุ่มถัดไปเลย
+        pubOutput.textContent = savedPub;
+        outputContainer.style.display = 'block';
+        nextBtn.classList.add('enabled');
+        nextBtn.removeAttribute('aria-disabled');
       }
-      // ถ้ามี ให้แสดง Public Key และเปิดปุ่มถัดไป
-      pubOutput.textContent = savedPub;
-      outputContainer.style.display = 'block';
-      nextBtn.classList.add('enabled');
-      nextBtn.removeAttribute('aria-disabled');
+      // ** ไม่ต้องรีไดเร็กต์กลับ index หากยังไม่มีค่า เพราะต้องให้ผู้ใช้กด Generate Key ก่อน **
     });
   </script>
 </body>
