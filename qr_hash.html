@@ -2,16 +2,101 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Generate QR Hash</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 2em auto;
+      padding: 1em;
+      background: #f5f7fa;
+      color: #333;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin-bottom: 1em;
+    }
+    .info {
+      background: #eaf2fd;
+      border-left: 5px solid #246bfd;
+      padding: 0.8em;
+      border-radius: 8px;
+      margin: 1em 0;
+      word-break: break-all;
+    }
+    .btn {
+      display: inline-block;
+      padding: 0.6em 1.2em;
+      margin: 0.5em 0.3em;
+      border: none;
+      border-radius: 6px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.2s;
+      text-decoration: none;
+      text-align: center;
+    }
+    #gen-qr-btn {
+      background: #246bfd;
+      color: #fff;
+    }
+    #gen-qr-btn:hover {
+      background: #1747a1;
+    }
+    #next-btn {
+      background: #219150;
+      color: #fff;
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #next-btn.enabled {
+      opacity: 1;
+      cursor: pointer;
+    }
+    #next-btn.enabled:hover {
+      background: #176d38;
+    }
+    .note {
+      font-size: 0.9em;
+      color: #777;
+      margin-top: 1em;
+      text-align: center;
+    }
+    @media (max-width: 480px) {
+      body { margin: 1em; padding: 0.5em; }
+      .btn { width: 100%; }
+    }
+  </style>
 </head>
 <body>
   <h2>2. สร้าง QR Hash จาก Public Key</h2>
-  <p>Public Key ที่ใช้: <span id="pub-key-display">กำลังโหลด...</span></p>
-  <button id="gen-qr-btn">Generate QR Hash</button>
-  <p>QR Hash: <span id="qr-hash-output">ยังไม่ได้สร้าง</span></p>
+
+  <div id="pub-container" class="info">
+    <strong>Public Key ที่ใช้:</strong>
+    <p id="pub-key-display">กำลังโหลด...</p>
+  </div>
+
+  <button id="gen-qr-btn" class="btn">Generate QR Hash</button>
+
+  <div id="qr-container" class="info" style="display: none;">
+    <strong>QR Hash:</strong>
+    <p id="qr-hash-output">–</p>
+  </div>
+
+  <div style="text-align: center;">
+    <!-- ปุ่มนำทางไปหน้า Register -->
+    <a id="next-btn" class="btn" href="register.html">ไปหน้าลงทะเบียน QR</a>
+  </div>
+
+  <p class="note">
+    (Public Key ต้องถูกสร้างก่อน ถ้าไม่มีจะแจ้งเตือน หากมีค่า QR Hash แล้ว ปุ่ม “ไปหน้าลงทะเบียน” จะใช้งานได้ทันที)
+  </p>
 
   <script>
-    // ฟังก์ชัน sha256() แบบเดียวกับหน้า generate_key.html
+    // ฟังก์ชัน sha256() แบบจำลอง เหมือน generate_key.html
     function sha256(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -21,29 +106,58 @@
       return hash.toString(16).padStart(64, '0');
     }
 
+    const pubKeyDisplay = document.getElementById('pub-key-display');
+    const genBtn = document.getElementById('gen-qr-btn');
+    const qrContainer = document.getElementById('qr-container');
+    const qrOutput = document.getElementById('qr-hash-output');
+    const nextBtn = document.getElementById('next-btn');
+
     // โหลด Public Key จาก localStorage มาแสดง
-    const pubKey = localStorage.getItem('dtc_publicKey');
+    let pubKey = localStorage.getItem('dtc_publicKey');
     if (pubKey) {
-      document.getElementById('pub-key-display').textContent = pubKey;
+      pubKeyDisplay.textContent = pubKey;
     } else {
-      document.getElementById('pub-key-display').textContent = 'ไม่พบ Public Key กรุณาสร้างที่หน้า 1';
+      pubKeyDisplay.textContent = 'ไม่พบ Public Key กรุณาสร้างที่หน้า 1';
     }
 
-    document.getElementById('gen-qr-btn').addEventListener('click', () => {
+    genBtn.addEventListener('click', () => {
+      // ตรวจสอบว่ามี publicKey ใน localStorage หรือไม่
+      pubKey = localStorage.getItem('dtc_publicKey');
       if (!pubKey) {
-        alert('ไม่พบ Public Key กรุณากลับไปหน้า 1 เพื่อสร้างก่อน');
+        alert('ไม่พบ Public Key กรุณากลับไปหน้า สร้าง Public Key เพื่อสร้างก่อน');
         return;
       }
-      // สร้าง QR Hash จาก Public Key + timestamp ปัจจุบัน (ตัวอย่าง)
+      // สร้าง QR Hash จาก Public Key + timestamp ปัจจุบัน
       const timestamp = Date.now().toString();
       const qrHash = sha256(pubKey + timestamp);
 
-      // แสดงผลบนหน้า
-      document.getElementById('qr-hash-output').textContent = qrHash;
-      // เก็บ QR Hash ใน localStorage (key: "dtc_qrHash")
+      // แสดงผลบนหน้า และเก็บใน localStorage
+      qrOutput.textContent = qrHash;
+      qrContainer.style.display = 'block';
       localStorage.setItem('dtc_qrHash', qrHash);
 
-      alert('QR Hash ถูกสร้างแล้ว! คุณสามารถไปหน้าลงทะเบียนต่อได้');
+      // เปิดใช้งานปุ่ม “ไปหน้าลงทะเบียน QR”
+      nextBtn.classList.add('enabled');
+      nextBtn.removeAttribute('aria-disabled');
+    });
+
+    // ป้องกันการคลิกก่อนสร้าง QR Hash
+    nextBtn.addEventListener('click', (e) => {
+      if (!nextBtn.classList.contains('enabled')) {
+        e.preventDefault();
+        alert('กรุณาสร้าง QR Hash ก่อนจึงจะไปยังหน้าลงทะเบียนได้');
+      }
+    });
+
+    // เมื่อหน้าโหลด ให้เช็กว่ามี qrHash อยู่แล้วหรือไม่ (โหลดขึ้นอัตโนมัติ)
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedQr = localStorage.getItem('dtc_qrHash');
+      if (savedQr) {
+        qrOutput.textContent = savedQr;
+        qrContainer.style.display = 'block';
+        nextBtn.classList.add('enabled');
+        nextBtn.removeAttribute('aria-disabled');
+      }
     });
   </script>
 </body>
