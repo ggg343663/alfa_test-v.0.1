@@ -25,6 +25,7 @@
       border-radius: 8px;
       margin: 1em 0;
       word-break: break-all;
+      overflow-wrap: break-word;
     }
     .btn {
       display: inline-block;
@@ -40,8 +41,7 @@
       text-align: center;
     }
     #gen-key-btn {
-      background: #219150;
-      color: #fff;
+      background: #219150; color: #fff;
     }
     #gen-key-btn:hover {
       background: #176d38;
@@ -82,7 +82,8 @@
   </div>
 
   <div style="text-align: center;">
-    <a id="next-btn" class="btn" href="generate_qr.html">ไปหน้าสร้าง QR Hash</a>
+    <!-- ใช้ aria-disabled="true" เริ่มต้น -->
+    <a id="next-btn" class="btn" href="generate_qr.html" aria-disabled="true">ไปหน้าสร้าง QR Hash</a>
   </div>
 
   <p class="note">
@@ -90,16 +91,12 @@
   </p>
 
   <script>
-    // สมมติฟังก์ชัน generateKeyPair() สร้างคู่คีย์ (Public/Private) แบบจำลอง
     function generateKeyPair() {
-      // สร้าง private key แบบสุ่ม (ผู้ใช้ต้องจดไว้เอง หากต้องใช้จริง)
       const priv = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
-      // แปลง private เป็น public ด้วยฟังก์ชัน hash (ตัวอย่างจำลอง)
       const pub  = sha256(priv);
       return { publicKey: pub, privateKey: priv };
     }
 
-    // ฟังก์ชัน sha256() แบบจำลอง
     function sha256(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -117,14 +114,11 @@
     genBtn.addEventListener('click', () => {
       const { publicKey, privateKey } = generateKeyPair();
 
-      // แสดง Public Key บนหน้า
       pubOutput.textContent = publicKey;
       outputContainer.style.display = 'block';
 
-      // เก็บเฉพาะ Public Key ใน localStorage (ไม่เก็บ Private Key)
       localStorage.setItem('dtc_publicKey', publicKey);
 
-      // แจ้งผู้ใช้ให้จด Private Key เก็บไว้เอง
       alert(
         'สร้าง Public Key เรียบร้อยแล้ว!\n\n' +
         'Public Key จะถูกเก็บไว้ในเบราว์เซอร์ (localStorage)\n' +
@@ -135,12 +129,11 @@
       console.log('*** PRIVATE KEY (กรุณาจดเก็บไว้ภายนอก) ***');
       console.log(privateKey);
 
-      // เปิดใช้งานปุ่ม “ไปหน้าสร้าง QR Hash”
+      // เปิดใช้งานปุ่มถัดไป
       nextBtn.classList.add('enabled');
       nextBtn.removeAttribute('aria-disabled');
     });
 
-    // ป้องกันการคลิกก่อนสร้าง Public Key
     nextBtn.addEventListener('click', (e) => {
       if (!nextBtn.classList.contains('enabled')) {
         e.preventDefault();
@@ -148,15 +141,26 @@
       }
     });
 
-    // เมื่อหน้าโหลด หากเคยสร้าง Public Key ไว้แล้ว ให้แสดงและเปิดปุ่มไปต่อ
+    // ป้องกันกรณีกด Enter/Space ที่ลิงก์
+    nextBtn.addEventListener('keydown', (e) => {
+      if ((e.key === 'Enter' || e.key === ' ') && !nextBtn.classList.contains('enabled')) {
+        e.preventDefault();
+        alert('กรุณาสร้าง Public Key ก่อนจึงจะไปยังหน้าสร้าง QR Hash ได้');
+      }
+    });
+
+    // เมื่อหน้าโหลด ให้ตรวจสอบค่าใน localStorage
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
-      if (savedPub) {
-        pubOutput.textContent = savedPub;
-        outputContainer.style.display = 'block';
-        nextBtn.classList.add('enabled');
-        nextBtn.removeAttribute('aria-disabled');
+      if (!savedPub) {
+        alert('ยังไม่มี Public Key กรุณาสร้างที่หน้าแรก');
+        window.location.href = 'index.html';
+        return;
       }
+      pubOutput.textContent = savedPub;
+      outputContainer.style.display = 'block';
+      nextBtn.classList.add('enabled');
+      nextBtn.removeAttribute('aria-disabled');
     });
   </script>
 </body>
