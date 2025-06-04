@@ -38,6 +38,12 @@
       font-size: 1.19em;
       margin-bottom: 0.4em;
     }
+    .general-desc {
+      color: #555;
+      font-size: 0.95em;
+      margin-bottom: 0.6em;
+      text-align: center;
+    }
     .general-list {
       display: flex;
       flex-direction: column;
@@ -64,6 +70,7 @@
     .general-list a:hover {
       background: #176d38;
     }
+
     /* User Section */
     .user-section {
       background: #eaf2fd;
@@ -76,6 +83,12 @@
       gap: 0.4em;
       font-size: 1.13em;
       margin-bottom: 0.36em;
+    }
+    .user-desc {
+      color: #457;
+      margin-bottom: 0.54em;
+      font-size: 0.98em;
+      text-align: center;
     }
     .user-list a {
       display: block;
@@ -94,12 +107,7 @@
     .user-list a:hover {
       background: #1747a1;
     }
-    .user-desc {
-      color: #457;
-      margin-bottom: 0.54em;
-      font-size: 0.98em;
-      text-align: center;
-    }
+
     /* Master Section */
     .master-section {
       background: #fffbe8;
@@ -112,6 +120,12 @@
       gap: 0.4em;
       font-size: 1.13em;
       margin-bottom: 0.36em;
+    }
+    .master-desc {
+      color: #875e00;
+      margin-bottom: 0.54em;
+      font-size: 0.98em;
+      text-align: center;
     }
     .master-list a {
       display: block;
@@ -127,16 +141,18 @@
       margin-bottom: 0.28em;
       transition: background 0.11s;
     }
-    .master-list a:hover {
+    .master-list a.disabled {
+      background: #ccc;
+      color: #666;
+      cursor: not-allowed;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .master-list a:hover:not(.disabled) {
       background: #eab308;
       color: #111;
     }
-    .master-desc {
-      color: #875e00;
-      margin-bottom: 0.54em;
-      font-size: 0.98em;
-      text-align: center;
-    }
+
     /* Agent Section */
     .agent-section {
       background: #f3f7fd;
@@ -170,10 +186,18 @@
       margin-bottom: 0.28em;
       transition: background 0.11s;
     }
-    .agent-list a:hover {
+    .agent-list a.disabled {
+      background: #ccc;
+      color: #666;
+      cursor: not-allowed;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+    .agent-list a:hover:not(.disabled) {
       background: #2563eb;
       color: #fff;
     }
+
     /* Genesis Section */
     .genesis-section {
       background: #f7f4fe;
@@ -193,6 +217,7 @@
       font-size: 0.98em;
       text-align: center;
     }
+
     .footer-note {
       display: block;
       text-align: center;
@@ -200,9 +225,17 @@
       color: #aaa;
       font-size: 0.95em;
     }
+
     @media (max-width: 600px) {
       body { margin: 0.4em; padding: 0.07em;}
       .section { padding: 0.34em 0.2em 0.55em 0.2em; }
+      .general-list a,
+      .user-list a,
+      .master-list a,
+      .agent-list a {
+        font-size: 1em;
+        padding: 0.6em 0.2em;
+      }
     }
   </style>
 </head>
@@ -211,11 +244,12 @@
 
   <div class="section general-section">
     <div class="general-title">🟩 General</div>
+    <div class="general-desc">ขั้นตอน: 1→2→3→4</div>
     <div class="general-list">
-      <a href="key_pair.html">Generate Public Key</a>
-      <a href="qr_hash.html">Generate QR Hash</a>
-      <a href="transfer.html">Transfer QR</a>
-      <a href="verify_log.html">Check QR Status</a>
+      <a href="generate_key.html">1. Generate Public Key</a>
+      <a href="generate_qr.html">2. Generate QR Hash</a>
+      <a href="transfer.html">3. Transfer QR</a>
+      <a href="verify_log.html">4. Check QR Status</a>
     </div>
   </div>
 
@@ -231,9 +265,9 @@
     <div class="master-title">🟨 Master</div>
     <div class="master-desc">ปลดล็อกสิทธิขั้นสูงและจัดการ Master</div>
     <div class="master-list">
-      <a href="request_master.html">Request Master</a>
-      <a href="master_unlock.html">Unlock Master</a>
-      <a href="master_dashboard.html">Master Dashboard</a>
+      <a class="disabled" href="#">Request Master (กำลังมา)</a>
+      <a class="disabled" href="#">Unlock Master (กำลังมา)</a>
+      <a class="disabled" href="#">Master Dashboard (กำลังมา)</a>
     </div>
   </div>
 
@@ -241,8 +275,8 @@
     <div class="agent-title">🟦 Agent</div>
     <div class="agent-desc">ลงทะเบียน Agent หลังเงื่อนไขในระบบ Master</div>
     <div class="agent-list">
-      <a href="agent_register.html">Register Agent</a>
-      <a href="agent_dashboard.html">Agent Dashboard</a>
+      <a class="disabled" href="#">Register Agent (กำลังมา)</a>
+      <a class="disabled" href="#">Agent Dashboard (กำลังมา)</a>
     </div>
   </div>
 
