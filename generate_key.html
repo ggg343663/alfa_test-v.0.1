@@ -41,7 +41,8 @@
       text-align: center;
     }
     #gen-key-btn {
-      background: #219150; color: #fff;
+      background: #219150;
+      color: #fff;
     }
     #gen-key-btn:hover {
       background: #176d38;
@@ -74,16 +75,20 @@
 <body>
   <h2>1. สร้าง Public Key</h2>
 
+  <!-- ปุ่ม Generate Key -->
   <button id="gen-key-btn" class="btn">Generate Key</button>
 
+  <!-- กล่องแสดงผล Public Key (ซ่อนก่อน) -->
   <div id="output-container" class="output" style="display: none;">
     <strong>Public Key:</strong>
     <p id="pub-key-output">–</p>
   </div>
 
+  <!-- ปุ่ม “ไปหน้าสร้าง QR Hash” (disabled ก่อน) -->
   <div style="text-align: center;">
-    <!-- ใช้ aria-disabled="true" เริ่มต้น -->
-    <a id="next-btn" class="btn" href="generate_qr.html" aria-disabled="true">ไปหน้าสร้าง QR Hash</a>
+    <a id="next-btn" class="btn" href="generate_qr.html" aria-disabled="true">
+      ไปหน้าสร้าง QR Hash
+    </a>
   </div>
 
   <p class="note">
@@ -91,12 +96,16 @@
   </p>
 
   <script>
+    // ฟังก์ชันสุ่มสร้างคู่คีย์ (Public+Private) แบบจำลอง
     function generateKeyPair() {
+      // สร้าง private key แบบสุ่ม (ผู้ใช้ต้องเก็บเอง)
       const priv = Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      // สร้าง public key ด้วยการ hash แบบจำลอง
       const pub  = sha256(priv);
       return { publicKey: pub, privateKey: priv };
     }
 
+    // ฟังก์ชัน sha256() แบบจำลอง (ไม่ใช่ของจริง แต่ให้ผลลัพธ์ออกมาเป็น hex 64 หลัก)
     function sha256(str) {
       let hash = 0;
       for (let i = 0; i < str.length; i++) {
@@ -106,19 +115,24 @@
       return hash.toString(16).padStart(64, '0');
     }
 
+    // อ้างอิง element
     const genBtn = document.getElementById('gen-key-btn');
     const pubOutput = document.getElementById('pub-key-output');
     const outputContainer = document.getElementById('output-container');
     const nextBtn = document.getElementById('next-btn');
 
+    // เมื่อผู้ใช้คลิก “Generate Key”
     genBtn.addEventListener('click', () => {
       const { publicKey, privateKey } = generateKeyPair();
 
+      // แสดง Public Key ในกล่อง output-container
       pubOutput.textContent = publicKey;
       outputContainer.style.display = 'block';
 
+      // เก็บเฉพาะ Public Key ใน localStorage
       localStorage.setItem('dtc_publicKey', publicKey);
 
+      // แจ้งให้ผู้ใช้จด Private Key และแสดงใน console
       alert(
         'สร้าง Public Key เรียบร้อยแล้ว!\n\n' +
         'Public Key จะถูกเก็บไว้ในเบราว์เซอร์ (localStorage)\n' +
@@ -126,14 +140,15 @@
         'แสดงใน console กรุณาจดเก็บไว้นอกเบราว์เซอร์:\n\n' +
         privateKey
       );
-      console.log('*** PRIVATE KEY (กรุณาจดเก็บไว้ภายนอก) ***');
+      console.log('*** PRIVATE KEY (กรุณาจดเก็บไว้นอก browser) ***');
       console.log(privateKey);
 
-      // เปิดใช้งานปุ่มถัดไป
+      // เปิดใช้งานปุ่ม “ไปหน้าสร้าง QR Hash”
       nextBtn.classList.add('enabled');
       nextBtn.removeAttribute('aria-disabled');
     });
 
+    // ป้องกันการคลิก “ถัดไป” ถ้ายังไม่พร้อม
     nextBtn.addEventListener('click', (e) => {
       if (!nextBtn.classList.contains('enabled')) {
         e.preventDefault();
@@ -141,22 +156,25 @@
       }
     });
 
-    // ป้องกันกรณีกด Enter/Space ที่ลิงก์
+    // ป้องกันกรณีกด Enter/Space บน <a> ถ้ายังไม่พร้อม
     nextBtn.addEventListener('keydown', (e) => {
-      if ((e.key === 'Enter' || e.key === ' ') && !nextBtn.classList.contains('enabled')) {
+      if ((e.key === 'Enter' || e.key === ' ') &&
+          !nextBtn.classList.contains('enabled')) {
         e.preventDefault();
         alert('กรุณาสร้าง Public Key ก่อนจึงจะไปยังหน้าสร้าง QR Hash ได้');
       }
     });
 
-    // เมื่อหน้าโหลด ให้ตรวจสอบค่าใน localStorage
+    // เมื่อโหลดหน้า ให้ตรวจว่ามี Public Key ใน localStorage หรือไม่
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       if (!savedPub) {
+        // ถ้าไม่มี ให้แจ้งแล้วย้อนกลับไปหน้า index.html
         alert('ยังไม่มี Public Key กรุณาสร้างที่หน้าแรก');
         window.location.href = 'index.html';
         return;
       }
+      // ถ้ามี ให้แสดง Public Key และเปิดปุ่มถัดไป
       pubOutput.textContent = savedPub;
       outputContainer.style.display = 'block';
       nextBtn.classList.add('enabled');
