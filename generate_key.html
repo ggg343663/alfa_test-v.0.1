@@ -57,7 +57,7 @@
     <div class="input-row">
       <div class="input-label">Password:</div>
       <div class="pw-group">
-        <input type="password" id="password" class="pw-input" placeholder="Enter password (min 6 chars, letters & numbers)" autocomplete="new-password"/>
+        <input type="password" id="password" class="pw-input" placeholder="6-12 chars, letters & numbers" autocomplete="new-password"/>
         <button class="show-btn" type="button" onclick="toggleShow('password',this)" aria-label="Show Password">
           <span class="eye-icon" id="eye-password">
             <svg width="22" height="22" viewBox="0 0 24 24">
@@ -136,7 +136,7 @@
   </div>
   <p class="note">
     Enter password and PIN, confirm both, then click Generate Key.<br>
-    Password can be any length and strength. PIN should be 4-6 digits.
+    <b>Password must be 6-12 characters and include both letters and numbers.</b> PIN should be 4-6 digits.
   </p>
   <script>
     // Show/hide password and pin (SVG switch)
@@ -166,6 +166,15 @@
       if (password.length >= 12) return 'strong';
       if (password.length >= 8) return 'medium';
       return 'weak';
+    }
+    // Custom password rule: 6-12 chars, must include both letters and numbers
+    function validPasswordRule(password) {
+      return (
+        password.length >= 6 &&
+        password.length <= 12 &&
+        /[a-zA-Z]/.test(password) &&
+        /[0-9]/.test(password)
+      );
     }
     // PBKDF2 derive private key from password+pin
     async function derivePrivateKey(password, pin) {
@@ -233,6 +242,11 @@
       }
       if (password !== confirmPassword) {
         showError("Passwords do not match.");
+        return;
+      }
+      // Password rule: 6-12 chars, both letters & numbers
+      if (!validPasswordRule(password)) {
+        showError("Password must be 6-12 characters and include both letters and numbers.");
         return;
       }
       if (pin !== confirmPin) {
