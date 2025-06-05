@@ -18,6 +18,11 @@
       color: #2c3e50;
       margin-bottom: 1em;
     }
+    label { display: block; margin-bottom: 0.3em; }
+    input[type="password"] {
+      width: 100%; padding: 0.7em; font-size:1em; margin-bottom:0.8em;
+      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+    }
     .output {
       background: #eafaf0;
       border-left: 5px solid #219150;
@@ -40,13 +45,8 @@
       text-decoration: none;
       text-align: center;
     }
-    #gen-key-btn {
-      background: #219150;
-      color: #fff;
-    }
-    #gen-key-btn:hover {
-      background: #176d38;
-    }
+    #gen-key-btn { background: #219150; color: #fff; }
+    #gen-key-btn:hover { background: #176d38; }
     #next-btn {
       background: #246bfd;
       color: #fff;
@@ -69,22 +69,25 @@
     @media (max-width: 480px) {
       body { margin: 1em; padding: 0.5em; }
       .btn { width: 100%; }
+      input[type="password"] { font-size:0.97em; }
     }
   </style>
 </head>
 <body>
-  <h2>1. สร้าง Public Key</h2>
-
-  <!-- ปุ่ม Generate Key -->
+  <h2>1. สร้าง Public Key จาก Password + Passphrase</h2>
+  <label>รหัสผ่าน (Password):
+    <input type="password" id="password" placeholder="ระบุ password"/>
+  </label>
+  <label>Passphrase:
+    <input type="password" id="passphrase" placeholder="ระบุ passphrase"/>
+  </label>
   <button id="gen-key-btn" class="btn">Generate Key</button>
 
-  <!-- กล่องแสดงผล Public Key (ซ่อนก่อน) -->
   <div id="output-container" class="output" style="display: none;">
     <strong>Public Key:</strong>
     <p id="pub-key-output">–</p>
   </div>
 
-  <!-- ปุ่ม “ไปหน้าสร้าง QR Hash” (disabled ก่อน) -->
   <div style="text-align: center;">
     <a id="next-btn" class="btn" href="generate_qr.html" aria-disabled="true">
       ไปหน้าสร้าง QR Hash
@@ -92,59 +95,63 @@
   </div>
 
   <p class="note">
-    (หลังจากสร้าง Public Key แล้ว ปุ่ม “ไปหน้าสร้าง QR Hash” จะใช้งานได้)
+    (กรอก password และ passphrase แล้วกด Generate Key<br>
+    Public Key เดิมจะได้เหมือนเดิมทุกครั้ง ปุ่ม “ไปหน้าสร้าง QR Hash” จะใช้งานได้)
   </p>
 
   <script>
-    // ฟังก์ชันสุ่มสร้างคู่คีย์ (Public+Private) แบบจำลอง
-    function generateKeyPair() {
-      // สร้าง private key แบบสุ่ม (ผู้ใช้ต้องเก็บเอง)
-      const priv = Math.random().toString(36).slice(2) +
-                   Math.random().toString(36).slice(2);
-      // สร้าง public key ด้วยการ hash แบบจำลอง
-      const pub  = sha256(priv);
-      return { publicKey: pub, privateKey: priv };
+    // ใช้ PBKDF2 แปลง password+passphrase เป็น private key แบบ deterministic
+    async function derivePrivateKey(password, passphrase) {
+      const enc = new TextEncoder();
+      const seed = password + "|" + passphrase;
+      const salt = enc.encode("DTC-KEY-SALT");
+      const baseKey = await window.crypto.subtle.importKey(
+        "raw", enc.encode(seed), "PBKDF2", false, ["deriveBits"]
+      );
+      const bits = await window.crypto.subtle.deriveBits(
+        { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },
+        baseKey,
+        256
+      );
+      // คืนค่า hex string 64 หลัก (32 bytes)
+      return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
-    // ฟังก์ชัน sha256() แบบจำลอง (ไม่ใช่ของจริง แต่ให้ผลลัพธ์ออกมาเป็น hex 64 หลัก)
-    function sha256(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0;
-      }
-      return hash.toString(16).padStart(64, '0');
+    // แฮช private key เพื่อสร้าง public key แบบจำลอง
+    async function sha256hex(strHex) {
+      const bin = new Uint8Array(strHex.match(/../g).map(x=>parseInt(x,16)));
+      const hashBuffer = await window.crypto.subtle.digest("SHA-256", bin);
+      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,"0")).join("");
     }
 
-    // อ้างอิง element
     const genBtn = document.getElementById('gen-key-btn');
     const pubOutput = document.getElementById('pub-key-output');
     const outputContainer = document.getElementById('output-container');
     const nextBtn = document.getElementById('next-btn');
+    let lastPubKey = "";
 
-    // เมื่อผู้ใช้คลิก “Generate Key”
-    genBtn.addEventListener('click', () => {
-      const { publicKey, privateKey } = generateKeyPair();
+    genBtn.addEventListener('click', async () => {
+      const password = document.getElementById('password').value.trim();
+      const passphrase = document.getElementById('passphrase').value.trim();
+      if (!password || !passphrase) {
+        alert("กรุณาใส่ password และ passphrase ให้ครบ");
+        return;
+      }
+      const privKey = await derivePrivateKey(password, passphrase);
+      const pubKey = await sha256hex(privKey);
 
-      // แสดง Public Key ในกล่อง output-container
-      pubOutput.textContent = publicKey;
+      pubOutput.textContent = pubKey;
       outputContainer.style.display = 'block';
 
-      // เก็บเฉพาะ Public Key ใน localStorage
-      localStorage.setItem('dtc_publicKey', publicKey);
+      // เก็บ public key ไว้ใน localStorage สำหรับขั้นตอนถัดไป
+      localStorage.setItem('dtc_publicKey', pubKey);
+      lastPubKey = pubKey;
 
-      // แจ้งให้ผู้ใช้จด Private Key และแสดงใน console
-      alert(
-        'สร้าง Public Key เรียบร้อยแล้ว!\n\n' +
-        'Public Key จะถูกเก็บไว้ในเบราว์เซอร์ (localStorage)\n' +
-        'ส่วน Private Key (ใช้ในขั้นตอนโอน QR หากมี) ' +
-        'แสดงใน console กรุณาจดเก็บไว้นอกเบราว์เซอร์:\n\n' +
-        privateKey
-      );
-      console.log('*** PRIVATE KEY (กรุณาจดเก็บไว้นอก browser) ***');
-      console.log(privateKey);
+      // แจ้ง private key ใน console (เพื่อ sign หรือโอนต่อ)
+      console.log('*** PRIVATE KEY (derive จาก password + passphrase) ***');
+      console.log(privKey);
 
-      // เปิดใช้งานปุ่ม “ไปหน้าสร้าง QR Hash”
+      // เปิดปุ่มไป QR Hash
       nextBtn.classList.add('enabled');
       nextBtn.removeAttribute('aria-disabled');
     });
@@ -157,7 +164,7 @@
       }
     });
 
-    // ป้องกันกรณีกด Enter/Space บน <a> ถ้ายังไม่พร้อม
+    // ป้องกัน Enter/Space ถ้ายังไม่พร้อม
     nextBtn.addEventListener('keydown', (e) => {
       if ((e.key === 'Enter' || e.key === ' ') &&
           !nextBtn.classList.contains('enabled')) {
@@ -166,18 +173,16 @@
       }
     });
 
-    // เมื่อโหลดหน้า ให้ตรวจว่ามี Public Key ใน localStorage หรือไม่
-    // แต่ง่ายๆ คือถ้ามี สั่ง pre-fill ให้เห็น แต่ถ้าไม่มีก็ปล่อยให้กดสร้างได้ปกติ
+    // ถ้าเคยมี public key ใน localStorage แล้ว (จาก session ก่อน)
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       if (savedPub) {
-        // ถ้ามีคีย์เก่า ให้แสดงผลและเปิดปุ่มถัดไปเลย
         pubOutput.textContent = savedPub;
         outputContainer.style.display = 'block';
         nextBtn.classList.add('enabled');
         nextBtn.removeAttribute('aria-disabled');
+        lastPubKey = savedPub;
       }
-      // ** ไม่ต้องรีไดเร็กต์กลับ index หากยังไม่มีค่า เพราะต้องให้ผู้ใช้กด Generate Key ก่อน **
     });
   </script>
 </body>
