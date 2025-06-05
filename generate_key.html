@@ -59,7 +59,7 @@
       <div class="pw-group">
         <input type="password" id="password" class="pw-input" placeholder="Enter password (min 6 chars, letters & numbers)" autocomplete="new-password"/>
         <button class="show-btn" type="button" onclick="toggleShow('password',this)" aria-label="Show Password">
-          <span class="eye-icon">
+          <span class="eye-icon" id="eye-password">
             <svg width="22" height="22" viewBox="0 0 24 24">
               <ellipse cx="12" cy="12" rx="9" ry="5" fill="none" stroke="#333" stroke-width="2"/>
               <circle cx="12" cy="12" r="2.2" fill="#333"/>
@@ -200,7 +200,16 @@
     const copyBtn = document.getElementById('copy-btn');
     const nextBtn = document.getElementById('next-btn');
     const errorMsg = document.getElementById('error-msg');
-    let lastPubKey = "";
+    // เคลียร์ output เมื่อเปลี่ยน input
+    function clearOutput() {
+      pubOutput.textContent = "–";
+      outputContainer.style.display = "none";
+      nextBtn.classList.remove('enabled');
+      nextBtn.setAttribute('aria-disabled', 'true');
+    }
+    [passwordInput, confirmPasswordInput, pinInput, confirmPinInput].forEach(el =>
+      el.addEventListener('input', clearOutput)
+    );
     // Live password strength display
     passwordInput.addEventListener('input', () => {
       const val = passwordInput.value;
@@ -244,7 +253,6 @@
       outputContainer.style.display = 'block';
       // Save public key in localStorage
       localStorage.setItem('dtc_publicKey', pubKey);
-      lastPubKey = pubKey;
       // Enable next step
       nextBtn.classList.add('enabled');
       nextBtn.removeAttribute('aria-disabled');
@@ -270,17 +278,6 @@
       if ((e.key === 'Enter' || e.key === ' ') && !nextBtn.classList.contains('enabled')) {
         e.preventDefault();
         alert('Please generate the Public Key before proceeding to the next step.');
-      }
-    });
-    // Show public key if already generated
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedPub = localStorage.getItem('dtc_publicKey');
-      if (savedPub) {
-        pubOutput.textContent = savedPub;
-        outputContainer.style.display = 'block';
-        nextBtn.classList.add('enabled');
-        nextBtn.removeAttribute('aria-disabled');
-        lastPubKey = savedPub;
       }
     });
   </script>
