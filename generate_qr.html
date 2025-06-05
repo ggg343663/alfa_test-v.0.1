@@ -1,109 +1,39 @@
-<!DOCTYPE html>
-<html lang="th">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Generate QR Hash</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 2em auto;
-      padding: 1em;
-      background: #f5f7fa;
-      color: #333;
-    }
-    h2 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 1em;
-    }
-    .info {
-      background: #eaf2fd;
-      border-left: 5px solid #246bfd;
-      padding: 0.8em;
-      border-radius: 8px;
-      margin: 1em 0;
-      word-break: break-all;
-    }
-    .btn {
-      display: inline-block;
-      padding: 0.6em 1.2em;
-      margin: 0.5em 0.3em;
-      border: none;
-      border-radius: 6px;
-      font-size: 1em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-      text-decoration: none;
-      text-align: center;
-    }
-    #gen-qr-btn {
-      background: #246bfd;
-      color: #fff;
-    }
-    #gen-qr-btn:hover {
-      background: #1747a1;
-    }
-    #next-btn {
-      background: #219150;
-      color: #fff;
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    #next-btn.enabled {
-      opacity: 1;
-      cursor: pointer;
-    }
-    #next-btn.enabled:hover {
-      background: #176d38;
-    }
-    .note {
-      font-size: 0.9em;
-      color: #777;
-      margin-top: 1em;
-      text-align: center;
-    }
-    @media (max-width: 480px) {
-      body { margin: 1em; padding: 0.5em; }
-      .btn { width: 100%; }
-    }
-  </style>
-</head>
+<!-- ...head เดิม... -->
 <body>
   <h2>2. สร้าง QR Hash จาก Public Key</h2>
 
-  <div id="pub-container" class="info">
+  <div class="info" style="border-color:#219150;">
     <strong>Public Key ที่ใช้:</strong>
-    <p id="pub-key-display">กำลังโหลด...</p>
+    <p id="pub-key-display" style="color:#219150;font-weight:bold;">กำลังโหลด...</p>
   </div>
 
   <button id="gen-qr-btn" class="btn">Generate QR Hash</button>
 
-  <div id="qr-container" class="info" style="display: none;">
+  <div id="qr-container" class="info" style="display:none; border-color:#246bfd;">
     <strong>QR Hash:</strong>
-    <p id="qr-hash-output">–</p>
+    <p id="qr-hash-output" style="word-break:break-all;"></p>
+    <div>
+      <span id="timestamp"></span>
+      <span id="nonce"></span>
+    </div>
   </div>
 
   <div style="text-align: center;">
-    <!-- ปุ่มนำทางไปหน้า Register -->
-    <a id="next-btn" class="btn" href="register.html">ไปหน้าลงทะเบียน QR</a>
+    <a id="next-btn" class="btn" href="register.html" aria-disabled="true" style="background:#219150;">ไปหน้าลงทะเบียน QR</a>
+    <br><a href="index.html" class="btn" style="background:#888;">กลับหน้าหลัก</a>
   </div>
 
   <p class="note">
-    (Public Key ต้องถูกสร้างก่อน ถ้าไม่มีจะแจ้งเตือน หากมีค่า QR Hash แล้ว ปุ่ม “ไปหน้าลงทะเบียน” จะใช้งานได้ทันที)
+    (ต้องมี Public Key ก่อน, ถ้ายังไม่มีจะพาไปสร้างอัตโนมัติ)
   </p>
 
   <script>
-    // ฟังก์ชัน sha256() แบบจำลอง เหมือน generate_key.html
-    function sha256(str) {
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        hash = ((hash << 5) - hash) + str.charCodeAt(i);
-        hash |= 0;
-      }
-      return hash.toString(16).padStart(64, '0');
+    // ใช้ WebCrypto SHA-256 จริง
+    async function sha256hex(str) {
+      const enc = new TextEncoder();
+      const buf = enc.encode(str);
+      const hashBuf = await window.crypto.subtle.digest("SHA-256", buf);
+      return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,"0")).join("");
     }
 
     const pubKeyDisplay = document.getElementById('pub-key-display');
@@ -111,37 +41,40 @@
     const qrContainer = document.getElementById('qr-container');
     const qrOutput = document.getElementById('qr-hash-output');
     const nextBtn = document.getElementById('next-btn');
+    const timestampEl = document.getElementById('timestamp');
+    const nonceEl = document.getElementById('nonce');
 
-    // โหลด Public Key จาก localStorage มาแสดง
     let pubKey = localStorage.getItem('dtc_publicKey');
-    if (pubKey) {
-      pubKeyDisplay.textContent = pubKey;
+    if (!pubKey) {
+      // ถ้าไม่มี public key ให้พาไปหน้าสร้าง
+      window.location.href = 'generate_key.html';
     } else {
-      pubKeyDisplay.textContent = 'ไม่พบ Public Key กรุณาสร้างที่หน้า 1';
+      pubKeyDisplay.textContent = pubKey;
     }
 
-    genBtn.addEventListener('click', () => {
-      // ตรวจสอบว่ามี publicKey ใน localStorage หรือไม่
+    genBtn.addEventListener('click', async () => {
       pubKey = localStorage.getItem('dtc_publicKey');
       if (!pubKey) {
-        alert('ไม่พบ Public Key กรุณากลับไปหน้า สร้าง Public Key เพื่อสร้างก่อน');
+        window.location.href = 'generate_key.html';
         return;
       }
-      // สร้าง QR Hash จาก Public Key + timestamp ปัจจุบัน
-      const timestamp = Date.now().toString();
-      const qrHash = sha256(pubKey + timestamp);
+      const timestamp = new Date().toISOString();
+      const nonce = Math.floor(Math.random() * 1e12).toString();
+      const qrHash = await sha256hex(pubKey + "|" + timestamp + "|" + nonce);
 
-      // แสดงผลบนหน้า และเก็บใน localStorage
       qrOutput.textContent = qrHash;
+      timestampEl.textContent = `⏰ Timestamp: ${timestamp} `;
+      nonceEl.textContent = `Nonce: ${nonce}`;
+
       qrContainer.style.display = 'block';
       localStorage.setItem('dtc_qrHash', qrHash);
+      localStorage.setItem('dtc_qrTimestamp', timestamp);
+      localStorage.setItem('dtc_qrNonce', nonce);
 
-      // เปิดใช้งานปุ่ม “ไปหน้าลงทะเบียน QR”
       nextBtn.classList.add('enabled');
       nextBtn.removeAttribute('aria-disabled');
     });
 
-    // ป้องกันการคลิกก่อนสร้าง QR Hash
     nextBtn.addEventListener('click', (e) => {
       if (!nextBtn.classList.contains('enabled')) {
         e.preventDefault();
@@ -149,11 +82,15 @@
       }
     });
 
-    // เมื่อหน้าโหลด ให้เช็กว่ามี qrHash อยู่แล้วหรือไม่ (โหลดขึ้นอัตโนมัติ)
     window.addEventListener('DOMContentLoaded', () => {
+      // ดึงข้อมูลจาก localStorage ถ้ามี
       const savedQr = localStorage.getItem('dtc_qrHash');
-      if (savedQr) {
+      const ts = localStorage.getItem('dtc_qrTimestamp');
+      const nonce = localStorage.getItem('dtc_qrNonce');
+      if (savedQr && ts && nonce) {
         qrOutput.textContent = savedQr;
+        timestampEl.textContent = `⏰ Timestamp: ${ts} `;
+        nonceEl.textContent = `Nonce: ${nonce}`;
         qrContainer.style.display = 'block';
         nextBtn.classList.add('enabled');
         nextBtn.removeAttribute('aria-disabled');
