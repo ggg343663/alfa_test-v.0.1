@@ -18,10 +18,18 @@
       color: #2c3e50;
       margin-bottom: 1em;
     }
-    label { display: block; margin-bottom: 0.3em; }
+    label {
+      display: block;
+      margin-bottom: 0.3em;
+    }
     input[type="password"] {
-      width: 100%; padding: 0.7em; font-size:1em; margin-bottom:0.8em;
-      border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box;
+      width: 100%;
+      padding: 0.7em;
+      font-size: 1em;
+      margin-bottom: 0.8em;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-sizing: border-box;
     }
     .output {
       background: #eafaf0;
@@ -45,8 +53,13 @@
       text-decoration: none;
       text-align: center;
     }
-    #gen-key-btn { background: #219150; color: #fff; }
-    #gen-key-btn:hover { background: #176d38; }
+    #gen-key-btn {
+      background: #219150;
+      color: #fff;
+    }
+    #gen-key-btn:hover {
+      background: #176d38;
+    }
     #next-btn {
       background: #246bfd;
       color: #fff;
@@ -66,21 +79,66 @@
       margin-top: 1em;
       text-align: center;
     }
+    .strength {
+      font-size: 0.9em;
+      color: #ff6b6b;
+    }
+    .strength.weak { color: #ff6b6b; }
+    .strength.medium { color: #f6a800; }
+    .strength.strong { color: #4caf50; }
+    .input-container {
+      display: flex;
+      flex-direction: column;
+    }
+    .input-container input {
+      width: 100%;
+      padding: 0.7em;
+      margin-bottom: 1em;
+    }
+    #password-strength-bar {
+      width: 100%;
+      height: 10px;
+      margin-top: 5px;
+    }
+    #password-strength-bar.weak {
+      background-color: red;
+    }
+    #password-strength-bar.medium {
+      background-color: orange;
+    }
+    #password-strength-bar.strong {
+      background-color: green;
+    }
+    .back-home {
+      background: #f2f2f2;
+      color: #333;
+      padding: 0.6em;
+      font-size: 1em;
+      text-decoration: none;
+      display: inline-block;
+      margin-top: 2em;
+      text-align: center;
+    }
     @media (max-width: 480px) {
       body { margin: 1em; padding: 0.5em; }
       .btn { width: 100%; }
-      input[type="password"] { font-size:0.97em; }
+      input[type="password"] { font-size: 0.97em; }
     }
   </style>
 </head>
 <body>
-  <h2>1. สร้าง Public Key จาก Password + Passphrase</h2>
-  <label>รหัสผ่าน (Password):
-    <input type="password" id="password" placeholder="ระบุ password"/>
-  </label>
-  <label>Passphrase:
-    <input type="password" id="passphrase" placeholder="ระบุ passphrase"/>
-  </label>
+  <h2>1. สร้าง Public Key จาก Password + Pin</h2>
+
+  <div class="input-container">
+    <label>รหัสผ่าน (Password):</label>
+    <input type="password" id="password" placeholder="ระบุ password" />
+    <div id="password-strength-bar" class="weak"></div>
+    <div id="password-strength-msg" class="strength weak">อ่อนแอ</div>
+
+    <label>Pin (4 ตัว):</label>
+    <input type="password" id="pin" placeholder="ระบุ Pin" />
+  </div>
+
   <button id="gen-key-btn" class="btn">Generate Key</button>
 
   <div id="output-container" class="output" style="display: none;">
@@ -89,21 +147,32 @@
   </div>
 
   <div style="text-align: center;">
-    <a id="next-btn" class="btn" href="generate_qr.html" aria-disabled="true">
-      ไปหน้าสร้าง QR Hash
-    </a>
+    <a id="next-btn" class="btn" href="generate_qr.html" aria-disabled="true">ไปหน้าสร้าง QR Hash</a>
   </div>
 
-  <p class="note">
-    (กรอก password และ passphrase แล้วกด Generate Key<br>
-    Public Key เดิมจะได้เหมือนเดิมทุกครั้ง ปุ่ม “ไปหน้าสร้าง QR Hash” จะใช้งานได้)
-  </p>
+  <div class="back-home">
+    <a href="index.html">กลับหน้าหลัก</a>
+  </div>
+
+  <p class="note">กรอก password และ Pin แล้วกด Generate Key</p>
 
   <script>
+    // ฟังก์ชันตรวจสอบความแข็งแรงของรหัสผ่าน
+    function checkPasswordStrength(password) {
+      const regexWeak = /[a-zA-Z]{3,}/;
+      const regexMedium = /[a-zA-Z]{6,}/;
+      const regexStrong = /[a-zA-Z0-9]{8,}/;
+
+      if (password.length < 6) return 'weak';
+      if (regexStrong.test(password)) return 'strong';
+      if (regexMedium.test(password)) return 'medium';
+      return 'weak';
+    }
+
     // ใช้ PBKDF2 แปลง password+passphrase เป็น private key แบบ deterministic
-    async function derivePrivateKey(password, passphrase) {
+    async function derivePrivateKey(password, pin) {
       const enc = new TextEncoder();
-      const seed = password + "|" + passphrase;
+      const seed = password + "|" + pin;
       const salt = enc.encode("DTC-KEY-SALT");
       const baseKey = await window.crypto.subtle.importKey(
         "raw", enc.encode(seed), "PBKDF2", false, ["deriveBits"]
@@ -113,11 +182,9 @@
         baseKey,
         256
       );
-      // คืนค่า hex string 64 หลัก (32 bytes)
       return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");
     }
 
-    // แฮช private key เพื่อสร้าง public key แบบจำลอง
     async function sha256hex(strHex) {
       const bin = new Uint8Array(strHex.match(/../g).map(x=>parseInt(x,16)));
       const hashBuffer = await window.crypto.subtle.digest("SHA-256", bin);
@@ -132,18 +199,28 @@
 
     genBtn.addEventListener('click', async () => {
       const password = document.getElementById('password').value.trim();
-      const passphrase = document.getElementById('passphrase').value.trim();
-      if (!password || !passphrase) {
-        alert("กรุณาใส่ password และ passphrase ให้ครบ");
+      const pin = document.getElementById('pin').value.trim();
+
+      if (!password || !pin) {
+        alert("กรุณาใส่ password และ pin ให้ครบ");
         return;
       }
-      const privKey = await derivePrivateKey(password, passphrase);
+
+      const passwordStrength = checkPasswordStrength(password);
+      const pinStrength = pin.length === 4 ? 'strong' : 'weak';
+
+      // Update password strength indicator
+      document.getElementById('password-strength-bar').classList = passwordStrength;
+      document.getElementById('password-strength-msg').classList = passwordStrength;
+      document.getElementById('password-strength-msg').textContent = passwordStrength === 'weak' ? 'อ่อนแอ' : passwordStrength === 'medium' ? 'ปานกลาง' : 'แข็งแรง';
+
+      const privKey = await derivePrivateKey(password, pin);
       const pubKey = await sha256hex(privKey);
 
       pubOutput.textContent = pubKey;
       outputContainer.style.display = 'block';
 
-      // เก็บ public key ไว้ใน localStorage สำหรับขั้นตอนถัดไป
+      // เก็บ public key ไว้ใน localStorage
       localStorage.setItem('dtc_publicKey', pubKey);
       lastPubKey = pubKey;
 
@@ -156,7 +233,6 @@
       nextBtn.removeAttribute('aria-disabled');
     });
 
-    // ป้องกันการคลิก “ถัดไป” ถ้ายังไม่พร้อม
     nextBtn.addEventListener('click', (e) => {
       if (!nextBtn.classList.contains('enabled')) {
         e.preventDefault();
@@ -164,7 +240,6 @@
       }
     });
 
-    // ป้องกัน Enter/Space ถ้ายังไม่พร้อม
     nextBtn.addEventListener('keydown', (e) => {
       if ((e.key === 'Enter' || e.key === ' ') &&
           !nextBtn.classList.contains('enabled')) {
@@ -173,7 +248,6 @@
       }
     });
 
-    // ถ้าเคยมี public key ใน localStorage แล้ว (จาก session ก่อน)
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       if (savedPub) {
