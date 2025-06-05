@@ -200,12 +200,13 @@
     const copyBtn = document.getElementById('copy-btn');
     const nextBtn = document.getElementById('next-btn');
     const errorMsg = document.getElementById('error-msg');
-    // เคลียร์ output เมื่อเปลี่ยน input
+    // Clear output and localStorage when input changes
     function clearOutput() {
       pubOutput.textContent = "–";
       outputContainer.style.display = "none";
       nextBtn.classList.remove('enabled');
       nextBtn.setAttribute('aria-disabled', 'true');
+      localStorage.removeItem('dtc_publicKey');
     }
     [passwordInput, confirmPasswordInput, pinInput, confirmPinInput].forEach(el =>
       el.addEventListener('input', clearOutput)
