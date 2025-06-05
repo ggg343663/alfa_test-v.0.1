@@ -14,9 +14,12 @@
     .pw-input { width: 100%; padding: 0.7em 2.3em 0.7em 0.9em; font-size: 1em; border-radius: 6px; box-sizing: border-box; border: 1.5px solid #ffe066; background: #fffbe7; }
     .pin-input { border: 1.5px solid #ffb44d; background: #fff7f1; }
     .show-btn {
-      position: absolute; right: 0.4em; top: 50%; transform: translateY(-50%);
-      background: none; border: none; font-size: 1.14em; color: #767676; cursor: pointer; padding: 0 0.3em;
+      position: absolute; right: 0.2em; top: 50%; transform: translateY(-50%);
+      background: none; border: none; cursor: pointer; padding: 0 0.12em;
+      width: 28px; height: 28px;
+      display: flex; align-items: center; justify-content: center;
     }
+    .show-btn svg { display: block; }
 
     .output { background: #eafaf0; border-left: 5px solid #219150; padding: 0.8em; border-radius: 8px; margin: 1em 0; word-break: break-all; overflow-wrap: break-word; }
     .publickey-box { display: flex; align-items: center; background: #f6fff8; border-radius: 7px; border: 1.5px solid #32bc5e; padding: 0.5em; margin-top: 0.7em; }
@@ -59,7 +62,15 @@
       <div class="input-label">Password:</div>
       <div class="pw-group">
         <input type="password" id="password" class="pw-input" placeholder="Enter password (min 6 chars, letters & numbers)" autocomplete="new-password"/>
-        <button class="show-btn" type="button" onclick="toggleShow('password',this)">👁️</button>
+        <button class="show-btn" type="button" onclick="toggleShow('password',this)" aria-label="Show Password">
+          <!-- eye icon -->
+          <span class="eye-icon">
+            <svg id="icon-eye" width="22" height="22" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5" fill="none" stroke="#333" stroke-width="2"/>
+              <circle cx="12" cy="12" r="2.2" fill="#333"/>
+            </svg>
+          </span>
+        </button>
       </div>
       <div id="strength-bar" class="strength-bar weak"></div>
       <div id="password-strength-msg" class="strength weak">Weak</div>
@@ -68,21 +79,42 @@
       <div class="input-label">Confirm Password:</div>
       <div class="pw-group">
         <input type="password" id="confirm-password" class="pw-input" placeholder="Confirm password" autocomplete="new-password"/>
-        <button class="show-btn" type="button" onclick="toggleShow('confirm-password',this)">👁️</button>
+        <button class="show-btn" type="button" onclick="toggleShow('confirm-password',this)" aria-label="Show Confirm Password">
+          <span class="eye-icon">
+            <svg id="icon-eye" width="22" height="22" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5" fill="none" stroke="#333" stroke-width="2"/>
+              <circle cx="12" cy="12" r="2.2" fill="#333"/>
+            </svg>
+          </span>
+        </button>
       </div>
     </div>
     <div class="input-row">
       <div class="input-label">PIN (4-6 digits):</div>
       <div class="pw-group">
         <input type="password" id="pin" class="pw-input pin-input" placeholder="Enter PIN (4-6 digits)" maxlength="6" autocomplete="off"/>
-        <button class="show-btn" type="button" onclick="toggleShow('pin',this)">👁️</button>
+        <button class="show-btn" type="button" onclick="toggleShow('pin',this)" aria-label="Show PIN">
+          <span class="eye-icon">
+            <svg id="icon-eye" width="22" height="22" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5" fill="none" stroke="#333" stroke-width="2"/>
+              <circle cx="12" cy="12" r="2.2" fill="#333"/>
+            </svg>
+          </span>
+        </button>
       </div>
     </div>
     <div class="input-row">
       <div class="input-label">Confirm PIN:</div>
       <div class="pw-group">
         <input type="password" id="confirm-pin" class="pw-input pin-input" placeholder="Confirm PIN" maxlength="6" autocomplete="off"/>
-        <button class="show-btn" type="button" onclick="toggleShow('confirm-pin',this)">👁️</button>
+        <button class="show-btn" type="button" onclick="toggleShow('confirm-pin',this)" aria-label="Show Confirm PIN">
+          <span class="eye-icon">
+            <svg id="icon-eye" width="22" height="22" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5" fill="none" stroke="#333" stroke-width="2"/>
+              <circle cx="12" cy="12" r="2.2" fill="#333"/>
+            </svg>
+          </span>
+        </button>
       </div>
     </div>
     <div id="error-msg" class="error" style="display:none;"></div>
@@ -112,15 +144,24 @@
     Password must be at least 6 chars and include both letters and numbers. PIN should be 4-6 digits.
   </p>
   <script>
-    // Show/hide password and pin
+    // Show/hide password and pin (SVG switch)
     function toggleShow(fieldId, btn) {
       const input = document.getElementById(fieldId);
+      const eyeOpen = `<svg width="22" height="22" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="12" rx="9" ry="5" fill="none" stroke="#333" stroke-width="2"/>
+        <circle cx="12" cy="12" r="2.2" fill="#333"/>
+      </svg>`;
+      const eyeSlash = `<svg width="22" height="22" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="12" rx="9" ry="5" fill="none" stroke="#333" stroke-width="2"/>
+        <circle cx="12" cy="12" r="2.2" fill="#333"/>
+        <line x1="5" y1="19" x2="19" y2="5" stroke="#333" stroke-width="2"/>
+      </svg>`;
       if (input.type === "password") {
         input.type = "text";
-        btn.textContent = "🙈";
+        btn.innerHTML = eyeSlash;
       } else {
         input.type = "password";
-        btn.textContent = "👁️";
+        btn.innerHTML = eyeOpen;
       }
     }
     // Password strength check
