@@ -136,7 +136,7 @@
   </div>
   <p class="note">
     Enter password and PIN, confirm both, then click Generate Key.<br>
-    Password must be at least 6 chars and include both letters and numbers. PIN should be 4-6 digits.
+    Password can be any length and strength. PIN should be 4-6 digits.
   </p>
   <script>
     // Show/hide password and pin (SVG switch)
@@ -237,10 +237,6 @@
       }
       if (pin !== confirmPin) {
         showError("PIN codes do not match.");
-        return;
-      }
-      if (checkPasswordStrength(password) === 'weak') {
-        showError("Password must be at least 6 characters, and include both letters and numbers.");
         return;
       }
       if (!/^\d{4,6}$/.test(pin)) {
