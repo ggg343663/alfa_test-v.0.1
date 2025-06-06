@@ -3,10 +3,12 @@
     "slot": 1,
     "hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
     "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
-    "timestamp": "2025-06-01T10:15:00Z",
+    "timestamp": "2025-06-01T10:15:00.000Z",
     "qr_hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
-    "pubkey": "1234567890abcdef1234567890abcdef12345678",
+    "pubkey": "0x1234567890abcdef1234567890abcdef12345678",
     "action": "register",
-    "detail": "Initial QR registration"
+    "detail": "Initial QR registration",
+    "sig": "SIGNATURE_BASE64_OR_HEX",       // optional (สำหรับระบบ audit/proof)
+    "meta": { }                           // optional (future proof)
   }
 ]
