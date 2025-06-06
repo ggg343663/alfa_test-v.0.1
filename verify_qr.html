@@ -6,14 +6,41 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    /* ...คง style เดิม... */
-    /* (ยกมาแค่ส่วนใหม่ที่เพิ่ม/เปลี่ยน) */
+    body { font-family: Arial, sans-serif; max-width: 530px; margin: 2em auto; background: #f9fafd;}
+    .container { background: #fff; padding: 2em 1.3em; border-radius: 15px; box-shadow: 0 2px 14px #e1e5f5; }
+    h2 { text-align: center; color: #26733e; margin-bottom: 1.2em;}
+    label { font-weight: bold; margin-bottom: 0.3em; }
+    .input-row { display: flex; align-items: center; gap: 0.3em; margin-bottom: 0.7em; }
+    input[type="text"] {
+      width: 100%; padding: 0.6em; font-size: 1em; border-radius: 6px;
+      border: 1.4px solid #d0d7e5; margin-bottom: 0;
+      transition: border 0.18s;
+    }
     input[type="text"]:focus { border-color: #2563eb; box-shadow:0 2px 6px #bfdbfe44;}
+    button, .icon-btn {
+      background: none; border: none; color: #26733e; font-size: 1em;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      padding: 0.28em 0.4em; border-radius: 6px;
+      transition: background 0.14s;
+    }
+    .icon-btn svg { width: 23px; height: 23px; }
+    .icon-btn:hover { background: #e3eefa;}
     .copy-btn {
       background: none; border: none; color: #2196F3; font-weight: bold;
       cursor: pointer; font-size: 1em; margin-left: 0.18em;
     }
     .copy-success { color: #16a34a; font-size: 0.93em; margin-left: 0.2em;}
+    #imgInput { display: none; }
+    #scanMsg { font-size: 0.97em; min-height: 1.2em; margin-bottom: 0.25em;}
+    #qr-reader { margin: 0.6em 0 0.4em 0;}
+    .result-box { margin-top: 1.2em; padding: 1.1em; border-radius: 9px; font-size: 1.09em; }
+    .ok { background: #eafaf0; color: #26733e; border: 1.7px solid #64bc6d;}
+    .fail { background: #ffe9e9; color: #b61b1b; border: 1.7px solid #ef8888;}
+    .registered { background: #e3eafe; color: #234bb6; border: 1.7px solid #6c85e3;}
+    .back-btn { margin-top: 1.5em; background: #dbeafe; color: #324275; border-radius: 6px; border: 1px solid #b3c4df; font-size: 1em; padding: 0.5em 1.1em;}
+    .back-btn:hover { background: #bae6fd;}
+    code { background: #f0f2f9; padding: 0.15em 0.5em; border-radius: 5px;}
+    @media (max-width:600px){ .container {padding:1em 0.3em;} .input-row{flex-wrap:wrap;} }
   </style>
 </head>
 <body>
@@ -23,19 +50,23 @@
     <label for="qrhash">QR Hash (64 chars):</label>
     <div class="input-row">
       <input type="text" id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" autofocus />
-      <button class="scan-btn" onclick="toggleCameraScan()" type="button">📷</button>
+      <!-- Camera Icon Button -->
+      <button class="icon-btn" id="scanBtn" onclick="toggleCameraScan()" type="button" title="Scan QR">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2.5" stroke="#26733e" stroke-width="2"/><path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z" stroke="#26733e" stroke-width="2"/><rect x="7" y="2" width="10" height="4" rx="1.5" stroke="#26733e" stroke-width="2"/></svg>
+      </button>
+      <!-- Image Icon Button -->
       <input type="file" id="imgInput" accept="image/*" onchange="importQR(this)" />
-      <button class="import-btn" onclick="document.getElementById('imgInput').click()" type="button">🖼️</button>
+      <button class="icon-btn" onclick="document.getElementById('imgInput').click()" type="button" title="Import from Image">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#2563eb" stroke-width="2"/><circle cx="8.5" cy="9.5" r="1.5" fill="#2563eb"/><path d="M21 17v-1.2a2 2 0 0 0-.6-1.43l-3.39-3.1a2 2 0 0 0-2.62 0l-1.25 1.15a2 2 0 0 1-2.62 0l-3.39-3.1A2 2 0 0 0 3 15.8V17" stroke="#2563eb" stroke-width="2"/></svg>
+      </button>
       <button class="copy-btn" onclick="copyField('qrhash')" title="Copy QR">Copy</button>
       <span id="copyQRSuccess" class="copy-success"></span>
     </div>
-    <div id="scanMsg" class="scan-box"></div>
-    <div id="qr-reader"></div>
-
+    <div id="scanMsg"></div>
+    <div id="qr-reader" style="display:none;"></div>
     <button onclick="checkQR()" id="checkBtn" type="button">Check</button>
     <div id="resultArea"></div>
   </div>
-
 <script>
   // DEMO DATA
   const whitelist = [
@@ -50,21 +81,13 @@
     { hash: "C4EEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1AF0", owner: "0xB4A998877665544332211000AABBCCDDEEFF999", timestamp: "2024-06-01T13:22:00Z" }
   ];
 
-  // Autofocus
   window.onload = ()=>{ document.getElementById('qrhash').focus(); };
 
-  // Enter = check, Esc = clear
   document.getElementById('qrhash').addEventListener('keydown', function(e){
-    if(e.key === 'Enter'){
-      e.preventDefault();
-      checkQR();
-    }
-    if(e.key === 'Escape'){
-      clearQR();
-    }
+    if(e.key === 'Enter'){ e.preventDefault(); checkQR(); }
+    if(e.key === 'Escape'){ clearQR(); }
   });
 
-  // Copy field
   function copyField(id) {
     const input = document.getElementById(id);
     input.select(); input.setSelectionRange(0, 9999);
@@ -78,16 +101,16 @@
   let qrScanner = null;
   function toggleCameraScan() {
     const qrReader = document.getElementById('qr-reader');
-    const scanBtn = document.querySelector('.scan-btn');
+    const scanBtn = document.getElementById('scanBtn');
     if (qrReader.style.display === "block") {
       qrScanner && qrScanner.stop().then(()=>{});
       qrReader.style.display = "none";
-      scanBtn.textContent = "📷";
+      scanBtn.style.background = "";
       document.getElementById('scanMsg').textContent = "";
     } else {
       qrReader.style.display = "block";
-      scanBtn.textContent = "✖️";
-      document.getElementById('scanMsg').textContent = "กำลังเปิดกล้อง...";
+      scanBtn.style.background = "#e3eefa";
+      document.getElementById('scanMsg').textContent = "Opening camera...";
       qrScanner = new Html5Qrcode("qr-reader");
       qrScanner.start(
         { facingMode: "environment" },
@@ -97,12 +120,12 @@
           document.getElementById('scanMsg').innerHTML = "✔️ QR hash scanned from camera!";
           qrScanner.stop();
           qrReader.style.display = "none";
-          scanBtn.textContent = "📷";
+          scanBtn.style.background = "";
         },
-        err => { /* ไม่ต้องแจ้ง error ทุก frame */ }
+        err => {}
       ).catch(err=>{
-        document.getElementById('scanMsg').innerHTML = "<span style='color:#e03e3e'>❌ ไม่สามารถเปิดกล้อง</span>";
-        scanBtn.textContent = "📷";
+        document.getElementById('scanMsg').innerHTML = "<span style='color:#e03e3e'>❌ Cannot access camera</span>";
+        scanBtn.style.background = "";
         qrReader.style.display = "none";
       });
     }
@@ -120,7 +143,7 @@
         scanMsg.innerHTML = "✔️ QR hash scanned from image!";
       })
       .catch(() => {
-        scanMsg.innerHTML = "<span style='color:#b80000'>❌ ไม่พบ QR ในภาพนี้</span>";
+        scanMsg.innerHTML = "<span style='color:#b80000'>❌ QR not found in this image</span>";
       });
   }
 
@@ -129,23 +152,23 @@
     const result = document.getElementById('resultArea');
     result.innerHTML = "";
     if (hash.length !== 64) {
-      result.innerHTML = `<div class="error-box">Invalid QR hash. Please enter 64 characters.</div>`;
+      result.innerHTML = `<div class="result-box fail">Invalid QR hash. Please enter 64 characters.</div>`;
       return;
     }
     if (!whitelist.includes(hash)) {
-      result.innerHTML = `<div class="error-box">❌ This QR is not in whitelist.<br>Registration not allowed.</div>`;
+      result.innerHTML = `<div class="result-box fail">❌ This QR is not in whitelist.<br>Registration not allowed.</div>`;
       return;
     }
     const reg = registered.find(q => q.hash === hash);
     if (reg) {
-      result.innerHTML = `<div class="result-box" style="color:#0ea5e9;">
+      result.innerHTML = `<div class="result-box registered" style="color:#0ea5e9;">
         ✅ Registered!<br>
         Owner: <b id="ownerText">${reg.owner}</b>
         <button class="copy-btn" onclick="copyText('ownerText')">Copy</button><br>
         Timestamp: ${reg.timestamp}
         </div>`;
     } else {
-      result.innerHTML = `<div class="result-box" style="color:#188b16;">🟩 Not registered yet.<br>This QR can be registered.</div>`;
+      result.innerHTML = `<div class="result-box ok" style="color:#188b16;">🟩 Not registered yet.<br>This QR can be registered.</div>`;
     }
   }
 
