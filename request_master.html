@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Request Master | DTC Magic Chain</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7fafc; color: #222; }
     .main { max-width: 410px; margin: 2.5em auto; background: #fff; border-radius: 19px; box-shadow: 0 8px 40px #246bfd17; padding: 2em 1.4em 1.8em 1.4em; }
@@ -18,7 +18,8 @@
     .counter { font-size: 0.96em; color: #789; float: right; }
     .btn {
       display: block; width: 100%; padding: 0.85em 0; border-radius: 10px; border: none;
-      background: linear-gradient(90deg,#26733e 70%,#246bfd 100%); color: #fff; font-size: 1.13em; font-weight: 600;
+      background: linear-gradient(90deg,#26733e 70%,#246bfd 100%);
+      color: #fff; font-size: 1.13em; font-weight: 600;
       margin: 1.2em 0 0.9em 0; cursor: pointer; box-shadow: 0 2px 8px #246bfd1b; transition: background 0.19s;
     }
     .btn:active { background: #176d38; }
@@ -30,6 +31,10 @@
     .copy-btn:active { background: #185fb0; }
     .back-btn { margin-top: 1.5em; background: #f1f1f1; color: #1a3a4d; border-radius: 8px; border: none; font-size: 1.01em; padding: 0.5em 1.3em; }
     .note { font-size: 0.98em; color: #789; text-align: center; margin-top: 1.3em;}
+    @media (max-width: 480px) {
+      .main { padding: 1.3em 0.5em 1em 0.5em; }
+      .btn, .back-btn { font-size: 1em; }
+    }
   </style>
 </head>
 <body>
@@ -65,7 +70,18 @@
     </div>
   </div>
   <script>
-    // Counter update
+    // ---- Auto-fill public key ----
+    window.addEventListener('DOMContentLoaded', function() {
+      const localPub = localStorage.getItem('dtc_publicKey');
+      if (localPub && localPub.length === 64 && /^[a-fA-F0-9]+$/.test(localPub)) {
+        document.getElementById('pubkey').value = localPub;
+        document.getElementById('confirmPubkey').value = localPub;
+        document.getElementById('pubkeyCounter').textContent = localPub.length + "/64";
+        document.getElementById('pubkey2Counter').textContent = localPub.length + "/64";
+      }
+    });
+
+    // ---- Counter update ----
     document.getElementById('masterName').addEventListener('input', function() {
       this.value = this.value.replace(/[^A-Z]/g,'').toUpperCase();
       document.getElementById('nameCounter').textContent = this.value.length + "/12";
@@ -79,7 +95,7 @@
       document.getElementById('pubkey2Counter').textContent = this.value.length + "/64";
     });
 
-    // Copy
+    // ---- Copy field utility ----
     function copyField(id) {
       const el = document.getElementById(id);
       el.select();
@@ -87,7 +103,7 @@
       showMsg("Copied!", "success");
     }
 
-    // Show message
+    // ---- Message display ----
     function showMsg(msg, type) {
       const box = document.getElementById('msgBox');
       box.innerHTML = msg;
@@ -95,7 +111,7 @@
       setTimeout(() => { box.innerHTML = ""; box.className = "msg"; }, 3200);
     }
 
-    // Submit
+    // ---- Submit Handler ----
     document.getElementById('masterForm').onsubmit = async function(e){
       e.preventDefault();
       const name = document.getElementById('masterName').value.trim();
@@ -110,13 +126,23 @@
       if(pk.length !== 64 || !/^[a-fA-F0-9]{64}$/.test(pk)) return showMsg("Public key must be exactly 64 HEX chars.", "error");
       if(pk !== pk2) return showMsg("Public key and confirmation do not match.", "error");
 
-      // Simulate request (or add your logic here)
+      // Demo: store in localStorage (optional)
+      let masters = [];
+      try { masters = JSON.parse(localStorage.getItem('dtc_masters') || "[]"); } catch(e) {}
+      masters.push({
+        masterName: name,
+        publicKey: pk,
+        requestedAt: new Date().toISOString(),
+        version: "0.1.7r"
+      });
+      localStorage.setItem('dtc_masters', JSON.stringify(masters));
       showMsg("Master request submitted! (Demo: data stored only on your device)", "success");
-      // Clear fields if you want
-      // document.getElementById('masterForm').reset();
-      // document.getElementById('nameCounter').textContent = "0/12";
-      // document.getElementById('pubkeyCounter').textContent = "0/64";
-      // document.getElementById('pubkey2Counter').textContent = "0/64";
+
+      // Reset fields and counters
+      document.getElementById('masterForm').reset();
+      document.getElementById('nameCounter').textContent = "0/12";
+      document.getElementById('pubkeyCounter').textContent = "0/64";
+      document.getElementById('pubkey2Counter').textContent = "0/64";
     }
   </script>
 </body>
