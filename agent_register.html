@@ -19,9 +19,11 @@
       border-radius:8px; border:1.3px solid #22c55e;
       background:#e7fbe8; color:#166534; margin-bottom:0.42em;
       margin-top:0.15em;
+      transition: border 0.15s;
     }
+    input.input-err { border:2px solid #e53935!important; background:#fef2f2;}
     .warn { color:#d97706; margin-bottom:0.3em;}
-    .err { color:#e53935; margin-bottom:0.3em;}
+    .err { color:#e53935; margin-bottom:0.3em; background: #fff3f2; padding:0.3em 0.7em; border-radius:7px;}
     .ok { color:#16a34a; margin-bottom:0.3em;}
     .btn-main {
       width:100%; padding:0.75em 0; background:#22c55e;
@@ -29,12 +31,26 @@
       font-size:1.08em; margin-top:1.3em; cursor:pointer;
       letter-spacing:0.01em; transition:background 0.17s;
     }
-    .btn-main:hover { background:#16a34a;}
+    .btn-main:disabled { background:#94e7ba; color:#fff;}
+    .btn-main:hover:enabled { background:#16a34a;}
     .hash-row {
       margin-top:1.2em; word-break:break-all; font-family:monospace;
       font-size:1.04em; color:#26733e; background:#e7fbe8;
       border-radius:8px; padding:0.7em 1em;
+      position: relative;
     }
+    .copy-btn {
+      background: none; border: none; cursor: pointer; margin-left: 0.22em; color: #16a34a;
+      font-size: 1em; vertical-align: middle;
+    }
+    .copy-success { color: #16a34a; font-size: 0.93em; margin-left: 0.25em;}
+    .nonce-row { display:flex; align-items:center; gap:0.3em;}
+    .nonce-len { font-size:0.92em; color:#197; margin-left:0.2em;}
+    .nonce-btn {
+      background:#e0e7ef; border:1px solid #b7c5df; border-radius:7px;
+      color:#136534; font-size:0.95em; padding:0.19em 0.82em; cursor:pointer; margin-left:0.1em;
+    }
+    .nonce-btn:hover { background:#bae6fd;}
     .back-btn {
       margin-bottom:1.3em; background:#dbeafe; color:#324275;
       border-radius:7px; border:1.3px solid #b7c5df;
@@ -54,23 +70,24 @@
       <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
       <div id="nameStatus"></div>
       <label>Nonce (random string):</label>
-      <input type="text" id="nonce" maxlength="20" required autocomplete="off" />
-      <button type="submit" class="btn-main">Register Agent</button>
+      <div class="nonce-row">
+        <input type="text" id="nonce" maxlength="20" required autocomplete="off" style="flex:1;"/>
+        <button type="button" class="nonce-btn" onclick="randomNonce()">Random</button>
+        <span class="nonce-len" id="nonceLen">0/20</span>
+      </div>
+      <button type="submit" class="btn-main" id="registerBtn">Register Agent</button>
     </form>
-    <div id="hashResult" class="hash-row" style="display:none;"></div>
+    <div id="hashResult" class="hash-row" style="display:none;">
+      <span id="copyAgentHashSuccess" class="copy-success"></span>
+    </div>
   </div>
   <script>
-    // --- CONFIG/DEMO DATA (replace with real data in production) ---
-    // master_hash: ต้องมาจาก master ที่ล็อกอิน/active
+    // --- CONFIG/DEMO DATA ---
     const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
-    // whitelist: object ที่ key เป็น qr_id, value มี registered:true/false
     const whitelist = {};
-    // DEMO: ลงทะเบียน 50 QR
     for (let i=1;i<=50;i++) whitelist['qr'+i] = {registered:true};
     for (let i=51;i<=100;i++) whitelist['qr'+i] = {registered:false};
-    // agent_db: object สำหรับเก็บ agent ที่ถูกสร้าง
     const agent_db = {};
-    // badwordList: ดึงจาก badwords.json ได้ (กรณีใช้)
     let badwordList = {"profanity":["fuck","shit"],"offensive":["idiot"]};
 
     // --- LOGIC ---
@@ -84,8 +101,21 @@
       str = str.toLowerCase();
       let found = [];
       for (const group of Object.values(badwordList))
-        group.forEach(word => { if(str.includes(word)) found.push(word); });
+        group.forEach(word => {
+          // ตรวจแบบ "ทั้งคำ" (word boundary)
+          const re = new RegExp("\\b"+word+"\\b", "i");
+          if(re.test(str)) found.push(word);
+        });
       return found;
+    }
+    function randomNonce() {
+      // 12-18 chars, a-z0-9
+      const len = Math.floor(Math.random()*7)+12;
+      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+      let s = '';
+      for(let i=0;i<len;i++) s += chars[Math.floor(Math.random()*chars.length)];
+      document.getElementById('nonce').value = s;
+      document.getElementById('nonceLen').textContent = s.length+"/20";
     }
 
     // --- UI Event ---
@@ -96,21 +126,35 @@
       if (!validateAgentName(this.value)) {
         st.innerHTML = "❌ Only a-z, 0-9 allowed (≤16 chars)";
         st.className = "err";
+        this.classList.add('input-err');
       } else if (bads.length>0) {
         st.innerHTML = "⚠ Badword detected: " + bads.join(", ");
         st.className = "warn";
+        this.classList.remove('input-err');
       } else {
         st.innerHTML = "✓ Name OK";
         st.className = "ok";
+        this.classList.remove('input-err');
       }
     });
+    document.getElementById('nonce').addEventListener('input', function(){
+      this.value = this.value.replace(/[^a-z0-9]/g, '').slice(0,20);
+      document.getElementById('nonceLen').textContent = this.value.length+"/20";
+    });
+
+    // focus ช่องแรก
+    window.onload = () => { document.getElementById('agentName').focus(); randomNonce(); };
 
     // --- Form Submission ---
     document.getElementById('agentForm').onsubmit = function(e){
       e.preventDefault();
-      // 1. Check unlock condition
+      const btn = document.getElementById('registerBtn');
+      btn.disabled = true;
+
+      // 1. Check unlock
       if (!canCreateAgent(whitelist)) {
         document.getElementById('unlockWarn').textContent = "ยังปลดล็อก master ไม่ได้ (ต้อง register 50 QR ก่อน)";
+        btn.disabled = false;
         return;
       } else {
         document.getElementById('unlockWarn').textContent = "";
@@ -120,23 +164,34 @@
       const nonce = document.getElementById('nonce').value.trim();
       if (!validateAgentName(agentName)) {
         alert("ชื่อ agent ต้องเป็น a-z, 0-9, ≤16 ตัว");
+        document.getElementById('agentName').focus();
+        btn.disabled = false;
         return;
       }
-      // 3. Check badword
+      if (nonce.length < 4 || nonce.length > 20) {
+        alert("Nonce ต้องยาว 4-20 ตัว (a-z, 0-9)");
+        document.getElementById('nonce').focus();
+        btn.disabled = false;
+        return;
+      }
+      // 3. Badword
       const bads = checkBadwords(agentName);
       if (bads.length>0 && !confirm("⚠ ชื่อ agent มีคำไม่เหมาะสม: " + bads.join(", ") + "\nดำเนินการต่อหรือไม่?")) {
+        btn.disabled = false;
+        document.getElementById('agentName').focus();
         return;
       }
-      // 4. Duplicate check
+      // 4. Duplicate
       if (Object.values(agent_db).some(a=>a.agent_name===agentName)) {
         alert("Agent name นี้ถูกใช้แล้วในระบบ");
+        btn.disabled = false;
         return;
       }
       // 5. Create agent hash
       const timestamp = Math.floor(Date.now()/1000);
       const s = `${master_hash}:${agentName}:${nonce}:${timestamp}`;
       const agent_hash = sha256(s);
-      // 6. Save to agent_db
+      // 6. Save
       agent_db[agent_hash] = {
         agent_name: agentName,
         master_hash,
@@ -144,17 +199,38 @@
         timestamp,
         agent_hash
       };
-      // 7. Show result
-      document.getElementById('hashResult').style.display = "block";
-      document.getElementById('hashResult').innerHTML =
+      // 7. Show result + Copy button
+      const resultDiv = document.getElementById('hashResult');
+      resultDiv.style.display = "block";
+      resultDiv.innerHTML =
         `<b>Agent Registered!</b><br>
          Agent Name: <b>${agentName}</b><br>
-         Agent Hash: <code>${agent_hash}</code><br>
+         Agent Hash: <code id="agentHashVal">${agent_hash}</code>
+         <button class="copy-btn" onclick="copyAgentHash()">Copy</button>
+         <span id="copyAgentHashSuccess" class="copy-success"></span><br>
          Timestamp: <b>${timestamp}</b><br>
          Nonce: <b>${nonce}</b>`;
-      this.reset();
+      document.getElementById('agentForm').reset();
       document.getElementById('nameStatus').innerHTML = "";
+      document.getElementById('nonceLen').textContent = "0/20";
+      setTimeout(()=>resultDiv.scrollIntoView({behavior:'smooth'}),120);
+      btn.disabled = false;
+      randomNonce();
     };
+
+    function copyAgentHash() {
+      const el = document.getElementById('agentHashVal');
+      if (!el) return;
+      const sel = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(el);
+      sel.removeAllRanges();
+      sel.addRange(range);
+      try { document.execCommand('copy'); } catch {}
+      sel.removeAllRanges();
+      document.getElementById('copyAgentHashSuccess').textContent = "Copied!";
+      setTimeout(()=>{document.getElementById('copyAgentHashSuccess').textContent="";},1200);
+    }
   </script>
 </body>
 </html>
