@@ -2,110 +2,164 @@
 <html lang="th">
 <head>
   <meta charset="UTF-8" />
-  <title>Request Master (DTC)</title>
+  <title>Request Master | DTC Magic Chain</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    /* ... ใช้ style เดิมจากคุณ ... */
-    .copy-success {
-      display: inline-block;
-      color: #1aa34a;
-      font-weight: bold;
-      margin-left: 0.45em;
-      opacity: 0;
-      transition: opacity 0.5s;
-      font-size: 0.98em;
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+      margin: 0; padding: 0;
+      min-height: 100vh;
     }
-    .copy-success.show { opacity: 1; }
-    .paste-btn {
-      background: #f3f5fd;
-      border: 1px solid #c5d4ef;
-      color: #296fc6;
-      padding: 0.16em 0.66em;
-      border-radius: 6px;
-      font-size: 0.93em;
-      margin-left: 0.2em;
+    .container {
+      max-width: 440px;
+      margin: 2.5em auto;
+      background: #fff;
+      padding: 2em 1.6em 2.2em 1.6em;
+      border-radius: 18px;
+      box-shadow: 0 6px 32px #1771b415, 0 1.5px 5px #7ed9a340;
+    }
+    h2 {
+      text-align: center;
+      color: #246bfd;
+      margin-bottom: 1.3em;
+      letter-spacing:0.01em;
+    }
+    .step {
+      text-align: center;
+      color: #219150;
+      font-size: 1.05em;
+      margin-bottom: 1.2em;
+    }
+    label { display:block; margin: 1.2em 0 0.2em 0; font-weight:600; }
+    input[type="text"] {
+      width: 100%;
+      padding: 0.66em 0.6em;
+      border: 1.5px solid #dbdbdb;
+      border-radius: 7px;
+      font-size: 1.05em;
+      background: #fcfcfc;
+      margin-bottom: 0.3em;
+      transition: border 0.2s;
+    }
+    input[type="text"]:focus {
+      border: 1.5px solid #246bfd;
+      outline: none;
+      background: #f0f8ff;
+    }
+    .input-error { border:1.5px solid #ff4a4a!important; background:#fff2f2!important;}
+    .msg-warn, .msg-error {
+      color: #b91c1c; background: #fff4f2;
+      border-left: 5px solid #e85028; padding: 0.66em 1em;
+      border-radius: 9px; margin-bottom: 0.3em; font-size: 0.97em;
+    }
+    .form-warn {color:#b91c1c;background:#fff9e4;border-left:4px solid #ffc04d;padding:0.6em 1em;border-radius:8px;margin-bottom:1em;}
+    .success-msg {
+      color: #26733e; background: #eafaf0;
+      border-left: 5px solid #219150; padding: 0.7em 1em; border-radius: 8px; margin-bottom: 1.1em; font-size: 1em;
+    }
+    .btn {
+      display: block; width: 100%; margin: 1.3em 0 1.1em 0;
+      padding: 0.85em 0; border: none; border-radius: 12px;
+      font-size: 1.12em; font-weight: 600; letter-spacing: 0.02em;
+      background: linear-gradient(90deg,#219150 75%,#246bfd 100%);
+      color: #fff; cursor: pointer;
+      transition: background 0.19s, box-shadow 0.22s;
+      box-shadow: 0 2px 12px #21915018;
+    }
+    .btn:active { background: #176d38; }
+    .copy-btn, .paste-btn {
+      margin-left:0.15em;
+      background: #e6f0fe;
+      border: 1px solid #bcd6fa;
+      color: #246bfd;
+      padding: 0.15em 0.78em;
+      border-radius: 5px;
+      font-size: 0.97em;
       cursor:pointer;
+      vertical-align: middle;
       transition: background 0.13s;
     }
-    .paste-btn:hover { background: #ffe066; color: #5c4700;}
-    .pubkey-count { font-size: 0.92em; color: #c77700; margin-left: 0.7em;}
-    .badword-err-disabled { opacity: 0.9; font-style: italic; }
+    .paste-btn:hover, .copy-btn:hover { background: #ffe066; color: #5c4700;}
+    .pubkey-count { font-size: 0.92em; color: #c77700; margin-left: 0.5em;}
+    .copy-success { color: #26733e; font-size: 0.98em; margin-left: 0.35em; opacity: 0; transition: opacity 0.6s;}
+    .copy-success.show { opacity: 1; }
+    .back-btn {
+      background: #f3f3f3; color: #26733e; border: none;
+      padding: 0.45em 1.3em; font-size: 1em;
+      border-radius: 5px; cursor: pointer; margin-bottom: 1.5em;
+      margin-left: -0.8em;
+    }
+    .back-btn:hover { background: #e0e7ef;}
+    .note { text-align:center;color:#789;font-size:0.97em;margin-top:1.4em;}
+    @media (max-width: 600px) {
+      .container { padding: 1em 0.2em 1.5em 0.2em; border-radius: 0; }
+      .btn, .back-btn { width: 100%; margin-left:0;}
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="back-btn" onclick="history.back()">← Back</button>
-    <h2>Request Master</h2>
+    <div class="step">ขั้นตอนที่ 3/4</div>
+    <button class="back-btn" onclick="history.back()">← กลับ</button>
+    <h2>ขอสิทธิ์ Master</h2>
 
     <div id="badwordWarn" class="form-warn" style="display:none;"></div>
-
     <form id="requestMasterForm" autocomplete="off">
-      <label>Master Name (A-Z only): 
+      <label>ชื่อ Master (A-Z เท่านั้น): 
         <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required autocomplete="off">
       </label>
-      <label>Confirm Master Name: 
+      <label>ยืนยันชื่อ Master: 
         <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required autocomplete="off">
       </label>
       <div id="nameMatchWarn" class="msg-warn" style="display:none;"></div>
       <label>
-        Public Key (42 ตัวอักษร): 
-        <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" maxlength="42" required autocomplete="off" />
+        Public Key (64 ตัวอักษร HEX): 
+        <input type="text" id="pubkey" pattern="^[a-f0-9]{64}$" maxlength="64" required autocomplete="off" />
         <button type="button" class="paste-btn" onclick="pastePubkey('pubkey')">Paste</button>
-        <button type="button" class="copy-btn" onclick="copyField('pubkey')" title="Copy"><svg width="17" height="17" viewBox="0 0 24 24"><path fill="#888" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19"/><path fill="#888" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z"/></svg></button>
-        <span class="pubkey-count" id="pubkeyCount">0/42</span>
+        <button type="button" class="copy-btn" onclick="copyField('pubkey')" title="Copy">Copy</button>
+        <span class="pubkey-count" id="pubkeyCount">0/64</span>
         <span class="copy-success" id="copySuccess"></span>
       </label>
       <label>
-        Confirm Public Key:
-        <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" maxlength="42" required autocomplete="off" />
+        ยืนยัน Public Key:
+        <input type="text" id="confirmPubkey" pattern="^[a-f0-9]{64}$" maxlength="64" required autocomplete="off" />
         <button type="button" class="paste-btn" onclick="pastePubkey('confirmPubkey')">Paste</button>
-        <button type="button" class="copy-btn" onclick="copyField('confirmPubkey')" title="Copy"><svg width="17" height="17" viewBox="0 0 24 24"><path fill="#888" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19"/><path fill="#888" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z"/></svg></button>
-        <span class="pubkey-count" id="confirmPubkeyCount">0/42</span>
+        <button type="button" class="copy-btn" onclick="copyField('confirmPubkey')" title="Copy">Copy</button>
+        <span class="pubkey-count" id="confirmPubkeyCount">0/64</span>
       </label>
       <small>📌 กรุณาส่ง Public Key นี้ให้ผู้รับ เพื่อยืนยันสิทธิ์ภายหลัง</small>
-      <button type="submit">Request Master</button>
+      <button type="submit" class="btn">Request Master</button>
     </form>
 
-    <!-- Hash + Copy UI -->
-    <div id="hashBox" style="display:none;">
-      <div class="hash-row">
-        <input type="text" id="qrHashInput" value="" readonly style="width:72%;">
-        <span class="hash-status ready">QR hash ready</span>
-        <button class="copy-btn" onclick="copyHash()" title="Copy to clipboard">
-          <svg width="22" height="22" viewBox="0 0 24 24">
-            <path fill="#24c48b" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19" />
-            <path fill="#24c48b" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z" />
-          </svg>
-        </button>
-        <span class="copy-success" id="copyHashSuccess"></span>
+    <div id="resultBox" style="display:none;">
+      <div class="success-msg">✅ สำเร็จ!<br>Hash สำหรับขอ Master:</div>
+      <div style="background:#e8f3fe;padding:1em;border-radius:8px;margin-bottom:1em;">
+        <b>Request Hash:</b> <span id="hashOutput" style="word-break:break-all;"></span><br>
+        <b>Timestamp:</b> <span id="timestamp"></span><br>
+        <b>Nonce:</b> <span id="nonce"></span>
       </div>
-      <pre id="hashResult"></pre>
+      <button class="copy-btn" onclick="copyHash()">Copy Hash</button>
+      <span class="copy-success" id="copyHashSuccess"></span>
     </div>
+    <a href="index.html" class="btn" style="background:#e0e7ef;color:#26733e;margin-top:0.25em;font-weight:500;">กลับหน้าหลัก</a>
+    <p class="note">
+      (ชื่อ Master ต้องไม่ใช่ GENESIS หรือชื่อสงวน)<br>
+      Public Key ต้องยาว 64 ตัวอักษร (HEX จากระบบ generate key)<br>
+      <b>โปรดสำรองข้อมูล key ของคุณไว้เอง ระบบจะไม่เก็บข้อมูลใด ๆ</b>
+    </p>
   </div>
-
-  <!-- Popup warn -->
-  <div class="popup-overlay" id="popupOverlay">
-    <div class="popup-content">
-      <button class="close-popup" onclick="hidePopup()">✖</button>
-      <div id="popupMsg"></div>
-    </div>
-  </div>
-
 <script>
-  // ========== Badword Loader & Check ==========
+  // Badword Loader
   let badwordList = {};
   let hasBadword = false;
   let badwordLoaded = false;
-  let badwordError = false;
   fetch('badwords.json')
     .then(res => res.json())
     .then(data => {badwordList = data; badwordLoaded = true;})
-    .catch(() => {
-      badwordError = true;
-      showBadwordWarn('<span class="badword-err-disabled">⚠ ไม่สามารถโหลด badword list ได้<br>ระบบไม่สามารถเตือนคำไม่เหมาะสมในขณะนี้</span>');
-    });
-
+    .catch(() => {badwordLoaded=false;});
   function showBadwordWarn(msg) {
     const warn = document.getElementById('badwordWarn');
     warn.style.display = 'block';
@@ -114,13 +168,12 @@
   function hideBadwordWarn() {
     document.getElementById('badwordWarn').style.display = 'none';
   }
-  // ตรวจ badword แบบ "ทั้งคำ" (exact word) ไม่เตือนเช่น class หรือ pass
   function checkBadwords(inputValue) {
     const input = inputValue.toLowerCase();
     let found = [];
     for (const group of Object.values(badwordList)) {
       group.forEach(word => {
-        const re = new RegExp("\\b"+word+"\\b", "i"); // ต้องเป็นทั้งคำ
+        const re = new RegExp("\\b"+word+"\\b", "i");
         if (re.test(input)) found.push(word);
       });
     }
@@ -132,57 +185,63 @@
       hasBadword = false;
     }
   }
-
-  // ========== Name, Pubkey Logic ==========
-  function toUpperNoOther(str) { return str.toUpperCase().replace(/[^A-Z]/g, ''); }
+  // ไม่อนุญาต GENESIS หรือชื่อสงวน
+  function isReservedName(name) {
+    return ["GENESIS", "ADMIN", "ROOT"].includes(name.toUpperCase());
+  }
+  function toUpperAZ(str) { return str.toUpperCase().replace(/[^A-Z]/g, ''); }
   document.getElementById('masterName').addEventListener('input', function () {
-    this.value = toUpperNoOther(this.value);
+    this.value = toUpperAZ(this.value);
     if(badwordLoaded) checkBadwords(this.value);
     checkNameMatch();
   });
   document.getElementById('confirmName').addEventListener('input', function () {
-    this.value = toUpperNoOther(this.value);
+    this.value = toUpperAZ(this.value);
     checkNameMatch();
   });
-
   function checkNameMatch() {
     const name = document.getElementById('masterName').value.trim();
     const confirm = document.getElementById('confirmName').value.trim();
     const warn = document.getElementById('nameMatchWarn');
     if (name && confirm && name !== confirm) {
-      warn.innerText = '⚠ Master Name และ Confirm Master Name ไม่ตรงกัน!';
+      warn.innerText = '⚠ ชื่อ Master และยืนยันชื่อไม่ตรงกัน!';
       warn.style.display = 'block';
       document.getElementById('confirmName').classList.add('input-error');
+    } else if (isReservedName(name)) {
+      warn.innerText = '⚠ ชื่อ Master นี้ถูกสงวนไว้ ไม่สามารถใช้ได้';
+      warn.style.display = 'block';
+      document.getElementById('masterName').classList.add('input-error');
     } else {
       warn.innerText = '';
       warn.style.display = 'none';
       document.getElementById('confirmName').classList.remove('input-error');
+      document.getElementById('masterName').classList.remove('input-error');
     }
   }
-
-  // Auto focus, Enter = Next, count pubkey
+  // Autofill public key
   window.onload = function(){
     document.getElementById('masterName').focus();
+    let pubKey = localStorage.getItem('dtc_publicKey');
+    if (pubKey && /^[a-f0-9]{64}$/i.test(pubKey)) {
+      document.getElementById('pubkey').value = pubKey;
+      document.getElementById('confirmPubkey').value = pubKey;
+      document.getElementById('pubkeyCount').innerText = pubKey.length + "/64";
+      document.getElementById('confirmPubkeyCount').innerText = pubKey.length + "/64";
+    }
+    // ถ้าไม่มี public key redirect ไปหน้า generate key
+    if (!pubKey) {
+      setTimeout(()=>{window.location.href = "generate_key.html";}, 1100);
+    }
   };
   document.getElementById('pubkey').addEventListener('input', function () {
-    document.getElementById('pubkeyCount').innerText = this.value.length + "/42";
+    this.value = this.value.replace(/[^a-f0-9]/gi,'');
+    document.getElementById('pubkeyCount').innerText = this.value.length + "/64";
   });
   document.getElementById('confirmPubkey').addEventListener('input', function () {
-    document.getElementById('confirmPubkeyCount').innerText = this.value.length + "/42";
+    this.value = this.value.replace(/[^a-f0-9]/gi,'');
+    document.getElementById('confirmPubkeyCount').innerText = this.value.length + "/64";
   });
-  // Enter กดข้ามช่อง
-  const jump = (id, nextId) => document.getElementById(id).addEventListener('keydown', function(e){
-    if(e.key==='Enter') {
-      e.preventDefault();
-      document.getElementById(nextId).focus();
-    }
-  });
-  jump('masterName','confirmName');
-  jump('confirmName','pubkey');
-  jump('pubkey','confirmPubkey');
-  jump('confirmPubkey','requestMasterForm'); // Enter ที่สุดท้าย = submit
-
-  // Copy/Paste fields
+  // Copy/Paste
   function copyField(id) {
     const el = document.getElementById(id);
     el.select(); el.setSelectionRange(0, 9999);
@@ -198,32 +257,41 @@
   async function pastePubkey(id) {
     try {
       const text = await navigator.clipboard.readText();
-      if (/^0x[a-fA-F0-9]{0,40}$/.test(text)) {
-        document.getElementById(id).value = text.substring(0,42);
-        document.getElementById(id+'Count').innerText = document.getElementById(id).value.length + "/42";
+      if (/^[a-f0-9]{64}$/i.test(text)) {
+        document.getElementById(id).value = text.substring(0,64);
+        document.getElementById(id+'Count').innerText = document.getElementById(id).value.length + "/64";
       }
     } catch {}
   }
-
-  // ========== Form Submit ==========
+  // Form submit
   document.getElementById('requestMasterForm').onsubmit = function (e) {
     e.preventDefault();
     const name = document.getElementById('masterName').value.trim();
     const confirm = document.getElementById('confirmName').value.trim();
     const pubkey = document.getElementById('pubkey').value.trim();
     const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
+    if (isReservedName(name)) {
+      showResult("❌ ชื่อ Master นี้ถูกสงวนไว้ ไม่สามารถใช้ได้");
+      document.getElementById('masterName').focus();
+      return;
+    }
     if (name !== confirm) {
-      showPopup('⚠ Master Name และ Confirm Master Name ไม่ตรงกัน');
+      showResult("❌ ชื่อ Master และยืนยันชื่อไม่ตรงกัน");
       document.getElementById('confirmName').focus();
       return;
     }
     if (pubkey !== confirmPubkey) {
-      showPopup('⚠ Public Key และ Confirm Public Key ไม่ตรงกัน');
+      showResult("❌ Public Key และยืนยัน Public Key ไม่ตรงกัน");
       document.getElementById('confirmPubkey').focus();
       return;
     }
+    if (!/^[a-f0-9]{64}$/i.test(pubkey)) {
+      showResult("❌ รูปแบบ Public Key ไม่ถูกต้อง (ต้อง 64 ตัวอักษร HEX)");
+      document.getElementById('pubkey').focus();
+      return;
+    }
     if (hasBadword) {
-      if (!confirm('⚠ ชื่อ Master นี้มีคำที่อาจไม่เหมาะสม\n\nคุณต้องการใช้ชื่อนี้ต่อหรือไม่?')) {
+      if (!confirm('⚠️ ชื่อ Master นี้มีคำที่อาจไม่เหมาะสม\n\nคุณต้องการใช้ชื่อนี้ต่อหรือไม่?')) {
         document.getElementById('masterName').focus();
         return;
       }
@@ -235,44 +303,23 @@
     const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, "0")).join('');
     const s = name + pubkey + timestamp + nonce;
     const hash = sha256(s);
-
-    // Show QR hash ready + copy button + full log
-    document.getElementById('hashBox').style.display = "block";
-    document.getElementById('qrHashInput').value = hash;
-    document.getElementById('hashResult').innerText = `
-📌 Copy & send to Genesis/Admin or keep for your log
-
-Request Hash: ${hash}
-Master Name : ${name}
-Public Key  : ${pubkey}
-Timestamp   : ${timestamp}
-Nonce       : ${nonce}
-    `.trim();
-    setTimeout(()=>{document.getElementById('hashBox').scrollIntoView({behavior:'smooth'});},120);
+    // แสดงผลลัพธ์
+    document.getElementById('resultBox').style.display = "block";
+    document.getElementById('hashOutput').innerText = hash;
+    document.getElementById('timestamp').innerText = timestamp;
+    document.getElementById('nonce').innerText = nonce;
+    setTimeout(()=>{document.getElementById('resultBox').scrollIntoView({behavior:'smooth'});},120);
   };
-
-  function copyHash() {
-    const input = document.getElementById('qrHashInput');
-    input.select();
-    input.setSelectionRange(0, 99999); // mobile
-    navigator.clipboard.writeText(input.value);
-    showCopyHashSuccess();
+  function showResult(msg) {
+    alert(msg);
   }
-  function showCopyHashSuccess() {
+  function copyHash() {
+    const hash = document.getElementById('hashOutput').innerText;
+    navigator.clipboard.writeText(hash);
     const el = document.getElementById('copyHashSuccess');
     el.innerText = "Copied!";
     el.classList.add('show');
     setTimeout(()=>el.classList.remove('show'),1200);
-  }
-
-  // ===== Popup (use as is) =====
-  function showPopup(msg) {
-    document.getElementById('popupMsg').innerHTML = msg;
-    document.getElementById('popupOverlay').style.display = 'flex';
-    setTimeout(()=>document.getElementById('popupOverlay').scrollIntoView({behavior:'smooth'}),160);
-  }
-  function hidePopup() {
-    document.getElementById('popupOverlay').style.display = 'none';
   }
 </script>
 </body>
