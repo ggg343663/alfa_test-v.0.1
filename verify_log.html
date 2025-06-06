@@ -24,6 +24,11 @@
     code { background: #f0f2f9; padding: 0.15em 0.5em; border-radius: 5px;}
     .lineage-box { margin-top:1.3em; font-size:0.98em;}
     .lineage-chain { margin-top: 0.7em; }
+    .copy-btn {
+      background: none; border: none; color: #2196F3; font-weight: bold;
+      margin-left: 0.18em; cursor: pointer; font-size: 0.98em;
+    }
+    .copy-success { color: #1aa34a; font-size: 0.95em; margin-left: 0.29em;}
     @media (max-width:600px){
       .container {padding:1em 0.3em;}
     }
@@ -33,15 +38,19 @@
   <div class="container">
     <h2>Verify QR</h2>
     <label for="qrhash">QR Hash (64 chars):</label>
-    <input id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" />
-    <button onclick="verifyQR()">Check QR</button>
+    <div style="display:flex;align-items:center;gap:0.2em;">
+      <input id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" />
+      <button class="copy-btn" title="Copy QR hash" onclick="copyHash('qrhash')">Copy</button>
+      <span id="copyHashSuccess" class="copy-success"></span>
+    </div>
+    <button onclick="verifyQR()" id="verifyBtn">Check QR</button>
     <button class="clear-btn" onclick="clearQR()">Clear</button>
     <div id="result"></div>
     <div class="lineage-box" id="chainView"></div>
     <button class="back-btn" onclick="window.history.back()">← Back</button>
   </div>
 <script>
-// DEMO: ตัวอย่างข้อมูล whitelist/log (เชื่อม fetch ได้)
+// DEMO DATA
 const WHITELIST = [
   "A9F1BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB1CDE",
   "0A4D2CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCF1B2",
@@ -59,6 +68,30 @@ const MOCK_LOGS = [
     ]
   }
 ];
+
+// Autofocus
+window.onload = ()=>{document.getElementById('qrhash').focus();};
+
+// Enter = check, Esc = clear
+document.getElementById('qrhash').addEventListener('keydown',function(e){
+  if(e.key === 'Enter'){
+    e.preventDefault();
+    verifyQR();
+  }
+  if(e.key === 'Escape'){
+    clearQR();
+  }
+});
+
+// Copy utility
+function copyHash(id) {
+  const input = document.getElementById(id);
+  input.select(); input.setSelectionRange(0, 9999);
+  navigator.clipboard.writeText(input.value);
+  const el = document.getElementById('copyHashSuccess');
+  el.textContent = "Copied!";
+  setTimeout(()=>{el.textContent="";}, 1200);
+}
 
 function verifyQR() {
   const qrhash = document.getElementById("qrhash").value.trim();
@@ -92,7 +125,8 @@ function verifyQR() {
   resultDiv.innerHTML = `
     <div class="result-box registered">
       <b>Registered</b><br>
-      <b>Owner:</b> <code>${log.owner}</code><br>
+      <b>Owner:</b> <code id="ownerCode">${log.owner}</code>
+      <button class="copy-btn" onclick="copyText('ownerCode')">Copy</button><br>
       <b>Status:</b> ${log.status}<br>
       <b>Timestamp:</b> ${log.timestamp}<br>
     </div>
@@ -108,7 +142,22 @@ function verifyQR() {
       ).join('<hr style="border:none;border-top:1px solid #e2e7fa;">')}
     </div>
   `;
+  setTimeout(()=>resultDiv.scrollIntoView({behavior:'smooth'}),150);
 }
+
+// Copy text by id (for owner)
+function copyText(id) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const sel = window.getSelection();
+  const range = document.createRange();
+  range.selectNodeContents(el);
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try { document.execCommand('copy'); } catch {}
+  sel.removeAllRanges();
+}
+
 function clearQR() {
   document.getElementById("qrhash").value = "";
   document.getElementById("result").innerHTML = "";
