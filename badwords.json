@@ -1,12 +1,13 @@
 {
   "หยาบคาย": [
     "fuck", "shit", "bitch", "bastard", "asshole", "dick", "pussy", "slut",
-    "cunt", "fag", "wanker",
+    "cunt", "fag", "wanker", "motherfucker", "douche",
     "เหี้ย", "ควาย", "สัส", "เย็ด", "มึง", "หี", "ควย", "เงี่ยน"
   ],
   "รุนแรง": [
     "kill", "murder", "bomb", "terror", "shoot", "stab", "rape", "attack",
-    "ฆ่า", "ข่มขืน", "ระเบิด", "แทง", "ยิง", "ปล้น", "จี้"
+    "massacre", "plunder", "lynch",
+    "ฆ่า", "ข่มขืน", "ระเบิด", "แทง", "ยิง", "ปล้น", "จี้", "ฆาตกร"
   ],
   "เหยียดเชื้อชาติ": [
     "nazi", "racist", "slave", "negro", "ching", "jap", "chink", "gook", "kike", "spic",
