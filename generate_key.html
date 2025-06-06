@@ -12,18 +12,15 @@
     .pw-group { position: relative; }
     .pw-input { width: 100%; padding: 0.7em 2.3em 0.7em 0.9em; font-size: 1em; border-radius: 6px; box-sizing: border-box; border: 1.5px solid #ffe066; background: #fffbe7; }
     .pin-input { border: 1.5px solid #ffb44d; background: #fff7f1; }
-    .show-btn {
-      position: absolute; right: 0.2em; top: 50%; transform: translateY(-50%);
-      background: none; border: none; cursor: pointer; padding: 0 0.12em;
-      width: 28px; height: 28px;
-      display: flex; align-items: center; justify-content: center;
-    }
+    .show-btn { position: absolute; right: 0.2em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0 0.12em; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;}
     .show-btn svg { display: block; }
     .output { background: #eafaf0; border-left: 5px solid #219150; padding: 0.8em; border-radius: 8px; margin: 1em 0; word-break: break-all; overflow-wrap: break-word; }
     .publickey-box { display: flex; align-items: center; background: #f6fff8; border-radius: 7px; border: 1.5px solid #32bc5e; padding: 0.5em; margin-top: 0.7em; }
     .publickey-box span { flex: 1; word-break: break-all; }
-    .copy-btn { margin-left: 0.7em; padding: 0.35em 1.2em; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+    .copy-btn, .export-btn { margin-left: 0.7em; padding: 0.35em 1.2em; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+    .export-btn { background: #2563eb; margin-left: 0.7em;}
     .copy-btn:active { background: #219150; }
+    .export-btn:active { background: #1747a1; }
     .btn { display: inline-block; padding: 0.7em 1.2em; margin: 0.5em 0.3em; border: none; border-radius: 6px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; text-decoration: none; text-align: center; }
     #gen-key-btn { background: #219150; color: #fff; width: 100%; margin-top: 0.3em; }
     #gen-key-btn:hover { background: #176d38; }
@@ -35,19 +32,18 @@
     .strength.weak { color: #ff6b6b; }
     .strength.medium { color: #f6a800; }
     .strength.strong { color: #4caf50; }
-    .strength-bar {
-      width: 100%; height: 7px; border-radius: 5px; margin-bottom: 0.7em; background: #ffe4e0; transition: background 0.3s;
-    }
+    .strength-bar { width: 100%; height: 7px; border-radius: 5px; margin-bottom: 0.7em; background: #ffe4e0; transition: background 0.3s;}
     .strength-bar.weak { background: #ff6b6b; }
     .strength-bar.medium { background: #ffd700; }
     .strength-bar.strong { background: #64dd17; }
     .error { color: #e74c3c; font-size: 0.98em; margin-bottom: 0.7em; text-align: left; }
     .back-home { background: #f2f2f2; color: #333; padding: 0.6em 1.3em; font-size: 1em; text-decoration: none; display: inline-block; margin-top: 2em; text-align: center; border-radius: 5px; }
+    .timestamp-row { color: #26733e; font-size: 0.98em; margin-top: 0.2em;}
     @media (max-width: 480px) {
       body { margin: 1em; padding: 0.5em; }
       .btn { width: 100%; }
       .publickey-box { flex-direction: column; align-items: stretch; }
-      .copy-btn { margin: 0.7em 0 0 0; }
+      .copy-btn, .export-btn { margin: 0.7em 0 0 0; }
     }
   </style>
 </head>
@@ -100,7 +96,9 @@
     <div class="publickey-box">
       <span id="pub-key-output">–</span>
       <button id="copy-btn" class="copy-btn">Copy</button>
+      <button id="export-btn" class="export-btn">Export Log</button>
     </div>
+    <div class="timestamp-row" id="timestamp-output"></div>
     <div class="note" style="color:#26733e;">
       *Your Public Key is generated deterministically from your Password and PIN.<br>
       <b>Keep your password & PIN safe!<br>
@@ -109,7 +107,6 @@
     </div>
   </div>
   <div style="text-align: center;">
-    <!-- เปลี่ยนลิงก์ปุ่มนี้ให้ถูกต้อง -->
     <a id="next-btn" class="btn" href="generate_qr_hash.html" aria-disabled="true">Next: Generate QR Hash</a>
   </div>
   <div class="back-home">
@@ -120,17 +117,9 @@
     <b>Password must be 6-12 characters and include both letters and numbers.</b> PIN should be 4-6 digits.
   </p>
   <script>
-    // SVG ลูกตา (เปิด/ปิด)
-    const eyeOpenSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path d="M1 12C1 12 5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#333" stroke-width="2"/>
-      <circle cx="12" cy="12" r="3.5" fill="#333"/>
-    </svg>`;
-    const eyeSlashSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-      <path d="M1 12C1 12 5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#333" stroke-width="2"/>
-      <circle cx="12" cy="12" r="3.5" fill="#333"/>
-      <line x1="4" y1="20" x2="20" y2="4" stroke="#e74c3c" stroke-width="2"/>
-    </svg>`;
-    // set icon ครั้งแรกทุกอัน
+    // Eye icons
+    const eyeOpenSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M1 12C1 12 5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#333" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#333"/></svg>`;
+    const eyeSlashSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M1 12C1 12 5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#333" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#333"/><line x1="4" y1="20" x2="20" y2="4" stroke="#e74c3c" stroke-width="2"/></svg>`;
     document.querySelectorAll(".eye-icon").forEach(el => el.innerHTML = eyeOpenSvg);
 
     function toggleShow(fieldId, btn) {
@@ -144,7 +133,7 @@
         icon.innerHTML = eyeOpenSvg;
       }
     }
-    // Password strength check
+
     function checkPasswordStrength(password) {
       if (password.length < 6) return 'weak';
       if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) return 'weak';
@@ -190,14 +179,20 @@
     const pubOutput = document.getElementById('pub-key-output');
     const outputContainer = document.getElementById('output-container');
     const copyBtn = document.getElementById('copy-btn');
+    const exportBtn = document.getElementById('export-btn');
     const nextBtn = document.getElementById('next-btn');
     const errorMsg = document.getElementById('error-msg');
+    const timestampOutput = document.getElementById('timestamp-output');
+    let lastKeyLog = null;
+
     function clearOutput() {
       pubOutput.textContent = "–";
       outputContainer.style.display = "none";
+      timestampOutput.textContent = "";
       nextBtn.classList.remove('enabled');
       nextBtn.setAttribute('aria-disabled', 'true');
       localStorage.removeItem('dtc_publicKey');
+      localStorage.removeItem('dtc_publicKeyTimestamp');
     }
     [passwordInput, confirmPasswordInput, pinInput, confirmPinInput].forEach(el =>
       el.addEventListener('input', clearOutput)
@@ -239,9 +234,17 @@
       const pubKey = await sha256hex(privKey);
       pubOutput.textContent = pubKey;
       outputContainer.style.display = 'block';
+      const createdAt = new Date().toISOString();
+      timestampOutput.textContent = `Created at: ${createdAt}`;
       localStorage.setItem('dtc_publicKey', pubKey);
+      localStorage.setItem('dtc_publicKeyTimestamp', createdAt);
       nextBtn.classList.add('enabled');
       nextBtn.removeAttribute('aria-disabled');
+      lastKeyLog = {
+        publicKey: pubKey,
+        createdAt,
+        version: "0.1.7r"
+      };
     });
     function showError(msg) {
       errorMsg.textContent = msg;
@@ -251,6 +254,16 @@
       navigator.clipboard.writeText(pubOutput.textContent);
       copyBtn.textContent = "Copied!";
       setTimeout(()=>{ copyBtn.textContent = "Copy"; }, 1200);
+    });
+    exportBtn.addEventListener('click', () => {
+      if (!lastKeyLog) return;
+      const blob = new Blob([JSON.stringify(lastKeyLog, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `pubkey_log_${Date.now()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
     });
     nextBtn.addEventListener('click', (e) => {
       if (!nextBtn.classList.contains('enabled')) {
