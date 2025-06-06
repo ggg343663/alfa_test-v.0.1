@@ -6,103 +6,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body {
-      font-family: 'Inter', Arial, sans-serif;
-      background: #f6fafb;
-      color: #232a3e;
-      margin: 0;
-      padding: 0;
+    /* ...style เดิม... */
+    .input-error { border: 2px solid #dc2626 !important; background: #fef2f2;}
+    .input-err { color: #dc2626; font-size: 0.97em; margin-bottom: 0.5em;}
+    .copy-btn {
+      background: none; border: none; cursor: pointer; margin-left: 0.22em; color: #16a34a;
+      font-size: 1em; vertical-align: middle;
     }
-    .container {
-      max-width: 410px;
-      margin: 2em auto 0 auto;
-      padding: 2em 1em 1.4em 1em;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 2px 16px #22c55e25;
-      position: relative;
-    }
-    .back-btn {
-      position: absolute;
-      top: 18px; left: 12px;
-      background: #e0e7ef; color: #363f5c;
-      border: 1px solid #cdd2df; border-radius: 7px;
-      font-size: 1em; padding: 0.34em 1.1em; cursor: pointer;
-      z-index: 1000; box-shadow: 0 2px 8px #22c55e13;
-      font-weight: 500; transition: background 0.2s;
-    }
-    .back-btn:hover { background: #c7f7fa; color: #232a3e;}
-    h2 {
-      text-align: center; color: #22c55e; font-size: 1.23em;
-      margin-bottom: 1.6em; letter-spacing: 0.01em; margin-top: 0.5em;
-    }
-    .row {
-      display: flex; align-items: center;
-      background: #e7fbe8; border-radius: 8px;
-      border: 1.4px solid #22c55e;
-      margin-bottom: 1em; padding: 0.38em 0.58em 0.38em 0.7em;
-      gap: 0.22em;
-    }
-    .row input[type="text"] {
-      flex: 1 1 0;
-      font-size: 1em; padding: 0.56em 0.6em;
-      border: none; background: transparent;
-      color: #166534; font-weight: 500;
-      outline: none;
-    }
-    .row input[type="text"]:focus { background: #d1fadf;}
-    .icon-btn {
-      background: none; border: none; margin: 0 0 0 0.1em; padding: 0;
-      cursor: pointer; display: flex; align-items: center;
-    }
-    .icon-btn img { width: 26px; height: 26px; }
-    .receiver-group {
-      margin-bottom: 1.3em;
-    }
-    .receiver-group label {
-      font-size: 0.98em; color: #15803d; font-weight: bold; display: block;
-      margin-bottom: 0.18em; margin-left: 0.04em;
-    }
-    .input-green {
-      width: 100%; font-size: 1em; padding: 0.6em 0.6em;
-      border-radius: 8px; border: 1.3px solid #22c55e;
-      background: #e7fbe8; color: #166534; margin-bottom: 1em;
-      font-weight: 500; transition: border-color 0.13s;
-    }
-    .input-green:focus { border-color: #16a34a;}
-    .yellow-group {
-      background: #fef7e0;
-      border: 1.2px solid #eab308;
-      border-radius: 10px;
-      padding: 1em 0.95em 0.6em 0.95em;
-      margin-bottom: 0.6em;
-      margin-top: 1.15em;
-    }
-    .yellow-group label {
-      color: #b58900;
-      font-size: 0.98em;
-      font-weight: 600;
-    }
-    .pw-input {
-      width: 100%; font-size: 1em; padding: 0.58em 0.62em;
-      border-radius: 8px; border: 1.1px solid #eab308;
-      background: #fef9c3; color: #854d0e; margin-bottom: 0.72em;
-      font-weight: 500; transition: border-color 0.13s;
-      letter-spacing: 0.11em;
-    }
-    .pw-input:focus { border-color: #eab308;}
-    .mini-btn {
-      background: #fff; color: #222; border: 1px solid #bbb; border-radius: 5px;
-      font-size: 0.95em; padding: 0.21em 0.6em; margin-left: 0.1em; cursor: pointer;
-      margin-top: 0.8em; width: 100%;
-    }
-    .mini-btn:hover { background: #f0fdf4; }
-    .input-err { color: #b91c1c; font-size: 0.97em; margin-bottom: 0.5em;}
-    pre { text-align:left; background:#f3f6fa; padding:0.7em 1.2em; border-radius:8px; color:#166534;}
-    @media (max-width: 520px) {
-      .container { padding: 1em 0.18em 1em 0.18em; }
-      .back-btn { left: 4px; top: 4px; font-size: 0.95em; padding: 0.2em 0.82em;}
-    }
+    .copy-success { color: #16a34a; font-size: 0.93em; margin-left: 0.25em;}
   </style>
 </head>
 <body>
@@ -112,18 +23,24 @@
 
     <div class="row">
       <input type="text" id="qrhash" maxlength="64" autocomplete="off" placeholder="Enter QR Hash" />
-      <button class="icon-btn" title="Scan QR" onclick="openQRScanner()">
+      <button class="icon-btn" title="Scan QR" onclick="openQRScanner()" id="scanBtn">
         <img src="/scan-qr-icon.png" alt="Scan QR"/>
       </button>
       <input type="file" accept="image/*" style="display:none;" id="imgQRInput" onchange="scanImageQR(this)">
-      <button class="icon-btn" title="Import QR Image" onclick="document.getElementById('imgQRInput').click()">
+      <button class="icon-btn" title="Import QR Image" onclick="document.getElementById('imgQRInput').click()" id="imgBtn">
         <img src="/gallery-icon.png" alt="Gallery"/>
       </button>
+      <button class="copy-btn" onclick="copyField('qrhash')">Copy</button>
+      <span id="copyHashSuccess" class="copy-success"></span>
     </div>
 
     <div class="receiver-group">
       <label for="recipientpk">Receiver Public Key (42 chars, 0x...):</label>
-      <input class="input-green" type="text" id="recipientpk" maxlength="42" autocomplete="off" placeholder="Enter recipient's public key" />
+      <div style="display:flex;align-items:center;gap:0.2em;">
+        <input class="input-green" type="text" id="recipientpk" maxlength="42" autocomplete="off" placeholder="Enter recipient's public key" />
+        <button class="copy-btn" onclick="copyField('recipientpk')">Copy</button>
+        <span id="copyPkSuccess" class="copy-success"></span>
+      </div>
       <div class="input-err" id="pubkeyErr"></div>
     </div>
 
@@ -135,7 +52,7 @@
       <input class="pw-input" type="password" id="pin" maxlength="6" minlength="6" pattern="\d{6}" autocomplete="off" placeholder="Enter your 6-digit PIN" />
     </div>
 
-    <button class="mini-btn" onclick="preview()" type="button">Preview Transfer</button>
+    <button class="mini-btn" onclick="preview()" type="button" id="previewBtn">Preview Transfer</button>
     <div id="previewBox" style="margin-top:0.3em;text-align:center;color:#15803d;"></div>
     <button class="mini-btn" onclick="confirmTransfer()" type="button" style="display:none;" id="confirmBtn">Confirm Transfer</button>
 
@@ -143,10 +60,22 @@
   </div>
   <script>
     let qrReader = null;
+    // Auto focus
+    window.onload = function() {
+      document.getElementById('qrhash').focus();
+      // Detect feature
+      if (!navigator.clipboard) {
+        document.getElementById('scanBtn').disabled = true;
+        document.getElementById('imgBtn').disabled = true;
+      }
+    };
     function openQRScanner() {
+      // ปิดก่อนถ้ามี instance ค้าง
+      if (qrReader) try { qrReader.stop(); } catch {}
       const qrDiv = document.getElementById('qr-reader');
       qrDiv.style.display = 'block';
-      if (!qrReader) qrReader = new Html5Qrcode("qr-reader");
+      qrDiv.innerHTML = ''; // reset
+      qrReader = new Html5Qrcode("qr-reader");
       qrReader.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: 180 },
@@ -154,6 +83,7 @@
           document.getElementById('qrhash').value = qrCodeMessage;
           qrReader.stop();
           qrDiv.style.display = 'none';
+          document.getElementById('recipientpk').focus(); // auto-focus ต่อ
         }
       ).catch(err => {
         alert("Cannot open camera: " + err);
@@ -165,12 +95,15 @@
         const file = input.files[0];
         const qrDiv = document.getElementById('qr-reader');
         qrDiv.style.display = 'block';
-        if (!qrReader) qrReader = new Html5Qrcode("qr-reader");
+        qrDiv.innerHTML = '';
+        if (qrReader) try { qrReader.clear(); } catch {}
+        qrReader = new Html5Qrcode("qr-reader");
         qrReader.scanFile(file, true)
           .then(qrCodeMessage => {
             document.getElementById('qrhash').value = qrCodeMessage;
             qrReader.clear();
             qrDiv.style.display = 'none';
+            document.getElementById('recipientpk').focus();
           })
           .catch(() => {
             alert("QR not found in this image.");
@@ -187,14 +120,30 @@
       const pw = document.getElementById('password').value.trim();
       const pin = document.getElementById('pin').value.trim();
       let valid = true;
+      // Reset errors
       document.getElementById('pubkeyErr').textContent = "";
-      if (hash.length !== 64) valid = false;
+      document.getElementById('recipientpk').classList.remove('input-error');
+      document.getElementById('qrhash').classList.remove('input-error');
+      document.getElementById('password').classList.remove('input-error');
+      document.getElementById('pin').classList.remove('input-error');
+      // Validate
+      if (hash.length !== 64) {
+        valid = false;
+        document.getElementById('qrhash').classList.add('input-error');
+      }
       if (!validatePubkey(pub)) {
         valid = false;
+        document.getElementById('recipientpk').classList.add('input-error');
         if (pub) document.getElementById('pubkeyErr').textContent = "Public Key must start with 0x and be 42 chars.";
       }
-      if (pw.length < 6 || pw.length > 12 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw)) valid = false;
-      if (!/^\d{6}$/.test(pin)) valid = false;
+      if (pw.length < 6 || pw.length > 12 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw)) {
+        valid = false;
+        document.getElementById('password').classList.add('input-error');
+      }
+      if (!/^\d{6}$/.test(pin)) {
+        valid = false;
+        document.getElementById('pin').classList.add('input-error');
+      }
       return valid;
     }
     function preview() {
@@ -208,8 +157,7 @@
       }
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
-
-      // ใน production: ต้อง sign payload ด้วย privateKey (password+pin) จริง
+      // ตัวอย่าง production: ต้อง sign payload ด้วย privateKey (password+pin)
       previewBox.innerHTML =
         `<b>Preview Transfer</b><br>
         <b>QR Hash:</b> <code>${hash}</code><br>
@@ -226,9 +174,29 @@
       confirmBtn.style.display = "block";
     }
     function confirmTransfer() {
+      document.getElementById('confirmBtn').disabled = true;
       alert('✅ Transfer submitted! (Add backend logic here)');
       document.getElementById('previewBox').textContent = "";
       document.getElementById('confirmBtn').style.display = "none";
+      // clear form (optional)
+      document.getElementById('qrhash').value = "";
+      document.getElementById('recipientpk').value = "";
+      document.getElementById('password').value = "";
+      document.getElementById('pin').value = "";
+      setTimeout(()=>{document.getElementById('confirmBtn').disabled = false;},800);
+    }
+    // Copy field utility
+    function copyField(id) {
+      const el = document.getElementById(id);
+      el.select(); el.setSelectionRange(0, 9999);
+      navigator.clipboard.writeText(el.value);
+      if (id === 'qrhash') showCopySuccess('copyHashSuccess');
+      else if (id === 'recipientpk') showCopySuccess('copyPkSuccess');
+    }
+    function showCopySuccess(elid) {
+      const el = document.getElementById(elid);
+      el.textContent = "Copied!";
+      setTimeout(()=>{el.textContent = "";},1100);
     }
   </script>
 </body>
