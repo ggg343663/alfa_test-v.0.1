@@ -6,58 +6,74 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body { font-family: Arial,sans-serif; background: #f4f8fb; margin:0; padding:0;}
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f8fb; margin:0; padding:0;}
     .container {
-      max-width: 420px; margin:2em auto; background:#fff;
-      padding:2.2em 1.1em 1.7em 1.1em; border-radius:15px;
-      box-shadow:0 2px 16px #22c55e22;
+      max-width: 440px; margin:2.2em auto 1.2em auto; background:#fff;
+      padding:2.6em 1.3em 2.2em 1.3em; border-radius:20px;
+      box-shadow:0 8px 36px #1ecf8a12, 0 2px 9px #c3e7fd17;
     }
-    h2 { color:#22c55e; text-align:center; margin-bottom:1em;}
-    label { font-weight:600; margin-top:1em; display:block;}
+    h2 { color:#22c55e; text-align:center; margin-bottom:1.3em; font-size:1.9em; }
+    label { font-weight:600; margin-top:1.18em; display:block; font-size:1.09em;}
     input[type=text] {
-      width:100%; padding:0.62em 0.7em; font-size:1.05em;
-      border-radius:8px; border:1.3px solid #22c55e;
-      background:#e7fbe8; color:#166534; margin-bottom:0.42em;
-      margin-top:0.15em;
-      transition: border 0.15s;
+      width:100%; padding:0.73em 0.85em; font-size:1.09em;
+      border-radius:9px; border:1.8px solid #22c55e;
+      background:#e8faf3; color:#15803d; margin-bottom:0.47em;
+      margin-top:0.18em; transition: border 0.17s;
+      outline: none;
     }
-    input.input-err { border:2px solid #e53935!important; background:#fef2f2;}
-    .warn { color:#d97706; margin-bottom:0.3em;}
+    input[type=text]:focus { border-color: #246bfd; background:#f0f7ff; }
+    input.input-err { border:2.2px solid #e53935!important; background:#fef2f2;}
+    .warn { color:#d97706; margin-bottom:0.3em; font-size:1.01em;}
     .err { color:#e53935; margin-bottom:0.3em; background: #fff3f2; padding:0.3em 0.7em; border-radius:7px;}
     .ok { color:#16a34a; margin-bottom:0.3em;}
     .btn-main {
-      width:100%; padding:0.75em 0; background:#22c55e;
-      color:#fff; border:none; border-radius:9px; font-weight:700;
-      font-size:1.08em; margin-top:1.3em; cursor:pointer;
-      letter-spacing:0.01em; transition:background 0.17s;
+      width:100%; padding:0.9em 0; background:linear-gradient(90deg,#22c55e 75%,#246bfd 100%);
+      color:#fff; border:none; border-radius:10px; font-weight:700;
+      font-size:1.11em; margin-top:1.5em; cursor:pointer;
+      letter-spacing:0.01em; transition:background 0.18s, box-shadow .18s;
+      box-shadow: 0 2px 12px #5eead420;
     }
-    .btn-main:disabled { background:#94e7ba; color:#fff;}
-    .btn-main:hover:enabled { background:#16a34a;}
+    .btn-main:disabled { background:#bcf0da; color:#fff;}
+    .btn-main:hover:enabled { background:#15803d;}
     .hash-row {
-      margin-top:1.2em; word-break:break-all; font-family:monospace;
-      font-size:1.04em; color:#26733e; background:#e7fbe8;
-      border-radius:8px; padding:0.7em 1em;
+      margin-top:1.5em; word-break:break-all; font-family:monospace;
+      font-size:1.07em; color:#26733e; background:#e7fbe8;
+      border-radius:10px; padding:1.1em 1.1em 1.1em 1.15em;
+      box-shadow:0 1px 6px #33ee7f0a;
       position: relative;
+      animation: fadein 0.3s;
     }
+    @keyframes fadein { from{opacity:0; transform: translateY(20px);} to{opacity:1;transform:none;} }
     .copy-btn {
-      background: none; border: none; cursor: pointer; margin-left: 0.22em; color: #16a34a;
-      font-size: 1em; vertical-align: middle;
+      background: #ebfbee; border: none; cursor: pointer;
+      color: #219150; font-size: 1em; font-weight:500;
+      padding: 0.35em 1.1em; border-radius: 5px; margin-left: 0.22em; margin-right: 0.16em;
+      transition: background .16s;
+      vertical-align: middle;
     }
-    .copy-success { color: #16a34a; font-size: 0.93em; margin-left: 0.25em;}
-    .nonce-row { display:flex; align-items:center; gap:0.3em;}
-    .nonce-len { font-size:0.92em; color:#197; margin-left:0.2em;}
+    .copy-btn:active { background: #b9f7d0; color: #176d38; }
+    .copy-success { color: #16a34a; font-size: 0.99em; margin-left: 0.28em; min-width:2.5em; display:inline-block;}
+    .nonce-row { display:flex; align-items:center; gap:0.4em;}
+    .nonce-len { font-size:0.96em; color:#197; margin-left:0.26em;}
     .nonce-btn {
-      background:#e0e7ef; border:1px solid #b7c5df; border-radius:7px;
-      color:#136534; font-size:0.95em; padding:0.19em 0.82em; cursor:pointer; margin-left:0.1em;
+      background:#e0e7ef; border:1.5px solid #b7c5df; border-radius:8px;
+      color:#136534; font-size:1em; padding:0.23em 0.9em; cursor:pointer; margin-left:0.09em;
+      transition: background .16s;
     }
     .nonce-btn:hover { background:#bae6fd;}
     .back-btn {
-      margin-bottom:1.3em; background:#dbeafe; color:#324275;
-      border-radius:7px; border:1.3px solid #b7c5df;
-      padding:0.38em 1.18em; font-size:1em; cursor:pointer;
-      transition:background 0.17s;
+      margin-bottom:1.45em; background:#dbeafe; color:#324275;
+      border-radius:8px; border:1.7px solid #b7c5df;
+      padding:0.4em 1.3em; font-size:1.07em; cursor:pointer;
+      transition:background 0.18s;
+      font-weight:600;
     }
     .back-btn:hover { background:#bae6fd;}
+    @media (max-width:500px) {
+      .container { padding:1.2em 0.4em 1.6em 0.4em; border-radius:0; }
+      h2 { font-size:1.3em; }
+      .btn-main { font-size:1em; }
+    }
   </style>
 </head>
 <body>
@@ -66,10 +82,10 @@
     <h2>Register Agent</h2>
     <div id="unlockWarn" class="warn"></div>
     <form id="agentForm" autocomplete="off">
-      <label>Agent Name (a-z, 0-9, ≤16):</label>
+      <label>Agent Name <span style="color:#246bfd;">(a-z, 0-9, ≤16)</span>:</label>
       <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
       <div id="nameStatus"></div>
-      <label>Nonce (random string):</label>
+      <label>Nonce <span style="color:#246bfd;">(random string)</span>:</label>
       <div class="nonce-row">
         <input type="text" id="nonce" maxlength="20" required autocomplete="off" style="flex:1;"/>
         <button type="button" class="nonce-btn" onclick="randomNonce()">Random</button>
@@ -90,7 +106,6 @@
     const agent_db = {};
     let badwordList = {"profanity":["fuck","shit"],"offensive":["idiot"]};
 
-    // --- LOGIC ---
     function canCreateAgent(whitelist) {
       return Object.values(whitelist).filter(q=>q.registered).length >= 50;
     }
@@ -102,14 +117,12 @@
       let found = [];
       for (const group of Object.values(badwordList))
         group.forEach(word => {
-          // ตรวจแบบ "ทั้งคำ" (word boundary)
           const re = new RegExp("\\b"+word+"\\b", "i");
           if(re.test(str)) found.push(word);
         });
       return found;
     }
     function randomNonce() {
-      // 12-18 chars, a-z0-9
       const len = Math.floor(Math.random()*7)+12;
       const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
       let s = '';
@@ -118,7 +131,6 @@
       document.getElementById('nonceLen').textContent = s.length+"/20";
     }
 
-    // --- UI Event ---
     document.getElementById('agentName').addEventListener('input', function(){
       this.value = this.value.replace(/[^a-z0-9]/g, '').slice(0,16);
       const bads = checkBadwords(this.value);
@@ -142,56 +154,48 @@
       document.getElementById('nonceLen').textContent = this.value.length+"/20";
     });
 
-    // focus ช่องแรก
     window.onload = () => { document.getElementById('agentName').focus(); randomNonce(); };
 
-    // --- Form Submission ---
     document.getElementById('agentForm').onsubmit = function(e){
       e.preventDefault();
       const btn = document.getElementById('registerBtn');
       btn.disabled = true;
 
-      // 1. Check unlock
       if (!canCreateAgent(whitelist)) {
-        document.getElementById('unlockWarn').textContent = "ยังปลดล็อก master ไม่ได้ (ต้อง register 50 QR ก่อน)";
+        document.getElementById('unlockWarn').textContent = "Master is still locked (need 50 QR registered first)";
         btn.disabled = false;
         return;
       } else {
         document.getElementById('unlockWarn').textContent = "";
       }
-      // 2. Validate name
       const agentName = document.getElementById('agentName').value.trim();
       const nonce = document.getElementById('nonce').value.trim();
       if (!validateAgentName(agentName)) {
-        alert("ชื่อ agent ต้องเป็น a-z, 0-9, ≤16 ตัว");
+        alert("Agent name must be a-z, 0-9, ≤16 characters.");
         document.getElementById('agentName').focus();
         btn.disabled = false;
         return;
       }
       if (nonce.length < 4 || nonce.length > 20) {
-        alert("Nonce ต้องยาว 4-20 ตัว (a-z, 0-9)");
+        alert("Nonce must be 4-20 characters (a-z, 0-9)");
         document.getElementById('nonce').focus();
         btn.disabled = false;
         return;
       }
-      // 3. Badword
       const bads = checkBadwords(agentName);
-      if (bads.length>0 && !confirm("⚠ ชื่อ agent มีคำไม่เหมาะสม: " + bads.join(", ") + "\nดำเนินการต่อหรือไม่?")) {
+      if (bads.length>0 && !confirm("⚠ Agent name contains inappropriate word(s): " + bads.join(", ") + "\nContinue?")) {
         btn.disabled = false;
         document.getElementById('agentName').focus();
         return;
       }
-      // 4. Duplicate
       if (Object.values(agent_db).some(a=>a.agent_name===agentName)) {
-        alert("Agent name นี้ถูกใช้แล้วในระบบ");
+        alert("This agent name is already used.");
         btn.disabled = false;
         return;
       }
-      // 5. Create agent hash
       const timestamp = Math.floor(Date.now()/1000);
       const s = `${master_hash}:${agentName}:${nonce}:${timestamp}`;
       const agent_hash = sha256(s);
-      // 6. Save
       agent_db[agent_hash] = {
         agent_name: agentName,
         master_hash,
@@ -199,21 +203,22 @@
         timestamp,
         agent_hash
       };
-      // 7. Show result + Copy button
+      // แสดงวันเวลาชัดเจน (ISO)
+      const isoTime = new Date(timestamp * 1000).toISOString();
       const resultDiv = document.getElementById('hashResult');
       resultDiv.style.display = "block";
       resultDiv.innerHTML =
         `<b>Agent Registered!</b><br>
-         Agent Name: <b>${agentName}</b><br>
-         Agent Hash: <code id="agentHashVal">${agent_hash}</code>
+         <b>Agent Name:</b> <span style="color:#246bfd;">${agentName}</span><br>
+         <b>Agent Hash:</b> <code id="agentHashVal">${agent_hash}</code>
          <button class="copy-btn" onclick="copyAgentHash()">Copy</button>
          <span id="copyAgentHashSuccess" class="copy-success"></span><br>
-         Timestamp: <b>${timestamp}</b><br>
-         Nonce: <b>${nonce}</b>`;
+         <b>Timestamp:</b> ${timestamp} <span style="color:#666;font-size:0.98em;">(${isoTime})</span><br>
+         <b>Nonce:</b> <span style="color:#26733e;">${nonce}</span>`;
       document.getElementById('agentForm').reset();
       document.getElementById('nameStatus').innerHTML = "";
       document.getElementById('nonceLen').textContent = "0/20";
-      setTimeout(()=>resultDiv.scrollIntoView({behavior:'smooth'}),120);
+      setTimeout(()=>resultDiv.scrollIntoView({behavior:'smooth'}),130);
       btn.disabled = false;
       randomNonce();
     };
@@ -229,7 +234,7 @@
       try { document.execCommand('copy'); } catch {}
       sel.removeAllRanges();
       document.getElementById('copyAgentHashSuccess').textContent = "Copied!";
-      setTimeout(()=>{document.getElementById('copyAgentHashSuccess').textContent="";},1200);
+      setTimeout(()=>{document.getElementById('copyAgentHashSuccess').textContent="";},1300);
     }
   </script>
 </body>
