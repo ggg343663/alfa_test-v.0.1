@@ -132,8 +132,7 @@
       masters.push({
         masterName: name,
         publicKey: pk,
-        requestedAt: new Date().toISOString(),
-        version: "0.1.7r"
+        requestedAt: new Date().toISOString()
       });
       localStorage.setItem('dtc_masters', JSON.stringify(masters));
       showMsg("Master request submitted! (Demo: data stored only on your device)", "success");
