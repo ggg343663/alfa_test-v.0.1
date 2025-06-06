@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>Verify QR</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     body { font-family: Arial, sans-serif; max-width: 530px; margin: 2em auto; background: #f9fafd;}
     .container { background: #fff; padding: 2em 1.3em; border-radius: 15px; box-shadow: 0 2px 14px #e1e5f5; }
@@ -29,6 +30,19 @@
       margin-left: 0.18em; cursor: pointer; font-size: 0.98em;
     }
     .copy-success { color: #1aa34a; font-size: 0.95em; margin-left: 0.29em;}
+    .icon-btn {
+      background: #f1f5fa;
+      border: 1.5px solid #c5d8e6;
+      border-radius: 6px;
+      padding: 0.3em 0.8em;
+      color: #246bfd;
+      font-weight: bold;
+      margin-right: 0.18em;
+      cursor: pointer;
+      font-size: 0.98em;
+    }
+    .icon-btn:active { background: #dbeafe; }
+    #qr-reader { margin-top: 1.2em; display:none; }
     @media (max-width:600px){
       .container {padding:1em 0.3em;}
     }
@@ -41,8 +55,12 @@
     <div style="display:flex;align-items:center;gap:0.2em;">
       <input id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" />
       <button class="copy-btn" title="Copy QR hash" onclick="copyHash('qrhash')">Copy</button>
+      <button class="icon-btn" type="button" onclick="openQRScanner()">Scan QR</button>
+      <input type="file" accept="image/*" id="imgQRInput" style="display:none;" onchange="scanImageQR(this)">
+      <button class="icon-btn" type="button" onclick="document.getElementById('imgQRInput').click()">Img</button>
       <span id="copyHashSuccess" class="copy-success"></span>
     </div>
+    <div id="qr-reader"></div>
     <button onclick="verifyQR()" id="verifyBtn">Check QR</button>
     <button class="clear-btn" onclick="clearQR()">Clear</button>
     <div id="result"></div>
@@ -91,6 +109,51 @@ function copyHash(id) {
   const el = document.getElementById('copyHashSuccess');
   el.textContent = "Copied!";
   setTimeout(()=>{el.textContent="";}, 1200);
+}
+
+// QR SCAN FUNCTIONS
+let qrReader = null;
+function openQRScanner() {
+  if (qrReader) try { qrReader.stop(); } catch {}
+  const qrDiv = document.getElementById('qr-reader');
+  qrDiv.style.display = 'block';
+  qrDiv.innerHTML = '';
+  qrReader = new Html5Qrcode("qr-reader");
+  qrReader.start(
+    { facingMode: "environment" },
+    { fps: 10, qrbox: 200 },
+    qrCodeMessage => {
+      document.getElementById('qrhash').value = qrCodeMessage;
+      qrReader.stop();
+      qrDiv.style.display = 'none';
+      verifyQR();
+    }
+  ).catch(err => {
+    alert("Cannot open camera: " + err);
+    qrDiv.style.display = 'none';
+  });
+}
+
+function scanImageQR(input) {
+  if (input.files && input.files.length > 0) {
+    const file = input.files[0];
+    const qrDiv = document.getElementById('qr-reader');
+    qrDiv.style.display = 'block';
+    qrDiv.innerHTML = '';
+    if (qrReader) try { qrReader.clear(); } catch {}
+    qrReader = new Html5Qrcode("qr-reader");
+    qrReader.scanFile(file, true)
+      .then(qrCodeMessage => {
+        document.getElementById('qrhash').value = qrCodeMessage;
+        qrReader.clear();
+        qrDiv.style.display = 'none';
+        verifyQR();
+      })
+      .catch(() => {
+        alert("QR not found in this image.");
+        qrDiv.style.display = 'none';
+      });
+  }
 }
 
 function verifyQR() {
