@@ -9,7 +9,7 @@
     .container { background:#fff; max-width:750px; margin:auto; border-radius:14px; box-shadow:0 2px 16px #ccd7e8; padding:2.4em 1.5em;}
     h2 { color:#f59e42; margin-bottom:0.2em; letter-spacing:0.03em;}
     .progress-section {
-      margin-bottom:2.4em; 
+      margin-bottom:2.4em;
       padding:1.4em 1.2em 1.1em 1.2em;
       background:#f3f5ff;
       border-radius:13px;
@@ -29,6 +29,13 @@
       color: #f59e42;
       font-size: 1.04em;
       margin-top: 0.16em;
+    }
+    .batch-status-bar {
+      display: flex; gap: 1.4em; font-size: 0.98em; margin: 0.2em 0 0.4em 0;
+    }
+    .batch-status-bar div {
+      background: #e5edff; padding: 0.27em 0.8em; border-radius: 7px; font-weight: bold;
+      color: #444;
     }
     .summary {
       margin: 1em 0 2.3em 0; font-size: 1.11em; color:#24404c;
@@ -56,6 +63,12 @@
     .status-transferred { color:#f59e42; font-weight:700;}
     .back-btn { position: fixed; top: 18px; left: 18px; background: #e3eaf8; color: #232a3e; border: 1.5px solid #b7c5df; border-radius: 7px; font-size: 1em; padding: 0.36em 1.18em; cursor: pointer; transition: background 0.18s; z-index:99;}
     .back-btn:hover { background: #c7f7fa; }
+    .copy-btn {
+      background: #f3f5fd; border: 1px solid #c5d4ef; color: #296fc6;
+      padding: 0.18em 0.6em; border-radius: 6px; font-size: 0.93em; margin-left: 0.23em; cursor:pointer;
+      transition: background 0.13s;
+    }
+    .copy-btn:hover { background: #f9f06b; color: #5c4700;}
     @media(max-width:700px){
       .container{padding:1em 0.3em;}
       .summary{flex-direction:column;gap:0.7em;}
@@ -70,15 +83,9 @@
   <button class="back-btn" onclick="history.back()">← Back</button>
   <div class="container">
     <h2>🔑 Master QR Dashboard</h2>
-
     <!-- Unlock progress by batch -->
     <div class="progress-section" id="batchProgress"></div>
-
-    <div class="summary">
-      <div>Total<br><span id="totalQR">0</span></div>
-      <div>Registered<br><span id="regQR">0</span></div>
-      <div>Available<br><span id="availQR">0</span></div>
-    </div>
+    <div class="summary" id="summaryBar"></div>
     <div class="search-box">
       <input type="text" id="searchBox" placeholder="Search QR hash, owner, or status..." oninput="renderTable()" />
       <button onclick="loadData()">Refresh</button>
@@ -115,57 +122,89 @@ const batchConfig = [
   {batch:3, label:"Batch 3", size:2000, unlockPercent:0.5, nextBatch:null, nextAmount:null},
 ];
 
+// --- Render Batch Progress ---
 function renderBatchProgress() {
   const section = document.getElementById('batchProgress');
   let html = "";
   batchConfig.forEach(cfg => {
     const batchQrs = qrList.filter(q=>q.batch===cfg.batch);
     const reg = batchQrs.filter(q=>q.status==="registered").length;
+    const avail = batchQrs.filter(q=>q.status==="available").length;
+    const trans = batchQrs.filter(q=>q.status==="transferred").length;
     const percent = ((reg/cfg.size)*100).toFixed(1);
     html += `<div class="progress-block">
       <span class="progress-title">${cfg.label}:</span>
-      <div class="progress-stats">Registered: <b>${reg}/${cfg.size}</b> &nbsp;|&nbsp; <b>${percent}%</b></div>
+      <div class="batch-status-bar">
+        <div>Registered: <b>${reg.toLocaleString()}</b></div>
+        <div>Available: <b>${avail.toLocaleString()}</b></div>
+        <div>Transferred: <b>${trans.toLocaleString()}</b></div>
+        <div>Total: <b>${cfg.size.toLocaleString()}</b></div>
+      </div>
+      <div class="progress-stats"><b>${percent}%</b> Registered</div>
       ${
         cfg.nextBatch && reg<Math.ceil(cfg.size*cfg.unlockPercent)
-          ? `<div class="progress-next">Next unlock: ${cfg.nextAmount} QR when registered ≥ ${Math.ceil(cfg.size*cfg.unlockPercent)} (${(cfg.unlockPercent*100).toFixed(0)}%)</div>`
-          : (cfg.nextBatch?`<div class="progress-next" style="color:#16a34a">Unlocked. Next: Batch ${cfg.nextBatch} (${cfg.nextAmount} QR)</div>`:"")
+          ? `<div class="progress-next">Next unlock: <b>${cfg.nextAmount.toLocaleString()} QR</b> when registered ≥ <b>${Math.ceil(cfg.size*cfg.unlockPercent).toLocaleString()}</b> (${(cfg.unlockPercent*100).toFixed(0)}%)</div>`
+          : (cfg.nextBatch?`<div class="progress-next" style="color:#16a34a">Unlocked. Next: Batch ${cfg.nextBatch} (${cfg.nextAmount.toLocaleString()} QR)</div>`:"")
       }
     </div>`;
   });
   section.innerHTML = html;
 }
 
+// --- Summary Bar (Filtered/Total) ---
+function renderSummaryBar(filteredList) {
+  let total = filteredList.length;
+  let reg = filteredList.filter(q=>q.status==="registered").length;
+  let avail = filteredList.filter(q=>q.status==="available").length;
+  let trans = filteredList.filter(q=>q.status==="transferred").length;
+  document.getElementById('summaryBar').innerHTML = `
+    <div>Total<br><span>${total.toLocaleString()}</span></div>
+    <div>Registered<br><span>${reg.toLocaleString()}</span></div>
+    <div>Available<br><span>${avail.toLocaleString()}</span></div>
+    <div>Transferred<br><span>${trans.toLocaleString()}</span></div>
+  `;
+}
+
+// --- Table & Search ---
+function renderTable() {
+  const qrTable = document.getElementById('qrTable');
+  const search = (document.getElementById('searchBox')?.value || "").toLowerCase();
+  let filtered = qrList.filter(q =>
+      q.hash.toLowerCase().includes(search) ||
+      (q.owner && q.owner.toLowerCase().includes(search)) ||
+      q.status.toLowerCase().includes(search)
+    );
+  renderSummaryBar(filtered);
+  let html = filtered.map(q => {
+    return `<tr>
+      <td>${q.index}</td>
+      <td>${q.batch}</td>
+      <td>
+        <code>${q.hash}</code>
+        <button class="copy-btn" title="Copy QR Hash" onclick="copyToClipboard('${q.hash}')">Copy</button>
+      </td>
+      <td class="status-${q.status}">${q.status.charAt(0).toUpperCase()+q.status.slice(1)}</td>
+      <td>
+        ${q.owner ? `<code>${q.owner}</code> <button class="copy-btn" title="Copy Owner" onclick="copyToClipboard('${q.owner}')">Copy</button>` : '-'}
+      </td>
+    </tr>`;
+  }).join('');
+  qrTable.innerHTML = html || `<tr><td colspan="5" style="text-align:center;color:#888;">No data found.</td></tr>`;
+}
+
+// --- Clipboard Utility ---
+function copyToClipboard(text) {
+  navigator.clipboard.writeText(text).then(()=>{
+    alert("Copied!");
+  });
+}
+
+// --- Initial Render ---
 function loadData() {
   renderBatchProgress();
   renderTable();
 }
 loadData();
-
-function renderTable() {
-  const qrTable = document.getElementById('qrTable');
-  const search = (document.getElementById('searchBox')?.value || "").toLowerCase();
-  let total = 0, reg = 0, avail = 0;
-  let html = qrList.filter(q =>
-      q.hash.toLowerCase().includes(search) ||
-      (q.owner && q.owner.toLowerCase().includes(search)) ||
-      q.status.toLowerCase().includes(search)
-    ).map(q => {
-      total++;
-      if(q.status === "registered") reg++;
-      if(q.status === "available") avail++;
-      return `<tr>
-        <td>${q.index}</td>
-        <td>${q.batch}</td>
-        <td><code>${q.hash}</code></td>
-        <td class="status-${q.status}">${q.status.charAt(0).toUpperCase()+q.status.slice(1)}</td>
-        <td>${q.owner ? `<code>${q.owner}</code>` : '-'}</td>
-      </tr>`;
-    }).join('');
-  qrTable.innerHTML = html || `<tr><td colspan="5" style="text-align:center;color:#888;">No data found.</td></tr>`;
-  document.getElementById('totalQR').textContent = total;
-  document.getElementById('regQR').textContent = reg;
-  document.getElementById('availQR').textContent = avail;
-}
 </script>
 </body>
 </html>
