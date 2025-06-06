@@ -6,169 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #fffbe8;
-      margin: 0; padding: 0;
-    }
-    .container {
-      background: #fff;
-      max-width: 430px;
-      margin: 2em auto 2em auto;
-      border-radius: 17px;
-      box-shadow: 0 2px 16px #eab30833;
-      padding: 2.1em 1.3em 1.6em 1.3em;
-    }
-    h2 {
-      color: #b58900;
-      margin-bottom: 1em;
-      text-align: center;
-      letter-spacing: 0.01em;
-      font-size: 1.35em;
-    }
-    label {
-      font-weight: 600;
-      margin-bottom: 0.3em;
-      display: block;
-      color: #684d00;
-      font-size: 1em;
-      margin-top: 1.1em;
-    }
-    input[type="text"] {
-      width: 100%;
-      padding: 0.6em 0.7em;
-      font-size: 1em;
-      border-radius: 7px;
-      border: 1.5px solid #ffe066;
-      margin-bottom: 0.35em;
-      transition: border 0.17s;
-      background: #fffdf4;
-    }
-    input:focus {
-      border: 1.7px solid #facc15;
-      background: #fffde4;
-      outline: none;
-    }
-    .form-warn {
-      color: #d97706;
-      background: #fffbe9;
-      border-left: 5px solid #facc15;
-      border-radius: 8px;
-      padding: 0.7em 1em;
-      margin: 1em 0 0.7em 0;
-      font-size: 1em;
-    }
-    .msg-warn {
-      color: #d32f2f;
+    /* ... ใช้ style เดิมจากคุณ ... */
+    .copy-success {
+      display: inline-block;
+      color: #1aa34a;
       font-weight: bold;
-      font-size: 1em;
-      margin-bottom: 0.3em;
+      margin-left: 0.45em;
+      opacity: 0;
+      transition: opacity 0.5s;
+      font-size: 0.98em;
     }
-    .input-error {
-      border: 2px solid #eab308;
-      background: #fff9db;
-    }
-    button[type="submit"] {
-      width: 100%;
-      margin-top: 1.4em;
-      padding: 0.82em 0;
-      font-size: 1.08em;
-      background: linear-gradient(90deg, #ffe066 50%, #facc15 100%);
-      color: #4a3800;
-      border: none;
-      border-radius: 9px;
-      font-weight: bold;
-      letter-spacing: 0.01em;
-      box-shadow: 0 1px 8px #ffe0664a;
-      cursor: pointer;
-      transition: background 0.18s, color 0.18s;
-    }
-    button[type="submit"]:hover {
-      background: linear-gradient(90deg, #facc15 60%, #ffe066 100%);
-      color: #2b2401;
-    }
-    .back-btn {
-      margin-bottom: 1em;
-      background: #fef9c3;
-      color: #684d00;
-      border-radius: 7px;
-      border: 1.3px solid #fde047;
-      padding: 0.4em 1.3em;
-      font-size: 1em;
-      cursor: pointer;
-      box-shadow: 0 1px 5px #fde04740;
-      transition: background 0.18s;
-    }
-    .back-btn:hover {
-      background: #fde047;
-      color: #21211d;
-    }
-    .hash-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-      margin-bottom: 0.4em;
-      margin-top: 1.7em;
-    }
-    .hash-status.ready {
-      color: #13a137;
-      font-weight: bold;
-      font-size: 1em;
-      margin-left: 6px;
-    }
-    .copy-btn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0 0.2em;
+    .copy-success.show { opacity: 1; }
+    .paste-btn {
+      background: #f3f5fd;
+      border: 1px solid #c5d4ef;
+      color: #296fc6;
+      padding: 0.16em 0.66em;
+      border-radius: 6px;
+      font-size: 0.93em;
       margin-left: 0.2em;
+      cursor:pointer;
+      transition: background 0.13s;
     }
-    .copy-btn:active svg { opacity: 0.65; }
-    pre {
-      background: #f9f6e3;
-      border-radius: 8px;
-      padding: 1.2em 0.9em;
-      color: #8a6903;
-      font-size: 1.07em;
-      margin-top: 0.2em;
-      white-space: pre-wrap;
-      word-break: break-all;
-      border: 1.5px solid #fde047;
-      box-shadow: 0 1px 10px #fde04718;
-    }
-    .popup-overlay {
-      position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(251, 224, 47, 0.32); z-index: 9999; display: none;
-      align-items: center; justify-content: center;
-    }
-    .popup-content {
-      background: #fffde4;
-      border-radius: 13px;
-      border: 2.5px solid #facc15;
-      max-width: 95vw; width: 340px;
-      padding: 2em 1em 1.2em 1em;
-      box-shadow: 0 4px 22px #facc1550;
-      color: #b58900;
-      font-size: 1.1em;
-      text-align: center;
-      position: relative;
-      animation: pop 0.22s;
-    }
-    .popup-content .close-popup {
-      position: absolute; right: 1em; top: 1em;
-      background: #fde047;
-      border: 1.4px solid #facc15;
-      border-radius: 100px;
-      padding: 0.22em 0.8em;
-      cursor: pointer; color: #b58900; font-size: 1em;
-    }
-    @keyframes pop {
-      0% { transform: scale(0.85);}
-      100% { transform: scale(1);}
-    }
-    @media (max-width: 600px) {
-      .container { padding: 1em 0.5em;}
-    }
+    .paste-btn:hover { background: #ffe066; color: #5c4700;}
+    .pubkey-count { font-size: 0.92em; color: #c77700; margin-left: 0.7em;}
+    .badword-err-disabled { opacity: 0.9; font-style: italic; }
   </style>
 </head>
 <body>
@@ -179,11 +41,28 @@
     <div id="badwordWarn" class="form-warn" style="display:none;"></div>
 
     <form id="requestMasterForm" autocomplete="off">
-      <label>Master Name (A-Z only): <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required autocomplete="off"></label>
-      <label>Confirm Master Name: <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required autocomplete="off"></label>
+      <label>Master Name (A-Z only): 
+        <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" required autocomplete="off">
+      </label>
+      <label>Confirm Master Name: 
+        <input type="text" id="confirmName" maxlength="8" pattern="[A-Z]+" required autocomplete="off">
+      </label>
       <div id="nameMatchWarn" class="msg-warn" style="display:none;"></div>
-      <label>Public Key (42 ตัวอักษร): <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" maxlength="42" required autocomplete="off"></label>
-      <label>Confirm Public Key: <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" maxlength="42" required autocomplete="off"></label>
+      <label>
+        Public Key (42 ตัวอักษร): 
+        <input type="text" id="pubkey" pattern="^0x[a-fA-F0-9]{40}$" maxlength="42" required autocomplete="off" />
+        <button type="button" class="paste-btn" onclick="pastePubkey('pubkey')">Paste</button>
+        <button type="button" class="copy-btn" onclick="copyField('pubkey')" title="Copy"><svg width="17" height="17" viewBox="0 0 24 24"><path fill="#888" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19"/><path fill="#888" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z"/></svg></button>
+        <span class="pubkey-count" id="pubkeyCount">0/42</span>
+        <span class="copy-success" id="copySuccess"></span>
+      </label>
+      <label>
+        Confirm Public Key:
+        <input type="text" id="confirmPubkey" pattern="^0x[a-fA-F0-9]{40}$" maxlength="42" required autocomplete="off" />
+        <button type="button" class="paste-btn" onclick="pastePubkey('confirmPubkey')">Paste</button>
+        <button type="button" class="copy-btn" onclick="copyField('confirmPubkey')" title="Copy"><svg width="17" height="17" viewBox="0 0 24 24"><path fill="#888" d="M19,21H8A2,2 0 0,1 6,19V7H8V19H19"/><path fill="#888" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z"/></svg></button>
+        <span class="pubkey-count" id="confirmPubkeyCount">0/42</span>
+      </label>
       <small>📌 กรุณาส่ง Public Key นี้ให้ผู้รับ เพื่อยืนยันสิทธิ์ภายหลัง</small>
       <button type="submit">Request Master</button>
     </form>
@@ -199,6 +78,7 @@
             <path fill="#24c48b" d="M16,1H4A2,2 0 0,0 2,3V17A2,2 0 0,0 4,19H16A2,2 0 0,0 18,17V3A2,2 0 0,0 16,1Z" />
           </svg>
         </button>
+        <span class="copy-success" id="copyHashSuccess"></span>
       </div>
       <pre id="hashResult"></pre>
     </div>
@@ -212,114 +92,154 @@
     </div>
   </div>
 
-  <script>
-    // โหลด badwords.json จาก root (ปรับ path ให้ถูกถ้าอยู่ใน subfolder)
-    let badwordList = {};
-    let hasBadword = false;
+<script>
+  // ========== Badword Loader & Check ==========
+  let badwordList = {};
+  let hasBadword = false;
+  let badwordLoaded = false;
+  let badwordError = false;
+  fetch('badwords.json')
+    .then(res => res.json())
+    .then(data => {badwordList = data; badwordLoaded = true;})
+    .catch(() => {
+      badwordError = true;
+      showBadwordWarn('<span class="badword-err-disabled">⚠ ไม่สามารถโหลด badword list ได้<br>ระบบไม่สามารถเตือนคำไม่เหมาะสมในขณะนี้</span>');
+    });
 
-    fetch('badwords.json')
-      .then(res => res.json())
-      .then(data => badwordList = data)
-      .catch(() => showPopup('⚠ ไม่สามารถโหลด badword list ได้ กรุณาเช็คไฟล์ badwords.json'));
-
-    function showPopup(msg) {
-      document.getElementById('popupMsg').innerHTML = msg;
-      document.getElementById('popupOverlay').style.display = 'flex';
+  function showBadwordWarn(msg) {
+    const warn = document.getElementById('badwordWarn');
+    warn.style.display = 'block';
+    warn.innerHTML = msg;
+  }
+  function hideBadwordWarn() {
+    document.getElementById('badwordWarn').style.display = 'none';
+  }
+  // ตรวจ badword แบบ "ทั้งคำ" (exact word) ไม่เตือนเช่น class หรือ pass
+  function checkBadwords(inputValue) {
+    const input = inputValue.toLowerCase();
+    let found = [];
+    for (const group of Object.values(badwordList)) {
+      group.forEach(word => {
+        const re = new RegExp("\\b"+word+"\\b", "i"); // ต้องเป็นทั้งคำ
+        if (re.test(input)) found.push(word);
+      });
     }
-    function hidePopup() {
-      document.getElementById('popupOverlay').style.display = 'none';
+    if (found.length > 0) {
+      showBadwordWarn(`⚠ <span style="color:red; font-weight:bold;">Badword:</span> ${found.join(', ')}<br>กรุณาหลีกเลี่ยงคำเหล่านี้ หรือกดยืนยันหากต้องการใช้จริง`);
+      hasBadword = true;
+    } else {
+      hideBadwordWarn();
+      hasBadword = false;
     }
+  }
 
-    function showBadwordWarn(msg) {
-      const warn = document.getElementById('badwordWarn');
+  // ========== Name, Pubkey Logic ==========
+  function toUpperNoOther(str) { return str.toUpperCase().replace(/[^A-Z]/g, ''); }
+  document.getElementById('masterName').addEventListener('input', function () {
+    this.value = toUpperNoOther(this.value);
+    if(badwordLoaded) checkBadwords(this.value);
+    checkNameMatch();
+  });
+  document.getElementById('confirmName').addEventListener('input', function () {
+    this.value = toUpperNoOther(this.value);
+    checkNameMatch();
+  });
+
+  function checkNameMatch() {
+    const name = document.getElementById('masterName').value.trim();
+    const confirm = document.getElementById('confirmName').value.trim();
+    const warn = document.getElementById('nameMatchWarn');
+    if (name && confirm && name !== confirm) {
+      warn.innerText = '⚠ Master Name และ Confirm Master Name ไม่ตรงกัน!';
       warn.style.display = 'block';
-      warn.innerHTML = msg;
+      document.getElementById('confirmName').classList.add('input-error');
+    } else {
+      warn.innerText = '';
+      warn.style.display = 'none';
+      document.getElementById('confirmName').classList.remove('input-error');
     }
-    function hideBadwordWarn() {
-      document.getElementById('badwordWarn').style.display = 'none';
-    }
+  }
 
-    function checkBadwords(inputValue) {
-      const input = inputValue.toLowerCase();
-      let found = [];
-      for (const group of Object.values(badwordList)) {
-        group.forEach(word => {
-          if (input.includes(word)) found.push(word);
-        });
-      }
-      if (found.length > 0) {
-        showBadwordWarn(`⚠ <span style="color:red; font-weight:bold;">Badword:</span> ${found.join(', ')}<br>กรุณาหลีกเลี่ยงคำเหล่านี้ หรือกดยืนยันหากต้องการใช้จริง`);
-        hasBadword = true;
-      } else {
-        hideBadwordWarn();
-        hasBadword = false;
-      }
-    }
-
-    // Force UPPERCASE for both masterName and confirmName
-    document.getElementById('masterName').addEventListener('input', function () {
-      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
-      checkBadwords(this.value);
-      checkNameMatch();
-    });
-    document.getElementById('confirmName').addEventListener('input', function () {
-      this.value = this.value.toUpperCase().replace(/[^A-Z]/g, '');
-      checkNameMatch();
-    });
-
-    // Warn if Master Name and Confirm Master Name do not match
-    function checkNameMatch() {
-      const name = document.getElementById('masterName').value.trim();
-      const confirm = document.getElementById('confirmName').value.trim();
-      const warn = document.getElementById('nameMatchWarn');
-      if (name && confirm && name !== confirm) {
-        warn.innerText = '⚠ Master Name และ Confirm Master Name ไม่ตรงกัน!';
-        warn.style.display = 'block';
-        document.getElementById('confirmName').classList.add('input-error');
-      } else {
-        warn.innerText = '';
-        warn.style.display = 'none';
-        document.getElementById('confirmName').classList.remove('input-error');
-      }
-    }
-
-    document.getElementById('requestMasterForm').onsubmit = function (e) {
+  // Auto focus, Enter = Next, count pubkey
+  window.onload = function(){
+    document.getElementById('masterName').focus();
+  };
+  document.getElementById('pubkey').addEventListener('input', function () {
+    document.getElementById('pubkeyCount').innerText = this.value.length + "/42";
+  });
+  document.getElementById('confirmPubkey').addEventListener('input', function () {
+    document.getElementById('confirmPubkeyCount').innerText = this.value.length + "/42";
+  });
+  // Enter กดข้ามช่อง
+  const jump = (id, nextId) => document.getElementById(id).addEventListener('keydown', function(e){
+    if(e.key==='Enter') {
       e.preventDefault();
+      document.getElementById(nextId).focus();
+    }
+  });
+  jump('masterName','confirmName');
+  jump('confirmName','pubkey');
+  jump('pubkey','confirmPubkey');
+  jump('confirmPubkey','requestMasterForm'); // Enter ที่สุดท้าย = submit
 
-      const name = document.getElementById('masterName').value.trim();
-      const confirm = document.getElementById('confirmName').value.trim();
-      const pubkey = document.getElementById('pubkey').value.trim();
-      const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
+  // Copy/Paste fields
+  function copyField(id) {
+    const el = document.getElementById(id);
+    el.select(); el.setSelectionRange(0, 9999);
+    navigator.clipboard.writeText(el.value);
+    showCopySuccess();
+  }
+  function showCopySuccess() {
+    const el = document.getElementById('copySuccess');
+    el.innerText = "Copied!";
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'),1100);
+  }
+  async function pastePubkey(id) {
+    try {
+      const text = await navigator.clipboard.readText();
+      if (/^0x[a-fA-F0-9]{0,40}$/.test(text)) {
+        document.getElementById(id).value = text.substring(0,42);
+        document.getElementById(id+'Count').innerText = document.getElementById(id).value.length + "/42";
+      }
+    } catch {}
+  }
 
-      if (name !== confirm) {
-        showPopup('⚠ Master Name และ Confirm Master Name ไม่ตรงกัน');
+  // ========== Form Submit ==========
+  document.getElementById('requestMasterForm').onsubmit = function (e) {
+    e.preventDefault();
+    const name = document.getElementById('masterName').value.trim();
+    const confirm = document.getElementById('confirmName').value.trim();
+    const pubkey = document.getElementById('pubkey').value.trim();
+    const confirmPubkey = document.getElementById('confirmPubkey').value.trim();
+    if (name !== confirm) {
+      showPopup('⚠ Master Name และ Confirm Master Name ไม่ตรงกัน');
+      document.getElementById('confirmName').focus();
+      return;
+    }
+    if (pubkey !== confirmPubkey) {
+      showPopup('⚠ Public Key และ Confirm Public Key ไม่ตรงกัน');
+      document.getElementById('confirmPubkey').focus();
+      return;
+    }
+    if (hasBadword) {
+      if (!confirm('⚠ ชื่อ Master นี้มีคำที่อาจไม่เหมาะสม\n\nคุณต้องการใช้ชื่อนี้ต่อหรือไม่?')) {
+        document.getElementById('masterName').focus();
         return;
       }
-      if (pubkey !== confirmPubkey) {
-        showPopup('⚠ Public Key และ Confirm Public Key ไม่ตรงกัน');
-        return;
-      }
+    }
+    if (!confirm("ยืนยันว่าข้อมูลนี้จะเปิดเผยต่อสาธารณะ และเข้าใจเงื่อนไขทั้งหมด\n\n(Confirm to proceed: All information will be public.)")) {
+      return;
+    }
+    const timestamp = new Date().toISOString();
+    const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8))).map(b => b.toString(16).padStart(2, "0")).join('');
+    const s = name + pubkey + timestamp + nonce;
+    const hash = sha256(s);
 
-      if (hasBadword) {
-        if (!confirm('⚠ ชื่อ Master นี้มีคำที่อาจไม่เหมาะสม\n\nคุณต้องการใช้ชื่อนี้ต่อหรือไม่?')) {
-          return;
-        }
-      }
-
-      if (!confirm("ยืนยันว่าข้อมูลนี้จะเปิดเผยต่อสาธารณะ และเข้าใจเงื่อนไขทั้งหมด\n\n(Confirm to proceed: All information will be public.)")) {
-        return;
-      }
-
-      const timestamp = new Date().toISOString();
-      const nonce = Array.from(crypto.getRandomValues(new Uint8Array(8)))
-                         .map(b => b.toString(16).padStart(2, "0")).join('');
-      const s = name + pubkey + timestamp + nonce;
-      const hash = sha256(s);
-
-      // Show QR hash ready + copy button + full log
-      document.getElementById('hashBox').style.display = "block";
-      document.getElementById('qrHashInput').value = hash;
-      document.getElementById('hashResult').innerText = `
+    // Show QR hash ready + copy button + full log
+    document.getElementById('hashBox').style.display = "block";
+    document.getElementById('qrHashInput').value = hash;
+    document.getElementById('hashResult').innerText = `
 📌 Copy & send to Genesis/Admin or keep for your log
 
 Request Hash: ${hash}
@@ -327,16 +247,33 @@ Master Name : ${name}
 Public Key  : ${pubkey}
 Timestamp   : ${timestamp}
 Nonce       : ${nonce}
-      `.trim();
-    };
+    `.trim();
+    setTimeout(()=>{document.getElementById('hashBox').scrollIntoView({behavior:'smooth'});},120);
+  };
 
-    function copyHash() {
-      const input = document.getElementById('qrHashInput');
-      input.select();
-      input.setSelectionRange(0, 99999); // mobile
-      navigator.clipboard.writeText(input.value);
-      alert('Copied!');
-    }
-  </script>
+  function copyHash() {
+    const input = document.getElementById('qrHashInput');
+    input.select();
+    input.setSelectionRange(0, 99999); // mobile
+    navigator.clipboard.writeText(input.value);
+    showCopyHashSuccess();
+  }
+  function showCopyHashSuccess() {
+    const el = document.getElementById('copyHashSuccess');
+    el.innerText = "Copied!";
+    el.classList.add('show');
+    setTimeout(()=>el.classList.remove('show'),1200);
+  }
+
+  // ===== Popup (use as is) =====
+  function showPopup(msg) {
+    document.getElementById('popupMsg').innerHTML = msg;
+    document.getElementById('popupOverlay').style.display = 'flex';
+    setTimeout(()=>document.getElementById('popupOverlay').scrollIntoView({behavior:'smooth'}),160);
+  }
+  function hidePopup() {
+    document.getElementById('popupOverlay').style.display = 'none';
+  }
+</script>
 </body>
 </html>
