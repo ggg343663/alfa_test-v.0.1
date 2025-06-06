@@ -7,11 +7,11 @@
   <style>
     body { font-family: Arial,sans-serif; background: #f4f8fb; margin:0; padding:0;}
     .container {
-      max-width: 460px; margin:2em auto; background:#fff;
+      max-width: 470px; margin:2em auto; background:#fff;
       padding:2.2em 1.1em 2.1em 1.1em; border-radius:15px;
       box-shadow:0 2px 16px #22c55e22;
     }
-    h2 { color:#22c55e; text-align:center; margin-bottom:1.4em;}
+    h2 { color:#22c55e; text-align:center; margin-bottom:1.3em;}
     label { font-weight:600; margin-top:1em; display:block;}
     input[type=text], textarea, input[type=password] {
       width:100%; padding:0.62em 0.7em; font-size:1.05em;
@@ -24,13 +24,13 @@
     .btn-main {
       width:100%; padding:0.75em 0; background:#22c55e;
       color:#fff; border:none; border-radius:9px; font-weight:700;
-      font-size:1.08em; margin-top:1.3em; cursor:pointer;
+      font-size:1.08em; margin-top:1.2em; cursor:pointer;
       letter-spacing:0.01em; transition:background 0.17s;
     }
     .btn-main:disabled { background:#94e7ba; color:#fff;}
     .btn-main:hover:enabled { background:#16a34a;}
     .hash-row {
-      margin-top:1.2em; word-break:break-all; font-family:monospace;
+      margin-top:1.1em; word-break:break-all; font-family:monospace;
       font-size:1.04em; color:#26733e; background:#e7fbe8;
       border-radius:8px; padding:0.7em 1em;
       position: relative;
@@ -38,24 +38,39 @@
     .step-label { margin:1em 0 0.4em 0; font-weight:bold; color:#26733e;}
     .copy-btn { background:none; border:none; color:#22c55e; cursor:pointer;}
     .copy-success { color:#16a34a; font-size:0.95em; margin-left:0.33em;}
+    .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.96em;}
+    .success { color:#16a34a; }
+    .row { display:flex; gap:0.4em; align-items:center;}
+    .qr-btn { background:#22c55e; color:#fff; border:none; padding:0.45em 0.8em; border-radius:6px; font-size:0.98em; cursor:pointer;}
+    #qrVideo { width:99%; border-radius:8px; margin-top:0.6em; display:none;}
   </style>
 </head>
 <body>
 <div class="container">
   <h2>Register Agent (2-step sign)</h2>
-  <div class="step-label">Step 1: Master creates Agent slot</div>
   <form id="masterForm" autocomplete="off">
-    <label>Agent Name (a-z,0-9, ≤16):</label>
+    <div class="step-label">Step 1: Master creates Agent slot</div>
+    <label>Agent Name (a-z, 0-9, ≤16):</label>
     <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
 
-    <label>Agent Public Key:</label>
+    <label class="row">
+      Agent Public Key:
+      <button type="button" class="qr-btn" onclick="startQRScanner('agentPubKey')">Scan QR</button>
+    </label>
     <input type="text" id="agentPubKey" maxlength="64" required autocomplete="off" />
 
     <label>Nonce (random string):</label>
-    <input type="text" id="nonce" maxlength="20" required autocomplete="off" />
-    <button type="button" onclick="randomNonce()" class="copy-btn" style="margin-bottom:0.6em;">Random Nonce</button>
+    <div class="row">
+      <input type="text" id="nonce" maxlength="20" required autocomplete="off" style="flex:1;" />
+      <button type="button" onclick="randomNonce()" class="qr-btn">Random</button>
+    </div>
+    <div id="badwordWarn" class="warn" style="display:none;"></div>
     <button class="btn-main" type="submit">Create Agent Slot</button>
   </form>
+  
+  <!-- QR SCANNER VIDEO -->
+  <video id="qrVideo" playsinline></video>
+
   <div id="step2Section" style="display:none;">
     <div class="step-label">Step 2: Agent confirms and signs</div>
     <div style="font-size:0.97em; margin-bottom:0.2em;">
@@ -66,16 +81,21 @@
     <span id="copyAgentPayloadSuccess" class="copy-success"></span>
     <div style="margin-top:1.2em;">
       <label>Agent Password:</label>
-      <input type="password" id="agentPw" maxlength="12" />
+      <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" />
       <label>Agent PIN:</label>
-      <input type="password" id="agentPin" maxlength="6" />
+      <input type="password" id="agentPin" maxlength="6" autocomplete="new-password" />
       <button class="btn-main" type="button" onclick="signAgent()" style="margin-top:0.8em;">Agent Sign</button>
     </div>
     <div id="sigResult" class="hash-row" style="display:none;"></div>
+    <button type="button" class="btn-main" style="margin-top:1.4em; background:#64748b;" onclick="exportLog()">Export Log (JSON)</button>
+    <span id="exportSuccess" class="success"></span>
   </div>
 </div>
 <script>
-  // Util
+  // --- Timestamp
+  let lastTimestamp = "";
+
+  // --- Nonce util
   function randomNonce() {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
     let s = "";
@@ -84,7 +104,83 @@
   }
   randomNonce();
 
-  // Step 1: Master Create
+  // --- Badwords warn
+  let badwords = [];
+  fetch('https://raw.githubusercontent.com/dtinth/badwords/master/th.json') // เปลี่ยน repo ได้ตามที่มีไฟล์ badwords.json
+    .then(r=>r.json()).then(list=>badwords=list);
+
+  document.getElementById('agentName').addEventListener('input', function(){
+    const warn = document.getElementById('badwordWarn');
+    const v = this.value.trim().toLowerCase();
+    if (badwords.some(bw=>v.includes(bw))) {
+      warn.style.display = "";
+      warn.textContent = "Warning: The agent name contains an inappropriate word. Please reconsider.";
+    } else {
+      warn.style.display = "none";
+    }
+  });
+
+  // --- QR SCANNER
+  let qrTargetInput = null;
+  let qrStream = null;
+  async function startQRScanner(targetId) {
+    qrTargetInput = document.getElementById(targetId);
+    const video = document.getElementById('qrVideo');
+    video.style.display = "block";
+    if (qrStream) { return; }
+    try {
+      qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+      video.srcObject = qrStream;
+      video.play();
+      scanQRCode(video);
+    } catch(e) {
+      alert("Camera access denied or not available.");
+      video.style.display = "none";
+    }
+  }
+  // Simple QR decode using jsQR library from CDN
+  async function scanQRCode(video) {
+    // Load jsQR if not already
+    if (!window.jsQR) {
+      let script = document.createElement('script');
+      script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
+      document.body.appendChild(script);
+      await new Promise(res=>script.onload=res);
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    const ctx = canvas.getContext('2d');
+    let stop = false;
+    function loop() {
+      if (video.readyState === video.HAVE_ENOUGH_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video,0,0,canvas.width,canvas.height);
+        const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
+        const code = window.jsQR(imgData.data, imgData.width, imgData.height);
+        if (code) {
+          qrTargetInput.value = code.data;
+          stop = true;
+          stopQRScanner();
+        }
+      }
+      if (!stop) requestAnimationFrame(loop);
+    }
+    loop();
+  }
+  function stopQRScanner() {
+    const video = document.getElementById('qrVideo');
+    if (qrStream) {
+      let tracks = qrStream.getTracks();
+      tracks.forEach(t=>t.stop());
+      qrStream = null;
+    }
+    video.style.display = "none";
+  }
+  // --- End QR SCANNER
+
+  // --- Step 1: Master Create
   document.getElementById('masterForm').onsubmit = function(e){
     e.preventDefault();
     const name = document.getElementById('agentName').value.trim();
@@ -93,18 +189,20 @@
     if (!name || !/^[a-z0-9]{1,16}$/.test(name)) { alert("Invalid agent name"); return; }
     if (!pubkey || pubkey.length<30) { alert("Invalid agent public key"); return; }
     if (!nonce) { alert("Enter nonce"); return; }
-    const timestamp = new Date().toISOString();
-    const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"; // demo
-    const agent_hash_str = `${master_hash}:${pubkey}:${name}:${nonce}:${timestamp}`;
-    window.agent_hash_data = { master_hash, agent_pubkey:pubkey, agent_name:name, nonce, timestamp };
+    lastTimestamp = new Date().toISOString();
+    const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"; // demo only
+    const agent_hash_str = `${master_hash}:${pubkey}:${name}:${nonce}:${lastTimestamp}`;
+    window.agent_hash_data = { master_hash, agent_pubkey:pubkey, agent_name:name, nonce, timestamp:lastTimestamp };
     window.agent_hash_to_sign = agent_hash_str;
     document.getElementById('step2Section').style.display = "block";
     document.getElementById('agentPayload').value = agent_hash_str;
     window.agent_hash = ""; // clear old
     document.getElementById('sigResult').style.display = "none";
+    document.getElementById('exportSuccess').textContent = "";
+    stopQRScanner();
   };
 
-  // PBKDF2 derive (browser)
+  // --- PBKDF2 derive (browser)
   async function pbkdf2_sha256(password, pin) {
     const enc = new TextEncoder();
     const key = await window.crypto.subtle.importKey("raw", enc.encode(password+"|"+pin), "PBKDF2", false, ["deriveBits"]);
@@ -120,7 +218,7 @@
   }
   function hex2buf(hex){return new Uint8Array(hex.match(/../g).map(x=>parseInt(x,16)));}
 
-  // Step 2: Agent Sign
+  // --- Step 2: Agent Sign
   async function signAgent() {
     const pw = document.getElementById('agentPw').value.trim();
     const pin = document.getElementById('agentPin').value.trim();
@@ -128,7 +226,7 @@
     const priv = await pbkdf2_sha256(pw, pin);
     const sig = await hmac_sha256(priv, window.agent_hash_to_sign);
     window.agent_hash = sig;
-    // Show log (demo, ใน production ต้องรวม sig_master ด้วย)
+    // Show log (in production, merge with sig_master if any)
     const res = {
       ...window.agent_hash_data,
       sig_agent: sig
@@ -136,9 +234,10 @@
     const div = document.getElementById('sigResult');
     div.style.display = "block";
     div.innerHTML = "<b>Agent Registration Complete</b><br><pre>"+JSON.stringify(res,null,2)+"</pre>";
+    window.lastExportObj = res;
   }
 
-  // Copy util
+  // --- Copy util
   function copyAgentPayload() {
     const el = document.getElementById('agentPayload');
     el.select(); el.setSelectionRange(0, 9999);
@@ -146,6 +245,23 @@
     document.getElementById('copyAgentPayloadSuccess').textContent = "Copied!";
     setTimeout(()=>{document.getElementById('copyAgentPayloadSuccess').textContent="";},1200);
   }
+
+  // --- Export Log (JSON)
+  function exportLog() {
+    const obj = window.lastExportObj || window.agent_hash_data || {};
+    if (!obj) { alert("Nothing to export yet."); return; }
+    obj.exported_at = new Date().toISOString();
+    const blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "dtc_agent_registration_log.json";
+    a.click();
+    document.getElementById('exportSuccess').textContent = "Exported!";
+    setTimeout(()=>{document.getElementById('exportSuccess').textContent="";}, 1500);
+  }
+
+  // --- Close QR scan when leaving page
+  window.addEventListener('beforeunload', stopQRScanner);
 </script>
 </body>
 </html>
