@@ -5,47 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Register QR</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 600px;
-      margin: 2em auto;
-      padding: 1em;
-      background: #f5f7fa;
-      color: #333;
-    }
-    h2 {
-      text-align: center;
-      color: #2c3e50;
-      margin-bottom: 1em;
-    }
-    label {
-      display: block;
-      margin-bottom: 1em;
-      font-weight: bold;
-    }
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; padding: 1em; background: #f5f7fa; color: #333; }
+    h2 { text-align: center; color: #2c3e50; margin-bottom: 1em; }
+    label { display: block; margin-bottom: 1em; font-weight: bold; }
     textarea, input[type="text"] {
-      width: 100%;
-      padding: 0.6em;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 1em;
-      resize: vertical;
-      box-sizing: border-box;
+      width: 100%; padding: 0.6em; border: 1px solid #ccc; border-radius: 6px; font-size: 1em; resize: vertical; box-sizing: border-box;
     }
     textarea { min-height: 3em; }
-    .btn {
-      display: inline-block;
-      padding: 0.6em 1.2em;
-      margin: 0.5em 0.3em;
-      border: none;
-      border-radius: 6px;
-      font-size: 1em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s;
-      text-decoration: none;
-      text-align: center;
-    }
+    .btn { display: inline-block; padding: 0.6em 1.2em; margin: 0.5em 0.3em; border: none; border-radius: 6px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; text-decoration: none; text-align: center; }
     #reg-btn { background: #219150; color: #fff; }
     #reg-btn[disabled] { background: #b4dcc3; cursor: not-allowed; }
     #reg-btn:hover:not([disabled]) { background: #176d38; }
@@ -53,18 +20,11 @@
     #clear-btn:hover { background: #eab308; }
     #back-btn { background: #aaa; color: #fff; }
     #back-btn:hover { background: #888; }
-    .status {
-      margin-top: 1em;
-      font-size: 1em;
-      font-weight: bold;
-      min-height: 2em;
-    }
-    .note {
-      font-size: 0.9em;
-      color: #777;
-      margin-top: 1.5em;
-      text-align: center;
-    }
+    #export-btn { background: #2563eb; color: #fff; }
+    #export-btn:hover { background: #1d4ed8; }
+    .status { margin-top: 1em; font-size: 1em; font-weight: bold; min-height: 2em; }
+    .note { font-size: 0.9em; color: #777; margin-top: 1.5em; text-align: center; }
+    .readonly { background: #f4f4f4; color: #888; }
     @media (max-width: 480px) {
       body { margin: 1em; padding: 0.5em; }
       .btn { width: 100%; margin: 0.3em 0; }
@@ -80,35 +40,44 @@
   <label for="qr-hash-input">QR Hash:</label>
   <textarea id="qr-hash-input" placeholder="QR Hash จะถูกเติมอัตโนมัติ"></textarea>
 
+  <label for="salt-input">Salt (Hex):</label>
+  <input id="salt-input" type="text" placeholder="ใส่ salt (hex) หรือดึงอัตโนมัติ" />
+
   <label for="owner-name">ชื่อผู้ขอ (ไม่บังคับ):</label>
   <input id="owner-name" type="text" placeholder="ใส่ชื่อ (ไม่บังคับ)" />
 
   <button id="reg-btn" class="btn">ลงทะเบียน</button>
+  <button id="export-btn" class="btn" type="button" style="display:none;">Export JSON Log</button>
   <button id="clear-btn" class="btn" type="button">นำค่าใหม่/รีเซ็ต</button>
   <button id="back-btn" class="btn" type="button">กลับหน้าแรก</button>
 
   <p id="status-msg" class="status"></p>
 
   <p class="note">
-    (Public Key และ QR Hash จะถูกเติมให้อัตโนมัติถ้ามีในเครื่อง)<br/>
+    Public Key, QR Hash และ Salt จะถูกเติมให้อัตโนมัติถ้ามีในเครื่อง<br/>
     หากไม่มี backend ระบบจะบันทึกเฉพาะในเครื่องนี้ (Demo/ทดลองเท่านั้น)
   </p>
 
   <script>
     const pubInput = document.getElementById('pub-key-input');
     const qrInput = document.getElementById('qr-hash-input');
+    const saltInput = document.getElementById('salt-input');
     const ownerInput = document.getElementById('owner-name');
     const regBtn = document.getElementById('reg-btn');
     const backBtn = document.getElementById('back-btn');
     const clearBtn = document.getElementById('clear-btn');
+    const exportBtn = document.getElementById('export-btn');
     const statusMsg = document.getElementById('status-msg');
+    let lastLogObj = null;
 
-    // Auto-fill public key and QR hash from localStorage
+    // Auto-fill public key, QR hash, salt from localStorage
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       const savedQr  = localStorage.getItem('dtc_qrHash');
+      const savedSalt = localStorage.getItem('dtc_salt');
       if (savedPub) pubInput.value = savedPub;
       if (savedQr)  qrInput.value = savedQr;
+      if (savedSalt) saltInput.value = savedSalt;
     });
 
     // ปุ่มกลับหน้าแรก
@@ -120,20 +89,26 @@
     clearBtn.addEventListener('click', () => {
       pubInput.value = '';
       qrInput.value = '';
+      saltInput.value = '';
       ownerInput.value = '';
       statusMsg.textContent = '';
+      exportBtn.style.display = 'none';
+      lastLogObj = null;
       localStorage.removeItem('dtc_publicKey');
       localStorage.removeItem('dtc_qrHash');
+      localStorage.removeItem('dtc_salt');
     });
 
     // ปุ่มลงทะเบียน
     regBtn.addEventListener('click', async () => {
       const pub       = pubInput.value.trim();
       const qr        = qrInput.value.trim();
+      const salt      = saltInput.value.trim();
       const ownerName = ownerInput.value.trim();
-      if (!pub || !qr) {
+      if (!pub || !qr || !salt) {
         statusMsg.style.color = 'red';
-        statusMsg.textContent = '📛 กรุณาใส่ Public Key และ QR Hash ให้ครบ';
+        statusMsg.textContent = '📛 กรุณาใส่ Public Key, QR Hash และ Salt ให้ครบ';
+        exportBtn.style.display = 'none';
         return;
       }
 
@@ -148,16 +123,27 @@
         try {
           demoList = JSON.parse(localStorage.getItem('dtc_demoRegList')) || [];
         } catch (e) { demoList = []; }
-        demoList.push({ publicKey: pub, qrHash: qr, ownerName, registeredAt: new Date().toISOString() });
+        // เพิ่ม log object ที่โปร่งใสตาม white paper v.0.1.7r
+        const logObj = {
+          publicKey: pub,
+          qrHash: qr,
+          salt: salt,
+          ownerName,
+          registeredAt: new Date().toISOString(),
+          version: "0.1.7r"
+        };
+        demoList.push(logObj);
         localStorage.setItem('dtc_demoRegList', JSON.stringify(demoList));
         statusMsg.style.color = 'green';
         statusMsg.textContent = '✅ (Demo) ลงทะเบียนสำเร็จแล้ว! (ข้อมูลถูกเก็บไว้ในเครื่องนี้)';
         regBtn.disabled = false;
+        exportBtn.style.display = 'inline-block';
+        lastLogObj = logObj;
         return;
       }
 
       // === สำหรับ Production เชื่อม API จริง ===
-      const payload = { publicKey: pub, qrHash: qr };
+      const payload = { publicKey: pub, qrHash: qr, salt: salt };
       if (ownerName) payload.ownerName = ownerName;
       try {
         const response = await fetch('/api/register', {
@@ -170,18 +156,33 @@
         if (response.ok) {
           statusMsg.style.color = 'green';
           statusMsg.textContent = '✅ ลงทะเบียนสำเร็จแล้ว!';
-          // localStorage.removeItem('dtc_qrHash');
+          exportBtn.style.display = 'inline-block';
+          lastLogObj = { ...payload, registeredAt: new Date().toISOString(), version: "0.1.7r" };
         } else {
           statusMsg.style.color = 'red';
           statusMsg.textContent =
             `❌ ลงทะเบียนไม่สำเร็จ: ${result.error || response.statusText}`;
+          exportBtn.style.display = 'none';
         }
       } catch (err) {
         statusMsg.style.color = 'red';
         statusMsg.textContent = `❌ เกิดข้อผิดพลาด: ${err.message}`;
+        exportBtn.style.display = 'none';
       } finally {
         regBtn.disabled = false;
       }
+    });
+
+    // ปุ่ม Export JSON Log
+    exportBtn.addEventListener('click', () => {
+      if (!lastLogObj) return;
+      const blob = new Blob([JSON.stringify(lastLogObj, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `qr_reg_log_${Date.now()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
     });
   </script>
 </body>
