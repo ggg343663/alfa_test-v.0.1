@@ -148,8 +148,7 @@
           publicKey: pub,
           qrHash: qr,
           ownerName,
-          registeredAt: ts,
-          version: "0.1.7r"
+          registeredAt: ts
         };
         demoList.push(logObj);
         localStorage.setItem('dtc_demoRegList', JSON.stringify(demoList));
@@ -181,7 +180,7 @@
           exportBtn.style.display = 'inline-block';
           tsRow.style.display = 'block';
           tsEl.textContent = ts;
-          lastLogObj = { ...payload, registeredAt: ts, version: "0.1.7r" };
+          lastLogObj = { ...payload, registeredAt: ts };
         } else {
           statusMsg.style.color = 'red';
           statusMsg.textContent =
