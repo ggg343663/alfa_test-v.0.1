@@ -1,9 +1,15 @@
 [
   {
+    "slot": 1,
+    "hash": "c86b6a1b...a5e1",  // sha256 ของ slot ทั้งหมด
+    "prev_hash": "00000000...0000", // slot ก่อนหน้า (หรือ 0 ถ้าเป็นอันแรก)
     "qr_hash": "a1234b5678cde...f9ab",
     "timestamp": "2024-06-02T00:41:00Z",
     "nonce": "123456789012",
-    "public_key": "MIIBIjANBgkq...",
-    "status": "active"
+    "pubkey": "0x8b3d...fa17",    // หรือ public_key ถ้าใช้ RSA จริง
+    "status": "active",
+    "action": "register",
+    "sig": "SIGNATURE_BASE64_OR_HEX",
+    "meta": { }
   }
 ]
