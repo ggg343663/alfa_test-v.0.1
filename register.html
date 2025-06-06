@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,7 +23,7 @@
     #export-btn { background: #2563eb; color: #fff; }
     #export-btn:hover { background: #1d4ed8; }
     .status { margin-top: 1em; font-size: 1em; font-weight: bold; min-height: 2em; }
-    .note { font-size: 0.9em; color: #777; margin-top: 1.5em; text-align: center; }
+    .note { font-size: 0.92em; color: #777; margin-top: 1.5em; text-align: center; }
     .readonly { background: #f4f4f4; color: #888; }
     @media (max-width: 480px) {
       body { margin: 1em; padding: 0.5em; }
@@ -32,36 +32,32 @@
   </style>
 </head>
 <body>
-  <h2>3. ลงทะเบียน QR</h2>
+  <h2>3. Register QR</h2>
 
   <label for="pub-key-input">Public Key:</label>
-  <textarea id="pub-key-input" placeholder="Public Key จะถูกเติมอัตโนมัติ" autofocus></textarea>
+  <textarea id="pub-key-input" placeholder="Public Key will be auto-filled" autofocus></textarea>
 
   <label for="qr-hash-input">QR Hash:</label>
-  <textarea id="qr-hash-input" placeholder="QR Hash จะถูกเติมอัตโนมัติ"></textarea>
+  <textarea id="qr-hash-input" placeholder="QR Hash will be auto-filled"></textarea>
 
-  <label for="salt-input">Salt (Hex):</label>
-  <input id="salt-input" type="text" placeholder="ใส่ salt (hex) หรือดึงอัตโนมัติ" />
+  <label for="owner-name">Owner Name (optional):</label>
+  <input id="owner-name" type="text" placeholder="Enter name (optional)" />
 
-  <label for="owner-name">ชื่อผู้ขอ (ไม่บังคับ):</label>
-  <input id="owner-name" type="text" placeholder="ใส่ชื่อ (ไม่บังคับ)" />
-
-  <button id="reg-btn" class="btn">ลงทะเบียน</button>
+  <button id="reg-btn" class="btn">Register</button>
   <button id="export-btn" class="btn" type="button" style="display:none;">Export JSON Log</button>
-  <button id="clear-btn" class="btn" type="button">นำค่าใหม่/รีเซ็ต</button>
-  <button id="back-btn" class="btn" type="button">กลับหน้าแรก</button>
+  <button id="clear-btn" class="btn" type="button">Clear</button>
+  <button id="back-btn" class="btn" type="button">Back</button>
 
   <p id="status-msg" class="status"></p>
 
   <p class="note">
-    Public Key, QR Hash และ Salt จะถูกเติมให้อัตโนมัติถ้ามีในเครื่อง<br/>
-    หากไม่มี backend ระบบจะบันทึกเฉพาะในเครื่องนี้ (Demo/ทดลองเท่านั้น)
+    Public Key and QR Hash will be auto-filled if stored locally.<br/>
+    If no backend, data is saved only in this browser (Demo mode).
   </p>
 
   <script>
     const pubInput = document.getElementById('pub-key-input');
     const qrInput = document.getElementById('qr-hash-input');
-    const saltInput = document.getElementById('salt-input');
     const ownerInput = document.getElementById('owner-name');
     const regBtn = document.getElementById('reg-btn');
     const backBtn = document.getElementById('back-btn');
@@ -70,64 +66,58 @@
     const statusMsg = document.getElementById('status-msg');
     let lastLogObj = null;
 
-    // Auto-fill public key, QR hash, salt from localStorage
+    // Auto-fill public key and QR hash from localStorage
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       const savedQr  = localStorage.getItem('dtc_qrHash');
-      const savedSalt = localStorage.getItem('dtc_salt');
       if (savedPub) pubInput.value = savedPub;
       if (savedQr)  qrInput.value = savedQr;
-      if (savedSalt) saltInput.value = savedSalt;
     });
 
-    // ปุ่มกลับหน้าแรก
+    // Back to homepage
     backBtn.addEventListener('click', () => {
       window.location.href = 'index.html';
     });
 
-    // ปุ่ม clear (reset ค่าในฟอร์ม)
+    // Clear form
     clearBtn.addEventListener('click', () => {
       pubInput.value = '';
       qrInput.value = '';
-      saltInput.value = '';
       ownerInput.value = '';
       statusMsg.textContent = '';
       exportBtn.style.display = 'none';
       lastLogObj = null;
       localStorage.removeItem('dtc_publicKey');
       localStorage.removeItem('dtc_qrHash');
-      localStorage.removeItem('dtc_salt');
     });
 
-    // ปุ่มลงทะเบียน
+    // Register QR
     regBtn.addEventListener('click', async () => {
       const pub       = pubInput.value.trim();
       const qr        = qrInput.value.trim();
-      const salt      = saltInput.value.trim();
       const ownerName = ownerInput.value.trim();
-      if (!pub || !qr || !salt) {
+      if (!pub || !qr) {
         statusMsg.style.color = 'red';
-        statusMsg.textContent = '📛 กรุณาใส่ Public Key, QR Hash และ Salt ให้ครบ';
+        statusMsg.textContent = '📛 Please enter both Public Key and QR Hash';
         exportBtn.style.display = 'none';
         return;
       }
 
       regBtn.disabled = true;
       statusMsg.style.color = '#26733e';
-      statusMsg.textContent = '⏳ กำลังลงทะเบียน...';
+      statusMsg.textContent = '⏳ Registering...';
 
-      // === Demo Mode (เปลี่ยน useDemo = false ถ้ามี API จริง) ===
+      // === Demo Mode (set useDemo = false if you have real API) ===
       const useDemo = true;
       if (useDemo) {
         let demoList = [];
         try {
           demoList = JSON.parse(localStorage.getItem('dtc_demoRegList')) || [];
         } catch (e) { demoList = []; }
-        // เพิ่ม log object ที่โปร่งใสตาม white paper v.0.1.7r
+        // Minimal log, no salt
         const logObj = {
           publicKey: pub,
           qrHash: qr,
-          salt: salt,
           ownerName,
           registeredAt: new Date().toISOString(),
           version: "0.1.7r"
@@ -135,15 +125,15 @@
         demoList.push(logObj);
         localStorage.setItem('dtc_demoRegList', JSON.stringify(demoList));
         statusMsg.style.color = 'green';
-        statusMsg.textContent = '✅ (Demo) ลงทะเบียนสำเร็จแล้ว! (ข้อมูลถูกเก็บไว้ในเครื่องนี้)';
+        statusMsg.textContent = '✅ (Demo) Registration successful! (Data saved only in this browser)';
         regBtn.disabled = false;
         exportBtn.style.display = 'inline-block';
         lastLogObj = logObj;
         return;
       }
 
-      // === สำหรับ Production เชื่อม API จริง ===
-      const payload = { publicKey: pub, qrHash: qr, salt: salt };
+      // === For production, connect your real API ===
+      const payload = { publicKey: pub, qrHash: qr };
       if (ownerName) payload.ownerName = ownerName;
       try {
         const response = await fetch('/api/register', {
@@ -155,25 +145,25 @@
 
         if (response.ok) {
           statusMsg.style.color = 'green';
-          statusMsg.textContent = '✅ ลงทะเบียนสำเร็จแล้ว!';
+          statusMsg.textContent = '✅ Registration successful!';
           exportBtn.style.display = 'inline-block';
           lastLogObj = { ...payload, registeredAt: new Date().toISOString(), version: "0.1.7r" };
         } else {
           statusMsg.style.color = 'red';
           statusMsg.textContent =
-            `❌ ลงทะเบียนไม่สำเร็จ: ${result.error || response.statusText}`;
+            `❌ Registration failed: ${result.error || response.statusText}`;
           exportBtn.style.display = 'none';
         }
       } catch (err) {
         statusMsg.style.color = 'red';
-        statusMsg.textContent = `❌ เกิดข้อผิดพลาด: ${err.message}`;
+        statusMsg.textContent = `❌ Error: ${err.message}`;
         exportBtn.style.display = 'none';
       } finally {
         regBtn.disabled = false;
       }
     });
 
-    // ปุ่ม Export JSON Log
+    // Export JSON log
     exportBtn.addEventListener('click', () => {
       if (!lastLogObj) return;
       const blob = new Blob([JSON.stringify(lastLogObj, null, 2)], {type: 'application/json'});
