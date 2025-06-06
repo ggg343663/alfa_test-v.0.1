@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>DTC: Magic Chain System</title>
   <style>
-    /* ... (CSS เดิมทั้งหมดของคุณ ใส่ไว้เหมือนเดิม) ... */
     body {
       font-family: Arial, sans-serif;
       max-width: 700px;
@@ -42,22 +41,22 @@
     .master-title { color: #b58900; display: flex; align-items: center; gap: 0.4em; font-size: 1.13em; margin-bottom: 0.36em; }
     .master-desc { color: #875e00; margin-bottom: 0.54em; font-size: 0.98em; text-align: center; }
     .master-list a { display: block; width: 100%; padding: 0.54em 0.4em; background: #facc15; color: #222; font-weight: bold; border-radius: 6px; font-size: 1.07em; text-align: center; text-decoration: none; margin-bottom: 0.28em; transition: background 0.11s; }
-    .master-list a.disabled { background: #ccc; color: #666; cursor: not-allowed; pointer-events: none; opacity: 0.7; }
-    .master-list a:hover:not(.disabled) { background: #eab308; color: #111; }
+    .master-list a:hover { background: #eab308; color: #111; }
     .agent-section { background: #f3f7fd; border-left: 6px solid #38bdf8; }
     .agent-title { color: #2563eb; display: flex; align-items: center; gap: 0.4em; font-size: 1.13em; margin-bottom: 0.36em; }
     .agent-desc { color: #2563eb; margin-bottom: 0.54em; font-size: 0.98em; text-align: center; }
     .agent-list a { display: block; width: 100%; padding: 0.54em 0.4em; background: #38bdf8; color: #fff; font-weight: bold; border-radius: 6px; font-size: 1.07em; text-align: center; text-decoration: none; margin-bottom: 0.28em; transition: background 0.11s; }
-    .agent-list a.disabled { background: #ccc; color: #666; cursor: not-allowed; pointer-events: none; opacity: 0.7; }
-    .agent-list a:hover:not(.disabled) { background: #2563eb; color: #fff; }
+    .agent-list a:hover { background: #2563eb; color: #fff; }
     .genesis-section { background: #f7f4fe; border-left: 6px solid #a78bfa; }
     .genesis-title { color: #7c3aed; display: flex; align-items: center; gap: 0.4em; font-size: 1.13em; margin-bottom: 0.36em; }
     .genesis-desc { color: #714ab6; margin-bottom: 0.54em; font-size: 0.98em; text-align: center; }
+    .genesis-list a { display: block; width: 100%; padding: 0.54em 0.4em; background: #a78bfa; color: #fff; font-weight: bold; border-radius: 6px; font-size: 1.07em; text-align: center; text-decoration: none; margin-bottom: 0.28em; transition: background 0.11s; }
+    .genesis-list a:hover { background: #7c3aed; }
     .footer-note { display: block; text-align: center; margin-top: 2em; color: #aaa; font-size: 0.95em; }
     @media (max-width: 600px) {
       body { margin: 0.4em; padding: 0.07em;}
       .section { padding: 0.34em 0.2em 0.55em 0.2em; }
-      .general-list a, .user-list a, .master-list a, .agent-list a {
+      .general-list a, .user-list a, .master-list a, .agent-list a, .genesis-list a {
         font-size: 1em;
         padding: 0.6em 0.2em;
       }
@@ -90,9 +89,8 @@
     <div class="master-title">🟨 Master</div>
     <div class="master-desc">Unlock privileges and manage Master functions</div>
     <div class="master-list">
-      <a class="disabled" href="#">Request Master (coming soon)</a>
-      <a class="disabled" href="#">Unlock Master (coming soon)</a>
-      <a class="disabled" href="#">Master Dashboard (coming soon)</a>
+      <a href="register_master.html">Register Master</a>
+      <a href="master_dashboard.html">Master Dashboard</a>
     </div>
   </div>
 
@@ -100,8 +98,8 @@
     <div class="agent-title">🟦 Agent</div>
     <div class="agent-desc">Register Agent after Master requirements are met</div>
     <div class="agent-list">
-      <a class="disabled" href="#">Register Agent (coming soon)</a>
-      <a class="disabled" href="#">Agent Dashboard (coming soon)</a>
+      <a href="register_agent.html">Register Agent</a>
+      <a href="agent_dashboard.html">Agent Dashboard</a>
     </div>
   </div>
 
@@ -110,6 +108,9 @@
     <div class="genesis-desc">
       Genesis: Root of trust, the very first step of the system.<br>
       (No further approval needed)
+    </div>
+    <div class="genesis-list">
+      <a href="generate_genesis.html">Generate Genesis QR</a>
     </div>
   </div>
 
