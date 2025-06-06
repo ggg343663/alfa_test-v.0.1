@@ -6,14 +6,141 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    /* ...style เดิม... */
-    .input-error { border: 2px solid #dc2626 !important; background: #fef2f2;}
-    .input-err { color: #dc2626; font-size: 0.97em; margin-bottom: 0.5em;}
-    .copy-btn {
-      background: none; border: none; cursor: pointer; margin-left: 0.22em; color: #16a34a;
-      font-size: 1em; vertical-align: middle;
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f6faff;
+      margin: 0;
+      padding: 0;
     }
-    .copy-success { color: #16a34a; font-size: 0.93em; margin-left: 0.25em;}
+    .container {
+      max-width: 430px;
+      margin: 2.4em auto;
+      background: #fff;
+      border-radius: 18px;
+      box-shadow: 0 8px 38px #1376b114, 0 1.5px 7px #36d86d1c;
+      padding: 2.2em 1.4em 2.2em 1.4em;
+    }
+    h2 {
+      text-align: center;
+      color: #219150;
+      margin-bottom: 1.35em;
+      letter-spacing: 0.02em;
+    }
+    .back-btn {
+      background: none;
+      border: none;
+      color: #246bfd;
+      font-size: 1.1em;
+      font-weight: bold;
+      cursor: pointer;
+      margin-bottom: 0.8em;
+      margin-left: -0.3em;
+    }
+    .row {
+      display: flex;
+      align-items: center;
+      gap: 0.35em;
+      margin-bottom: 1.1em;
+      flex-wrap: wrap;
+    }
+    .row input[type="text"] {
+      flex: 1;
+      padding: 0.68em 0.8em;
+      border: 1.5px solid #c9e8d4;
+      border-radius: 6px;
+      font-size: 1.08em;
+      background: #f5f7fa;
+      outline: none;
+      transition: border .2s;
+    }
+    .row input[type="text"]:focus, .pw-input:focus {
+      border: 1.5px solid #246bfd;
+      background: #f0f7ff;
+    }
+    .icon-btn {
+      background: none;
+      border: none;
+      padding: 0.13em;
+      cursor: pointer;
+      transition: background 0.15s;
+      border-radius: 5px;
+      height: 38px; width: 38px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .icon-btn img { width: 25px; height: 25px; }
+    .copy-btn {
+      background: #ebfbee;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      color: #219150;
+      font-size: 1em;
+      font-weight: 500;
+      padding: 0.36em 1.05em;
+      margin-left: 0.2em;
+      margin-right: 0.2em;
+      transition: background .18s;
+    }
+    .copy-btn:active { background: #d1fae5; color: #176d38; }
+    .copy-success { color: #16a34a; font-size: 0.95em; margin-left: 0.27em; min-width: 2.4em; display: inline-block; }
+
+    .receiver-group, .yellow-group {
+      margin-bottom: 1.25em;
+      background: #f6fbfe;
+      border-radius: 7px;
+      padding: 0.9em 1em 0.85em 1em;
+      box-shadow: 0 1px 4px #d0e8fd12;
+    }
+    .receiver-group label, .yellow-group label {
+      font-size: 1.03em;
+      color: #246bfd;
+      margin-bottom: 0.32em;
+      display: block;
+      font-weight: 600;
+    }
+    .receiver-group input, .yellow-group input {
+      margin-top: 0.22em;
+      width: 100%;
+      padding: 0.7em 0.9em;
+      border: 1.3px solid #c7d5ee;
+      border-radius: 6px;
+      font-size: 1em;
+      background: #fafdff;
+      outline: none;
+      margin-bottom: 0.6em;
+    }
+    .pw-input { border: 1.5px solid #ffe066; background: #fffbe7;}
+    .pw-input:focus { border: 1.5px solid #f6a800; background: #fffdf1; }
+    .input-error { border: 2px solid #dc2626 !important; background: #fef2f2;}
+    .input-err { color: #dc2626; font-size: 0.97em; margin-bottom: 0.45em;}
+    .mini-btn {
+      width: 100%;
+      background: linear-gradient(90deg, #219150 68%, #246bfd 100%);
+      color: #fff; border: none;
+      font-weight: bold; border-radius: 8px;
+      font-size: 1.08em; margin: 0.36em 0 0.2em 0;
+      padding: 0.68em 0;
+      transition: background .2s, box-shadow .17s;
+      box-shadow: 0 1.5px 9px #60a5fa12;
+      cursor: pointer;
+    }
+    .mini-btn:active { background: #176d38; }
+    #previewBox {
+      margin-top: 0.4em;
+      padding: 0.9em 0.7em;
+      border-radius: 7px;
+      background: #f0fdf4;
+      font-size: 1.04em;
+      box-shadow: 0 0.7px 4px #67e8f9a2;
+      border-left: 6px solid #15803d;
+      min-height: 2.2em;
+    }
+    #qr-reader { margin-top: 1.2em; }
+    @media (max-width: 540px) {
+      .container { padding: 1em 0.1em 1.3em 0.1em; border-radius: 0; }
+      .row { flex-direction: column; gap: 0.12em;}
+      .mini-btn { font-size: 1em; }
+    }
   </style>
 </head>
 <body>
@@ -37,7 +164,7 @@
     <div class="receiver-group">
       <label for="recipientpk">Receiver Public Key (42 chars, 0x...):</label>
       <div style="display:flex;align-items:center;gap:0.2em;">
-        <input class="input-green" type="text" id="recipientpk" maxlength="42" autocomplete="off" placeholder="Enter recipient's public key" />
+        <input type="text" id="recipientpk" maxlength="42" autocomplete="off" placeholder="Enter recipient's public key" />
         <button class="copy-btn" onclick="copyField('recipientpk')">Copy</button>
         <span id="copyPkSuccess" class="copy-success"></span>
       </div>
@@ -53,7 +180,7 @@
     </div>
 
     <button class="mini-btn" onclick="preview()" type="button" id="previewBtn">Preview Transfer</button>
-    <div id="previewBox" style="margin-top:0.3em;text-align:center;color:#15803d;"></div>
+    <div id="previewBox"></div>
     <button class="mini-btn" onclick="confirmTransfer()" type="button" style="display:none;" id="confirmBtn">Confirm Transfer</button>
 
     <div id="qr-reader"></div>
@@ -63,18 +190,16 @@
     // Auto focus
     window.onload = function() {
       document.getElementById('qrhash').focus();
-      // Detect feature
       if (!navigator.clipboard) {
         document.getElementById('scanBtn').disabled = true;
         document.getElementById('imgBtn').disabled = true;
       }
     };
     function openQRScanner() {
-      // ปิดก่อนถ้ามี instance ค้าง
       if (qrReader) try { qrReader.stop(); } catch {}
       const qrDiv = document.getElementById('qr-reader');
       qrDiv.style.display = 'block';
-      qrDiv.innerHTML = ''; // reset
+      qrDiv.innerHTML = '';
       qrReader = new Html5Qrcode("qr-reader");
       qrReader.start(
         { facingMode: "environment" },
@@ -83,7 +208,7 @@
           document.getElementById('qrhash').value = qrCodeMessage;
           qrReader.stop();
           qrDiv.style.display = 'none';
-          document.getElementById('recipientpk').focus(); // auto-focus ต่อ
+          document.getElementById('recipientpk').focus();
         }
       ).catch(err => {
         alert("Cannot open camera: " + err);
@@ -120,13 +245,11 @@
       const pw = document.getElementById('password').value.trim();
       const pin = document.getElementById('pin').value.trim();
       let valid = true;
-      // Reset errors
       document.getElementById('pubkeyErr').textContent = "";
       document.getElementById('recipientpk').classList.remove('input-error');
       document.getElementById('qrhash').classList.remove('input-error');
       document.getElementById('password').classList.remove('input-error');
       document.getElementById('pin').classList.remove('input-error');
-      // Validate
       if (hash.length !== 64) {
         valid = false;
         document.getElementById('qrhash').classList.add('input-error');
@@ -157,35 +280,32 @@
       }
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
-      // ตัวอย่าง production: ต้อง sign payload ด้วย privateKey (password+pin)
       previewBox.innerHTML =
         `<b>Preview Transfer</b><br>
         <b>QR Hash:</b> <code>${hash}</code><br>
         <b>Receiver Public Key:</b> <code>${pub}</code><br>
         <b>Sign Message:</b><br>
-        <pre>{
+        <pre style="background:#e7fbe8;color:#246bfd;border-radius:6px;border-left:4px solid #219150;padding:0.8em 0.7em 0.8em 1em;font-size:1em;">{
   "qr_hash": "${hash}",
   "to_pubkey": "${pub}",
   "signed_by": "(your_address)",
   "sig": "(private_sign)",
   "timestamp": "${new Date().toISOString()}"
 }</pre>
-        <small style="color:#666;">(In production, sign this payload with your private key derived from password+PIN.)</small>`;
+        <small style="color:#666;">(Sign this payload with your private key derived from password+PIN.)</small>`;
       confirmBtn.style.display = "block";
     }
     function confirmTransfer() {
       document.getElementById('confirmBtn').disabled = true;
-      alert('✅ Transfer submitted! (Add backend logic here)');
+      alert('✅ Transfer submitted! (You can add backend logic here)');
       document.getElementById('previewBox').textContent = "";
       document.getElementById('confirmBtn').style.display = "none";
-      // clear form (optional)
       document.getElementById('qrhash').value = "";
       document.getElementById('recipientpk').value = "";
       document.getElementById('password').value = "";
       document.getElementById('pin').value = "";
       setTimeout(()=>{document.getElementById('confirmBtn').disabled = false;},800);
     }
-    // Copy field utility
     function copyField(id) {
       const el = document.getElementById(id);
       el.select(); el.setSelectionRange(0, 9999);
@@ -196,7 +316,7 @@
     function showCopySuccess(elid) {
       const el = document.getElementById(elid);
       el.textContent = "Copied!";
-      setTimeout(()=>{el.textContent = "";},1100);
+      setTimeout(()=>{el.textContent = "";},1200);
     }
   </script>
 </body>
