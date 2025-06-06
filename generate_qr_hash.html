@@ -25,6 +25,7 @@
       color: #26733e;
       margin-bottom: 1.3em;
     }
+    .step { text-align: center; color: #5e8bdb; font-size: 1.05em; margin-bottom: 1em; }
     .info {
       border-left: 6px solid #219150;
       background: #ecf9f2;
@@ -59,6 +60,7 @@
       opacity: 0.52;
       cursor: not-allowed;
       background: #b2e4c6;
+      pointer-events: none;
     }
     #next-btn {
       background: linear-gradient(90deg,#246bfd 65%,#219150 100%);
@@ -70,6 +72,7 @@
       opacity: 1;
       cursor: pointer;
       background: linear-gradient(90deg,#246bfd 65%,#219150 100%);
+      pointer-events: auto;
     }
     .qr-label {
       color: #246bfd;
@@ -97,7 +100,8 @@
 </head>
 <body>
   <div class="container">
-    <h2>2. สร้าง QR Hash จาก Public Key</h2>
+    <div class="step">ขั้นตอนที่ 2/3</div>
+    <h2>สร้าง QR Hash จาก Public Key</h2>
 
     <div class="info" id="pub-info">
       <span style="font-weight:bold;">Public Key ที่ใช้:</span>
@@ -115,14 +119,14 @@
       </div>
     </div>
 
-    <a id="next-btn" class="btn" href="register.html" aria-disabled="true">ไปหน้าลงทะเบียน QR</a>
+    <a id="next-btn" class="btn" href="register.html" aria-disabled="true" tabindex="-1">ไปหน้าลงทะเบียน QR</a>
     <a href="index.html" class="btn" style="background:#e0e7ef; color:#26733e; margin-top: 0.25em; font-weight:500;">กลับหน้าหลัก</a>
 
     <p class="note">(ต้องมี Public Key ก่อน, ถ้ายังไม่มีจะพาไปสร้างอัตโนมัติ)</p>
   </div>
 
   <script>
-    // ใช้ WebCrypto SHA-256 จริง
+    // -- ฟังก์ชัน hash SHA-256 (WebCrypto) --
     async function sha256hex(str) {
       const enc = new TextEncoder();
       const buf = enc.encode(str);
@@ -130,6 +134,7 @@
       return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,"0")).join("");
     }
 
+    // -- Element ต่าง ๆ ที่ใช้ --
     const pubKeyDisplay = document.getElementById('pub-key-display');
     const genBtn = document.getElementById('gen-qr-btn');
     const qrContainer = document.getElementById('qr-container');
@@ -138,18 +143,19 @@
     const timestampEl = document.getElementById('timestamp');
     const nonceEl = document.getElementById('nonce');
 
+    // -- โหลด public key จาก localStorage ถ้าไม่มีให้ redirect ไปหน้า generate public key --
     let pubKey = localStorage.getItem('dtc_publicKey');
     if (!pubKey) {
-      // ถ้าไม่มี public key ให้พาไปหน้าสร้าง
-      window.location.href = 'generate_key.html';
+      window.location.href = 'generate_public_key_for_dtc.html';
     } else {
       pubKeyDisplay.textContent = pubKey;
     }
 
+    // -- เมื่อกดปุ่มสร้าง QR Hash --
     genBtn.addEventListener('click', async () => {
       pubKey = localStorage.getItem('dtc_publicKey');
       if (!pubKey) {
-        window.location.href = 'generate_key.html';
+        window.location.href = 'generate_public_key_for_dtc.html';
         return;
       }
       const timestamp = new Date().toISOString();
@@ -167,8 +173,10 @@
 
       nextBtn.classList.add('enabled');
       nextBtn.removeAttribute('aria-disabled');
+      nextBtn.removeAttribute('tabindex');
     });
 
+    // -- ไม่ให้ next ถ้ายังไม่ได้สร้าง QR --
     nextBtn.addEventListener('click', (e) => {
       if (!nextBtn.classList.contains('enabled')) {
         e.preventDefault();
@@ -176,8 +184,8 @@
       }
     });
 
+    // -- โหลดค่า QR จาก localStorage ถ้าเคยกดสร้างไว้ก่อน --
     window.addEventListener('DOMContentLoaded', () => {
-      // ดึงข้อมูลจาก localStorage ถ้ามี
       const savedQr = localStorage.getItem('dtc_qrHash');
       const ts = localStorage.getItem('dtc_qrTimestamp');
       const nonce = localStorage.getItem('dtc_qrNonce');
@@ -188,6 +196,7 @@
         qrContainer.style.display = 'block';
         nextBtn.classList.add('enabled');
         nextBtn.removeAttribute('aria-disabled');
+        nextBtn.removeAttribute('tabindex');
       }
     });
   </script>
