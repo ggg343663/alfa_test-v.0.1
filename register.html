@@ -22,31 +22,45 @@
     #back-btn:hover { background: #888; }
     #export-btn { background: #2563eb; color: #fff; }
     #export-btn:hover { background: #1d4ed8; }
+    #copy-qr-btn { background: #2563eb; color: #fff; margin-left: 0; }
+    #copy-qr-btn:active { background: #1747a1; }
     .status { margin-top: 1em; font-size: 1em; font-weight: bold; min-height: 2em; }
     .note { font-size: 0.92em; color: #777; margin-top: 1.5em; text-align: center; }
+    .timestamp-row { margin-top: 0.6em; color: #26733e; font-size: 0.98em; }
     .readonly { background: #f4f4f4; color: #888; }
+    .action-row { display: flex; gap: 0.6em; flex-wrap: wrap; }
     @media (max-width: 480px) {
       body { margin: 1em; padding: 0.5em; }
       .btn { width: 100%; margin: 0.3em 0; }
+      .action-row { flex-direction: column; gap: 0.2em; }
     }
   </style>
 </head>
 <body>
-  <h2>3. Register QR</h2>
+  <h2>Step 3/3: Register QR</h2>
 
   <label for="pub-key-input">Public Key:</label>
   <textarea id="pub-key-input" placeholder="Public Key will be auto-filled" autofocus></textarea>
 
   <label for="qr-hash-input">QR Hash:</label>
-  <textarea id="qr-hash-input" placeholder="QR Hash will be auto-filled"></textarea>
+  <div style="display:flex;gap:0.5em;align-items:center;">
+    <textarea id="qr-hash-input" placeholder="QR Hash will be auto-filled"></textarea>
+    <button id="copy-qr-btn" class="btn" type="button" style="padding:0.35em 1em;font-size:1em;">Copy</button>
+  </div>
 
   <label for="owner-name">Owner Name (optional):</label>
   <input id="owner-name" type="text" placeholder="Enter name (optional)" />
 
-  <button id="reg-btn" class="btn">Register</button>
-  <button id="export-btn" class="btn" type="button" style="display:none;">Export JSON Log</button>
-  <button id="clear-btn" class="btn" type="button">Clear</button>
-  <button id="back-btn" class="btn" type="button">Back</button>
+  <div class="action-row">
+    <button id="reg-btn" class="btn">Register</button>
+    <button id="export-btn" class="btn" type="button" style="display:none;">Export JSON Log</button>
+    <button id="clear-btn" class="btn" type="button">Clear</button>
+    <button id="back-btn" class="btn" type="button">Back</button>
+  </div>
+
+  <div class="timestamp-row" id="ts-row" style="display:none;">
+    Registered at: <span id="ts"></span>
+  </div>
 
   <p id="status-msg" class="status"></p>
 
@@ -63,7 +77,10 @@
     const backBtn = document.getElementById('back-btn');
     const clearBtn = document.getElementById('clear-btn');
     const exportBtn = document.getElementById('export-btn');
+    const copyQrBtn = document.getElementById('copy-qr-btn');
     const statusMsg = document.getElementById('status-msg');
+    const tsRow = document.getElementById('ts-row');
+    const tsEl = document.getElementById('ts');
     let lastLogObj = null;
 
     // Auto-fill public key and QR hash from localStorage
@@ -72,6 +89,15 @@
       const savedQr  = localStorage.getItem('dtc_qrHash');
       if (savedPub) pubInput.value = savedPub;
       if (savedQr)  qrInput.value = savedQr;
+    });
+
+    // Copy QR Hash
+    copyQrBtn.addEventListener('click', () => {
+      const qr = qrInput.value.trim();
+      if (!qr) return;
+      navigator.clipboard.writeText(qr);
+      copyQrBtn.textContent = "Copied!";
+      setTimeout(() => copyQrBtn.textContent = "Copy", 1200);
     });
 
     // Back to homepage
@@ -86,6 +112,7 @@
       ownerInput.value = '';
       statusMsg.textContent = '';
       exportBtn.style.display = 'none';
+      tsRow.style.display = 'none';
       lastLogObj = null;
       localStorage.removeItem('dtc_publicKey');
       localStorage.removeItem('dtc_qrHash');
@@ -100,6 +127,7 @@
         statusMsg.style.color = 'red';
         statusMsg.textContent = '📛 Please enter both Public Key and QR Hash';
         exportBtn.style.display = 'none';
+        tsRow.style.display = 'none';
         return;
       }
 
@@ -115,11 +143,12 @@
           demoList = JSON.parse(localStorage.getItem('dtc_demoRegList')) || [];
         } catch (e) { demoList = []; }
         // Minimal log, no salt
+        const ts = new Date().toISOString();
         const logObj = {
           publicKey: pub,
           qrHash: qr,
           ownerName,
-          registeredAt: new Date().toISOString(),
+          registeredAt: ts,
           version: "0.1.7r"
         };
         demoList.push(logObj);
@@ -128,6 +157,8 @@
         statusMsg.textContent = '✅ (Demo) Registration successful! (Data saved only in this browser)';
         regBtn.disabled = false;
         exportBtn.style.display = 'inline-block';
+        tsRow.style.display = 'block';
+        tsEl.textContent = ts;
         lastLogObj = logObj;
         return;
       }
@@ -144,20 +175,25 @@
         const result = await response.json();
 
         if (response.ok) {
+          const ts = new Date().toISOString();
           statusMsg.style.color = 'green';
           statusMsg.textContent = '✅ Registration successful!';
           exportBtn.style.display = 'inline-block';
-          lastLogObj = { ...payload, registeredAt: new Date().toISOString(), version: "0.1.7r" };
+          tsRow.style.display = 'block';
+          tsEl.textContent = ts;
+          lastLogObj = { ...payload, registeredAt: ts, version: "0.1.7r" };
         } else {
           statusMsg.style.color = 'red';
           statusMsg.textContent =
             `❌ Registration failed: ${result.error || response.statusText}`;
           exportBtn.style.display = 'none';
+          tsRow.style.display = 'none';
         }
       } catch (err) {
         statusMsg.style.color = 'red';
         statusMsg.textContent = `❌ Error: ${err.message}`;
         exportBtn.style.display = 'none';
+        tsRow.style.display = 'none';
       } finally {
         regBtn.disabled = false;
       }
