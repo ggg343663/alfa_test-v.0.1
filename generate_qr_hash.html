@@ -93,6 +93,16 @@
       margin-top: 1.6em;
       margin-bottom: 0.5em;
     }
+    .warn {
+      color: #b91c1c;
+      background: #fff2f2;
+      border-left: 5px solid #b91c1c;
+      padding: 0.7em 1em 0.5em 1em;
+      border-radius: 9px;
+      margin-bottom: 1em;
+      font-size: 0.99em;
+      text-align: center;
+    }
     @media (max-width: 600px) {
       .container { padding: 1em 0.2em 1.5em 0.2em; border-radius: 0; }
     }
@@ -102,6 +112,11 @@
   <div class="container">
     <div class="step">ขั้นตอนที่ 2/3</div>
     <h2>สร้าง QR Hash จาก Public Key</h2>
+
+    <div class="warn" id="warn-missing" style="display:none;">
+      <b>⚠ ไม่พบ Public Key!</b> <br>
+      โปรดสร้าง Public Key ก่อนใช้งานหน้านี้
+    </div>
 
     <div class="info" id="pub-info">
       <span style="font-weight:bold;">Public Key ที่ใช้:</span>
@@ -122,7 +137,9 @@
     <a id="next-btn" class="btn" href="register.html" aria-disabled="true" tabindex="-1">ไปหน้าลงทะเบียน QR</a>
     <a href="index.html" class="btn" style="background:#e0e7ef; color:#26733e; margin-top: 0.25em; font-weight:500;">กลับหน้าหลัก</a>
 
-    <p class="note">(ต้องมี Public Key ก่อน, ถ้ายังไม่มีจะพาไปสร้างอัตโนมัติ)</p>
+    <p class="note">(ต้องมี Public Key ก่อน, ถ้ายังไม่มีจะพาไปสร้างอัตโนมัติ<br>
+      <b>โปรดสำรองข้อมูล key ของคุณไว้เอง ระบบจะไม่เก็บข้อมูลใด ๆ</b>
+    </p>
   </div>
 
   <script>
@@ -142,11 +159,18 @@
     const nextBtn = document.getElementById('next-btn');
     const timestampEl = document.getElementById('timestamp');
     const nonceEl = document.getElementById('nonce');
+    const warnMissing = document.getElementById('warn-missing');
 
     // -- โหลด public key จาก localStorage ถ้าไม่มีให้ redirect ไปหน้า generate public key --
     let pubKey = localStorage.getItem('dtc_publicKey');
     if (!pubKey) {
-      window.location.href = 'generate_public_key_for_dtc.html';
+      pubKeyDisplay.textContent = '(ไม่พบ Public Key)';
+      warnMissing.style.display = '';
+      setTimeout(() => {
+        window.location.href = 'generate_public_key_for_dtc.html';
+      }, 1200);
+      genBtn.disabled = true;
+      nextBtn.disabled = true;
     } else {
       pubKeyDisplay.textContent = pubKey;
     }
@@ -155,7 +179,10 @@
     genBtn.addEventListener('click', async () => {
       pubKey = localStorage.getItem('dtc_publicKey');
       if (!pubKey) {
-        window.location.href = 'generate_public_key_for_dtc.html';
+        warnMissing.style.display = '';
+        setTimeout(() => {
+          window.location.href = 'generate_public_key_for_dtc.html';
+        }, 1000);
         return;
       }
       const timestamp = new Date().toISOString();
