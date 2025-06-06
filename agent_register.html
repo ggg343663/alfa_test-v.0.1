@@ -2,240 +2,150 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Register Agent (DTC)</title>
+  <title>Register Agent (DTC, 2-step sign)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
   <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f4f8fb; margin:0; padding:0;}
+    body { font-family: Arial,sans-serif; background: #f4f8fb; margin:0; padding:0;}
     .container {
-      max-width: 440px; margin:2.2em auto 1.2em auto; background:#fff;
-      padding:2.6em 1.3em 2.2em 1.3em; border-radius:20px;
-      box-shadow:0 8px 36px #1ecf8a12, 0 2px 9px #c3e7fd17;
+      max-width: 460px; margin:2em auto; background:#fff;
+      padding:2.2em 1.1em 2.1em 1.1em; border-radius:15px;
+      box-shadow:0 2px 16px #22c55e22;
     }
-    h2 { color:#22c55e; text-align:center; margin-bottom:1.3em; font-size:1.9em; }
-    label { font-weight:600; margin-top:1.18em; display:block; font-size:1.09em;}
-    input[type=text] {
-      width:100%; padding:0.73em 0.85em; font-size:1.09em;
-      border-radius:9px; border:1.8px solid #22c55e;
-      background:#e8faf3; color:#15803d; margin-bottom:0.47em;
-      margin-top:0.18em; transition: border 0.17s;
-      outline: none;
+    h2 { color:#22c55e; text-align:center; margin-bottom:1.4em;}
+    label { font-weight:600; margin-top:1em; display:block;}
+    input[type=text], textarea, input[type=password] {
+      width:100%; padding:0.62em 0.7em; font-size:1.05em;
+      border-radius:8px; border:1.3px solid #22c55e;
+      background:#e7fbe8; color:#166534; margin-bottom:0.42em;
+      margin-top:0.15em;
+      transition: border 0.15s;
     }
-    input[type=text]:focus { border-color: #246bfd; background:#f0f7ff; }
-    input.input-err { border:2.2px solid #e53935!important; background:#fef2f2;}
-    .warn { color:#d97706; margin-bottom:0.3em; font-size:1.01em;}
-    .err { color:#e53935; margin-bottom:0.3em; background: #fff3f2; padding:0.3em 0.7em; border-radius:7px;}
-    .ok { color:#16a34a; margin-bottom:0.3em;}
+    textarea { min-height:3.3em; resize:vertical;}
     .btn-main {
-      width:100%; padding:0.9em 0; background:linear-gradient(90deg,#22c55e 75%,#246bfd 100%);
-      color:#fff; border:none; border-radius:10px; font-weight:700;
-      font-size:1.11em; margin-top:1.5em; cursor:pointer;
-      letter-spacing:0.01em; transition:background 0.18s, box-shadow .18s;
-      box-shadow: 0 2px 12px #5eead420;
+      width:100%; padding:0.75em 0; background:#22c55e;
+      color:#fff; border:none; border-radius:9px; font-weight:700;
+      font-size:1.08em; margin-top:1.3em; cursor:pointer;
+      letter-spacing:0.01em; transition:background 0.17s;
     }
-    .btn-main:disabled { background:#bcf0da; color:#fff;}
-    .btn-main:hover:enabled { background:#15803d;}
+    .btn-main:disabled { background:#94e7ba; color:#fff;}
+    .btn-main:hover:enabled { background:#16a34a;}
     .hash-row {
-      margin-top:1.5em; word-break:break-all; font-family:monospace;
-      font-size:1.07em; color:#26733e; background:#e7fbe8;
-      border-radius:10px; padding:1.1em 1.1em 1.1em 1.15em;
-      box-shadow:0 1px 6px #33ee7f0a;
+      margin-top:1.2em; word-break:break-all; font-family:monospace;
+      font-size:1.04em; color:#26733e; background:#e7fbe8;
+      border-radius:8px; padding:0.7em 1em;
       position: relative;
-      animation: fadein 0.3s;
     }
-    @keyframes fadein { from{opacity:0; transform: translateY(20px);} to{opacity:1;transform:none;} }
-    .copy-btn {
-      background: #ebfbee; border: none; cursor: pointer;
-      color: #219150; font-size: 1em; font-weight:500;
-      padding: 0.35em 1.1em; border-radius: 5px; margin-left: 0.22em; margin-right: 0.16em;
-      transition: background .16s;
-      vertical-align: middle;
-    }
-    .copy-btn:active { background: #b9f7d0; color: #176d38; }
-    .copy-success { color: #16a34a; font-size: 0.99em; margin-left: 0.28em; min-width:2.5em; display:inline-block;}
-    .nonce-row { display:flex; align-items:center; gap:0.4em;}
-    .nonce-len { font-size:0.96em; color:#197; margin-left:0.26em;}
-    .nonce-btn {
-      background:#e0e7ef; border:1.5px solid #b7c5df; border-radius:8px;
-      color:#136534; font-size:1em; padding:0.23em 0.9em; cursor:pointer; margin-left:0.09em;
-      transition: background .16s;
-    }
-    .nonce-btn:hover { background:#bae6fd;}
-    .back-btn {
-      margin-bottom:1.45em; background:#dbeafe; color:#324275;
-      border-radius:8px; border:1.7px solid #b7c5df;
-      padding:0.4em 1.3em; font-size:1.07em; cursor:pointer;
-      transition:background 0.18s;
-      font-weight:600;
-    }
-    .back-btn:hover { background:#bae6fd;}
-    @media (max-width:500px) {
-      .container { padding:1.2em 0.4em 1.6em 0.4em; border-radius:0; }
-      h2 { font-size:1.3em; }
-      .btn-main { font-size:1em; }
-    }
+    .step-label { margin:1em 0 0.4em 0; font-weight:bold; color:#26733e;}
+    .copy-btn { background:none; border:none; color:#22c55e; cursor:pointer;}
+    .copy-success { color:#16a34a; font-size:0.95em; margin-left:0.33em;}
   </style>
 </head>
 <body>
-  <div class="container">
-    <button class="back-btn" onclick="history.back()">← Back</button>
-    <h2>Register Agent</h2>
-    <div id="unlockWarn" class="warn"></div>
-    <form id="agentForm" autocomplete="off">
-      <label>Agent Name <span style="color:#246bfd;">(a-z, 0-9, ≤16)</span>:</label>
-      <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
-      <div id="nameStatus"></div>
-      <label>Nonce <span style="color:#246bfd;">(random string)</span>:</label>
-      <div class="nonce-row">
-        <input type="text" id="nonce" maxlength="20" required autocomplete="off" style="flex:1;"/>
-        <button type="button" class="nonce-btn" onclick="randomNonce()">Random</button>
-        <span class="nonce-len" id="nonceLen">0/20</span>
-      </div>
-      <button type="submit" class="btn-main" id="registerBtn">Register Agent</button>
-    </form>
-    <div id="hashResult" class="hash-row" style="display:none;">
-      <span id="copyAgentHashSuccess" class="copy-success"></span>
+<div class="container">
+  <h2>Register Agent (2-step sign)</h2>
+  <div class="step-label">Step 1: Master creates Agent slot</div>
+  <form id="masterForm" autocomplete="off">
+    <label>Agent Name (a-z,0-9, ≤16):</label>
+    <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
+
+    <label>Agent Public Key:</label>
+    <input type="text" id="agentPubKey" maxlength="64" required autocomplete="off" />
+
+    <label>Nonce (random string):</label>
+    <input type="text" id="nonce" maxlength="20" required autocomplete="off" />
+    <button type="button" onclick="randomNonce()" class="copy-btn" style="margin-bottom:0.6em;">Random Nonce</button>
+    <button class="btn-main" type="submit">Create Agent Slot</button>
+  </form>
+  <div id="step2Section" style="display:none;">
+    <div class="step-label">Step 2: Agent confirms and signs</div>
+    <div style="font-size:0.97em; margin-bottom:0.2em;">
+      Copy this payload and let the agent sign with their password+pin:
     </div>
+    <textarea id="agentPayload" readonly></textarea>
+    <button class="copy-btn" type="button" onclick="copyAgentPayload()">Copy Payload</button>
+    <span id="copyAgentPayloadSuccess" class="copy-success"></span>
+    <div style="margin-top:1.2em;">
+      <label>Agent Password:</label>
+      <input type="password" id="agentPw" maxlength="12" />
+      <label>Agent PIN:</label>
+      <input type="password" id="agentPin" maxlength="6" />
+      <button class="btn-main" type="button" onclick="signAgent()" style="margin-top:0.8em;">Agent Sign</button>
+    </div>
+    <div id="sigResult" class="hash-row" style="display:none;"></div>
   </div>
-  <script>
-    // --- CONFIG/DEMO DATA ---
-    const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890";
-    const whitelist = {};
-    for (let i=1;i<=50;i++) whitelist['qr'+i] = {registered:true};
-    for (let i=51;i<=100;i++) whitelist['qr'+i] = {registered:false};
-    const agent_db = {};
-    let badwordList = {"profanity":["fuck","shit"],"offensive":["idiot"]};
+</div>
+<script>
+  // Util
+  function randomNonce() {
+    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+    let s = "";
+    for (let i=0;i<16;i++) s += chars[Math.floor(Math.random()*chars.length)];
+    document.getElementById('nonce').value = s;
+  }
+  randomNonce();
 
-    function canCreateAgent(whitelist) {
-      return Object.values(whitelist).filter(q=>q.registered).length >= 50;
-    }
-    function validateAgentName(name) {
-      return /^[a-z0-9]{1,16}$/.test(name);
-    }
-    function checkBadwords(str) {
-      str = str.toLowerCase();
-      let found = [];
-      for (const group of Object.values(badwordList))
-        group.forEach(word => {
-          const re = new RegExp("\\b"+word+"\\b", "i");
-          if(re.test(str)) found.push(word);
-        });
-      return found;
-    }
-    function randomNonce() {
-      const len = Math.floor(Math.random()*7)+12;
-      const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
-      let s = '';
-      for(let i=0;i<len;i++) s += chars[Math.floor(Math.random()*chars.length)];
-      document.getElementById('nonce').value = s;
-      document.getElementById('nonceLen').textContent = s.length+"/20";
-    }
+  // Step 1: Master Create
+  document.getElementById('masterForm').onsubmit = function(e){
+    e.preventDefault();
+    const name = document.getElementById('agentName').value.trim();
+    const pubkey = document.getElementById('agentPubKey').value.trim();
+    const nonce = document.getElementById('nonce').value.trim();
+    if (!name || !/^[a-z0-9]{1,16}$/.test(name)) { alert("Invalid agent name"); return; }
+    if (!pubkey || pubkey.length<30) { alert("Invalid agent public key"); return; }
+    if (!nonce) { alert("Enter nonce"); return; }
+    const timestamp = new Date().toISOString();
+    const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"; // demo
+    const agent_hash_str = `${master_hash}:${pubkey}:${name}:${nonce}:${timestamp}`;
+    window.agent_hash_data = { master_hash, agent_pubkey:pubkey, agent_name:name, nonce, timestamp };
+    window.agent_hash_to_sign = agent_hash_str;
+    document.getElementById('step2Section').style.display = "block";
+    document.getElementById('agentPayload').value = agent_hash_str;
+    window.agent_hash = ""; // clear old
+    document.getElementById('sigResult').style.display = "none";
+  };
 
-    document.getElementById('agentName').addEventListener('input', function(){
-      this.value = this.value.replace(/[^a-z0-9]/g, '').slice(0,16);
-      const bads = checkBadwords(this.value);
-      const st = document.getElementById('nameStatus');
-      if (!validateAgentName(this.value)) {
-        st.innerHTML = "❌ Only a-z, 0-9 allowed (≤16 chars)";
-        st.className = "err";
-        this.classList.add('input-err');
-      } else if (bads.length>0) {
-        st.innerHTML = "⚠ Badword detected: " + bads.join(", ");
-        st.className = "warn";
-        this.classList.remove('input-err');
-      } else {
-        st.innerHTML = "✓ Name OK";
-        st.className = "ok";
-        this.classList.remove('input-err');
-      }
-    });
-    document.getElementById('nonce').addEventListener('input', function(){
-      this.value = this.value.replace(/[^a-z0-9]/g, '').slice(0,20);
-      document.getElementById('nonceLen').textContent = this.value.length+"/20";
-    });
+  // PBKDF2 derive (browser)
+  async function pbkdf2_sha256(password, pin) {
+    const enc = new TextEncoder();
+    const key = await window.crypto.subtle.importKey("raw", enc.encode(password+"|"+pin), "PBKDF2", false, ["deriveBits"]);
+    const bits = await window.crypto.subtle.deriveBits(
+      {name:"PBKDF2",salt:enc.encode("DTC-KEY-SALT"),iterations:100000,hash:"SHA-256"}, key, 256);
+    return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2,"0")).join("");
+  }
+  async function hmac_sha256(keyHex, msg) {
+    const enc = new TextEncoder();
+    const key = await window.crypto.subtle.importKey("raw", hex2buf(keyHex), {name:"HMAC",hash:"SHA-256"}, false, ["sign"]);
+    const sig = await window.crypto.subtle.sign("HMAC", key, enc.encode(msg));
+    return Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+  function hex2buf(hex){return new Uint8Array(hex.match(/../g).map(x=>parseInt(x,16)));}
 
-    window.onload = () => { document.getElementById('agentName').focus(); randomNonce(); };
-
-    document.getElementById('agentForm').onsubmit = function(e){
-      e.preventDefault();
-      const btn = document.getElementById('registerBtn');
-      btn.disabled = true;
-
-      if (!canCreateAgent(whitelist)) {
-        document.getElementById('unlockWarn').textContent = "Master is still locked (need 50 QR registered first)";
-        btn.disabled = false;
-        return;
-      } else {
-        document.getElementById('unlockWarn').textContent = "";
-      }
-      const agentName = document.getElementById('agentName').value.trim();
-      const nonce = document.getElementById('nonce').value.trim();
-      if (!validateAgentName(agentName)) {
-        alert("Agent name must be a-z, 0-9, ≤16 characters.");
-        document.getElementById('agentName').focus();
-        btn.disabled = false;
-        return;
-      }
-      if (nonce.length < 4 || nonce.length > 20) {
-        alert("Nonce must be 4-20 characters (a-z, 0-9)");
-        document.getElementById('nonce').focus();
-        btn.disabled = false;
-        return;
-      }
-      const bads = checkBadwords(agentName);
-      if (bads.length>0 && !confirm("⚠ Agent name contains inappropriate word(s): " + bads.join(", ") + "\nContinue?")) {
-        btn.disabled = false;
-        document.getElementById('agentName').focus();
-        return;
-      }
-      if (Object.values(agent_db).some(a=>a.agent_name===agentName)) {
-        alert("This agent name is already used.");
-        btn.disabled = false;
-        return;
-      }
-      const timestamp = Math.floor(Date.now()/1000);
-      const s = `${master_hash}:${agentName}:${nonce}:${timestamp}`;
-      const agent_hash = sha256(s);
-      agent_db[agent_hash] = {
-        agent_name: agentName,
-        master_hash,
-        nonce,
-        timestamp,
-        agent_hash
-      };
-      // แสดงวันเวลาชัดเจน (ISO)
-      const isoTime = new Date(timestamp * 1000).toISOString();
-      const resultDiv = document.getElementById('hashResult');
-      resultDiv.style.display = "block";
-      resultDiv.innerHTML =
-        `<b>Agent Registered!</b><br>
-         <b>Agent Name:</b> <span style="color:#246bfd;">${agentName}</span><br>
-         <b>Agent Hash:</b> <code id="agentHashVal">${agent_hash}</code>
-         <button class="copy-btn" onclick="copyAgentHash()">Copy</button>
-         <span id="copyAgentHashSuccess" class="copy-success"></span><br>
-         <b>Timestamp:</b> ${timestamp} <span style="color:#666;font-size:0.98em;">(${isoTime})</span><br>
-         <b>Nonce:</b> <span style="color:#26733e;">${nonce}</span>`;
-      document.getElementById('agentForm').reset();
-      document.getElementById('nameStatus').innerHTML = "";
-      document.getElementById('nonceLen').textContent = "0/20";
-      setTimeout(()=>resultDiv.scrollIntoView({behavior:'smooth'}),130);
-      btn.disabled = false;
-      randomNonce();
+  // Step 2: Agent Sign
+  async function signAgent() {
+    const pw = document.getElementById('agentPw').value.trim();
+    const pin = document.getElementById('agentPin').value.trim();
+    if (!pw || !pin) { alert("Please enter agent password & pin"); return; }
+    const priv = await pbkdf2_sha256(pw, pin);
+    const sig = await hmac_sha256(priv, window.agent_hash_to_sign);
+    window.agent_hash = sig;
+    // Show log (demo, ใน production ต้องรวม sig_master ด้วย)
+    const res = {
+      ...window.agent_hash_data,
+      sig_agent: sig
     };
+    const div = document.getElementById('sigResult');
+    div.style.display = "block";
+    div.innerHTML = "<b>Agent Registration Complete</b><br><pre>"+JSON.stringify(res,null,2)+"</pre>";
+  }
 
-    function copyAgentHash() {
-      const el = document.getElementById('agentHashVal');
-      if (!el) return;
-      const sel = window.getSelection();
-      const range = document.createRange();
-      range.selectNodeContents(el);
-      sel.removeAllRanges();
-      sel.addRange(range);
-      try { document.execCommand('copy'); } catch {}
-      sel.removeAllRanges();
-      document.getElementById('copyAgentHashSuccess').textContent = "Copied!";
-      setTimeout(()=>{document.getElementById('copyAgentHashSuccess').textContent="";},1300);
-    }
-  </script>
+  // Copy util
+  function copyAgentPayload() {
+    const el = document.getElementById('agentPayload');
+    el.select(); el.setSelectionRange(0, 9999);
+    navigator.clipboard.writeText(el.value);
+    document.getElementById('copyAgentPayloadSuccess').textContent = "Copied!";
+    setTimeout(()=>{document.getElementById('copyAgentPayloadSuccess').textContent="";},1200);
+  }
+</script>
 </body>
 </html>
