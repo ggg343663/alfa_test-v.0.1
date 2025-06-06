@@ -32,9 +32,7 @@
       resize: vertical;
       box-sizing: border-box;
     }
-    textarea {
-      min-height: 3em;
-    }
+    textarea { min-height: 3em; }
     .btn {
       display: inline-block;
       padding: 0.6em 1.2em;
@@ -48,24 +46,18 @@
       text-decoration: none;
       text-align: center;
     }
-    #reg-btn {
-      background: #219150;
-      color: #fff;
-    }
-    #reg-btn:hover {
-      background: #176d38;
-    }
-    #back-btn {
-      background: #aaa;
-      color: #fff;
-    }
-    #back-btn:hover {
-      background: #888;
-    }
+    #reg-btn { background: #219150; color: #fff; }
+    #reg-btn[disabled] { background: #b4dcc3; cursor: not-allowed; }
+    #reg-btn:hover:not([disabled]) { background: #176d38; }
+    #clear-btn { background: #facc15; color: #885e00; }
+    #clear-btn:hover { background: #eab308; }
+    #back-btn { background: #aaa; color: #fff; }
+    #back-btn:hover { background: #888; }
     .status {
       margin-top: 1em;
       font-size: 1em;
       font-weight: bold;
+      min-height: 2em;
     }
     .note {
       font-size: 0.9em;
@@ -83,22 +75,23 @@
   <h2>3. ลงทะเบียน QR</h2>
 
   <label for="pub-key-input">Public Key:</label>
-  <textarea id="pub-key-input" placeholder="Public Key จะถูกเติมอัตโนมัติ"></textarea>
+  <textarea id="pub-key-input" placeholder="Public Key จะถูกเติมอัตโนมัติ" autofocus></textarea>
 
   <label for="qr-hash-input">QR Hash:</label>
   <textarea id="qr-hash-input" placeholder="QR Hash จะถูกเติมอัตโนมัติ"></textarea>
 
-  <label for="owner-name">ชื่อผู้ขอ (optional):</label>
+  <label for="owner-name">ชื่อผู้ขอ (ไม่บังคับ):</label>
   <input id="owner-name" type="text" placeholder="ใส่ชื่อ (ไม่บังคับ)" />
 
   <button id="reg-btn" class="btn">ลงทะเบียน</button>
-  <button id="back-btn" class="btn">กลับหน้าแรก</button>
+  <button id="clear-btn" class="btn" type="button">นำค่าใหม่/รีเซ็ต</button>
+  <button id="back-btn" class="btn" type="button">กลับหน้าแรก</button>
 
   <p id="status-msg" class="status"></p>
 
   <p class="note">
-    (Public Key และ QR Hash จะถูกเติมให้อัตโนมัติถ้ามีค่าใน localStorage)<br/>
-    หลังลงทะเบียน สำเร็จแล้วคุณอาจลบ QR Hash ใน localStorage เพื่อใช้ใหม่ครั้งถัดไป
+    (Public Key และ QR Hash จะถูกเติมให้อัตโนมัติถ้ามีในเครื่อง)<br/>
+    หากไม่มี backend ระบบจะบันทึกเฉพาะในเครื่องนี้ (Demo/ทดลองเท่านั้น)
   </p>
 
   <script>
@@ -107,19 +100,15 @@
     const ownerInput = document.getElementById('owner-name');
     const regBtn = document.getElementById('reg-btn');
     const backBtn = document.getElementById('back-btn');
+    const clearBtn = document.getElementById('clear-btn');
     const statusMsg = document.getElementById('status-msg');
 
-    // เมื่อหน้าโหลด ให้เติมค่า Public Key + QR Hash จาก localStorage
+    // Auto-fill public key and QR hash from localStorage
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       const savedQr  = localStorage.getItem('dtc_qrHash');
-
-      if (savedPub) {
-        pubInput.value = savedPub;
-      }
-      if (savedQr) {
-        qrInput.value = savedQr;
-      }
+      if (savedPub) pubInput.value = savedPub;
+      if (savedQr)  qrInput.value = savedQr;
     });
 
     // ปุ่มกลับหน้าแรก
@@ -127,24 +116,50 @@
       window.location.href = 'index.html';
     });
 
-    // เมื่อกดลงทะเบียน
+    // ปุ่ม clear (reset ค่าในฟอร์ม)
+    clearBtn.addEventListener('click', () => {
+      pubInput.value = '';
+      qrInput.value = '';
+      ownerInput.value = '';
+      statusMsg.textContent = '';
+      localStorage.removeItem('dtc_publicKey');
+      localStorage.removeItem('dtc_qrHash');
+    });
+
+    // ปุ่มลงทะเบียน
     regBtn.addEventListener('click', async () => {
       const pub       = pubInput.value.trim();
       const qr        = qrInput.value.trim();
       const ownerName = ownerInput.value.trim();
-
       if (!pub || !qr) {
         statusMsg.style.color = 'red';
         statusMsg.textContent = '📛 กรุณาใส่ Public Key และ QR Hash ให้ครบ';
         return;
       }
 
-      // เตรียม payload สำหรับส่งไปยัง backend
+      regBtn.disabled = true;
+      statusMsg.style.color = '#26733e';
+      statusMsg.textContent = '⏳ กำลังลงทะเบียน...';
+
+      // === Demo Mode (เปลี่ยน useDemo = false ถ้ามี API จริง) ===
+      const useDemo = true;
+      if (useDemo) {
+        let demoList = [];
+        try {
+          demoList = JSON.parse(localStorage.getItem('dtc_demoRegList')) || [];
+        } catch (e) { demoList = []; }
+        demoList.push({ publicKey: pub, qrHash: qr, ownerName, registeredAt: new Date().toISOString() });
+        localStorage.setItem('dtc_demoRegList', JSON.stringify(demoList));
+        statusMsg.style.color = 'green';
+        statusMsg.textContent = '✅ (Demo) ลงทะเบียนสำเร็จแล้ว! (ข้อมูลถูกเก็บไว้ในเครื่องนี้)';
+        regBtn.disabled = false;
+        return;
+      }
+
+      // === สำหรับ Production เชื่อม API จริง ===
       const payload = { publicKey: pub, qrHash: qr };
       if (ownerName) payload.ownerName = ownerName;
-
       try {
-        // สมมติ API endpoint ของคุณคือ /api/register
         const response = await fetch('/api/register', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -155,7 +170,6 @@
         if (response.ok) {
           statusMsg.style.color = 'green';
           statusMsg.textContent = '✅ ลงทะเบียนสำเร็จแล้ว!';
-          // ลบ QR Hash เพื่อป้องกันใช้ซ้ำ
           // localStorage.removeItem('dtc_qrHash');
         } else {
           statusMsg.style.color = 'red';
@@ -164,8 +178,9 @@
         }
       } catch (err) {
         statusMsg.style.color = 'red';
-        statusMsg.textContent =
-          `❌ เกิดข้อผิดพลาด: ${err.message}`;
+        statusMsg.textContent = `❌ เกิดข้อผิดพลาด: ${err.message}`;
+      } finally {
+        regBtn.disabled = false;
       }
     });
   </script>
