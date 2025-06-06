@@ -176,24 +176,48 @@
     const nonceEl = document.getElementById('nonce');
     const warnMissing = document.getElementById('warn-missing');
 
-    // Load public key from localStorage, redirect if missing
-    let pubKey = localStorage.getItem('dtc_publicKey');
-    if (!pubKey) {
-      pubKeyDisplay.textContent = '(Public Key Not Found)';
-      warnMissing.style.display = '';
-      setTimeout(() => {
-        window.location.href = 'generate_key.html';
-      }, 1200);
-      genBtn.disabled = true;
-      nextBtn.disabled = true;
-    } else {
+    let lastQRLog = null;
+
+    // On page load, show data if available
+    window.addEventListener('DOMContentLoaded', () => {
+      let pubKey = localStorage.getItem('dtc_publicKey');
+      if (!pubKey) {
+        pubKeyDisplay.textContent = '(Public Key Not Found)';
+        warnMissing.style.display = '';
+        setTimeout(() => {
+          window.location.href = 'generate_key.html';
+        }, 1200);
+        genBtn.disabled = true;
+        nextBtn.disabled = true;
+        return;
+      }
       pubKeyDisplay.textContent = pubKey;
-    }
+
+      // load last QR data if available
+      const savedQr = localStorage.getItem('dtc_qrHash');
+      const ts = localStorage.getItem('dtc_qrTimestamp');
+      const nonce = localStorage.getItem('dtc_qrNonce');
+      if (savedQr && ts && nonce) {
+        qrOutput.textContent = savedQr;
+        timestampEl.textContent = `⏰ ${ts}`;
+        nonceEl.textContent = `Nonce: ${nonce}`;
+        qrContainer.style.display = 'block';
+        lastQRLog = {
+          publicKey: pubKey,
+          qrHash: savedQr,
+          timestamp: ts,
+          nonce: nonce,
+          version: "0.1.7r"
+        };
+        nextBtn.classList.add('enabled');
+        nextBtn.removeAttribute('aria-disabled');
+        nextBtn.removeAttribute('tabindex');
+      }
+    });
 
     // When Generate QR button is clicked
-    let lastQRLog = null;
     genBtn.addEventListener('click', async () => {
-      pubKey = localStorage.getItem('dtc_publicKey');
+      let pubKey = localStorage.getItem('dtc_publicKey');
       if (!pubKey) {
         warnMissing.style.display = '';
         setTimeout(() => {
@@ -253,29 +277,6 @@
       if (!nextBtn.classList.contains('enabled')) {
         e.preventDefault();
         alert('Please generate QR Hash before continuing.');
-      }
-    });
-
-    // Load existing QR from localStorage (if previously generated)
-    window.addEventListener('DOMContentLoaded', () => {
-      const savedQr = localStorage.getItem('dtc_qrHash');
-      const ts = localStorage.getItem('dtc_qrTimestamp');
-      const nonce = localStorage.getItem('dtc_qrNonce');
-      if (savedQr && ts && nonce) {
-        qrOutput.textContent = savedQr;
-        timestampEl.textContent = `⏰ ${ts}`;
-        nonceEl.textContent = `Nonce: ${nonce}`;
-        qrContainer.style.display = 'block';
-        lastQRLog = {
-          publicKey: pubKey,
-          qrHash: savedQr,
-          timestamp: ts,
-          nonce: nonce,
-          version: "0.1.7r"
-        };
-        nextBtn.classList.add('enabled');
-        nextBtn.removeAttribute('aria-disabled');
-        nextBtn.removeAttribute('tabindex');
       }
     });
   </script>
