@@ -161,13 +161,13 @@
     const nonceEl = document.getElementById('nonce');
     const warnMissing = document.getElementById('warn-missing');
 
-    // -- โหลด public key จาก localStorage ถ้าไม่มีให้ redirect ไปหน้า generate public key --
+    // -- โหลด public key จาก localStorage ถ้าไม่มีให้ redirect ไปหน้า generate_key.html --
     let pubKey = localStorage.getItem('dtc_publicKey');
     if (!pubKey) {
       pubKeyDisplay.textContent = '(ไม่พบ Public Key)';
       warnMissing.style.display = '';
       setTimeout(() => {
-        window.location.href = 'generate_public_key_for_dtc.html';
+        window.location.href = 'generate_key.html';
       }, 1200);
       genBtn.disabled = true;
       nextBtn.disabled = true;
@@ -181,7 +181,7 @@
       if (!pubKey) {
         warnMissing.style.display = '';
         setTimeout(() => {
-          window.location.href = 'generate_public_key_for_dtc.html';
+          window.location.href = 'generate_key.html';
         }, 1000);
         return;
       }
