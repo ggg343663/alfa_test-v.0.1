@@ -140,6 +140,7 @@
       <div class="action-row">
         <button id="copy-qr-btn" class="btn" type="button" style="background:#2563eb;width:auto;padding:0.35em 1.3em;font-size:1em;margin:0;">Copy QR Hash</button>
         <button id="export-log-btn" class="btn" type="button" style="background:#facc15;color:#5c4500;width:auto;padding:0.35em 1.3em;font-size:1em;margin:0;">Export Log</button>
+        <button id="clear-qr-btn" class="btn" type="button" style="background:#f87171;color:#fff;width:auto;padding:0.35em 1.3em;font-size:1em;margin:0;">Clear QR Data</button>
       </div>
       <div class="timestamp-row">
         <span id="timestamp"></span>
@@ -171,6 +172,7 @@
     const qrOutput = document.getElementById('qr-hash-output');
     const copyQrBtn = document.getElementById('copy-qr-btn');
     const exportLogBtn = document.getElementById('export-log-btn');
+    const clearQrBtn = document.getElementById('clear-qr-btn');
     const nextBtn = document.getElementById('next-btn');
     const timestampEl = document.getElementById('timestamp');
     const nonceEl = document.getElementById('nonce');
@@ -270,6 +272,17 @@
       link.download = `qr_log_${Date.now()}.json`;
       link.click();
       URL.revokeObjectURL(url);
+    });
+
+    // Clear QR Data
+    clearQrBtn.addEventListener('click', () => {
+      localStorage.removeItem('dtc_qrHash');
+      localStorage.removeItem('dtc_qrTimestamp');
+      localStorage.removeItem('dtc_qrNonce');
+      qrContainer.style.display = 'none';
+      nextBtn.classList.remove('enabled');
+      nextBtn.setAttribute('aria-disabled', 'true');
+      nextBtn.setAttribute('tabindex', '-1');
     });
 
     // Prevent next if QR not generated yet
