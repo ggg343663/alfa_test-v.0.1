@@ -83,7 +83,6 @@
     }
     .copy-btn:active { background: #d1fae5; color: #176d38; }
     .copy-success { color: #16a34a; font-size: 0.95em; margin-left: 0.27em; min-width: 2.4em; display: inline-block; }
-
     .receiver-group, .yellow-group {
       margin-bottom: 1.25em;
       background: #f6fbfe;
@@ -187,7 +186,6 @@
   </div>
   <script>
     let qrReader = null;
-    // Auto focus
     window.onload = function() {
       document.getElementById('qrhash').focus();
       if (!navigator.clipboard) {
