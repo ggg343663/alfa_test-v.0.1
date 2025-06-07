@@ -17,8 +17,7 @@
       width:100%; padding:0.62em 0.7em; font-size:1.05em;
       border-radius:8px; border:1.3px solid #22c55e;
       background:#e7fbe8; color:#166534; margin-bottom:0.42em;
-      margin-top:0.15em;
-      transition: border 0.15s;
+      margin-top:0.15em; transition: border 0.15s;
     }
     textarea { min-height:3.3em; resize:vertical;}
     .btn-main {
@@ -104,17 +103,31 @@
   }
   randomNonce();
 
-  // --- Badwords warn
-  let badwords = [];
-  fetch('https://raw.githubusercontent.com/dtinth/badwords/master/th.json') // เปลี่ยน repo ได้ตามที่มีไฟล์ badwords.json
-    .then(r=>r.json()).then(list=>badwords=list);
+  // --- Badwords warn (multi-category)
+  let badwords = {};
+  let flatBadwords = [];
+  let badwordsReady = false;
+  fetch('badwords.json')
+    .then(r=>r.json())
+    .then(list=>{
+      badwords=list;
+      flatBadwords = Object.values(list).flat().map(x=>x.toLowerCase());
+      badwordsReady = true;
+    }).catch(()=>{ badwordsReady = false; });
+
+  function findBadwords(str) {
+    if (!badwordsReady || !str) return [];
+    const s = str.toLowerCase();
+    return flatBadwords.filter(w => w && s.includes(w));
+  }
 
   document.getElementById('agentName').addEventListener('input', function(){
     const warn = document.getElementById('badwordWarn');
     const v = this.value.trim().toLowerCase();
-    if (badwords.some(bw=>v.includes(bw))) {
+    const found = findBadwords(v);
+    if (found.length) {
       warn.style.display = "";
-      warn.textContent = "Warning: The agent name contains an inappropriate word. Please reconsider.";
+      warn.textContent = "Warning: This name contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
     } else {
       warn.style.display = "none";
     }
@@ -178,12 +191,17 @@
     }
     video.style.display = "none";
   }
-  // --- End QR SCANNER
+  window.addEventListener('beforeunload', stopQRScanner);
 
   // --- Step 1: Master Create
   document.getElementById('masterForm').onsubmit = function(e){
-    e.preventDefault();
     const name = document.getElementById('agentName').value.trim();
+    if (badwordsReady && findBadwords(name).length) {
+      if (!confirm("Warning: The agent name contains inappropriate words. Are you sure you want to continue?")) {
+        e.preventDefault(); return false;
+      }
+    }
+    e.preventDefault();
     const pubkey = document.getElementById('agentPubKey').value.trim();
     const nonce = document.getElementById('nonce').value.trim();
     if (!name || !/^[a-z0-9]{1,16}$/.test(name)) { alert("Invalid agent name"); return; }
@@ -259,9 +277,6 @@
     document.getElementById('exportSuccess').textContent = "Exported!";
     setTimeout(()=>{document.getElementById('exportSuccess').textContent="";}, 1500);
   }
-
-  // --- Close QR scan when leaving page
-  window.addEventListener('beforeunload', stopQRScanner);
 </script>
 </body>
 </html>
