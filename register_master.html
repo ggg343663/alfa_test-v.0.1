@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Request Master | DTC Magic Chain</title>
+  <title>Register Master | DTC Magic Chain</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7fafc; color: #222; }
@@ -29,6 +29,7 @@
     .msg-success { color: #16774a; background: #eafff1; border-left: 5px solid #31e57a; border-radius: 7px; padding: 0.55em; }
     .copy-btn { padding: 0.2em 1.1em; margin-left: 0.55em; border: none; border-radius: 5px; background: #246bfd; color: #fff; cursor: pointer; font-size: 0.95em; }
     .copy-btn:active { background: #185fb0; }
+    .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.96em;}
     .back-btn { margin-top: 1.5em; background: #f1f1f1; color: #1a3a4d; border-radius: 8px; border: none; font-size: 1.01em; padding: 0.5em 1.3em; }
     .note { font-size: 0.98em; color: #789; text-align: center; margin-top: 1.3em;}
     @media (max-width: 480px) {
@@ -40,11 +41,12 @@
 <body>
   <div class="main">
     <div class="step">Step 3/4</div>
-    <h2>Request Master</h2>
+    <h2>Register Master</h2>
     <form id="masterForm" autocomplete="off">
       <div class="input-row">
         <label>Master Name (A-Z only): <span class="counter" id="nameCounter">0/12</span></label>
         <input type="text" id="masterName" maxlength="12" pattern="[A-Z]+" placeholder="Enter master name (A-Z)" required />
+        <div id="badwordWarn" class="warn" style="display:none;"></div>
       </div>
       <div class="input-row">
         <label>Confirm Master Name:</label>
@@ -60,7 +62,7 @@
         <input type="text" id="confirmPubkey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Confirm public key" required />
         <button class="copy-btn" type="button" onclick="copyField('confirmPubkey')">Copy</button>
       </div>
-      <button class="btn" type="submit" id="reqBtn">Request Master</button>
+      <button class="btn" type="submit" id="reqBtn">Register Master</button>
       <div id="msgBox" class="msg"></div>
     </form>
     <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
@@ -78,6 +80,45 @@
         document.getElementById('confirmPubkey').value = localPub;
         document.getElementById('pubkeyCounter').textContent = localPub.length + "/64";
         document.getElementById('pubkey2Counter').textContent = localPub.length + "/64";
+      }
+    });
+
+    // ---- Badwords logic ----
+    let badwords = {};
+    let flatBadwords = [];
+    let badwordsReady = false;
+    let badwordsError = false;
+    fetch('badwords.json')
+      .then(r=>r.json())
+      .then(list=>{
+        badwords=list;
+        flatBadwords = Object.values(list).flat().map(x=>x.toLowerCase());
+        badwordsReady = true;
+      }).catch(()=>{
+        badwordsReady = false;
+        badwordsError = true;
+        document.getElementById('badwordWarn').style.display = "";
+        document.getElementById('badwordWarn').textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
+      });
+
+    function findBadwords(str) {
+      if (!badwordsReady || !str) return [];
+      const s = str.toLowerCase();
+      return flatBadwords.filter(w => w && s.includes(w));
+    }
+
+    document.getElementById('masterName').addEventListener('input', function(){
+      const warn = document.getElementById('badwordWarn');
+      const v = this.value.trim().toLowerCase();
+      const found = findBadwords(v);
+      if (badwordsError) {
+        warn.style.display = "";
+        warn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
+      } else if (found.length) {
+        warn.style.display = "";
+        warn.textContent = "Warning: This name contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
+      } else {
+        warn.style.display = "none";
       }
     });
 
@@ -113,8 +154,18 @@
 
     // ---- Submit Handler ----
     document.getElementById('masterForm').onsubmit = async function(e){
-      e.preventDefault();
       const name = document.getElementById('masterName').value.trim();
+      if (badwordsReady && findBadwords(name).length) {
+        if (!confirm("Warning: The master name contains inappropriate words. Are you sure you want to continue?")) {
+          e.preventDefault(); return false;
+        }
+      }
+      if (badwordsError) {
+        alert("Cannot verify inappropriate words. Please check badwords.json or contact admin.");
+        e.preventDefault(); return false;
+      }
+
+      e.preventDefault();
       const name2 = document.getElementById('confirmName').value.trim();
       const pk = document.getElementById('pubkey').value.trim();
       const pk2 = document.getElementById('confirmPubkey').value.trim();
