@@ -51,6 +51,8 @@
     <div class="step-label">Step 1: Master creates Agent slot</div>
     <label>Agent Name (a-z, 0-9, ≤16):</label>
     <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
+    <!-- แจ้งเตือน badword จะอยู่ตรงนี้ใต้ช่องกรอกชื่อ -->
+    <div id="badwordWarn" class="warn" style="display:none;"></div>
 
     <label class="row">
       Agent Public Key:
@@ -63,7 +65,6 @@
       <input type="text" id="nonce" maxlength="20" required autocomplete="off" style="flex:1;" />
       <button type="button" onclick="randomNonce()" class="qr-btn">Random</button>
     </div>
-    <div id="badwordWarn" class="warn" style="display:none;"></div>
     <button class="btn-main" type="submit">Create Agent Slot</button>
   </form>
   
