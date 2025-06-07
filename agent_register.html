@@ -107,13 +107,20 @@
   let badwords = {};
   let flatBadwords = [];
   let badwordsReady = false;
+  let badwordsError = false;
+
   fetch('badwords.json')
     .then(r=>r.json())
     .then(list=>{
       badwords=list;
       flatBadwords = Object.values(list).flat().map(x=>x.toLowerCase());
       badwordsReady = true;
-    }).catch(()=>{ badwordsReady = false; });
+    }).catch(()=>{
+      badwordsReady = false;
+      badwordsError = true;
+      document.getElementById('badwordWarn').style.display = "";
+      document.getElementById('badwordWarn').textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
+    });
 
   function findBadwords(str) {
     if (!badwordsReady || !str) return [];
@@ -125,7 +132,10 @@
     const warn = document.getElementById('badwordWarn');
     const v = this.value.trim().toLowerCase();
     const found = findBadwords(v);
-    if (found.length) {
+    if (badwordsError) {
+      warn.style.display = "";
+      warn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
+    } else if (found.length) {
       warn.style.display = "";
       warn.textContent = "Warning: This name contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
     } else {
@@ -200,6 +210,10 @@
       if (!confirm("Warning: The agent name contains inappropriate words. Are you sure you want to continue?")) {
         e.preventDefault(); return false;
       }
+    }
+    if (badwordsError) {
+      alert("Cannot verify inappropriate words. Please check badwords.json or contact admin.");
+      e.preventDefault(); return false;
     }
     e.preventDefault();
     const pubkey = document.getElementById('agentPubKey').value.trim();
