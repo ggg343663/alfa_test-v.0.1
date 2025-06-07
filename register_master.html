@@ -32,10 +32,27 @@
     .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.96em;}
     .back-btn { margin-top: 1.5em; background: #f1f1f1; color: #1a3a4d; border-radius: 8px; border: none; font-size: 1.01em; padding: 0.5em 1.3em; }
     .note { font-size: 0.98em; color: #789; text-align: center; margin-top: 1.3em;}
-    @media (max-width: 480px) {
-      .main { padding: 1.3em 0.5em 1em 0.5em; }
-      .btn, .back-btn { font-size: 1em; }
+    /* Popup */
+    .popup-bg {
+      position: fixed; left:0; top:0; width:100vw; height:100vh;
+      background: rgba(34,52,102,0.15); z-index:9999; display: flex; align-items:center; justify-content:center;
     }
+    .popup {
+      background: #fff; border-radius: 14px; max-width: 97vw; width:370px; box-shadow: 0 6px 32px #246bfd18;
+      padding: 2em 1.2em 1.2em 1.2em; position:relative; text-align:left;
+      animation: fadein 0.19s;
+    }
+    @keyframes fadein { from {opacity:0;transform:translateY(40px);} to {opacity:1;transform:none;} }
+    .popup h3 { margin:0 0 0.5em 0; color:#26733e;}
+    .popup-row { margin-bottom:0.65em; }
+    .popup-row label { color:#999; font-size:1em; margin-bottom:0;}
+    .popup-row code { font-size:1em; color:#246bfd; background:#f4f4fa; border-radius:5px; padding:0.08em 0.4em;}
+    .popup .btn { margin:0.6em 0 0.5em 0; font-size:1.07em;}
+    .popup .close-btn { display:block; margin:auto; background:#eee; color:#234; border-radius:6px; border:none; padding:0.45em 1.3em;}
+    .popup .close-btn:active { background:#c1f6dd;}
+    .popup .copy-btn { margin:0.1em 0.5em;}
+    .popup .export-btn { margin:0.3em 0; background:#246bfd;}
+    @media (max-width: 480px) { .main, .popup {padding:1.1em 0.2em 0.7em 0.2em;} .popup{width:98vw;} }
   </style>
 </head>
 <body>
@@ -49,20 +66,11 @@
         <div id="badwordWarn" class="warn" style="display:none;"></div>
       </div>
       <div class="input-row">
-        <label>Confirm Master Name:</label>
-        <input type="text" id="confirmName" maxlength="12" pattern="[A-Z]+" placeholder="Confirm master name" required />
-      </div>
-      <div class="input-row">
         <label>Public Key (64 HEX): <span class="counter" id="pubkeyCounter">0/64</span></label>
         <input type="text" id="pubkey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your public key here" required />
         <button class="copy-btn" type="button" onclick="copyField('pubkey')">Copy</button>
       </div>
-      <div class="input-row">
-        <label>Confirm Public Key: <span class="counter" id="pubkey2Counter">0/64</span></label>
-        <input type="text" id="confirmPubkey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Confirm public key" required />
-        <button class="copy-btn" type="button" onclick="copyField('confirmPubkey')">Copy</button>
-      </div>
-      <button class="btn" type="submit" id="reqBtn">Register Master</button>
+      <button class="btn" type="submit" id="reqBtn" disabled>Register Master</button>
       <div id="msgBox" class="msg"></div>
     </form>
     <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
@@ -71,16 +79,16 @@
       *Public key must be 64 HEX chars (auto generated from previous step).
     </div>
   </div>
+  <div id="popupRoot"></div>
   <script>
     // ---- Auto-fill public key ----
     window.addEventListener('DOMContentLoaded', function() {
       const localPub = localStorage.getItem('dtc_publicKey');
       if (localPub && localPub.length === 64 && /^[a-fA-F0-9]+$/.test(localPub)) {
         document.getElementById('pubkey').value = localPub;
-        document.getElementById('confirmPubkey').value = localPub;
         document.getElementById('pubkeyCounter').textContent = localPub.length + "/64";
-        document.getElementById('pubkey2Counter').textContent = localPub.length + "/64";
       }
+      updateBtnState();
     });
 
     // ---- Badwords logic ----
@@ -120,21 +128,32 @@
       } else {
         warn.style.display = "none";
       }
+      updateBtnState();
     });
 
-    // ---- Counter update ----
     document.getElementById('masterName').addEventListener('input', function() {
       this.value = this.value.replace(/[^A-Z]/g,'').toUpperCase();
       document.getElementById('nameCounter').textContent = this.value.length + "/12";
+      updateBtnState();
     });
     document.getElementById('pubkey').addEventListener('input', function() {
       this.value = this.value.replace(/[^a-fA-F0-9]/g,'');
       document.getElementById('pubkeyCounter').textContent = this.value.length + "/64";
+      updateBtnState();
     });
-    document.getElementById('confirmPubkey').addEventListener('input', function() {
-      this.value = this.value.replace(/[^a-fA-F0-9]/g,'');
-      document.getElementById('pubkey2Counter').textContent = this.value.length + "/64";
-    });
+
+    // ---- Enable/disable register button ----
+    function updateBtnState() {
+      const name = document.getElementById('masterName').value.trim();
+      const pk = document.getElementById('pubkey').value.trim();
+      const found = findBadwords(name);
+      const btn = document.getElementById('reqBtn');
+      btn.disabled = (
+        !name || name.length<4 || name.length>12 ||
+        !pk || pk.length!==64 ||
+        badwordsError
+      );
+    }
 
     // ---- Copy field utility ----
     function copyField(id) {
@@ -154,45 +173,82 @@
 
     // ---- Submit Handler ----
     document.getElementById('masterForm').onsubmit = async function(e){
+      e.preventDefault();
       const name = document.getElementById('masterName').value.trim();
+      const pk = document.getElementById('pubkey').value.trim();
       if (badwordsReady && findBadwords(name).length) {
         if (!confirm("Warning: The master name contains inappropriate words. Are you sure you want to continue?")) {
-          e.preventDefault(); return false;
+          return false;
         }
       }
       if (badwordsError) {
         alert("Cannot verify inappropriate words. Please check badwords.json or contact admin.");
-        e.preventDefault(); return false;
+        return false;
       }
 
-      e.preventDefault();
-      const name2 = document.getElementById('confirmName').value.trim();
-      const pk = document.getElementById('pubkey').value.trim();
-      const pk2 = document.getElementById('confirmPubkey').value.trim();
-
-      // Validation
       if(name.length < 4 || name.length > 12) return showMsg("Master name must be 4-12 uppercase letters.", "error");
-      if(name !== name2) return showMsg("Master name and confirmation do not match.", "error");
       if(name === "GENESIS") return showMsg("Cannot use reserved name GENESIS for Master.", "error");
       if(pk.length !== 64 || !/^[a-fA-F0-9]{64}$/.test(pk)) return showMsg("Public key must be exactly 64 HEX chars.", "error");
-      if(pk !== pk2) return showMsg("Public key and confirmation do not match.", "error");
 
-      // Demo: store in localStorage (optional)
-      let masters = [];
-      try { masters = JSON.parse(localStorage.getItem('dtc_masters') || "[]"); } catch(e) {}
-      masters.push({
+      // Generate master id as hash (simple: sha256 of pk+name)
+      const master_id = await sha256Hex(pk + ":" + name);
+      const logObj = {
         masterName: name,
         publicKey: pk,
+        masterId: master_id,
         requestedAt: new Date().toISOString()
-      });
-      localStorage.setItem('dtc_masters', JSON.stringify(masters));
-      showMsg("Master request submitted! (Demo: data stored only on your device)", "success");
+      };
 
-      // Reset fields and counters
+      // Store to localStorage (Demo only)
+      let masters = [];
+      try { masters = JSON.parse(localStorage.getItem('dtc_masters') || "[]"); } catch(e) {}
+      masters.push(logObj);
+      localStorage.setItem('dtc_masters', JSON.stringify(masters));
+
+      // Show popup
+      showPopup(logObj);
+
+      // Reset form/counters
       document.getElementById('masterForm').reset();
       document.getElementById('nameCounter').textContent = "0/12";
       document.getElementById('pubkeyCounter').textContent = "0/64";
-      document.getElementById('pubkey2Counter').textContent = "0/64";
+      updateBtnState();
+    };
+
+    // --- SHA256 utility (browser, returns hex string)
+    async function sha256Hex(str) {
+      const enc = new TextEncoder();
+      const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    // --- Popup success ---
+    function showPopup(obj) {
+      const root = document.getElementById('popupRoot');
+      let html = `
+      <div class="popup-bg"><div class="popup">
+        <h3>Registration Successful!</h3>
+        <div class="popup-row"><label>Master Name:</label><br><code>${obj.masterName}</code></div>
+        <div class="popup-row"><label>Master ID:</label><br><code id="idC">${obj.masterId}</code>
+          <button class="copy-btn" onclick="copyToClipboard('${obj.masterId}')">Copy</button></div>
+        <div class="popup-row"><label>Public Key:</label><br><code id="pkC">${obj.publicKey}</code>
+          <button class="copy-btn" onclick="copyToClipboard('${obj.publicKey}')">Copy</button></div>
+        <div class="popup-row"><label>Timestamp:</label><br>${obj.requestedAt}</div>
+        <button class="btn export-btn" onclick="exportMasterLog()">Export Log (JSON)</button>
+        <button class="close-btn" onclick="document.getElementById('popupRoot').innerHTML=''">Close</button>
+      </div></div>`;
+      root.innerHTML = html;
+      window.exportMasterLog = function() {
+        const blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = "dtc_master_registration_log.json";
+        a.click();
+      };
+    }
+    function copyToClipboard(text) {
+      navigator.clipboard.writeText(text);
+      alert("Copied!");
     }
   </script>
 </body>
