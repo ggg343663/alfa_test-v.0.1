@@ -32,6 +32,19 @@
     .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.96em;}
     .back-btn { margin-top: 1.5em; background: #f1f1f1; color: #1a3a4d; border-radius: 8px; border: none; font-size: 1.01em; padding: 0.5em 1.3em; }
     .note { font-size: 0.98em; color: #789; text-align: center; margin-top: 1.3em;}
+    .preview-box {
+      background: #f6fafd;
+      border: 1.5px solid #dde6ee;
+      border-radius: 10px;
+      padding: 1.1em 0.8em 0.9em 0.8em;
+      margin: 1.1em 0 0.5em 0;
+      font-size: 0.96em;
+      color: #246bfd;
+      word-break: break-all;
+      max-height: 160px;
+      overflow-x: auto;
+    }
+    .preview-title { color: #26733e; font-size: 1.05em; margin-bottom:0.25em;}
     /* Popup */
     .popup-bg {
       position: fixed; left:0; top:0; width:100vw; height:100vh;
@@ -73,6 +86,11 @@
       <button class="btn" type="submit" id="reqBtn" disabled>Register Master</button>
       <div id="msgBox" class="msg"></div>
     </form>
+    <div id="previewBox" class="preview-box" style="display:none;">
+      <div class="preview-title">Preview Master Node (Audit Structure):</div>
+      <pre id="previewJson" style="background:none;padding:0 0 0 0;font-size:0.96em;color:#246bfd;"></pre>
+      <button class="copy-btn" style="margin-top:0.3em;" onclick="copyPreviewJson()">Copy JSON</button>
+    </div>
     <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
     <div class="note">
       *Master name must be A-Z only, 4-12 chars.<br>
@@ -81,6 +99,9 @@
   </div>
   <div id="popupRoot"></div>
   <script>
+    // ---- DTC Genesis Hash (DEMO: replace with real value in production) ----
+    const GENESIS_HASH = "c8a1e35a25dcb2742e17b26f012f13a742b639d94a1a5e6c18e7a12dbcc9bfc7";
+
     // ---- Auto-fill public key ----
     window.addEventListener('DOMContentLoaded', function() {
       const localPub = localStorage.getItem('dtc_publicKey');
@@ -122,24 +143,27 @@
       if (badwordsError) {
         warn.style.display = "";
         warn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
-      } else if (found.length) {
-        warn.style.display = "";
+      } else if (found.length
+            warn.style.display = "";
         warn.textContent = "Warning: This name contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
       } else {
         warn.style.display = "none";
       }
       updateBtnState();
+      livePreview();
     });
 
     document.getElementById('masterName').addEventListener('input', function() {
       this.value = this.value.replace(/[^A-Z]/g,'').toUpperCase();
       document.getElementById('nameCounter').textContent = this.value.length + "/12";
       updateBtnState();
+      livePreview();
     });
     document.getElementById('pubkey').addEventListener('input', function() {
       this.value = this.value.replace(/[^a-fA-F0-9]/g,'');
       document.getElementById('pubkeyCounter').textContent = this.value.length + "/64";
       updateBtnState();
+      livePreview();
     });
 
     // ---- Enable/disable register button ----
@@ -171,6 +195,61 @@
       setTimeout(() => { box.innerHTML = ""; box.className = "msg"; }, 3200);
     }
 
+    // ---- SHA256 utility (browser, returns hex string)
+    async function sha256Hex(str) {
+      const enc = new TextEncoder();
+      const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    // ---- Nonce (random hex)
+    function genNonce() {
+      let arr = new Uint8Array(8);
+      window.crypto.getRandomValues(arr);
+      return Array.from(arr).map(x=>x.toString(16).padStart(2,'0')).join('');
+    }
+
+    // ---- Master Node Builder (audit-ready)
+    async function buildMasterNode() {
+      const masterName = document.getElementById('masterName').value.trim();
+      const publicKey = document.getElementById('pubkey').value.trim();
+      if(masterName.length<4 || masterName.length>12 || publicKey.length!==64) return null;
+      const timestamp = Math.floor(Date.now() / 1000).toString();
+      const nonce = genNonce();
+      // hash = SHA256(genesis_hash + master_id + timestamp + nonce)
+      const hashInput = GENESIS_HASH + masterName + timestamp + nonce;
+      const hash = await sha256Hex(hashInput);
+      return {
+        master_id: masterName,
+        public_key: publicKey,
+        timestamp: timestamp,
+        nonce: nonce,
+        prev_hash: GENESIS_HASH,
+        hash: hash
+      };
+    }
+
+    // ---- Live Preview (on input)
+    async function livePreview() {
+      const masterName = document.getElementById('masterName').value.trim();
+      const publicKey = document.getElementById('pubkey').value.trim();
+      if(masterName.length<4 || masterName.length>12 || publicKey.length!==64) {
+        document.getElementById('previewBox').style.display = "none";
+        return;
+      }
+      const node = await buildMasterNode();
+      if(!node) return;
+      document.getElementById('previewJson').textContent = JSON.stringify(node, null, 2);
+      document.getElementById('previewBox').style.display = "";
+    }
+
+    // ---- Copy JSON Preview
+    function copyPreviewJson() {
+      const txt = document.getElementById('previewJson').textContent;
+      navigator.clipboard.writeText(txt);
+      showMsg("Copied JSON!", "success");
+    }
+
     // ---- Submit Handler ----
     document.getElementById('masterForm').onsubmit = async function(e){
       e.preventDefault();
@@ -190,37 +269,25 @@
       if(name === "GENESIS") return showMsg("Cannot use reserved name GENESIS for Master.", "error");
       if(pk.length !== 64 || !/^[a-fA-F0-9]{64}$/.test(pk)) return showMsg("Public key must be exactly 64 HEX chars.", "error");
 
-      // Generate master id as hash (simple: sha256 of pk+name)
-      const master_id = await sha256Hex(pk + ":" + name);
-      const logObj = {
-        masterName: name,
-        publicKey: pk,
-        masterId: master_id,
-        requestedAt: new Date().toISOString()
-      };
+      // Create audit-ready master node
+      const node = await buildMasterNode();
 
       // Store to localStorage (Demo only)
       let masters = [];
       try { masters = JSON.parse(localStorage.getItem('dtc_masters') || "[]"); } catch(e) {}
-      masters.push(logObj);
+      masters.push(node);
       localStorage.setItem('dtc_masters', JSON.stringify(masters));
 
       // Show popup
-      showPopup(logObj);
+      showPopup(node);
 
-      // Reset form/counters
+      // Reset form/counters/preview
       document.getElementById('masterForm').reset();
       document.getElementById('nameCounter').textContent = "0/12";
       document.getElementById('pubkeyCounter').textContent = "0/64";
+      document.getElementById('previewBox').style.display = "none";
       updateBtnState();
     };
-
-    // --- SHA256 utility (browser, returns hex string)
-    async function sha256Hex(str) {
-      const enc = new TextEncoder();
-      const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
-    }
 
     // --- Popup success ---
     function showPopup(obj) {
@@ -228,12 +295,14 @@
       let html = `
       <div class="popup-bg"><div class="popup">
         <h3>Registration Successful!</h3>
-        <div class="popup-row"><label>Master Name:</label><br><code>${obj.masterName}</code></div>
-        <div class="popup-row"><label>Master ID:</label><br><code id="idC">${obj.masterId}</code>
-          <button class="copy-btn" onclick="copyToClipboard('${obj.masterId}')">Copy</button></div>
-        <div class="popup-row"><label>Public Key:</label><br><code id="pkC">${obj.publicKey}</code>
-          <button class="copy-btn" onclick="copyToClipboard('${obj.publicKey}')">Copy</button></div>
-        <div class="popup-row"><label>Timestamp:</label><br>${obj.requestedAt}</div>
+        <div class="popup-row"><label>Master Name:</label><br><code>${obj.master_id}</code></div>
+        <div class="popup-row"><label>Master Hash:</label><br><code id="hashC">${obj.hash}</code>
+          <button class="copy-btn" onclick="copyToClipboard('${obj.hash}')">Copy</button></div>
+        <div class="popup-row"><label>Public Key:</label><br><code id="pkC">${obj.public_key}</code>
+          <button class="copy-btn" onclick="copyToClipboard('${obj.public_key}')">Copy</button></div>
+        <div class="popup-row"><label>Timestamp:</label><br>${obj.timestamp} <span style="color:#789;font-size:0.98em;">(${(new Date(obj.timestamp*1000)).toISOString()})</span></div>
+        <div class="popup-row"><label>Nonce:</label><br><code>${obj.nonce}</code></div>
+        <div class="popup-row"><label>Prev Hash (Genesis):</label><br><code>${obj.prev_hash}</code></div>
         <button class="btn export-btn" onclick="exportMasterLog()">Export Log (JSON)</button>
         <button class="close-btn" onclick="document.getElementById('popupRoot').innerHTML=''">Close</button>
       </div></div>`;
@@ -242,7 +311,7 @@
         const blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
         const a = document.createElement("a");
         a.href = URL.createObjectURL(blob);
-        a.download = "dtc_master_registration_log.json";
+        a.download = "dtc_master_node.json";
         a.click();
       };
     }
@@ -250,6 +319,9 @@
       navigator.clipboard.writeText(text);
       alert("Copied!");
     }
+
+    // ---- Live preview (init)
+    livePreview();
   </script>
 </body>
-</html>
+</html>     
