@@ -7,57 +7,68 @@
   <style>
     body { font-family: Arial,sans-serif; background: #f4f8fb; margin:0; padding:0;}
     .container {
-      max-width: 500px; margin:2em auto; background:#fff;
-      padding:2.2em 1.1em 2.1em 1.1em; border-radius:18px;
+      max-width: 520px; margin:2em auto; background:#fff;
+      padding:2.2em 1.3em 2em 1.3em; border-radius:18px;
       box-shadow:0 2px 18px #4f8efc19;
     }
-    h2 { color:#2563eb; text-align:center; margin-bottom:1.6em;}
-    label { font-weight:600; margin-top:1em; display:block; color:#26733e;}
+    h2 { color:#2563eb; text-align:center; margin-bottom:1.5em;}
+    label { font-weight:600; margin-top:0.9em; display:block; color:#26733e;}
     input[type=text], input[type=password], textarea {
-      width:100%; padding:0.62em 0.7em; font-size:1.05em;
-      border-radius:8px; border:1.3px solid #60a5fa;
-      background:#f0f6ff; color:#1e293b; margin-bottom:0.46em;
-      margin-top:0.18em; transition: border 0.15s;
-      min-height: 38px; max-height: 44px;
+      width:100%; padding:0.8em 0.9em; font-size:1.07em;
+      border-radius:7px; border:1.2px solid #60a5fa;
+      background:#f0f6ff; color:#1e293b; margin-bottom:0.62em;
+      margin-top:0.16em; transition: border 0.15s;
+      min-height: 40px;
+      box-sizing: border-box;
     }
-    textarea { min-height:3.3em; resize:vertical;}
+    textarea { min-height:3.2em; max-height: 6em; resize:vertical;}
     .btn-main {
-      width:100%; padding:0.75em 0; background:#2563eb;
+      width:100%; padding:0.86em 0; background:#2563eb;
       color:#fff; border:none; border-radius:9px; font-weight:700;
-      font-size:1.08em; margin-top:1.2em; cursor:pointer;
+      font-size:1.13em; margin-top:1.2em; cursor:pointer;
       letter-spacing:0.01em; transition:background 0.17s;
     }
     .btn-main:disabled { background:#a5c7fa; color:#fff;}
     .btn-main:hover:enabled { background:#1d4ed8;}
     .hash-row {
       margin-top:1.1em; word-break:break-all; font-family:monospace;
-      font-size:1.04em; color:#334155; background:#e0e7ef;
+      font-size:1.02em; color:#334155; background:#e0e7ef;
       border-radius:8px; padding:0.7em 1em;
-      position: relative;
-      max-height: 96px; overflow:auto;
+      position: relative; max-height: 120px; overflow:auto;
     }
-    .step-label { margin:1em 0 0.4em 0; font-weight:bold; color:#2563eb;}
+    .step-label {
+      margin:1.05em 0 0.28em 0; font-weight:bold; color:#2563eb;
+      font-size:1.04em;
+      transition: opacity 0.15s;
+    }
+    .step-label.disabled {
+      opacity: 0.38;
+      font-weight: 500;
+    }
     .copy-btn { background:none; border:none; color:#2563eb; cursor:pointer; font-weight:600;}
-    .copy-success { color:#22c55e; font-size:0.96em; margin-left:0.33em;}
-    .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.96em;}
+    .copy-success { color:#22c55e; font-size:0.97em; margin-left:0.33em;}
+    .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.97em;}
     .success { color:#16a34a; }
     .row { display:flex; gap:0.4em; align-items:center;}
-    .qr-btn { background:#60a5fa; color:#fff; border:none; padding:0.45em 0.8em; border-radius:6px; font-size:0.98em; cursor:pointer;}
+    .qr-btn { background:#60a5fa; color:#fff; border:none; padding:0.46em 0.9em; border-radius:6px; font-size:1.01em; cursor:pointer;}
     #qrVideo { width:99%; border-radius:8px; margin-top:0.6em; display:none;}
-    .nav-bar { display:flex; gap:0.5em; margin-top:2.1em; }
-    .nav-btn { flex:1; border:none; border-radius:7px; padding:0.8em 0;
+    .nav-bar { display:flex; gap:0.5em; margin-top:2em; }
+    .nav-btn { flex:1; border:none; border-radius:7px; padding:0.9em 0;
       font-weight:600; font-size:1em; cursor:pointer;}
     .nav-btn-back, .nav-btn-home { background:#cbd5e1; color:#1e293b;}
     .nav-btn-next { background:#60a5fa; color:#fff;}
     @media (max-width:600px) {
-      .container { padding:1.3em 0.4em 1.4em 0.4em;}
-      .nav-bar { flex-direction: column; gap:0.4em;}
+      .container { padding:1.2em 0.35em 1.3em 0.35em;}
+      .nav-bar { flex-direction: column; gap:0.45em;}
+      input, textarea { font-size:1em; }
+      h2 { font-size:1.17em; }
     }
   </style>
 </head>
 <body>
 <div class="container">
   <h2>Register Agent<br>(Dual Sign, DTC v.0.1.8d)</h2>
+  
   <!-- Step 1: Master สร้าง slot ให้ Agent -->
   <form id="masterForm" autocomplete="off">
     <div class="step-label">Step 1: Master creates Agent slot</div>
@@ -76,26 +87,25 @@
     </div>
     <button class="btn-main" type="submit">Create Agent Slot</button>
   </form>
-  <video id="qrVideo" playsinline></video>
-
+  
+  <div class="step-label disabled" id="step2Label" style="margin-top:2.2em;">Step 2: Agent confirms and signs</div>
   <!-- Step 2: Agent ลงนาม/confirm -->
   <div id="step2Section" style="display:none;">
-    <div class="step-label">Step 2: Agent confirms and signs</div>
-    <div style="font-size:0.97em; margin-bottom:0.2em;">
+    <div style="font-size:0.98em; margin-bottom:0.27em;">
       Copy this payload and let the agent sign with their password+pin:
     </div>
     <textarea id="agentPayload" readonly></textarea>
     <button class="copy-btn" type="button" onclick="copyAgentPayload()">Copy Payload</button>
     <span id="copyAgentPayloadSuccess" class="copy-success"></span>
-    <div style="margin-top:1.2em;">
+    <div style="margin-top:1.1em;">
       <label>Agent Password:</label>
       <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" />
       <label>Agent PIN:</label>
       <input type="password" id="agentPin" maxlength="6" autocomplete="new-password" />
-      <button class="btn-main" type="button" onclick="signAgent()" style="margin-top:0.8em;">Agent Sign</button>
+      <button class="btn-main" type="button" onclick="signAgent()" style="margin-top:0.7em;">Agent Sign</button>
     </div>
     <div id="sigResult" class="hash-row" style="display:none;"></div>
-    <button type="button" class="btn-main" style="margin-top:1.4em; background:#facc15;color:#3b3b0a;" onclick="exportLog()">Export Log (JSON)</button>
+    <button type="button" class="btn-main" style="margin-top:1.1em; background:#facc15;color:#3b3b0a;" onclick="exportLog()">Export Log (JSON)</button>
     <span id="exportSuccess" class="success"></span>
   </div>
   <div class="nav-bar">
@@ -240,6 +250,7 @@
     window.agent_hash_data = { master_hash, agent_pubkey:pubkey, agent_name:name, nonce, timestamp:lastTimestamp };
     window.agent_hash_to_sign = agent_hash_str;
     document.getElementById('step2Section').style.display = "block";
+    document.getElementById('step2Label').classList.remove("disabled");
     document.getElementById('agentPayload').value = agent_hash_str;
     window.agent_hash = ""; // clear old
     document.getElementById('sigResult').style.display = "none";
