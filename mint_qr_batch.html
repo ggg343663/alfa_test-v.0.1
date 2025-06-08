@@ -20,12 +20,8 @@
       border-left: 6px solid #246bfd;
       min-width: 230px; max-width: 330px; font-size: 1.07em;
     }
-    .export-btns .btn {
-      min-width: 140px;
-    }
-    .nav-btns .btn {
-      min-width: 100px;
-    }
+    .export-btns .btn { min-width: 140px; }
+    .nav-btns .btn { min-width: 100px; }
   </style>
 </head>
 <body>
@@ -121,17 +117,18 @@
       return;
     }
 
-    // Step 1: สร้าง hash1 สำหรับแต่ละ slot
+    // Double hash: Step 1 (hash1) + Step 2 (commitment hash2)
     const qrList = [];
     for (let i = 0; i < qrAmount; i++) {
+      // สามารถเพิ่ม serial/slot_id ได้ (ตรง logic DTC จริง)
+      const slot_id = i + 1;
       const nonce = crypto.randomUUID();
-      const qrhash = await sha256(secret + "|" + nonce);
-      qrList.push({ qrhash, nonce });
+      const qrhash = await sha256(secret + "|" + slot_id + "|" + nonce);
+      qrList.push({ qrhash, slot_id, nonce });
     }
-
-    // Step 2: สร้าง hash2 (commitment) จาก QR ทั้ง batch
+    // commitment hash2
     const combinedHashes = qrList.map(q => q.qrhash).join('|');
-    const commitmentHash = await sha256(combinedHashes);
+    const commitmentHash = await sha256(combinedHashes + "|" + batchName);
 
     // Timestamp
     const timestamp = new Date().toISOString();
@@ -139,10 +136,9 @@
     // Update UI
     commitmentHashDiv.textContent = commitmentHash;
     timestampDiv.textContent = timestamp;
-    nonceListPre.textContent = qrList.map(q => q.nonce).join('\n');
+    nonceListPre.textContent = qrList.map(q => `#${q.slot_id}: ${q.nonce}`).join('\n');
     nonceSummary.textContent = `${qrAmount} items`;
 
-    // Generate QR code for commitment hash
     QRCode.toCanvas(qrCanvas, commitmentHash);
 
     resultSection.classList.remove("d-none");
@@ -153,7 +149,7 @@
     };
   };
 
-  // Export Ticket (ทุกข้อมูลรวม)
+  // Export Ticket (backup)
   document.getElementById("exportTicket").onclick = () => {
     if (!batchData) return;
     const ticket = [
@@ -164,7 +160,7 @@
       `Commitment: ${batchData.commitmentHash}`,
       `Timestamp: ${batchData.timestamp}`,
       `Nonces:`,
-      ...batchData.qrList.map((q, idx) => `#${idx + 1}: ${q.nonce}`)
+      ...batchData.qrList.map(q => `#${q.slot_id}: ${q.nonce}`)
     ].join('\n');
     downloadText(ticket, `qr_ticket_${Date.now()}.txt`);
   };
@@ -176,15 +172,15 @@
     downloadText(qrHashes, `qr_hashes_${Date.now()}.txt`);
   };
 
-  // Export Commitment Log (hash2+batch)
+  // Export Commitment Log (public, ไม่เผย secret)
   document.getElementById("exportLog").onclick = () => {
     if (!batchData) return;
     const log = {
       batchName: batchData.batchName,
       timestamp: batchData.timestamp,
       commitmentHash: batchData.commitmentHash,
-      qrHashes: batchData.qrList.map(q => q.qrhash),
-      nonces: batchData.qrList.map(q => q.nonce)
+      // public log สามารถเลือกไม่ใส่ nonce/secret ได้
+      qrHashes: batchData.qrList.map(q => q.qrhash)
     };
     const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
@@ -209,7 +205,6 @@
     return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
-  // Navigation - Next (demo)
   document.getElementById("nextBtn").onclick = () => {
     alert("You can connect to the next step (e.g., QR registration) here.");
     // window.location.href = "register.html";
