@@ -1,116 +1,219 @@
 <!DOCTYPE html>
-<html lang="en">  
-<head>  
-  <meta charset="UTF-8" />  
-  <title>Mint QR Batch (Double Hash UI) - DTC System</title>  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">  
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>  
-</head>  
-<body>  
-  <div class="container my-5 p-4 bg-white rounded shadow">  
-    <h2 class="text-center text-success mb-4">Mint QR Batch (Double Hash UI)</h2>
-    <form id="mintForm">
-      <div class="row g-3">
-        <div class="col-md-6">
-          <label class="form-label">Password</label>
-          <input id="password" type="password" class="form-control" required>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">PIN</label>
-          <input id="pin" type="password" class="form-control" required>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Secret</label>
-          <input id="secret" type="text" class="form-control" required>
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Batch Name (optional)</label>
-          <input id="batchName" type="text" class="form-control">
-        </div>
-        <div class="col-md-6">
-          <label class="form-label">Number of QR</label>
-          <input id="qrAmount" type="number" class="form-control" value="10" min="1" max="200">
-        </div>
-      </div>
-      <button class="btn btn-success w-100 my-3" type="submit">Generate QR Batch</button>
-    </form>
-
-    <div id="result" class="mt-4 d-none">
-      <h5 class="text-primary">Commitment Hash:</h5>
-      <div id="commitmentHash" class="mb-2 text-break"></div>
-
-      <h5 class="text-primary">Timestamp:</h5>
-      <div id="timestamp" class="mb-2"></div>
-
-      <h5 class="text-primary">Nonce List:</h5>
-      <pre id="nonceList" class="bg-light p-3 rounded"></pre>
-
-      <canvas id="qrCanvas" class="my-3"></canvas>
-
-      <button id="copyTicket" class="btn btn-primary">Copy Ticket</button>
-      <button id="exportLog" class="btn btn-warning">Export JSON Log</button>
-    </div>
-  </div>  
-
-  <script>
-    const form = document.getElementById("mintForm");
-    const commitmentHashDiv = document.getElementById("commitmentHash");
-    const timestampDiv = document.getElementById("timestamp");
-    const nonceListPre = document.getElementById("nonceList");
-    const resultSection = document.getElementById("result");
-
-    form.onsubmit = async e => {
-      e.preventDefault();
-
-      const password = document.getElementById("password").value;
-      const pin = document.getElementById("pin").value;
-      const secret = document.getElementById("secret").value;
-      const batchName = document.getElementById("batchName").value || "Unnamed";
-      const qrAmount = parseInt(document.getElementById("qrAmount").value);
-
-      const qrList = [];
-      for (let i = 0; i < qrAmount; i++) {
-        const nonce = crypto.randomUUID();
-        const qrhash = await sha256(secret + nonce);
-        qrList.push({ qrhash, nonce });
-      }
-
-      const combinedHashes = qrList.map(q => q.qrhash).join('|');
-      const commitmentHash = await sha256(combinedHashes);
-      const timestamp = new Date().toISOString();
-
-      commitmentHashDiv.textContent = commitmentHash;
-      timestampDiv.textContent = timestamp;
-      nonceListPre.textContent = qrList.map(q => q.nonce).join('\n');
-
-      QRCode.toCanvas(document.getElementById('qrCanvas'), commitmentHash);
-
-      resultSection.classList.remove("d-none");
-
-      window.batchData = { batchName, password, pin, secret, commitmentHash, timestamp, qrList };
-    };
-
-    document.getElementById("copyTicket").onclick = () => {
-      const { batchName, password, pin, secret, commitmentHash, timestamp, qrList } = window.batchData;
-      const ticket = `Batch: ${batchName}\nPassword: ${password}\nPIN: ${pin}\nSecret: ${secret}\nCommitment: ${commitmentHash}\nTimestamp: ${timestamp}\nNonces:\n${qrList.map(q => q.nonce).join('\n')}`;
-      navigator.clipboard.writeText(ticket).then(() => alert("Ticket copied!"));
-    };
-
-    document.getElementById("exportLog").onclick = () => {
-      const blob = new Blob([JSON.stringify(window.batchData, null, 2)], { type: 'application/json' });
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = `qr_batch_${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(a.href);
-    };
-
-    async function sha256(str) {
-      const enc = new TextEncoder().encode(str);
-      const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
-      return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mint QR Batch (Double Hash UI) - DTC System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <style>
+    .qr-preview-section {
+      display: flex; gap: 1.4em; flex-wrap: wrap; align-items: flex-start;
+      margin-bottom: 1.6em;
     }
-  </script>
-</body>  
+    .qr-box {
+      background: #eaf2fa; border-radius: 13px; padding: 1em 1.1em;
+      border-left: 6px solid #219150; min-width: 140px; text-align: center;
+    }
+    .info-box {
+      background: #f7f7fb; border-radius: 13px; padding: 1.2em 1em;
+      border-left: 6px solid #246bfd;
+      min-width: 230px; max-width: 330px; font-size: 1.07em;
+    }
+    .export-btns .btn {
+      min-width: 140px;
+    }
+    .nav-btns .btn {
+      min-width: 100px;
+    }
+  </style>
+</head>
+<body>
+<div class="container my-5 p-4 bg-white rounded shadow">
+  <h2 class="text-center text-success mb-4">Mint QR Batch (Double Hash UI)</h2>
+
+  <!-- Key & Batch Info Section -->
+  <form id="mintForm" autocomplete="off">
+    <div class="row g-3">
+      <div class="col-md-6">
+        <label class="form-label">Password</label>
+        <input id="password" type="password" class="form-control" required maxlength="16">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">PIN</label>
+        <input id="pin" type="password" class="form-control" required maxlength="8">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Secret</label>
+        <input id="secret" type="text" class="form-control" required maxlength="64">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Batch Name (optional)</label>
+        <input id="batchName" type="text" class="form-control" maxlength="32">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Number of QR</label>
+        <input id="qrAmount" type="number" class="form-control" value="10" min="1" max="200">
+      </div>
+      <div class="col-md-6 d-flex align-items-end">
+        <button class="btn btn-primary w-100" id="generateBtn" type="submit">Generate QR Batch</button>
+      </div>
+    </div>
+  </form>
+
+  <!-- Result Section -->
+  <div id="resultSection" class="mt-5 d-none">
+    <div class="qr-preview-section">
+      <div class="qr-box">
+        <canvas id="qrCanvas"></canvas>
+        <div class="text-secondary mt-2" style="font-size:0.95em;">QR preview</div>
+      </div>
+      <div class="info-box">
+        <div><strong>Commitment Hash</strong></div>
+        <div id="commitmentHash" class="mb-2 text-break"></div>
+        <div><strong>Timestamp</strong></div>
+        <div id="timestamp" class="mb-2"></div>
+        <div><strong>Nonce</strong></div>
+        <div id="nonceSummary" class="mb-2"></div>
+      </div>
+    </div>
+    <div>
+      <h6 class="mb-1 mt-2">Nonce List</h6>
+      <pre id="nonceList" class="bg-light p-3 rounded" style="font-size:0.97em; max-height:140px; overflow:auto"></pre>
+    </div>
+    <!-- Export Section -->
+    <div class="export-btns d-flex gap-2 mt-3 mb-3">
+      <button id="exportTicket" class="btn btn-warning">Export Ticket</button>
+      <button id="exportQR" class="btn btn-primary">Export QR</button>
+      <button id="exportLog" class="btn btn-info text-white">Export Commitment Log</button>
+    </div>
+    <!-- Navigation -->
+    <div class="nav-btns d-flex gap-2 mt-4 justify-content-between">
+      <button class="btn btn-outline-secondary" onclick="history.back()">Back</button>
+      <button class="btn btn-outline-dark" onclick="window.location.href='index.html'">Home</button>
+      <button class="btn btn-success" id="nextBtn">Next &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const form = document.getElementById("mintForm");
+  const resultSection = document.getElementById("resultSection");
+  const commitmentHashDiv = document.getElementById("commitmentHash");
+  const timestampDiv = document.getElementById("timestamp");
+  const nonceListPre = document.getElementById("nonceList");
+  const nonceSummary = document.getElementById("nonceSummary");
+  const qrCanvas = document.getElementById("qrCanvas");
+
+  let batchData = null;
+
+  form.onsubmit = async e => {
+    e.preventDefault();
+
+    const password = document.getElementById("password").value.trim();
+    const pin = document.getElementById("pin").value.trim();
+    const secret = document.getElementById("secret").value.trim();
+    const batchName = document.getElementById("batchName").value.trim() || "Unnamed";
+    const qrAmount = parseInt(document.getElementById("qrAmount").value);
+
+    if (!password || !pin || !secret || isNaN(qrAmount) || qrAmount < 1 || qrAmount > 200) {
+      alert("Please fill all required fields correctly.");
+      return;
+    }
+
+    // Step 1: สร้าง hash1 สำหรับแต่ละ slot
+    const qrList = [];
+    for (let i = 0; i < qrAmount; i++) {
+      const nonce = crypto.randomUUID();
+      const qrhash = await sha256(secret + "|" + nonce);
+      qrList.push({ qrhash, nonce });
+    }
+
+    // Step 2: สร้าง hash2 (commitment) จาก QR ทั้ง batch
+    const combinedHashes = qrList.map(q => q.qrhash).join('|');
+    const commitmentHash = await sha256(combinedHashes);
+
+    // Timestamp
+    const timestamp = new Date().toISOString();
+
+    // Update UI
+    commitmentHashDiv.textContent = commitmentHash;
+    timestampDiv.textContent = timestamp;
+    nonceListPre.textContent = qrList.map(q => q.nonce).join('\n');
+    nonceSummary.textContent = `${qrAmount} items`;
+
+    // Generate QR code for commitment hash
+    QRCode.toCanvas(qrCanvas, commitmentHash);
+
+    resultSection.classList.remove("d-none");
+
+    batchData = {
+      batchName, password, pin, secret,
+      commitmentHash, timestamp, qrList
+    };
+  };
+
+  // Export Ticket (ทุกข้อมูลรวม)
+  document.getElementById("exportTicket").onclick = () => {
+    if (!batchData) return;
+    const ticket = [
+      `Batch: ${batchData.batchName}`,
+      `Password: ${batchData.password}`,
+      `PIN: ${batchData.pin}`,
+      `Secret: ${batchData.secret}`,
+      `Commitment: ${batchData.commitmentHash}`,
+      `Timestamp: ${batchData.timestamp}`,
+      `Nonces:`,
+      ...batchData.qrList.map((q, idx) => `#${idx + 1}: ${q.nonce}`)
+    ].join('\n');
+    downloadText(ticket, `qr_ticket_${Date.now()}.txt`);
+  };
+
+  // Export QR only (hash1)
+  document.getElementById("exportQR").onclick = () => {
+    if (!batchData) return;
+    const qrHashes = batchData.qrList.map(q => q.qrhash).join('\n');
+    downloadText(qrHashes, `qr_hashes_${Date.now()}.txt`);
+  };
+
+  // Export Commitment Log (hash2+batch)
+  document.getElementById("exportLog").onclick = () => {
+    if (!batchData) return;
+    const log = {
+      batchName: batchData.batchName,
+      timestamp: batchData.timestamp,
+      commitmentHash: batchData.commitmentHash,
+      qrHashes: batchData.qrList.map(q => q.qrhash),
+      nonces: batchData.qrList.map(q => q.nonce)
+    };
+    const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `commitment_log_${Date.now()}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  };
+
+  function downloadText(text, filename) {
+    const blob = new Blob([text], { type: 'text/plain' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(a.href);
+  }
+
+  async function sha256(str) {
+    const enc = new TextEncoder().encode(str);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
+    return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  // Navigation - Next (demo)
+  document.getElementById("nextBtn").onclick = () => {
+    alert("You can connect to the next step (e.g., QR registration) here.");
+    // window.location.href = "register.html";
+  };
+</script>
+</body>
 </html>
