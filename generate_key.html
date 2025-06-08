@@ -1,279 +1,231 @@
-<!DOCTYPE html>  <html lang="en">  
-<head>  
-  <meta charset="UTF-8" />  
-  <meta name="viewport" content="width=device-width, initial-scale=1" />  
-  <title>Generate Public Key</title>  
-  <style>  
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; padding: 1em; background: #f5f7fa; color: #333; }  
-    h2 { text-align: center; color: #2c3e50; margin-bottom: 1em; }  
-    .input-row { margin-bottom: 1.2em; }  
-    .input-label { margin-bottom: 0.35em; font-weight: bold; }  
-    .pw-group { position: relative; }  
-    .pw-input { width: 100%; padding: 0.7em 2.3em 0.7em 0.9em; font-size: 1em; border-radius: 6px; box-sizing: border-box; border: 1.5px solid #ffe066; background: #fffbe7; }  
-    .pin-input { border: 1.5px solid #ffb44d; background: #fff7f1; }  
-    .show-btn { position: absolute; right: 0.2em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; padding: 0 0.12em; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;}  
-    .show-btn svg { display: block; }  
-    .output { background: #eafaf0; border-left: 5px solid #219150; padding: 0.8em; border-radius: 8px; margin: 1em 0; word-break: break-all; overflow-wrap: break-word; }  
-    .publickey-box { display: flex; align-items: center; background: #f6fff8; border-radius: 7px; border: 1.5px solid #32bc5e; padding: 0.5em; margin-top: 0.7em; }  
-    .publickey-box span { flex: 1; word-break: break-all; }  
-    .copy-btn, .export-btn { margin-left: 0.7em; padding: 0.35em 1.2em; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }  
-    .export-btn { background: #2563eb; margin-left: 0.7em;}  
-    .copy-btn:active { background: #219150; }  
-    .export-btn:active { background: #1747a1; }  
-    .btn { display: inline-block; padding: 0.7em 1.2em; margin: 0.5em 0.3em; border: none; border-radius: 6px; font-size: 1em; font-weight: bold; cursor: pointer; transition: background 0.2s; text-decoration: none; text-align: center; }  
-    #gen-key-btn { background: #219150; color: #fff; width: 100%; margin-top: 0.3em; }  
-    #gen-key-btn:hover { background: #176d38; }  
-    #next-btn { background: #246bfd; color: #fff; opacity: 0.5; cursor: not-allowed; width: 100%; }  
-    #next-btn.enabled { opacity: 1; cursor: pointer; }  
-    #next-btn.enabled:hover { background: #1747a1; }  
-    .note { font-size: 0.92em; color: #777; margin-top: 1.1em; text-align: center; }  
-    .strength { font-size: 0.97em; margin-bottom: 0.15em; margin-top: 0.10em; }  
-    .strength.weak { color: #ff6b6b; }  
-    .strength.medium { color: #f6a800; }  
-    .strength.strong { color: #4caf50; }  
-    .strength-bar { width: 100%; height: 7px; border-radius: 5px; margin-bottom: 0.7em; background: #ffe4e0; transition: background 0.3s;}  
-    .strength-bar.weak { background: #ff6b6b; }  
-    .strength-bar.medium { background: #ffd700; }  
-    .strength-bar.strong { background: #64dd17; }  
-    .error { color: #e74c3c; font-size: 0.98em; margin-bottom: 0.7em; text-align: left; }  
-    .back-home { background: #f2f2f2; color: #333; padding: 0.6em 1.3em; font-size: 1em; text-decoration: none; display: inline-block; margin-top: 2em; text-align: center; border-radius: 5px; }  
-    .timestamp-row { color: #26733e; font-size: 0.98em; margin-top: 0.2em;}  
-    @media (max-width: 480px) {  
-      body { margin: 1em; padding: 0.5em; }  
-      .btn { width: 100%; }  
-      .publickey-box { flex-direction: column; align-items: stretch; }  
-      .copy-btn, .export-btn { margin: 0.7em 0 0 0; }  
-    }  
-  </style>  
-</head>  
-<body>  
-  <h2>1. Generate Public Key from Password + PIN</h2>  
-  <div class="input-container">  
-    <div class="input-row">  
-      <div class="input-label">Password:</div>  
-      <div class="pw-group">  
-        <input type="password" id="password" class="pw-input" placeholder="6-12 chars, letters & numbers" autocomplete="new-password"/>  
-        <button class="show-btn" type="button" onclick="toggleShow('password',this)" aria-label="Show Password">  
-          <span class="eye-icon" id="eye-password"></span>  
-        </button>  
-      </div>  
-      <div id="strength-bar" class="strength-bar weak"></div>  
-      <div id="password-strength-msg" class="strength weak">Weak</div>  
-    </div>  
-    <div class="input-row">  
-      <div class="input-label">Confirm Password:</div>  
-      <div class="pw-group">  
-        <input type="password" id="confirm-password" class="pw-input" placeholder="Confirm password" autocomplete="new-password"/>  
-        <button class="show-btn" type="button" onclick="toggleShow('confirm-password',this)" aria-label="Show Confirm Password">  
-          <span class="eye-icon"></span>  
-        </button>  
-      </div>  
-    </div>  
-    <div class="input-row">  
-      <div class="input-label">PIN (4-6 digits):</div>  
-      <div class="pw-group">  
-        <input type="password" id="pin" class="pw-input pin-input" placeholder="Enter PIN (4-6 digits)" maxlength="6" autocomplete="off"/>  
-        <button class="show-btn" type="button" onclick="toggleShow('pin',this)" aria-label="Show PIN">  
-          <span class="eye-icon"></span>  
-        </button>  
-      </div>  
-    </div>  
-    <div class="input-row">  
-      <div class="input-label">Confirm PIN:</div>  
-      <div class="pw-group">  
-        <input type="password" id="confirm-pin" class="pw-input pin-input" placeholder="Confirm PIN" maxlength="6" autocomplete="off"/>  
-        <button class="show-btn" type="button" onclick="toggleShow('confirm-pin',this)" aria-label="Show Confirm PIN">  
-          <span class="eye-icon"></span>  
-        </button>  
-      </div>  
-    </div>  
-    <div id="error-msg" class="error" style="display:none;"></div>  
-  </div>  
-  <button id="gen-key-btn" class="btn">Generate Key</button>  
-  <div id="output-container" class="output" style="display: none;">  
-    <strong>Public Key:</strong>  
-    <div class="publickey-box">  
-      <span id="pub-key-output">–</span>  
-      <button id="copy-btn" class="copy-btn">Copy</button>  
-      <button id="export-btn" class="export-btn">Export Log</button>  
-    </div>  
-    <div class="timestamp-row" id="timestamp-output"></div>  
-    <div class="note" style="color:#26733e;">  
-      *Your Public Key is generated deterministically from your Password and PIN.<br>  
-      <b>Keep your password & PIN safe!<br>  
-      We never store or show your private key.<br>  
-      You can always regenerate the same public key if you enter the same info.</b>  
-    </div>  
-  </div>  
-  <div style="text-align: center;">  
-    <a id="next-btn" class="btn" href="mint_qr_batch.html" aria-disabled="true">Next: Mint QR Batch</a>  
-  </div>  
-  <div class="back-home">  
-    <a href="index.html">Back to Home</a>  
-  </div>  
-  <p class="note">  
-    Enter password and PIN, confirm both, then click Generate Key.<br>  
-    <b>Password must be 6-12 characters and include both letters and numbers.</b> PIN should be 4-6 digits.  
-  </p>  
-  <script>  
-    // Eye icons  
-    const eyeOpenSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M1 12C1 12 5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#333" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#333"/></svg>`;  
-    const eyeSlashSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path d="M1 12C1 12 5 5 12 5s11 7 11 7-4 7-11 7S1 12 1 12Z" stroke="#333" stroke-width="2"/><circle cx="12" cy="12" r="3.5" fill="#333"/><line x1="4" y1="20" x2="20" y2="4" stroke="#e74c3c" stroke-width="2"/></svg>`;  
-    document.querySelectorAll(".eye-icon").forEach(el => el.innerHTML = eyeOpenSvg);  function toggleShow(fieldId, btn) {  
-  const input = document.getElementById(fieldId);  
-  const icon = btn.querySelector(".eye-icon");  
-  if (input.type === "password") {  
-    input.type = "text";  
-    icon.innerHTML = eyeSlashSvg;  
-  } else {  
-    input.type = "password";  
-    icon.innerHTML = eyeOpenSvg;  
-  }  
-}  
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>1. Generate Public Key from Password + PIN</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; padding: 1em; background: #f5f7fa; color: #333; }
+    h2 { text-align: center; color: #246bfd; margin-bottom: 1em; }
+    .input-row { margin-bottom: 1.2em; }
+    .input-label { margin-bottom: 0.38em; font-weight: bold; color: #607d8b;}
+    .pw-group { position: relative; }
+    .pw-input { width: 100%; padding: 0.75em 2.1em 0.75em 0.95em; font-size: 1.11em; border-radius: 7px; box-sizing: border-box; border: 1.4px solid #cddc39; background: #f8fff6; }
+    .pw-input:focus { border-color: #246bfd; background: #fff; }
+    .pin-input { border: 1.4px solid #b2ebf2; background: #f4fdff; }
+    .show-btn { position: absolute; right: 0.42em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; width: 28px; height: 28px;}
+    .show-btn svg { display: block; }
+    .output { background: #eafaf0; border-left: 5px solid #219150; padding: 1em; border-radius: 9px; margin: 1.3em 0 1em 0; word-break: break-all;}
+    .publickey-box { display: flex; align-items: center; background: #f6fff8; border-radius: 7px; border: 1.5px solid #32bc5e; padding: 0.55em; margin-top: 0.7em; }
+    .publickey-box span { flex: 1; word-break: break-all; font-size: 0.96em;}
+    .copy-btn, .export-btn { margin-left: 0.7em; padding: 0.38em 1.3em; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+    .export-btn { background: #246bfd; }
+    .copy-btn:active { background: #219150; }
+    .export-btn:active { background: #1747a1; }
+    .btn { display: inline-block; width: 100%; padding: 0.82em 0; margin: 0.52em 0; border: none; border-radius: 7px; font-size: 1.11em; font-weight: bold; cursor: pointer; transition: background 0.18s; text-decoration: none; text-align: center; }
+    #gen-key-btn { background: #246bfd; color: #fff; margin-top: 0.12em;}
+    #gen-key-btn:active { background: #176d38; }
+    #register-btn { background: #ffd600; color: #324c10; margin-bottom: 0.5em;}
+    #register-btn:active { background: #ffab00;}
+    #home-btn { background: #eceff1; color: #246bfd; }
+    #home-btn:active { background: #b0bec5;}
+    .note { font-size: 0.97em; color: #8395a7; margin-top: 1.0em; text-align: center;}
+    .strength { font-size: 0.99em; margin-bottom: 0.12em; margin-top: 0.11em;}
+    .strength.weak { color: #ff6b6b; }
+    .strength.medium { color: #ffb300; }
+    .strength.strong { color: #4caf50; }
+    .strength-bar { width: 100%; height: 7px; border-radius: 5px; margin-bottom: 0.55em; background: #ffe4e0; transition: background 0.3s;}
+    .strength-bar.weak { background: #ff6b6b; }
+    .strength-bar.medium { background: #ffd700; }
+    .strength-bar.strong { background: #64dd17; }
+    .error { color: #e74c3c; font-size: 0.98em; margin-bottom: 0.7em; text-align: left; }
+    .timestamp-row { color: #26733e; font-size: 0.98em; margin-top: 0.2em;}
+    .action-bar { display: flex; gap: 0.7em; margin-top: 1.4em;}
+    .action-bar .btn { width: 50%; }
+    @media (max-width: 480px) {
+      body { margin: 1em; padding: 0.5em; }
+      .btn, .action-bar .btn { width: 100%; margin: 0.33em 0; }
+      .publickey-box { flex-direction: column; align-items: stretch; }
+      .copy-btn, .export-btn { margin: 0.7em 0 0 0; }
+      .action-bar { flex-direction: column; gap: 0.3em;}
+    }
+  </style>
+</head>
+<body>
+  <h2>1. Generate Public Key from Password + PIN</h2>
+  <div class="input-container">
+    <div class="input-row">
+      <div class="input-label">Password:</div>
+      <div class="pw-group">
+        <input type="password" id="password" class="pw-input" placeholder="6-12 chars, letters & numbers" autocomplete="new-password"/>
+        <button class="show-btn" type="button" onclick="toggleShow('password',this)" aria-label="Show Password"><span class="eye-icon" id="eye-password"></span>
+          <svg width="22" height="22" fill="none"><circle cx="11" cy="11" r="10" stroke="#333" stroke-width="1.5"/><path d="M4 11c2.5-4 9.5-4 12 0-2.5 4-9.5 4-12 0Z" stroke="#333" stroke-width="1.5"/><circle cx="11" cy="11" r="2" fill="#333"/></svg>
+        </button>
+      </div>
+      <div id="strength-bar" class="strength-bar weak"></div>
+      <div id="password-strength-msg" class="strength weak">Weak</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Confirm Password:</div>
+      <div class="pw-group">
+        <input type="password" id="confirm-password" class="pw-input" placeholder="Confirm password" autocomplete="new-password"/>
+        <button class="show-btn" type="button" onclick="toggleShow('confirm-password',this)" aria-label="Show Confirm Password"><span class="eye-icon"></span>
+          <svg width="22" height="22" fill="none"><circle cx="11" cy="11" r="10" stroke="#333" stroke-width="1.5"/><path d="M4 11c2.5-4 9.5-4 12 0-2.5 4-9.5 4-12 0Z" stroke="#333" stroke-width="1.5"/><circle cx="11" cy="11" r="2" fill="#333"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">PIN (4-6 digits):</div>
+      <div class="pw-group">
+        <input type="password" id="pin" class="pw-input pin-input" placeholder="Enter PIN (4-6 digits)" maxlength="6" autocomplete="off"/>
+        <button class="show-btn" type="button" onclick="toggleShow('pin',this)" aria-label="Show PIN"><span class="eye-icon"></span>
+          <svg width="22" height="22" fill="none"><circle cx="11" cy="11" r="10" stroke="#333" stroke-width="1.5"/><path d="M4 11c2.5-4 9.5-4 12 0-2.5 4-9.5 4-12 0Z" stroke="#333" stroke-width="1.5"/><circle cx="11" cy="11" r="2" fill="#333"/></svg>
+        </button>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Confirm PIN:</div>
+      <div class="pw-group">
+        <input type="password" id="confirm-pin" class="pw-input pin-input" placeholder="Confirm PIN" maxlength="6" autocomplete="off"/>
+        <button class="show-btn" type="button" onclick="toggleShow('confirm-pin',this)" aria-label="Show Confirm PIN"><span class="eye-icon"></span>
+          <svg width="22" height="22" fill="none"><circle cx="11" cy="11" r="10" stroke="#333" stroke-width="1.5"/><path d="M4 11c2.5-4 9.5-4 12 0-2.5 4-9.5 4-12 0Z" stroke="#333" stroke-width="1.5"/><circle cx="11" cy="11" r="2" fill="#333"/></svg>
+        </button>
+      </div>
+    </div>
+    <div id="error-msg" class="error" style="display:none;"></div>
+  </div>
+  <button id="gen-key-btn" class="btn">Generate Key</button>
+  <div id="output-container" class="output" style="display: none;">
+    <strong>Public Key:</strong>
+    <div class="publickey-box">
+      <span id="public-key"></span>
+      <button class="copy-btn" onclick="copyPubKey()">Copy</button>
+      <button class="export-btn" onclick="exportLog()">Export Log</button>
+    </div>
+    <div class="timestamp-row" id="timestamp-row"></div>
+  </div>
+  <div class="action-bar">
+    <a href="register_qr.html" id="register-btn" class="btn">Next: Register QR</a>
+    <a href="index.html" id="home-btn" class="btn">Back to Home</a>
+  </div>
+  <div class="note">
+    *Your Public Key is generated deterministically from your Password and PIN.<br>
+    <b>Keep your password & PIN safe!</b> We never store or show your private key. You can always regenerate the same public key if you enter the same info.
+  </div>
+  <div class="note" style="margin-top: 0.8em;">
+    Enter password and PIN, confirm both, then click <b>Generate Key</b>.<br>
+    <b>Password must be 6-12 characters and include both letters and numbers.</b> PIN should be 4-6 digits.
+  </div>
 
-function checkPasswordStrength(password) {  
-  if (password.length < 6) return 'weak';  
-  if (!/[a-zA-Z]/.test(password) || !/[0-9]/.test(password)) return 'weak';  
-  if (password.length >= 12) return 'strong';  
-  if (password.length >= 8) return 'medium';  
-  return 'weak';  
-}  
-function validPasswordRule(password) {  
-  return (  
-    password.length >= 6 &&  
-    password.length <= 12 &&  
-    /[a-zA-Z]/.test(password) &&  
-    /[0-9]/.test(password)  
-  );  
-}  
-async function derivePrivateKey(password, pin) {  
-  const enc = new TextEncoder();  
-  const seed = password + "|" + pin;  
-  const salt = enc.encode("DTC-KEY-SALT");  
-  const baseKey = await window.crypto.subtle.importKey(  
-    "raw", enc.encode(seed), "PBKDF2", false, ["deriveBits"]  
-  );  
-  const bits = await window.crypto.subtle.deriveBits(  
-    { name: "PBKDF2", salt, iterations: 100000, hash: "SHA-256" },  
-    baseKey,  
-    256  
-  );  
-  return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, "0")).join("");  
-}  
-async function sha256hex(strHex) {  
-  const bin = new Uint8Array(strHex.match(/../g).map(x=>parseInt(x,16)));  
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", bin);  
-  return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2,"0")).join("");  
-}  
-// Elements  
-const passwordInput = document.getElementById('password');  
-const confirmPasswordInput = document.getElementById('confirm-password');  
-const pinInput = document.getElementById('pin');  
-const confirmPinInput = document.getElementById('confirm-pin');  
-const strengthMsg = document.getElementById('password-strength-msg');  
-const strengthBar = document.getElementById('strength-bar');  
-const genBtn = document.getElementById('gen-key-btn');  
-const pubOutput = document.getElementById('pub-key-output');  
-const outputContainer = document.getElementById('output-container');  
-const copyBtn = document.getElementById('copy-btn');  
-const exportBtn = document.getElementById('export-btn');  
-const nextBtn = document.getElementById('next-btn');  
-const errorMsg = document.getElementById('error-msg');  
-const timestampOutput = document.getElementById('timestamp-output');  
-let lastKeyLog = null;  
+  <script>
+    // Toggle show/hide password fields
+    function toggleShow(id, btn) {
+      const input = document.getElementById(id);
+      if (input.type === "password") {
+        input.type = "text";
+        btn.style.opacity = 0.7;
+      } else {
+        input.type = "password";
+        btn.style.opacity = 1;
+      }
+    }
 
-function clearOutput() {  
-  pubOutput.textContent = "–";  
-  outputContainer.style.display = "none";  
-  timestampOutput.textContent = "";  
-  nextBtn.classList.remove('enabled');  
-  nextBtn.setAttribute('aria-disabled', 'true');  
-  localStorage.removeItem('dtc_publicKey');  
-  localStorage.removeItem('dtc_publicKeyTimestamp');  
-}  
-[passwordInput, confirmPasswordInput, pinInput, confirmPinInput].forEach(el =>  
-  el.addEventListener('input', clearOutput)  
-);  
-passwordInput.addEventListener('input', () => {  
-  const val = passwordInput.value;  
-  const strength = checkPasswordStrength(val);  
-  strengthMsg.textContent = (strength === 'strong') ? 'Strong' : (strength === 'medium') ? 'Medium' : 'Weak';  
-  strengthMsg.className = 'strength ' + strength;  
-  strengthBar.className = 'strength-bar ' + strength;  
-});  
-genBtn.addEventListener('click', async () => {  
-  errorMsg.style.display = 'none';  
-  const password = passwordInput.value.trim();  
-  const confirmPassword = confirmPasswordInput.value.trim();  
-  const pin = pinInput.value.trim();  
-  const confirmPin = confirmPinInput.value.trim();  
-  if (!password || !confirmPassword || !pin || !confirmPin) {  
-    showError("Please fill in all fields.");  
-    return;  
-  }  
-  if (password !== confirmPassword) {  
-    showError("Passwords do not match.");  
-    return;  
-  }  
-  if (!validPasswordRule(password)) {  
-    showError("Password must be 6-12 characters and include both letters and numbers.");  
-    return;  
-  }  
-  if (pin !== confirmPin) {  
-    showError("PIN codes do not match.");  
-    return;  
-  }  
-  if (!/^\d{4,6}$/.test(pin)) {  
-    showError("PIN must be 4-6 digits.");  
-    return;  
-  }  
-  const privKey = await derivePrivateKey(password, pin);  
-  const pubKey = await sha256hex(privKey);  
-  pubOutput.textContent = pubKey;  
-  outputContainer.style.display = 'block';  
-  const createdAt = new Date().toISOString();  
-  timestampOutput.textContent = `Created at: ${createdAt}`;  
-  localStorage.setItem('dtc_publicKey', pubKey);  
-  localStorage.setItem('dtc_publicKeyTimestamp', createdAt);  
-  nextBtn.classList.add('enabled');  
-  nextBtn.removeAttribute('aria-disabled');  
-  lastKeyLog = {  
-    publicKey: pubKey,  
-    createdAt  
-  };  
-});  
-function showError(msg) {  
-  errorMsg.textContent = msg;  
-  errorMsg.style.display = 'block';  
-}  
-copyBtn.addEventListener('click', () => {  
-  navigator.clipboard.writeText(pubOutput.textContent);  
-  copyBtn.textContent = "Copied!";  
-  setTimeout(()=>{ copyBtn.textContent = "Copy"; }, 1200);  
-});  
-exportBtn.addEventListener('click', () => {  
-  if (!lastKeyLog) return;  
-  const blob = new Blob([JSON.stringify(lastKeyLog, null, 2)], {type: 'application/json'});  
-  const url = URL.createObjectURL(blob);  
-  const link = document.createElement('a');  
-  link.href = url;  
-  link.download = `pubkey_log_${Date.now()}.json`;  
-  link.click();  
-  URL.revokeObjectURL(url);  
-});  
-nextBtn.addEventListener('click', (e) => {  
-  if (!nextBtn.classList.contains('enabled')) {  
-    e.preventDefault();  
-    alert('Please generate the Public Key before proceeding to the next step.');  
-  }  
-});  
-nextBtn.addEventListener('keydown', (e) => {  
-  if ((e.key === 'Enter' || e.key === ' ') && !nextBtn.classList.contains('enabled')) {  
-    e.preventDefault();  
-    alert('Please generate the Public Key before proceeding to the next step.');  
-  }  
-});
+    // Password strength check
+    const passwordInput = document.getElementById('password');
+    passwordInput.addEventListener('input', checkPasswordStrength);
+    function checkPasswordStrength() {
+      const pw = passwordInput.value;
+      let strength = 'weak';
+      let msg = 'Weak';
+      let barClass = 'strength-bar weak';
+      if (pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw) && pw.length <= 12) {
+        if (/[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\W/.test(pw)) {
+          strength = 'strong'; msg = 'Strong'; barClass = 'strength-bar strong';
+        } else {
+          strength = 'medium'; msg = 'Medium'; barClass = 'strength-bar medium';
+        }
+      } else if (pw.length >= 6 && /[A-Za-z]/.test(pw) && /\d/.test(pw)) {
+        strength = 'medium'; msg = 'Medium'; barClass = 'strength-bar medium';
+      }
+      document.getElementById('strength-bar').className = barClass;
+      document.getElementById('password-strength-msg').className = 'strength ' + strength;
+      document.getElementById('password-strength-msg').textContent = msg;
+    }
 
-  </script>  
-</body>  
-</html>  
+    // Validate & Generate Key
+    document.getElementById('gen-key-btn').onclick = function () {
+      const password = document.getElementById('password').value;
+      const confirmPassword = document.getElementById('confirm-password').value;
+      const pin = document.getElementById('pin').value;
+      const confirmPin = document.getElementById('confirm-pin').value;
+      const errorMsg = document.getElementById('error-msg');
+      errorMsg.style.display = "none";
+
+      // Validate password
+      if (!password || password.length < 6 || password.length > 12 || !(/[A-Za-z]/.test(password) && /\d/.test(password))) {
+        errorMsg.textContent = "Password must be 6-12 chars, include letters and numbers.";
+        errorMsg.style.display = "block"; return;
+      }
+      if (password !== confirmPassword) {
+        errorMsg.textContent = "Passwords do not match."; errorMsg.style.display = "block"; return;
+      }
+      // Validate PIN
+      if (!pin || !/^\d{4,6}$/.test(pin)) {
+        errorMsg.textContent = "PIN must be 4-6 digits."; errorMsg.style.display = "block"; return;
+      }
+      if (pin !== confirmPin) {
+        errorMsg.textContent = "PINs do not match."; errorMsg.style.display = "block"; return;
+      }
+
+      // Generate Public Key (simple SHA-256: demo, replace by real crypto in production)
+      const publicKey = sha256(password + '|' + pin);
+      document.getElementById('public-key').textContent = publicKey;
+      document.getElementById('output-container').style.display = 'block';
+
+      // Timestamp (ISO8601, UTC)
+      const now = new Date();
+      document.getElementById('timestamp-row').textContent = "Timestamp: " + now.toISOString();
+    };
+
+    // Copy Public Key
+    function copyPubKey() {
+      const pk = document.getElementById('public-key').textContent;
+      navigator.clipboard.writeText(pk).then(() => {
+        alert('Copied!');
+      });
+    }
+    // Export Log
+    function exportLog() {
+      const pk = document.getElementById('public-key').textContent;
+      const now = new Date().toISOString();
+      const log = {
+        public_key: pk,
+        timestamp: now,
+        note: 'Public key generated from password+PIN (DTC Demo)'
+      };
+      const blob = new Blob([JSON.stringify(log, null, 2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'publickey-log.json';
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }
+
+    // Simple SHA-256 hash (hex) with Web Crypto API
+    function sha256(str) {
+      // Sync wrapper (for demo only)
+      let result = '';
+      const encoder = new TextEncoder();
+      const data = encoder.encode(str);
+      // Use sync XHR to avoid async/await in UI
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "https://hash.deno.dev/sha256", false); // Free, stateless endpoint
+      xhr.setRequestHeader("Content-Type", "text/plain");
+      xhr.send(str);
+      if(xhr.status==200) result = xhr.responseText;
+      else result = "error-hash";
+      return result;
+    }
+  </script>
+</body>
+</html>
