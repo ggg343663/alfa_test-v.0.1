@@ -2,75 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Register Agent (DTC, 2-step sign)</title>
+  <title>Register Agent (DTC v.0.1.8d, Dual Sign)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: Arial,sans-serif; background: #f4f8fb; margin:0; padding:0;}
     .container {
-      max-width: 470px; margin:2em auto; background:#fff;
-      padding:2.2em 1.1em 2.1em 1.1em; border-radius:15px;
-      box-shadow:0 2px 16px #22c55e22;
+      max-width: 500px; margin:2em auto; background:#fff;
+      padding:2.2em 1.1em 2.1em 1.1em; border-radius:18px;
+      box-shadow:0 2px 18px #4f8efc19;
     }
-    h2 { color:#22c55e; text-align:center; margin-bottom:1.3em;}
-    label { font-weight:600; margin-top:1em; display:block;}
-    input[type=text], textarea, input[type=password] {
+    h2 { color:#2563eb; text-align:center; margin-bottom:1.6em;}
+    label { font-weight:600; margin-top:1em; display:block; color:#26733e;}
+    input[type=text], input[type=password], textarea {
       width:100%; padding:0.62em 0.7em; font-size:1.05em;
-      border-radius:8px; border:1.3px solid #22c55e;
-      background:#e7fbe8; color:#166534; margin-bottom:0.42em;
-      margin-top:0.15em; transition: border 0.15s;
+      border-radius:8px; border:1.3px solid #60a5fa;
+      background:#f0f6ff; color:#1e293b; margin-bottom:0.46em;
+      margin-top:0.18em; transition: border 0.15s;
+      min-height: 38px; max-height: 44px;
     }
     textarea { min-height:3.3em; resize:vertical;}
     .btn-main {
-      width:100%; padding:0.75em 0; background:#22c55e;
+      width:100%; padding:0.75em 0; background:#2563eb;
       color:#fff; border:none; border-radius:9px; font-weight:700;
       font-size:1.08em; margin-top:1.2em; cursor:pointer;
       letter-spacing:0.01em; transition:background 0.17s;
     }
-    .btn-main:disabled { background:#94e7ba; color:#fff;}
-    .btn-main:hover:enabled { background:#16a34a;}
+    .btn-main:disabled { background:#a5c7fa; color:#fff;}
+    .btn-main:hover:enabled { background:#1d4ed8;}
     .hash-row {
       margin-top:1.1em; word-break:break-all; font-family:monospace;
-      font-size:1.04em; color:#26733e; background:#e7fbe8;
+      font-size:1.04em; color:#334155; background:#e0e7ef;
       border-radius:8px; padding:0.7em 1em;
       position: relative;
+      max-height: 96px; overflow:auto;
     }
-    .step-label { margin:1em 0 0.4em 0; font-weight:bold; color:#26733e;}
-    .copy-btn { background:none; border:none; color:#22c55e; cursor:pointer;}
-    .copy-success { color:#16a34a; font-size:0.95em; margin-left:0.33em;}
+    .step-label { margin:1em 0 0.4em 0; font-weight:bold; color:#2563eb;}
+    .copy-btn { background:none; border:none; color:#2563eb; cursor:pointer; font-weight:600;}
+    .copy-success { color:#22c55e; font-size:0.96em; margin-left:0.33em;}
     .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.96em;}
     .success { color:#16a34a; }
     .row { display:flex; gap:0.4em; align-items:center;}
-    .qr-btn { background:#22c55e; color:#fff; border:none; padding:0.45em 0.8em; border-radius:6px; font-size:0.98em; cursor:pointer;}
+    .qr-btn { background:#60a5fa; color:#fff; border:none; padding:0.45em 0.8em; border-radius:6px; font-size:0.98em; cursor:pointer;}
     #qrVideo { width:99%; border-radius:8px; margin-top:0.6em; display:none;}
+    .nav-bar { display:flex; gap:0.5em; margin-top:2.1em; }
+    .nav-btn { flex:1; border:none; border-radius:7px; padding:0.8em 0;
+      font-weight:600; font-size:1em; cursor:pointer;}
+    .nav-btn-back, .nav-btn-home { background:#cbd5e1; color:#1e293b;}
+    .nav-btn-next { background:#60a5fa; color:#fff;}
+    @media (max-width:600px) {
+      .container { padding:1.3em 0.4em 1.4em 0.4em;}
+      .nav-bar { flex-direction: column; gap:0.4em;}
+    }
   </style>
 </head>
 <body>
 <div class="container">
-  <h2>Register Agent (2-step sign)</h2>
+  <h2>Register Agent<br>(Dual Sign, DTC v.0.1.8d)</h2>
+  <!-- Step 1: Master สร้าง slot ให้ Agent -->
   <form id="masterForm" autocomplete="off">
     <div class="step-label">Step 1: Master creates Agent slot</div>
-    <label>Agent Name (a-z, 0-9, ≤16):</label>
+    <label>Agent Name (a-z, 0-9, ≤16):<span style="color:#64748b;font-weight:400;font-size:0.93em;"> (No badword)</span></label>
     <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
-    <!-- แจ้งเตือน badword จะอยู่ตรงนี้ใต้ช่องกรอกชื่อ -->
     <div id="badwordWarn" class="warn" style="display:none;"></div>
-
     <label class="row">
       Agent Public Key:
       <button type="button" class="qr-btn" onclick="startQRScanner('agentPubKey')">Scan QR</button>
     </label>
     <input type="text" id="agentPubKey" maxlength="64" required autocomplete="off" />
-
-    <label>Nonce (random string):</label>
+    <label>Nonce (random):</label>
     <div class="row">
       <input type="text" id="nonce" maxlength="20" required autocomplete="off" style="flex:1;" />
       <button type="button" onclick="randomNonce()" class="qr-btn">Random</button>
     </div>
     <button class="btn-main" type="submit">Create Agent Slot</button>
   </form>
-  
-  <!-- QR SCANNER VIDEO -->
   <video id="qrVideo" playsinline></video>
 
+  <!-- Step 2: Agent ลงนาม/confirm -->
   <div id="step2Section" style="display:none;">
     <div class="step-label">Step 2: Agent confirms and signs</div>
     <div style="font-size:0.97em; margin-bottom:0.2em;">
@@ -87,8 +95,13 @@
       <button class="btn-main" type="button" onclick="signAgent()" style="margin-top:0.8em;">Agent Sign</button>
     </div>
     <div id="sigResult" class="hash-row" style="display:none;"></div>
-    <button type="button" class="btn-main" style="margin-top:1.4em; background:#64748b;" onclick="exportLog()">Export Log (JSON)</button>
+    <button type="button" class="btn-main" style="margin-top:1.4em; background:#facc15;color:#3b3b0a;" onclick="exportLog()">Export Log (JSON)</button>
     <span id="exportSuccess" class="success"></span>
+  </div>
+  <div class="nav-bar">
+    <button class="nav-btn nav-btn-back" onclick="location.href='index.html'">Back</button>
+    <button class="nav-btn nav-btn-home" onclick="location.href='index.html'">Home</button>
+    <button class="nav-btn nav-btn-next" onclick="location.href='register.html'">Next</button>
   </div>
 </div>
 <script>
@@ -164,7 +177,6 @@
   }
   // Simple QR decode using jsQR library from CDN
   async function scanQRCode(video) {
-    // Load jsQR if not already
     if (!window.jsQR) {
       let script = document.createElement('script');
       script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
@@ -223,7 +235,7 @@
     if (!pubkey || pubkey.length<30) { alert("Invalid agent public key"); return; }
     if (!nonce) { alert("Enter nonce"); return; }
     lastTimestamp = new Date().toISOString();
-    const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"; // demo only
+    const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"; // demo only, replace by real hash
     const agent_hash_str = `${master_hash}:${pubkey}:${name}:${nonce}:${lastTimestamp}`;
     window.agent_hash_data = { master_hash, agent_pubkey:pubkey, agent_name:name, nonce, timestamp:lastTimestamp };
     window.agent_hash_to_sign = agent_hash_str;
@@ -259,7 +271,6 @@
     const priv = await pbkdf2_sha256(pw, pin);
     const sig = await hmac_sha256(priv, window.agent_hash_to_sign);
     window.agent_hash = sig;
-    // Show log (in production, merge with sig_master if any)
     const res = {
       ...window.agent_hash_data,
       sig_agent: sig
