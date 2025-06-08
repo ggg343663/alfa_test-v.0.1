@@ -1,56 +1,59 @@
-<!DOCTYPE html><html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Mint QR Batch (Double Hash UI) - DTC System</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-</head>
-<body>
-  <div class="container my-5 p-4 bg-white rounded shadow">
-    <h2 class="text-center text-success mb-4">Mint QR Batch (Double Hash UI)</h2><form id="mintForm">
-  <div class="row g-3">
-    <div class="col-md-6">
-      <label class="form-label">Password</label>
-      <input id="password" type="password" class="form-control" required>
+<!DOCTYPE html>
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <title>Mint QR Batch (Double Hash UI) - DTC System</title>  
+  <meta name="viewport" content="width=device-width, initial-scale=1" />  
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/5.3.0/css/bootstrap.min.css">  
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>  
+</head>  
+<body>  
+  <div class="container my-5 p-4 bg-white rounded shadow">  
+    <h2 class="text-center text-success mb-4">Mint QR Batch (Double Hash UI)</h2>
+    <form id="mintForm">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <label class="form-label">Password</label>
+          <input id="password" type="password" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">PIN</label>
+          <input id="pin" type="password" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Secret</label>
+          <input id="secret" type="text" class="form-control" required>
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Batch Name (optional)</label>
+          <input id="batchName" type="text" class="form-control">
+        </div>
+        <div class="col-md-6">
+          <label class="form-label">Number of QR</label>
+          <input id="qrAmount" type="number" class="form-control" value="10" min="1" max="200">
+        </div>
+      </div>
+      <button class="btn btn-success w-100 my-3" type="submit">Generate QR Batch</button>
+    </form>
+
+    <div id="result" class="mt-4 d-none">
+      <h5 class="text-primary">Commitment Hash:</h5>
+      <div id="commitmentHash" class="mb-2 text-break"></div>
+
+      <h5 class="text-primary">Timestamp:</h5>
+      <div id="timestamp" class="mb-2"></div>
+
+      <h5 class="text-primary">Nonce List:</h5>
+      <pre id="nonceList" class="bg-light p-3 rounded"></pre>
+
+      <canvas id="qrCanvas" class="my-3"></canvas>
+
+      <button id="copyTicket" class="btn btn-primary">Copy Ticket</button>
+      <button id="exportLog" class="btn btn-warning">Export JSON Log</button>
     </div>
-    <div class="col-md-6">
-      <label class="form-label">PIN</label>
-      <input id="pin" type="password" class="form-control" required>
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Secret</label>
-      <input id="secret" type="text" class="form-control" required>
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Batch Name (optional)</label>
-      <input id="batchName" type="text" class="form-control">
-    </div>
-    <div class="col-md-6">
-      <label class="form-label">Number of QR</label>
-      <input id="qrAmount" type="number" class="form-control" value="10" min="1" max="200">
-    </div>
-  </div>
-  <button class="btn btn-success w-100 my-3" type="submit">Generate QR Batch</button>
-</form>
+  </div>  
 
-<div id="result" class="mt-4 d-none">
-  <h5 class="text-primary">Commitment Hash:</h5>
-  <div id="commitmentHash" class="mb-2 text-break"></div>
-
-  <h5 class="text-primary">Timestamp:</h5>
-  <div id="timestamp" class="mb-2"></div>
-
-  <h5 class="text-primary">Nonce List:</h5>
-  <pre id="nonceList" class="bg-light p-3 rounded"></pre>
-
-  <canvas id="qrCanvas" class="my-3"></canvas>
-
-  <button id="copyTicket" class="btn btn-primary">Copy Ticket</button>
-  <button id="exportLog" class="btn btn-warning">Export JSON Log</button>
-</div>
-
-  </div>  <script>
+  <script>
     const form = document.getElementById("mintForm");
     const commitmentHashDiv = document.getElementById("commitmentHash");
     const timestampDiv = document.getElementById("timestamp");
@@ -108,5 +111,6 @@
       const hashBuffer = await crypto.subtle.digest('SHA-256', enc);
       return Array.from(new Uint8Array(hashBuffer)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
-  </script></body>
+  </script>
+</body>  
 </html>
