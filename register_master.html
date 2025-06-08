@@ -143,8 +143,8 @@
       if (badwordsError) {
         warn.style.display = "";
         warn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
-      } else if (found.length {
-            warn.style.display = "";
+      } else if (found.length) {
+        warn.style.display = "";
         warn.textContent = "Warning: This name contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
       } else {
         warn.style.display = "none";
@@ -211,7 +211,7 @@
 
     // ---- Master Node Builder (audit-ready)
     async function buildMasterNode() {
-      const masterName = document.getElementById('masterName').value.trim();
+      const masterName = document.getElementById('masterName').value.trim().toUpperCase();
       const publicKey = document.getElementById('pubkey').value.trim();
       if(masterName.length<4 || masterName.length>12 || publicKey.length!==64) return null;
       const timestamp = Math.floor(Date.now() / 1000).toString();
@@ -231,7 +231,7 @@
 
     // ---- Live Preview (on input)
     async function livePreview() {
-      const masterName = document.getElementById('masterName').value.trim();
+      const masterName = document.getElementById('masterName').value.trim().toUpperCase();
       const publicKey = document.getElementById('pubkey').value.trim();
       if(masterName.length<4 || masterName.length>12 || publicKey.length!==64) {
         document.getElementById('previewBox').style.display = "none";
@@ -253,7 +253,7 @@
     // ---- Submit Handler ----
     document.getElementById('masterForm').onsubmit = async function(e){
       e.preventDefault();
-      const name = document.getElementById('masterName').value.trim();
+      const name = document.getElementById('masterName').value.trim().toUpperCase();
       const pk = document.getElementById('pubkey').value.trim();
       if (badwordsReady && findBadwords(name).length) {
         if (!confirm("Warning: The master name contains inappropriate words. Are you sure you want to continue?")) {
@@ -298,30 +298,4 @@
         <div class="popup-row"><label>Master Name:</label><br><code>${obj.master_id}</code></div>
         <div class="popup-row"><label>Master Hash:</label><br><code id="hashC">${obj.hash}</code>
           <button class="copy-btn" onclick="copyToClipboard('${obj.hash}')">Copy</button></div>
-        <div class="popup-row"><label>Public Key:</label><br><code id="pkC">${obj.public_key}</code>
-          <button class="copy-btn" onclick="copyToClipboard('${obj.public_key}')">Copy</button></div>
-        <div class="popup-row"><label>Timestamp:</label><br>${obj.timestamp} <span style="color:#789;font-size:0.98em;">(${(new Date(obj.timestamp*1000)).toISOString()})</span></div>
-        <div class="popup-row"><label>Nonce:</label><br><code>${obj.nonce}</code></div>
-        <div class="popup-row"><label>Prev Hash (Genesis):</label><br><code>${obj.prev_hash}</code></div>
-        <button class="btn export-btn" onclick="exportMasterLog()">Export Log (JSON)</button>
-        <button class="close-btn" onclick="document.getElementById('popupRoot').innerHTML=''">Close</button>
-      </div></div>`;
-      root.innerHTML = html;
-      window.exportMasterLog = function() {
-        const blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
-        const a = document.createElement("a");
-        a.href = URL.createObjectURL(blob);
-        a.download = "dtc_master_node.json";
-        a.click();
-      };
-    }
-    function copyToClipboard(text) {
-      navigator.clipboard.writeText(text);
-      alert("Copied!");
-    }
-
-    // ---- Live preview (init)
-    livePreview();
-  </script>
-</body>
-</html>     
+        <div class="popup-row"><label>Public Key:</label
