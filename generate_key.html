@@ -13,10 +13,13 @@
     .pw-input { width: 100%; padding: 0.75em 2.1em 0.75em 0.95em; font-size: 1.11em; border-radius: 7px; box-sizing: border-box; border: 1.4px solid #cddc39; background: #f8fff6; }
     .pw-input:focus { border-color: #246bfd; background: #fff; }
     .pin-input { border: 1.4px solid #b2ebf2; background: #f4fdff; }
-    .show-btn { position: absolute; right: 0.42em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; width: 28px; height: 28px;}
+    .show-btn { position: absolute; right: 0.42em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; width: 28px; height: 28px; padding: 0;}
     .show-btn svg { display: block; }
-    .output { background: #eafaf0; border-left: 5px solid #219150; padding: 1em; border-radius: 9px; margin: 1.3em 0 1em 0; word-break: break-all;}
-    .publickey-box { display: flex; align-items: center; background: #f6fff8; border-radius: 7px; border: 1.5px solid #32bc5e; padding: 0.55em; margin-top: 0.7em; }
+    .show-btn .eye-hide { display: none;}
+    .show-btn.hide .eye-show { display: none;}
+    .show-btn.hide .eye-hide { display: block;}
+    .output { background: #f6fff8; border-left: 5px solid #90caf9; padding: 1em; border-radius: 9px; margin: 1.3em 0 1em 0; word-break: break-all; }
+    .publickey-box { display: flex; align-items: center; background: #f8fafb; border-radius: 7px; border: 1.5px solid #90caf9; padding: 0.55em; margin-top: 0.7em; }
     .publickey-box span { flex: 1; word-break: break-all; font-size: 0.96em;}
     .copy-btn, .export-btn { margin-left: 0.7em; padding: 0.38em 1.3em; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
     .export-btn { background: #246bfd; }
@@ -25,7 +28,8 @@
     .btn { display: inline-block; width: 100%; padding: 0.82em 0; margin: 0.52em 0; border: none; border-radius: 7px; font-size: 1.11em; font-weight: bold; cursor: pointer; transition: background 0.18s; text-decoration: none; text-align: center; }
     #gen-key-btn { background: #246bfd; color: #fff; margin-top: 0.12em;}
     #gen-key-btn:active { background: #176d38; }
-    #register-btn { background: #ffd600; color: #324c10; margin-bottom: 0.5em;}
+    #register-btn { background: #ffd600; color: #324c10; margin-bottom: 0.5em; display: flex; align-items: center; justify-content: center;}
+    #register-btn svg { margin-left: 8px; }
     #register-btn:active { background: #ffab00;}
     #home-btn { background: #eceff1; color: #246bfd; }
     #home-btn:active { background: #b0bec5;}
@@ -48,6 +52,7 @@
       .publickey-box { flex-direction: column; align-items: stretch; }
       .copy-btn, .export-btn { margin: 0.7em 0 0 0; }
       .action-bar { flex-direction: column; gap: 0.3em;}
+      #register-btn svg { margin-left: 3px;}
     }
   </style>
 </head>
@@ -58,8 +63,20 @@
       <div class="input-label">Password:</div>
       <div class="pw-group">
         <input type="password" id="password" class="pw-input" placeholder="6-12 chars, letters & numbers" autocomplete="new-password"/>
-        <button class="show-btn" type="button" onclick="toggleShow('password',this)" aria-label="Show Password"><span class="eye-icon" id="eye-password"></span>
-          <svg width="22" height="22" fill="none"><circle cx="11" cy="11" r="10" stroke="#333" stroke-width="1.5"/><path d="M4 11c2.5-4 9.5-4 12 0-2.5 4-9.5 4-12 0Z" stroke="#333" stroke-width="1.5"/><circle cx="11" cy="11" r="2" fill="#333"/></svg>
+        <button class="show-btn" type="button" onclick="toggleShow('password',this)" aria-label="Show Password">
+          <span class="eye-icon">
+            <!-- ตาเปิด (show) -->
+            <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5.5" />
+              <circle cx="12" cy="12" r="2.5"/>
+            </svg>
+            <!-- ตาปิด (hide) -->
+            <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5.5" />
+              <circle cx="12" cy="12" r="2.5"/>
+              <line x1="5" y1="5" x2="19" y2="19" />
+            </svg>
+          </span>
         </button>
       </div>
       <div id="strength-bar" class="strength-bar weak"></div>
@@ -69,8 +86,18 @@
       <div class="input-label">Confirm Password:</div>
       <div class="pw-group">
         <input type="password" id="confirm-password" class="pw-input" placeholder="Confirm password" autocomplete="new-password"/>
-        <button class="show-btn" type="button" onclick="toggleShow('confirm-password',this)" aria-label="Show Confirm Password"><span class="eye-icon"></span>
-          <svg width="22" height="22" fill="none"><circle cx="11" cy="11" r="10" stroke="#333" stroke-width="1.5"/><path d="M4 11c2.5-4 9.5-4 12 0-2.5 4-9.5 4-12 0Z" stroke="#333" stroke-width="1.5"/><circle cx="11" cy="11" r="2" fill="#333"/></svg>
+        <button class="show-btn" type="button" onclick="toggleShow('confirm-password',this)" aria-label="Show Confirm Password">
+          <span class="eye-icon">
+            <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5.5" />
+              <circle cx="12" cy="12" r="2.5"/>
+            </svg>
+            <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5.5" />
+              <circle cx="12" cy="12" r="2.5"/>
+              <line x1="5" y1="5" x2="19" y2="19" />
+            </svg>
+          </span>
         </button>
       </div>
     </div>
@@ -78,8 +105,18 @@
       <div class="input-label">PIN (4-6 digits):</div>
       <div class="pw-group">
         <input type="password" id="pin" class="pw-input pin-input" placeholder="Enter PIN (4-6 digits)" maxlength="6" autocomplete="off"/>
-        <button class="show-btn" type="button" onclick="toggleShow('pin',this)" aria-label="Show PIN"><span class="eye-icon"></span>
-          <svg width="22" height="22" fill="none"><circle cx="11" cy="11" r="10" stroke="#333" stroke-width="1.5"/><path d="M4 11c2.5-4 9.5-4 12 0-2.5 4-9.5 4-12 0Z" stroke="#333" stroke-width="1.5"/><circle cx="11" cy="11" r="2" fill="#333"/></svg>
+        <button class="show-btn" type="button" onclick="toggleShow('pin',this)" aria-label="Show PIN">
+          <span class="eye-icon">
+            <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5.5" />
+              <circle cx="12" cy="12" r="2.5"/>
+            </svg>
+            <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5.5" />
+              <circle cx="12" cy="12" r="2.5"/>
+              <line x1="5" y1="5" x2="19" y2="19" />
+            </svg>
+          </span>
         </button>
       </div>
     </div>
@@ -87,8 +124,18 @@
       <div class="input-label">Confirm PIN:</div>
       <div class="pw-group">
         <input type="password" id="confirm-pin" class="pw-input pin-input" placeholder="Confirm PIN" maxlength="6" autocomplete="off"/>
-        <button class="show-btn" type="button" onclick="toggleShow('confirm-pin',this)" aria-label="Show Confirm PIN"><span class="eye-icon"></span>
-          <svg width="22" height="22" fill="none"><circle cx="11" cy="11" r="10" stroke="#333" stroke-width="1.5"/><path d="M4 11c2.5-4 9.5-4 12 0-2.5 4-9.5 4-12 0Z" stroke="#333" stroke-width="1.5"/><circle cx="11" cy="11" r="2" fill="#333"/></svg>
+        <button class="show-btn" type="button" onclick="toggleShow('confirm-pin',this)" aria-label="Show Confirm PIN">
+          <span class="eye-icon">
+            <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5.5" />
+              <circle cx="12" cy="12" r="2.5"/>
+            </svg>
+            <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
+              <ellipse cx="12" cy="12" rx="9" ry="5.5" />
+              <circle cx="12" cy="12" r="2.5"/>
+              <line x1="5" y1="5" x2="19" y2="19" />
+            </svg>
+          </span>
         </button>
       </div>
     </div>
@@ -105,7 +152,10 @@
     <div class="timestamp-row" id="timestamp-row"></div>
   </div>
   <div class="action-bar">
-    <a href="register_qr.html" id="register-btn" class="btn">Next: Register QR</a>
+    <a href="register_qr.html" id="register-btn" class="btn">
+      Next: Register QR
+      <svg width="20" height="20" viewBox="0 0 20 20"><path d="M7 5l5 5-5 5" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
     <a href="index.html" id="home-btn" class="btn">Back to Home</a>
   </div>
   <div class="note">
@@ -118,15 +168,15 @@
   </div>
 
   <script>
-    // Toggle show/hide password fields
+    // Toggle show/hide password fields (ตา)
     function toggleShow(id, btn) {
       const input = document.getElementById(id);
       if (input.type === "password") {
         input.type = "text";
-        btn.style.opacity = 0.7;
+        btn.classList.add('hide');
       } else {
         input.type = "password";
-        btn.style.opacity = 1;
+        btn.classList.remove('hide');
       }
     }
 
@@ -152,8 +202,16 @@
       document.getElementById('password-strength-msg').textContent = msg;
     }
 
+    // SHA-256 offline (Web Crypto API)
+    async function sha256(str) {
+      const buf = new TextEncoder().encode(str);
+      const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+      return Array.from(new Uint8Array(hashBuf))
+        .map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
     // Validate & Generate Key
-    document.getElementById('gen-key-btn').onclick = function () {
+    document.getElementById('gen-key-btn').onclick = async function () {
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirm-password').value;
       const pin = document.getElementById('pin').value;
@@ -177,14 +235,12 @@
         errorMsg.textContent = "PINs do not match."; errorMsg.style.display = "block"; return;
       }
 
-      // Generate Public Key (simple SHA-256: demo, replace by real crypto in production)
-      const publicKey = sha256(password + '|' + pin);
+      // Generate Public Key (offline)
+      const publicKey = await sha256(password + '|' + pin);
       document.getElementById('public-key').textContent = publicKey;
       document.getElementById('output-container').style.display = 'block';
-
-      // Timestamp (ISO8601, UTC)
-      const now = new Date();
-      document.getElementById('timestamp-row').textContent = "Timestamp: " + now.toISOString();
+      document.getElementById('timestamp-row').textContent =
+        "Timestamp: " + new Date().toISOString();
     };
 
     // Copy Public Key
@@ -194,14 +250,15 @@
         alert('Copied!');
       });
     }
-    // Export Log
+
+    // // Export Log
     function exportLog() {
       const pk = document.getElementById('public-key').textContent;
       const now = new Date().toISOString();
       const log = {
         public_key: pk,
         timestamp: now,
-        note: 'Public key generated from password+PIN (DTC Demo)'
+        note: 'Public key generated from password+PIN (DTC)'
       };
       const blob = new Blob([JSON.stringify(log, null, 2)], {type:'application/json'});
       const url = URL.createObjectURL(blob);
@@ -210,22 +267,6 @@
       document.body.appendChild(a); a.click(); document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
-
-    // Simple SHA-256 hash (hex) with Web Crypto API
-    function sha256(str) {
-      // Sync wrapper (for demo only)
-      let result = '';
-      const encoder = new TextEncoder();
-      const data = encoder.encode(str);
-      // Use sync XHR to avoid async/await in UI
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "https://hash.deno.dev/sha256", false); // Free, stateless endpoint
-      xhr.setRequestHeader("Content-Type", "text/plain");
-      xhr.send(str);
-      if(xhr.status==200) result = xhr.responseText;
-      else result = "error-hash";
-      return result;
-    }
   </script>
 </body>
-</html>
+</html> Log
