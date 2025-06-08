@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mint QR Batch (Double Hash UI) - DTC System</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    /* Styles ตามที่คุณให้มา */
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+      margin: 0; padding: 0;
+      min-height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      margin: 2.5em auto 2.5em auto;
+      background: #fff;
+      padding: 2.5em 2em 2.5em 2em;
+      border-radius: 20px;
+      box-shadow: 0 8px 32px #1771b420, 0 2px 7px #2563eb13;
+    }
+    h2 {
+      text-align: center;
+      color: #219150;
+      margin-bottom: 1.8em;
+      font-size: 1.8em;
+      letter-spacing: 0.02em;
+      font-weight: 700;
+    }
+    .input-row {
+      display: flex;
+      gap: 0.9em;
+      margin-bottom: 1.25em;
+      flex-wrap: wrap;
+    }
+    .input-row > div {
+      flex: 1 1 48%;
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      font-weight: 700;
+      color: #246bfd;
+      margin-bottom: 0.4em;
+      font-size: 1.05em;
+    }
+    input[type="text"], input[type="password"], input[type="number"] {
+      padding: 0.7em 0.9em;
+      font-size: 1.05em;
+      border-radius: 9px;
+      border: 1.5px solid #bee7d6;
+      background: #fafdff;
+      color: #184;
+      font-weight: 600;
+      transition: border-color 0.17s;
+    }
+    input[type="text"]:focus, input[type="password"]:focus, input[type="number"]:focus {
+      border-color: #2563eb;
+      outline: none;
+      background: #eaf6fd;
+    }
+    input[type="number"] {
+      max-width: 120px;
+      text-align: center;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 0.95em 0;
+      font-size: 1.2em;
+      font-weight: 700;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      background: linear-gradient(90deg,#219150 75%,#246bfd 100%);
+      cursor: pointer;
+      box-shadow: 0 3px 14px #219150aa;
+      transition: background 0.19s, box-shadow 0.22s;
+      margin-top: 1.25em;
+    }
+    .btn:active {
+      background: #176d38;
+      box-shadow: 0 2px 10px #176d38cc;
+    }
+    .btn[disabled] {
+      opacity: 0.52;
+      cursor: not-allowed;
+      background: #b2e4c6;
+      box-shadow: none;
+    }
+    .msg {
+      font-weight: 600;
+      font-size: 1.05em;
+      color: #26733e;
+      text-align: center;
+      min-height: 1.6em;
+      margin-top: 1em;
+      margin-bottom: 1.5em;
+    }
+    .result-section {
+      display: flex;
+      gap: 1.6em;
+      margin-top: 2em;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .qr-preview {
+      flex: 1 1 170px;
+      max-width: 170px;
+      background: #e8f3fe;
+      border-left: 6px solid #246bfd;
+      border-radius: 14px;
+      padding: 1em;
+      box-shadow: 0 2px 9px #32bc5e0c;
+      text-align: center;
+      font-weight: 700;
+      color: #246bfd;
+    }
+    .qr-preview canvas {
+      max-width: 150px;
+      max-height: 150px;
+      margin-bottom: 0.6em;
+    }
+    .info-box {
+      flex: 1 1 260px;
+      background: #f4faff;
+      border-left: 6px solid #219150;
+      border-radius: 14px;
+      padding: 1.3em 1.2em;
+      font-size: 1.05em;
+      box-shadow: 0 2px 9px #32bc5e0c;
+      color: #215d33;
+      line-height: 1.3em;
+      white-space: pre-wrap;
+      user-select: text;
+    }
+    .info-box strong {
+      font-weight: 700;
+      color: #13421f;
+    }
+    .action-buttons {
+      display: flex;
+      gap: 1em;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      margin-top: 2em;
+    }
+    .copy-btn, .export-btn {
+      background: #246bfd;
+      color: #fff;
+      border: none;
+      border-radius: 9px;
+      padding: 0.6em 1.5em;
+      font-size: 1.05em;
+      cursor: pointer;
+      font-weight: 600;
+      box-shadow: 0 2px 9px #bcd7ff55;
+      transition: background 0.18s;
+    }
+    .copy-btn:active, .export-btn:active {
+      background: #1747a1;
+      box-shadow: 0 1px 7px #1747a199;
+    }
+    .export-btn {
+      background: #facc15;
+      color: #3b3306;
+    }
+    .export-btn:active {
+      background: #eab308;
+      color: #191600;
+    }
+    .nav-buttons {
+      display: flex;
+      gap: 1.1em;
+      margin-top: 3em;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+    .nav-btn {
+      flex: 1 1 32%;
+      padding: 0.65em 0;
+      border-radius: 10px;
+      border: none;
+      font-weight: 600;
+      font-size: 1.04em;
+      cursor: pointer;
+      transition: background-color 0.17s;
+      box-shadow: 0 1px 6px #8888;
+      user-select: none;
+    }
+    .nav-btn.back {
+      background-color: #e0e7ef;
+      color: #26733e;
+    }
+    .nav-btn.back:hover {
+      background-color: #d0f9e8;
+    }
+    .nav-btn.home {
+      background-color: #2563eb;
+      color: white;
+    }
+    .nav-btn.home:hover {
+      background-color: #1e40af;
+    }
+    .nav-btn.next {
+      background-color: #219150;
+      color: white;
+    }
+    .nav-btn.next:hover {
+      background-color: #176d38;
+    }
+
+    /* Tooltip */
+    .tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      border-bottom: 1.2px dotted #13421f;
+    }
+    .tooltip .tooltiptext {
+      visibility: hidden;
+      width: 210px;
+      background-color: #13421f;
+      color: #fff;
+      text-align: center;
+      border-radius: 7px;
+      padding: 0.5em 0.8em;
+      position: absolute;
+      z-index: 10;
+      bottom: 130%;
+      left: 50%;
+      margin-left: -105px;
+      opacity: 0;
+      transition: opacity 0.3s;
+      font-size: 0.92em;
+      user-select: none;
+    }
+    .tooltip:hover .tooltiptext {
+      visibility: visible;
+      opacity: 1;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Mint QR Batch (Double Hash UI)</h2>
+    <form id="mintForm" autocomplete="off">
+      <div class="input-row">
+        <div>
+          <label for="passwordInput">Password</label>
+          <input id="passwordInput" type="password" maxlength="12" placeholder="Enter password" required />
+        </div>
+        <div>
+          <label for="pinInput">PIN</label>
+          <input id="pinInput" type="password" maxlength="6" placeholder="Enter PIN" required />
+        </div>
+      </div>
+      <div class="input-row">
+        <div>
+          <label for="secretInput">Secret</label>
+          <input id="secretInput" type="text" maxlength="64" placeholder="Enter secret phrase" required />
+        </div>
+        <div>
+          <label for="batchNameInput">Batch Name (optional)</label>
+          <input id="batchNameInput" type="text" maxlength="32" placeholder="Batch name (optional)" />
+        </div>
+      </div>
+      <div class="input-row">
+        <div>
+          <label for="qrAmountInput">Number of QR to generate</label>
+          <input id="qrAmountInput" type="number" min="1" max="200" value="10" required />
+        </div>
+      </div>
+      <button type="submit" id="genBatchBtn" class="btn">Generate QR Batch</button>
+    </form>
+
+    <div class="msg" id="msg"></div>
+
+    <div class="result-section" id="resultSection" style="display:none;">
+      <div class="qr-preview" id="qrPreview">
+        <canvas id="qrCanvas"></canvas>
+        <div>QR preview</div>
+      </div>
+      <div class="info-box" id="infoBox">
+        <div><strong>Commitment Hash:</strong> <span id="commitmentHash"></span></div>
+        <div><strong>Timestamp:</strong> <span id="timestamp"></span></div>
+        <div><strong>Nonce:</strong> <span id="nonce"></span></div>
+      </div>
+    </div>
+
+    <div class="action-buttons" id="actionButtons" style="display:none;">
+      <button class="copy-btn" id="copyTicketBtn">Copy Ticket</button>
+      <button class="copy-btn" id="copyQRBtn">Copy QR List</button>
+      <button class="export-btn" id="exportLogBtn">Export Commit Log (JSON)</button>
+    </div>
+
+    <div class="nav-buttons">
+      <button class="nav-btn back" id="backBtn">Back</button>
+      <button class="nav-btn home" id="homeBtn">Home</button>
+      <button class="nav-btn next" id="nextBtn" disabled>Next →</button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script>
+    async function sha256hex(str) {
+      const enc = new TextEncoder();
+      const buf = enc.encode(str);
+      const hashBuf = await crypto.subtle.digest("SHA-256", buf);
+      return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    async function hmac_sha256(keyHex, msg) {
+      const enc = new TextEncoder();
+      const key = await crypto.subtle.importKey("raw", hex2buf(keyHex), {name: "HMAC", hash: "SHA-256"}, false, ["sign"]);
+      const sig = await crypto.subtle.sign("HMAC", key, enc.encode(msg));
+      return Array.from(new Uint8Array(sig)).map(b => b.toString(16).padStart(2, "0")).join("");
+    }
+
+    function hex2buf(hex) {
+      return new Uint8Array(hex.match(/../g).map(x => parseInt(x, 16)));
+    }
+
+    // Elements
+    const mintForm = document.getElementById("mintForm");
+    const passwordInput = document.getElementById("passwordInput");
+    const pinInput = document.getElementById("pinInput");
+    const secretInput = document.getElementById("secretInput");
+    const batchNameInput = document.getElementById("batchNameInput");
+    const qrAmountInput = document.getElementById("qrAmountInput");
+
+    const msg = document.getElementById("msg");
+
+    const resultSection = document.getElementById("resultSection");
+    const qrCanvas = document.getElementById("qrCanvas");
+    const commitmentHashSpan = document.getElementById("commitmentHash");
+    const timestampSpan = document.getElementById("timestamp");
+    const nonceSpan = document.getElementById("nonce");
+
+    const actionButtons = document.getElementById("actionButtons");
+    const copyTicketBtn = document.getElementById("copyTicketBtn");
+    const copyQRBtn = document.getElementById("copyQRBtn");
+    const exportLogBtn = document.getElementById("exportLogBtn");
+
+    const backBtn = document.getElementById("backBtn");
+    const homeBtn = document.getElementById("homeBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    let lastBatchData = null;
+
+    function generateNonce() {
+      return Math.floor(Math.random() * 1e12).toString() + "_" + Date.now() + "_" + Math.random();
+    }
+
+    mintForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const password = passwordInput.value.trim();
+      const pin = pinInput.value.trim();
+      const secret = secretInput.value.trim();
+      const batchName = batchNameInput.value.trim();
+      const qrAmount = parseInt(qrAmountInput.value, 10);
+
+      if (!password || password.length < 6) {
+        msg.textContent = "Please enter a password at least 6 characters.";
+        return;
+      }
+      if (!pin || pin.length < 4) {
+        msg.textContent = "Please enter a PIN at least 4 digits.";
+        return;
+      }
+      if (!secret || secret.length < 8) {
+        msg.textContent = "Please enter a secret phrase at least 8 characters.";
+        return;
+      }
+      if (isNaN(qrAmount) || qrAmount < 1 || qrAmount > 200) {
+        msg.textContent = "Please enter number of QR between 1 and 200.";
+        return;
+      }
+
+      msg.textContent = "⏳ Generating QR batch... Please wait.";
+
+      // Generate qrhash1 for each slot using secret + nonce
+      const qrList = [];
+      for (let i = 0; i < qrAmount; i++) {
+        const nonce = generateNonce();
+        const qrhash = await sha256hex(secret + "|" + nonce);
+        qrList.push({ qrhash, nonce });
+      }
+
+      // Generate commitment hash from all qrhash1 concatenated
+      const combinedQRHashes = qrList.map(q => q.qrhash).join("|");
+      const commitmentHash = await sha256hex(combinedQRHashes);
+
+      // Timestamp
+      const timestamp = new Date().toISOString();
+
+      // Compose ticket string
+      const ticketLines = [
+        `Batch Name: ${batchName || "(none)"}`,
+        `Password: ${password}`,
+        `PIN: ${pin}`,
+        `Secret: ${secret}`,
+        `Commitment Hash: ${commitmentHash}`,
+        `Timestamp: ${timestamp}`,
+        `Nonce List:`
+      ];
+      qrList.forEach((q, idx) => {
+        ticketLines.push(`  #${idx + 1}: ${q.nonce}`);
+      });
+      const ticketStr = ticketLines.join("\n");
+
+      // Show QR code for commitment hash
+      QRCode.toCanvas(qrCanvas, commitmentHash, { width: 150 }, (err) => {
+        if (err) console.error(err);
+      });
+
+      // Update UI info
+      commitmentHashSpan.textContent = commitmentHash;
+      timestampSpan.textContent = timestamp;
+      nonceSpan.textContent = qrAmount + " QR Nonces";
+
+      // Show sections
+      resultSection.style.display = "flex";
+      actionButtons.style.display = "flex";
+      msg.textContent = "✅ QR Batch generated. Please backup your ticket securely!";
+
+      lastBatchData = {
+        password,
+        pin,
+        secret,
+        batchName,
+        qrList,
+        commitmentHash,
+        timestamp,
+        ticketStr,
+      };
+
+      nextBtn.disabled = false;
+    });
+
+    function copyText(text, btn, msg) {
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = msg;
+        setTimeout(() => {
+          btn.textContent = btn.originalText;
+        }, 1200);
+      });
+    }
+
+    copyTicketBtn.originalText = "Copy Ticket";
+    copyQRBtn.originalText = "Copy QR List";
+    exportLogBtn.originalText = "Export Commit Log (JSON)";
+
+    copyTicketBtn.onclick = () => {
+      if (!lastBatchData) return;
+      copyText(lastBatchData.ticketStr, copyTicketBtn, "Copied!");
+    };
+
+    copyQRBtn.onclick = () => {
+      if (!lastBatchData) return;
+      const qrStrings = lastBatchData.qrList.map((q) => q.qrhash).join("\n");
+      copyText(qrStrings, copyQRBtn, "Copied!");
+    };
+
+    exportLogBtn.onclick = () => {
+      if (!lastBatchData) return;
+      const obj = {
+        batchName: lastBatchData.batchName,
+        timestamp: lastBatchData.timestamp,
+        commitmentHash: lastBatchData.commitmentHash,
+        qrHashes: lastBatchData.qrList.map((q) => q.qrhash),
+        nonces: lastBatchData.qrList.map((q) => q.nonce),
+      };
+      const blob = new Blob([JSON.stringify(obj, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dtc_commit_log_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url
