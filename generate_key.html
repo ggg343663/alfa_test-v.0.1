@@ -2,52 +2,56 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>1. Generate Public Key from Password + PIN</title>
+  <title>Generate Public Key – DTC</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2em auto; padding: 1em; background: #f5f7fa; color: #333; }
-    h2 { text-align: center; color: #246bfd; margin-bottom: 1em; }
-    .input-row { margin-bottom: 1.2em; }
-    .input-label { margin-bottom: 0.38em; font-weight: bold; color: #607d8b;}
+    body { font-family: Arial, sans-serif; max-width: 430px; margin: 0 auto; padding: 0 0 20px 0; background: #f6f7fa; color: #333; }
+    .container { background: #fff; margin-top: 20px; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2em 1.2em 1.2em 1.2em; }
+    h2 { text-align: center; color: #246bfd; margin-bottom: 1.4em; font-size: 1.36em; font-weight: bold; }
+    .input-row { margin-bottom: 1.22em; }
+    .input-label { margin-bottom: 0.23em; font-weight: bold; color: #90a4ae; font-size: 1em;}
+    .input-hint { color: #b0bec5; font-size: 0.93em; margin-top: 0.09em;}
     .pw-group { position: relative; }
-    .pw-input { width: 100%; padding: 0.75em 2.1em 0.75em 0.95em; font-size: 1.11em; border-radius: 7px; box-sizing: border-box; border: 1.4px solid #cddc39; background: #f8fff6; }
+    .pw-input { width: 100%; min-height: 40px; max-height: 44px; padding: 0.67em 2.2em 0.67em 1em; font-size: 1.09em; border-radius: 8px; box-sizing: border-box; border: 1.3px solid #cfd8dc; background: #f8fafc; }
     .pw-input:focus { border-color: #246bfd; background: #fff; }
-    .pin-input { border: 1.4px solid #b2ebf2; background: #f4fdff; }
-    .show-btn { position: absolute; right: 0.42em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; width: 28px; height: 28px; padding: 0;}
+    .pin-input { border: 1.3px solid #b2ebf2; background: #f4fdff; }
+    .show-btn { position: absolute; right: 0.5em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; width: 26px; height: 26px; padding: 0;}
     .show-btn svg { display: block; }
     .show-btn .eye-hide { display: none;}
     .show-btn.hide .eye-show { display: none;}
     .show-btn.hide .eye-hide { display: block;}
-    .output { background: #f6fff8; border-left: 5px solid #90caf9; padding: 1em; border-radius: 9px; margin: 1.3em 0 1em 0; word-break: break-all; }
-    .publickey-box { display: flex; align-items: center; background: #f8fafb; border-radius: 7px; border: 1.5px solid #90caf9; padding: 0.55em; margin-top: 0.7em; }
-    .publickey-box span { flex: 1; word-break: break-all; font-size: 0.96em;}
-    .copy-btn, .export-btn { margin-left: 0.7em; padding: 0.38em 1.3em; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
+    .strength-bar { width: 100%; height: 7px; border-radius: 4px; margin-bottom: 0.3em; background: #ffe4e0; transition: background 0.3s;}
+    .strength-bar.weak { background: #ff6b6b; }
+    .strength-bar.medium { background: #ffd700; }
+    .strength-bar.strong { background: #64dd17; }
+    .strength { font-size: 0.99em; margin-bottom: 0.11em; margin-top: 0.06em;}
+    .strength.weak { color: #ff6b6b; }
+    .strength.medium { color: #ffb300; }
+    .strength.strong { color: #4caf50; }
+    .error { color: #e74c3c; font-size: 1em; margin-bottom: 0.8em; text-align: left; }
+    .output { background: #f7fafd; border-left: 5px solid #90caf9; padding: 0.77em 0.8em; border-radius: 8px; margin: 1.2em 0 0.7em 0; font-size: 1em; }
+    .publickey-box { display: flex; align-items: center; background: #fafdff; border-radius: 6px; border: 1.2px solid #cfd8dc; padding: 0.44em; margin-top: 0.2em;}
+    .publickey-box span { flex: 1; word-break: break-all; font-size: 0.98em;}
+    .copy-btn, .export-btn { margin-left: 0.7em; padding: 0.35em 1.13em; background: #4caf50; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 1em; }
     .export-btn { background: #246bfd; }
     .copy-btn:active { background: #219150; }
     .export-btn:active { background: #1747a1; }
-    .btn { display: inline-block; width: 100%; padding: 0.82em 0; margin: 0.52em 0; border: none; border-radius: 7px; font-size: 1.11em; font-weight: bold; cursor: pointer; transition: background 0.18s; text-decoration: none; text-align: center; }
-    #gen-key-btn { background: #246bfd; color: #fff; margin-top: 0.12em;}
+    .timestamp-row { color: #26733e; font-size: 0.95em; margin-top: 0.11em;}
+    .action-bar { display: flex; gap: 0.7em; margin: 1.8em 0 0.6em 0; }
+    .action-bar .btn { flex: 1; font-size: 1.04em; min-height: 42px; margin: 0; border-radius: 7px; font-weight: bold;}
+    .btn { border: none; cursor: pointer; }
+    #gen-key-btn { background: #246bfd; color: #fff; }
     #gen-key-btn:active { background: #176d38; }
-    #register-btn { background: #ffd600; color: #324c10; margin-bottom: 0.5em; display: flex; align-items: center; justify-content: center;}
+    #register-btn { background: #ffd600; color: #324c10; display: flex; align-items: center; justify-content: center;}
     #register-btn svg { margin-left: 8px; }
     #register-btn:active { background: #ffab00;}
     #home-btn { background: #eceff1; color: #246bfd; }
     #home-btn:active { background: #b0bec5;}
-    .note { font-size: 0.97em; color: #8395a7; margin-top: 1.0em; text-align: center;}
-    .strength { font-size: 0.99em; margin-bottom: 0.12em; margin-top: 0.11em;}
-    .strength.weak { color: #ff6b6b; }
-    .strength.medium { color: #ffb300; }
-    .strength.strong { color: #4caf50; }
-    .strength-bar { width: 100%; height: 7px; border-radius: 5px; margin-bottom: 0.55em; background: #ffe4e0; transition: background 0.3s;}
-    .strength-bar.weak { background: #ff6b6b; }
-    .strength-bar.medium { background: #ffd700; }
-    .strength-bar.strong { background: #64dd17; }
-    .error { color: #e74c3c; font-size: 0.98em; margin-bottom: 0.7em; text-align: left; }
-    .timestamp-row { color: #26733e; font-size: 0.98em; margin-top: 0.2em;}
-    .action-bar { display: flex; gap: 0.7em; margin-top: 1.4em;}
-    .action-bar .btn { width: 50%; }
+    #back-btn { background: #d1c4e9; color: #424242; }
+    #back-btn:active { background: #b39ddb; }
+    .note { font-size: 0.97em; color: #8395a7; margin-top: 1.1em; text-align: center;}
     @media (max-width: 480px) {
-      body { margin: 1em; padding: 0.5em; }
+      .container { padding: 1.3em 0.3em 1em 0.3em;}
       .btn, .action-bar .btn { width: 100%; margin: 0.33em 0; }
       .publickey-box { flex-direction: column; align-items: stretch; }
       .copy-btn, .export-btn { margin: 0.7em 0 0 0; }
@@ -57,8 +61,8 @@
   </style>
 </head>
 <body>
-  <h2>1. Generate Public Key from Password + PIN</h2>
-  <div class="input-container">
+  <div class="container">
+    <h2>1. Generate Public Key from Password + PIN</h2>
     <div class="input-row">
       <div class="input-label">Password:</div>
       <div class="pw-group">
@@ -79,6 +83,7 @@
           </span>
         </button>
       </div>
+      <div class="input-hint">Password must include both letters and numbers.</div>
       <div id="strength-bar" class="strength-bar weak"></div>
       <div id="password-strength-msg" class="strength weak">Weak</div>
     </div>
@@ -119,6 +124,7 @@
           </span>
         </button>
       </div>
+      <div class="input-hint">PIN should be 4-6 digits.</div>
     </div>
     <div class="input-row">
       <div class="input-label">Confirm PIN:</div>
@@ -130,6 +136,7 @@
               <ellipse cx="12" cy="12" rx="9" ry="5.5" />
               <circle cx="12" cy="12" r="2.5"/>
             </svg>
+            <!-- eye-hide SVG ต่อจากข้างบน -->
             <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
               <ellipse cx="12" cy="12" rx="9" ry="5.5" />
               <circle cx="12" cy="12" r="2.5"/>
@@ -140,32 +147,43 @@
       </div>
     </div>
     <div id="error-msg" class="error" style="display:none;"></div>
-  </div>
-  <button id="gen-key-btn" class="btn">Generate Key</button>
-  <div id="output-container" class="output" style="display: none;">
-    <strong>Public Key:</strong>
-    <div class="publickey-box">
-      <span id="public-key"></span>
-      <button class="copy-btn" onclick="copyPubKey()">Copy</button>
-      <button class="export-btn" onclick="exportLog()">Export Log</button>
+
+    <!-- Action Button -->
+    <button id="gen-key-btn" class="btn" style="margin-top:18px;">Generate Key</button>
+
+    <!-- ผลลัพธ์/Preview (Public Key) -->
+    <div id="output-container" class="output" style="display: none;">
+      <strong>Public Key:</strong>
+      <div class="publickey-box">
+        <span id="public-key"></span>
+        <button class="copy-btn" onclick="copyPubKey()">Copy</button>
+        <button class="export-btn" onclick="exportLog()">Export Log</button>
+      </div>
+      <div class="timestamp-row" id="timestamp-row"></div>
     </div>
-    <div class="timestamp-row" id="timestamp-row"></div>
-  </div>
-  <div class="action-bar">
-    <a href="register_qr.html" id="register-btn" class="btn">
-      Next: Register QR
-      <svg width="20" height="20" viewBox="0 0 20 20"><path d="M7 5l5 5-5 5" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </a>
-    <a href="index.html" id="home-btn" class="btn">Back to Home</a>
-  </div>
-  <div class="note">
-    *Your Public Key is generated deterministically from your Password and PIN.<br>
-    <b>Keep your password & PIN safe!</b> We never store or show your private key. You can always regenerate the same public key if you enter the same info.
-  </div>
-  <div class="note" style="margin-top: 0.8em;">
-    Enter password and PIN, confirm both, then click <b>Generate Key</b>.<br>
-    <b>Password must be 6-12 characters and include both letters and numbers.</b> PIN should be 4-6 digits.
-  </div>
+
+    <!-- Navigation Bar -->
+    <div class="action-bar">
+      <a href="index.html" id="back-btn" class="btn">Back</a>
+      <a href="index.html" id="home-btn" class="btn">Home</a>
+      <a href="register_qr.html" id="register-btn" class="btn">
+        Next
+        <svg width="20" height="20" viewBox="0 0 20 20">
+          <path d="M7 5l5 5-5 5" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </a>
+    </div>
+
+    <!-- Note (ด้านล่างสุด) -->
+    <div class="note">
+      *Your Public Key is generated deterministically from your Password and PIN.<br>
+      <b>Keep your password & PIN safe!</b> We never store or show your private key.
+    </div>
+    <div class="note" style="margin-top: 0.6em;">
+      Enter password and PIN, confirm both, then click <b>Generate Key</b>.<br>
+      <b>Password must be 6-12 characters and include both letters and numbers.</b> PIN should be 4-6 digits.
+    </div>
+  </div> <!-- end .container -->
 
   <script>
     // Toggle show/hide password fields (ตา)
@@ -251,7 +269,7 @@
       });
     }
 
-    // // Export Log
+    // Export Log
     function exportLog() {
       const pk = document.getElementById('public-key').textContent;
       const now = new Date().toISOString();
@@ -269,4 +287,4 @@
     }
   </script>
 </body>
-</html> Log
+</html>
