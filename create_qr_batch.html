@@ -10,47 +10,56 @@
       background: #f5f7fa;
       color: #222;
       margin: 0; padding: 0;
+      min-height: 100vh;
     }
     .container {
-      max-width: 520px;
-      margin: 2.5em auto;
+      max-width: 500px;
+      margin: 2.7em auto 2.5em auto;
       background: #fff;
-      padding: 2em 1.6em 2.2em 1.6em;
-      border-radius: 18px;
-      box-shadow: 0 6px 32px #1771b415, 0 1.5px 5px #7ed9a340;
+      padding: 2.2em 1.3em 2.4em 1.3em;
+      border-radius: 19px;
+      box-shadow: 0 8px 32px #1771b420, 0 2px 7px #2563eb13;
     }
     h2 {
       text-align: center;
       color: #219150;
-      margin-bottom: 1.3em;
+      margin-bottom: 1.5em;
+      font-size: 1.6em;
+      letter-spacing: 0.01em;
     }
     .input-row {
       display: flex;
       align-items: center;
       gap: 0.7em;
-      margin-bottom: 1.2em;
+      margin-bottom: 1.25em;
     }
     input[type="number"] {
-      width: 90px;
-      padding: 0.7em 0.9em;
-      font-size: 1.1em;
-      border-radius: 7px;
+      width: 92px;
+      padding: 0.75em 0.95em;
+      font-size: 1.11em;
+      border-radius: 8px;
       border: 1.5px solid #bee7d6;
       background: #fafdff;
-      margin-right: 1em;
+      margin-right: 0.9em;
+      color: #184;
+      font-weight: bold;
+      transition: border .17s;
     }
+    input[type="number"]:focus { border-color: #2563eb; outline: none; background: #eaf6fd;}
     label {
       font-weight: bold;
       color: #246bfd;
+      font-size: 1.08em;
+      margin-right: 0.2em;
     }
     .btn {
       display: block;
       width: 100%;
-      margin: 1.1em 0 0.7em 0;
-      padding: 0.85em 0;
+      margin: 1.15em 0 0.8em 0;
+      padding: 0.87em 0;
       border: none;
       border-radius: 12px;
-      font-size: 1.13em;
+      font-size: 1.14em;
       font-weight: 600;
       letter-spacing: 0.02em;
       background: linear-gradient(90deg,#219150 75%,#246bfd 100%);
@@ -61,62 +70,77 @@
     }
     .btn:active { background: #176d38; }
     .btn[disabled] {
-      opacity: 0.52;
+      opacity: 0.54;
       cursor: not-allowed;
       background: #b2e4c6;
       pointer-events: none;
     }
     .list-row {
       margin: 1.2em 0 0 0;
-      padding: 1.2em 0.7em;
+      padding: 1.25em 0.7em 1.18em 0.7em;
       background: #e8f3fe;
-      border-left: 5px solid #246bfd;
-      border-radius: 12px;
-      font-size: 1.04em;
+      border-left: 6px solid #246bfd;
+      border-radius: 13px;
+      font-size: 1.07em;
       min-height: 2.5em;
       word-break: break-all;
+      box-shadow: 0 1.5px 6px #32bc5e0c;
+      max-height: 410px;
+      overflow-y: auto;
     }
     .action-row {
       display: flex;
-      gap: 0.7em;
+      gap: 0.65em;
       flex-wrap: wrap;
-      margin-top: 1.3em;
-      margin-bottom: 0.8em;
+      margin-top: 1.2em;
+      margin-bottom: 0.7em;
+      justify-content: flex-end;
     }
     .copy-btn, .export-btn {
       background: #246bfd;
       color: #fff;
       border: none;
-      border-radius: 7px;
-      padding: 0.46em 1.2em;
+      border-radius: 8px;
+      padding: 0.47em 1.23em;
       font-size: 1em;
       cursor: pointer;
       font-weight: 600;
       margin-right: 0.1em;
       transition: background 0.13s;
+      box-shadow: 0 1px 5px #bcd7ff26;
     }
     .copy-btn:active, .export-btn:active { background: #1747a1; }
     .export-btn { background: #facc15; color: #444; }
     .export-btn:active { background: #eab308; color: #000; }
-    .msg { color: #26733e; margin-bottom: 1.1em; text-align: center; }
+    .msg {
+      color: #26733e;
+      margin-bottom: 1.1em;
+      text-align: center;
+      font-weight: 600;
+      min-height: 1.5em;
+      letter-spacing: 0.01em;
+    }
     .back-btn {
       display: inline-block;
       background: #e0e7ef;
       color: #26733e;
-      border-radius: 7px;
+      border-radius: 8px;
       border: none;
       font-size: 1.04em;
       padding: 0.7em 1.2em;
-      margin-top: 1.2em;
+      margin-top: 1.4em;
       text-align: center;
       cursor: pointer;
       font-weight: 500;
+      box-shadow: 0 1px 5px #e3e8f026;
+      transition: background 0.13s;
     }
     .back-btn:hover { background: #d0f9e8; }
     @media (max-width: 600px) {
-      .container { padding: 1em 0.2em 1.5em 0.2em; border-radius: 0; }
-      .action-row { flex-direction: column; gap: 0.3em; }
-      .list-row { font-size: 0.99em; }
+      .container { padding: 1.1em 0.13em 1.5em 0.13em; border-radius: 0; }
+      .action-row { flex-direction: column; gap: 0.35em; align-items: flex-end; }
+      .list-row { font-size: 0.98em; max-height: 240px;}
+      h2 { font-size: 1.17em; }
     }
   </style>
 </head>
