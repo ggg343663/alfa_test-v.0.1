@@ -5,26 +5,32 @@
   <title>Generate Public Key – DTC</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; max-width: 430px; margin: 0 auto; padding: 0 0 20px 0; background: #f6f7fa; color: #333; }
-    .container { background: #fff; margin-top: 20px; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2em 1.2em 1.2em 1.2em; }
-    h2 { text-align: center; color: #246bfd; margin-bottom: 1.4em; font-size: 1.36em; font-weight: bold; }
-    .input-row { margin-bottom: 1.22em; }
-    .input-label { margin-bottom: 0.23em; font-weight: bold; color: #90a4ae; font-size: 1em;}
-    .input-hint { color: #b0bec5; font-size: 0.93em; margin-top: 0.09em;}
+    body { font-family: Arial, sans-serif; background: #f6f7fa; color: #333; margin: 0; padding: 0; }
+    .container { max-width: 430px; background: #fff; margin: 30px auto 0 auto; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2.3em 1.1em 1.5em 1.1em; }
+    h2 { text-align: center; color: #246bfd; margin-bottom: 1.5em; font-size: 1.5em; font-weight: bold; }
+    .input-row { margin-bottom: 1.1em; }
+    .input-label { margin-bottom: 0.28em; font-weight: bold; color: #7e8b9a; font-size: 1.09em; }
     .pw-group { position: relative; }
-    .pw-input { width: 100%; min-height: 40px; max-height: 44px; padding: 0.67em 2.2em 0.67em 1em; font-size: 1.09em; border-radius: 8px; box-sizing: border-box; border: 1.3px solid #cfd8dc; background: #f8fafc; }
-    .pw-input:focus { border-color: #246bfd; background: #fff; }
-    .pin-input { border: 1.3px solid #b2ebf2; background: #f4fdff; }
-    .show-btn { position: absolute; right: 0.5em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; width: 26px; height: 26px; padding: 0;}
+    .pw-input, .pin-input {
+      width: 100%; min-height: 44px; max-height: 48px; 
+      padding: 0.83em 2.1em 0.83em 1em;
+      font-size: 1.11em; border-radius: 9px; box-sizing: border-box;
+      border: 2px solid #ffe082;
+      background: #fffde7;
+      transition: border .2s, background .2s;
+    }
+    .pw-input:focus, .pin-input:focus { border-color: #246bfd; background: #ffffff; }
+    .show-btn { position: absolute; right: 0.55em; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; width: 26px; height: 26px; padding: 0;}
     .show-btn svg { display: block; }
     .show-btn .eye-hide { display: none;}
     .show-btn.hide .eye-show { display: none;}
     .show-btn.hide .eye-hide { display: block;}
-    .strength-bar { width: 100%; height: 7px; border-radius: 4px; margin-bottom: 0.3em; background: #ffe4e0; transition: background 0.3s;}
+    .input-hint { color: #b0bec5; font-size: 0.96em; margin-top: 0.05em;}
+    .strength-bar { width: 100%; height: 7px; border-radius: 4px; margin: 0.28em 0 0.15em 0; background: #ffe4e0; transition: background 0.3s;}
     .strength-bar.weak { background: #ff6b6b; }
     .strength-bar.medium { background: #ffd700; }
     .strength-bar.strong { background: #64dd17; }
-    .strength { font-size: 0.99em; margin-bottom: 0.11em; margin-top: 0.06em;}
+    .strength { font-size: 1em; margin-bottom: 0.1em; margin-top: 0.05em;}
     .strength.weak { color: #ff6b6b; }
     .strength.medium { color: #ffb300; }
     .strength.strong { color: #4caf50; }
@@ -37,44 +43,33 @@
     .copy-btn:active { background: #219150; }
     .export-btn:active { background: #1747a1; }
     .timestamp-row { color: #26733e; font-size: 0.95em; margin-top: 0.11em;}
-    .action-bar { display: flex; gap: 0.7em; margin: 1.8em 0 0.6em 0; }
-    .action-bar .btn { flex: 1; font-size: 1.04em; min-height: 42px; margin: 0; border-radius: 7px; font-weight: bold;}
-    .btn { border: none; cursor: pointer; }
-    #gen-key-btn { background: #246bfd; color: #fff; }
-    #gen-key-btn:active { background: #176d38; }
-    #register-btn { background: #ffd600; color: #324c10; display: flex; align-items: center; justify-content: center;}
-    #register-btn svg { margin-left: 8px; }
-    #register-btn:active { background: #ffab00;}
-    #home-btn { background: #eceff1; color: #246bfd; }
-    #home-btn:active { background: #b0bec5;}
-    #back-btn { background: #d1c4e9; color: #424242; }
-    #back-btn:active { background: #b39ddb; }
-    .note { font-size: 0.97em; color: #8395a7; margin-top: 1.1em; text-align: center;}
+    .btn-main { display: block; width: 100%; font-size: 1.15em; border-radius: 8px; border: none; font-weight: bold; min-height: 48px; margin: 16px 0 7px 0; }
+    #gen-key-btn { background: #2d995b; color: #fff;}
+    #gen-key-btn:active { background: #196c34; }
+    #next-btn { background: #b8cafe; color: #173472; margin-top: 9px;}
+    #next-btn:active { background: #97b6ed;}
+    .back-home-bar { display: flex; flex-direction: row; justify-content: center; align-items: center; margin-top: 26px; }
+    #back-home-btn { background: #ede7f6; color: #512da8; border: none; border-radius: 10px; padding: 0.95em 1.5em; font-size: 1.14em; text-align: center; min-width: 150px; font-weight: bold; text-decoration: none; }
+    #back-home-btn:active { background: #b39ddb;}
     @media (max-width: 480px) {
-      .container { padding: 1.3em 0.3em 1em 0.3em;}
-      .btn, .action-bar .btn { width: 100%; margin: 0.33em 0; }
-      .publickey-box { flex-direction: column; align-items: stretch; }
-      .copy-btn, .export-btn { margin: 0.7em 0 0 0; }
-      .action-bar { flex-direction: column; gap: 0.3em;}
-      #register-btn svg { margin-left: 3px;}
+      .container { padding: 1.1em 0.22em 1em 0.22em;}
+      .btn-main, #back-home-btn { font-size: 1em; min-height: 42px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>1. Generate Public Key from Password + PIN</h2>
+    <h2>1. Generate Public Key from<br>Password + PIN</h2>
     <div class="input-row">
       <div class="input-label">Password:</div>
       <div class="pw-group">
         <input type="password" id="password" class="pw-input" placeholder="6-12 chars, letters & numbers" autocomplete="new-password"/>
         <button class="show-btn" type="button" onclick="toggleShow('password',this)" aria-label="Show Password">
           <span class="eye-icon">
-            <!-- ตาเปิด (show) -->
             <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
               <ellipse cx="12" cy="12" rx="9" ry="5.5" />
               <circle cx="12" cy="12" r="2.5"/>
             </svg>
-            <!-- ตาปิด (hide) -->
             <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
               <ellipse cx="12" cy="12" rx="9" ry="5.5" />
               <circle cx="12" cy="12" r="2.5"/>
@@ -109,7 +104,7 @@
     <div class="input-row">
       <div class="input-label">PIN (4-6 digits):</div>
       <div class="pw-group">
-        <input type="password" id="pin" class="pw-input pin-input" placeholder="Enter PIN (4-6 digits)" maxlength="6" autocomplete="off"/>
+        <input type="password" id="pin" class="pin-input" placeholder="Enter PIN (4-6 digits)" maxlength="6" autocomplete="off"/>
         <button class="show-btn" type="button" onclick="toggleShow('pin',this)" aria-label="Show PIN">
           <span class="eye-icon">
             <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
@@ -129,14 +124,13 @@
     <div class="input-row">
       <div class="input-label">Confirm PIN:</div>
       <div class="pw-group">
-        <input type="password" id="confirm-pin" class="pw-input pin-input" placeholder="Confirm PIN" maxlength="6" autocomplete="off"/>
+        <input type="password" id="confirm-pin" class="pin-input" placeholder="Confirm PIN" maxlength="6" autocomplete="off"/>
         <button class="show-btn" type="button" onclick="toggleShow('confirm-pin',this)" aria-label="Show Confirm PIN">
           <span class="eye-icon">
             <svg class="eye-show" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
               <ellipse cx="12" cy="12" rx="9" ry="5.5" />
               <circle cx="12" cy="12" r="2.5"/>
             </svg>
-            <!-- eye-hide SVG ต่อจากข้างบน -->
             <svg class="eye-hide" xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="none" stroke="#222" stroke-width="2" viewBox="0 0 24 24">
               <ellipse cx="12" cy="12" rx="9" ry="5.5" />
               <circle cx="12" cy="12" r="2.5"/>
@@ -149,44 +143,16 @@
     <div id="error-msg" class="error" style="display:none;"></div>
 
     <!-- Action Button -->
-    <button id="gen-key-btn" class="btn" style="margin-top:18px;">Generate Key</button>
+    <button id="gen-key-btn" class="btn-main">Generate Key</button>
+    <a href="register_qr.html" id="next-btn" class="btn-main" style="background: #b8cafe; color:#173472;">Next: Generate QR Hash</a>
 
-    <!-- ผลลัพธ์/Preview (Public Key) -->
-    <div id="output-container" class="output" style="display: none;">
-      <strong>Public Key:</strong>
-      <div class="publickey-box">
-        <span id="public-key"></span>
-        <button class="copy-btn" onclick="copyPubKey()">Copy</button>
-        <button class="export-btn" onclick="exportLog()">Export Log</button>
-      </div>
-      <div class="timestamp-row" id="timestamp-row"></div>
-    </div>
-
-    <!-- Navigation Bar -->
-    <div class="action-bar">
-      <a href="index.html" id="back-btn" class="btn">Back</a>
-      <a href="index.html" id="home-btn" class="btn">Home</a>
-      <a href="register_qr.html" id="register-btn" class="btn">
-        Next
-        <svg width="20" height="20" viewBox="0 0 20 20">
-          <path d="M7 5l5 5-5 5" stroke="#333" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        </svg>
-      </a>
-    </div>
-
-    <!-- Note (ด้านล่างสุด) -->
-    <div class="note">
-      *Your Public Key is generated deterministically from your Password and PIN.<br>
-      <b>Keep your password & PIN safe!</b> We never store or show your private key.
-    </div>
-    <div class="note" style="margin-top: 0.6em;">
-      Enter password and PIN, confirm both, then click <b>Generate Key</b>.<br>
-      <b>Password must be 6-12 characters and include both letters and numbers.</b> PIN should be 4-6 digits.
+    <div class="back-home-bar">
+      <a href="index.html" id="back-home-btn">Back to Home</a>
     </div>
   </div> <!-- end .container -->
 
   <script>
-    // Toggle show/hide password fields (ตา)
+    // Toggle show/hide password fields
     function toggleShow(id, btn) {
       const input = document.getElementById(id);
       if (input.type === "password") {
@@ -197,21 +163,16 @@
         btn.classList.remove('hide');
       }
     }
-
     // Password strength check
     const passwordInput = document.getElementById('password');
     passwordInput.addEventListener('input', checkPasswordStrength);
     function checkPasswordStrength() {
       const pw = passwordInput.value;
-      let strength = 'weak';
-      let msg = 'Weak';
-      let barClass = 'strength-bar weak';
+      let strength = 'weak', msg = 'Weak', barClass = 'strength-bar weak';
       if (pw.length >= 8 && /[A-Za-z]/.test(pw) && /\d/.test(pw) && pw.length <= 12) {
         if (/[A-Z]/.test(pw) && /[a-z]/.test(pw) && /\W/.test(pw)) {
           strength = 'strong'; msg = 'Strong'; barClass = 'strength-bar strong';
-        } else {
-          strength = 'medium'; msg = 'Medium'; barClass = 'strength-bar medium';
-        }
+        } else { strength = 'medium'; msg = 'Medium'; barClass = 'strength-bar medium'; }
       } else if (pw.length >= 6 && /[A-Za-z]/.test(pw) && /\d/.test(pw)) {
         strength = 'medium'; msg = 'Medium'; barClass = 'strength-bar medium';
       }
@@ -219,15 +180,12 @@
       document.getElementById('password-strength-msg').className = 'strength ' + strength;
       document.getElementById('password-strength-msg').textContent = msg;
     }
-
     // SHA-256 offline (Web Crypto API)
     async function sha256(str) {
       const buf = new TextEncoder().encode(str);
       const hashBuf = await crypto.subtle.digest('SHA-256', buf);
-      return Array.from(new Uint8Array(hashBuf))
-        .map(b => b.toString(16).padStart(2, '0')).join('');
+      return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
-
     // Validate & Generate Key
     document.getElementById('gen-key-btn').onclick = async function () {
       const password = document.getElementById('password').value;
@@ -236,8 +194,6 @@
       const confirmPin = document.getElementById('confirm-pin').value;
       const errorMsg = document.getElementById('error-msg');
       errorMsg.style.display = "none";
-
-      // Validate password
       if (!password || password.length < 6 || password.length > 12 || !(/[A-Za-z]/.test(password) && /\d/.test(password))) {
         errorMsg.textContent = "Password must be 6-12 chars, include letters and numbers.";
         errorMsg.style.display = "block"; return;
@@ -245,46 +201,16 @@
       if (password !== confirmPassword) {
         errorMsg.textContent = "Passwords do not match."; errorMsg.style.display = "block"; return;
       }
-      // Validate PIN
       if (!pin || !/^\d{4,6}$/.test(pin)) {
         errorMsg.textContent = "PIN must be 4-6 digits."; errorMsg.style.display = "block"; return;
       }
       if (pin !== confirmPin) {
         errorMsg.textContent = "PINs do not match."; errorMsg.style.display = "block"; return;
       }
-
       // Generate Public Key (offline)
       const publicKey = await sha256(password + '|' + pin);
-      document.getElementById('public-key').textContent = publicKey;
-      document.getElementById('output-container').style.display = 'block';
-      document.getElementById('timestamp-row').textContent =
-        "Timestamp: " + new Date().toISOString();
+      alert("Public Key:\n" + publicKey); // เปลี่ยนเป็น alert แบบเรียบง่าย
     };
-
-    // Copy Public Key
-    function copyPubKey() {
-      const pk = document.getElementById('public-key').textContent;
-      navigator.clipboard.writeText(pk).then(() => {
-        alert('Copied!');
-      });
-    }
-
-    // Export Log
-    function exportLog() {
-      const pk = document.getElementById('public-key').textContent;
-      const now = new Date().toISOString();
-      const log = {
-        public_key: pk,
-        timestamp: now,
-        note: 'Public key generated from password+PIN (DTC)'
-      };
-      const blob = new Blob([JSON.stringify(log, null, 2)], {type:'application/json'});
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = 'publickey-log.json';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    }
   </script>
 </body>
 </html>
