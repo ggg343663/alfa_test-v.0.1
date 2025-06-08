@@ -44,7 +44,7 @@
     .btn-main { display: block; width: 100%; font-size: 1.15em; border-radius: 8px; border: none; font-weight: bold; min-height: 48px; margin: 16px 0 7px 0; }
     #gen-key-btn { background: #2d995b; color: #fff;}
     #gen-key-btn:active { background: #196c34; }
-    #next-btn { background: #b8cafe; color: #173472; margin-top: 9px;}
+    #next-btn { background: #b8cafe; color: #173472; margin-top: 9px; display: none;}
     #next-btn:active { background: #97b6ed;}
     .back-home-bar { display: flex; flex-direction: row; justify-content: center; align-items: center; margin-top: 26px; }
     #back-home-btn { background: #ede7f6; color: #512da8; border: none; border-radius: 10px; padding: 0.95em 1.5em; font-size: 1.14em; text-align: center; min-width: 150px; font-weight: bold; text-decoration: none; }
@@ -142,7 +142,7 @@
 
     <!-- Action Button -->
     <button id="gen-key-btn" class="btn-main">Generate Key</button>
-<a href="create_qr_hash.html" id="next-btn" class="btn-main" style="background: #b8cafe; color:#173472;">Next: Generate QR Hash</a>
+    <a href="create_qr_hash.html" id="next-btn" class="btn-main" style="background: #b8cafe; color:#173472; display: none;">Next: Generate QR Hash</a>
 
     <!-- ผลลัพธ์ Public Key -->
     <div id="output-container" class="output">
@@ -225,6 +225,7 @@
       document.getElementById('public-key').textContent = publicKey;
       document.getElementById('timestamp-row').textContent = "Timestamp: " + new Date().toISOString();
       document.getElementById('output-container').style.display = "block";
+      document.getElementById('next-btn').style.display = "block"; // <-- show next step
     };
   </script>
 </body>
