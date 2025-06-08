@@ -1,15 +1,15 @@
 [
   {
     "slot": 1,
-    "hash": "c86b6a1b...a5e1",               // SHA256 ของ slot (ทุก field ที่สำคัญใน slot นี้)
-    "prev_hash": "00000000...0000",          // hash ของ slot ก่อนหน้า (หรือ 0 ถ้าเป็น genesis)
-    "qr_hash": "a1234b5678cde...f9ab",       // QR hash ที่ใช้กับ slot นี้
-    "timestamp": "2024-06-02T00:41:00Z",     // เวลาสร้าง slot (ISO8601, UTC)
-    "nonce": "123456789012",                 // ค่า random ป้องกัน hash ซ้ำ
-    "pubkey": "0x8b3d...fa17",               // public key ของเจ้าของ QR นี้
-    "status": "active",                      // สถานะ (active, transferred, revoked ฯลฯ)
-    "action": "register",                    // กิจกรรมที่เกิดขึ้น (register, transfer, revoke ฯลฯ)
-    "sig": "SIGNATURE_BASE64_OR_HEX",        // ลายเซ็นดิจิทัล (Base64 หรือ HEX, อาจเว้นว่างถ้าเป็น demo)
-    "meta": {}                               // ข้อมูลเสริม (เช่น ชื่อผู้ถือ, memo, ฯลฯ)
+    "hash": "c86b6a1b...a5e1",
+    "prev_hash": "00000000...0000",
+    "qr_hash": "a1234b5678cde...f9ab",
+    "timestamp": "2024-06-02T00:41:00Z",
+    "nonce": "123456789012",
+    "pubkey": "0x8b3d...fa17",
+    "status": "active",
+    "action": "register",
+    "sig": "SIGNATURE_BASE64_OR_HEX",
+    "meta": {}
   }
 ]
