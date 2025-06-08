@@ -120,13 +120,13 @@
     // Double hash: Step 1 (hash1) + Step 2 (commitment hash2)
     const qrList = [];
     for (let i = 0; i < qrAmount; i++) {
-      // สามารถเพิ่ม serial/slot_id ได้ (ตรง logic DTC จริง)
       const slot_id = i + 1;
       const nonce = crypto.randomUUID();
+      // DTC logic: hash1 = sha256(secret|slot_id|nonce)
       const qrhash = await sha256(secret + "|" + slot_id + "|" + nonce);
       qrList.push({ qrhash, slot_id, nonce });
     }
-    // commitment hash2
+    // hash2 = sha256(qrhash1|qrhash2|...|batchName)
     const combinedHashes = qrList.map(q => q.qrhash).join('|');
     const commitmentHash = await sha256(combinedHashes + "|" + batchName);
 
@@ -172,14 +172,13 @@
     downloadText(qrHashes, `qr_hashes_${Date.now()}.txt`);
   };
 
-  // Export Commitment Log (public, ไม่เผย secret)
+  // Export Commitment Log (public)
   document.getElementById("exportLog").onclick = () => {
     if (!batchData) return;
     const log = {
       batchName: batchData.batchName,
       timestamp: batchData.timestamp,
       commitmentHash: batchData.commitmentHash,
-      // public log สามารถเลือกไม่ใส่ nonce/secret ได้
       qrHashes: batchData.qrList.map(q => q.qrhash)
     };
     const blob = new Blob([JSON.stringify(log, null, 2)], { type: 'application/json' });
