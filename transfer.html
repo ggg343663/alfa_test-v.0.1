@@ -2,149 +2,43 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Transfer QR</title>
+  <title>Transfer QR - DTC System</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f6faff;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 430px;
-      margin: 2.4em auto;
-      background: #fff;
-      border-radius: 18px;
-      box-shadow: 0 8px 38px #1376b114, 0 1.5px 7px #36d86d1c;
-      padding: 2.2em 1.4em 2.2em 1.4em;
-    }
-    h2 {
-      text-align: center;
-      color: #219150;
-      margin-bottom: 1.35em;
-      letter-spacing: 0.02em;
-    }
-    .back-btn {
-      background: none;
-      border: none;
-      color: #246bfd;
-      font-size: 1.1em;
-      font-weight: bold;
-      cursor: pointer;
-      margin-bottom: 0.8em;
-      margin-left: -0.3em;
-    }
-    .row {
-      display: flex;
-      align-items: center;
-      gap: 0.35em;
-      margin-bottom: 1.1em;
-      flex-wrap: wrap;
-    }
-    .row input[type="text"] {
-      flex: 1;
-      padding: 0.68em 0.8em;
-      border: 1.5px solid #c9e8d4;
-      border-radius: 6px;
-      font-size: 1.08em;
-      background: #f5f7fa;
-      outline: none;
-      transition: border .2s;
-    }
-    .row input[type="text"]:focus, .pw-input:focus {
-      border: 1.5px solid #246bfd;
-      background: #f0f7ff;
-    }
-    .icon-btn {
-      background: none;
-      border: none;
-      padding: 0.13em;
-      cursor: pointer;
-      transition: background 0.15s;
-      border-radius: 5px;
-      height: 38px; width: 38px;
-      display: flex; align-items: center; justify-content: center;
-    }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f6faff; margin: 0; padding: 0; }
+    .container { max-width: 440px; margin: 2.5em auto; background: #fff; border-radius: 19px; box-shadow: 0 8px 40px #1376b114, 0 1.5px 7px #36d86d1c; padding: 2.3em 1.3em 2em 1.3em;}
+    h2 { text-align: center; color: #219150; margin-bottom: 1.2em; }
+    .step { text-align:center; color: #26733e; margin-bottom: 1em;}
+    .back-btn { background: none; border: none; color: #246bfd; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-bottom: 0.8em;}
+    .row { display: flex; align-items: center; gap: 0.35em; margin-bottom: 1.1em; flex-wrap: wrap; }
+    .row input[type="text"] { flex: 1; padding: 0.68em 0.8em; border: 1.5px solid #c9e8d4; border-radius: 6px; font-size: 1.08em; background: #f5f7fa; outline: none; transition: border .2s;}
+    .row input[type="text"]:focus, .pw-input:focus { border: 1.5px solid #246bfd; background: #f0f7ff;}
+    .icon-btn { background: none; border: none; padding: 0.13em; cursor: pointer; transition: background 0.15s; border-radius: 5px; height: 38px; width: 38px; display: flex; align-items: center; justify-content: center;}
     .icon-btn img { width: 25px; height: 25px; }
-    .copy-btn {
-      background: #ebfbee;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      color: #219150;
-      font-size: 1em;
-      font-weight: 500;
-      padding: 0.36em 1.05em;
-      margin-left: 0.2em;
-      margin-right: 0.2em;
-      transition: background .18s;
-    }
+    .copy-btn { background: #ebfbee; border: none; border-radius: 4px; cursor: pointer; color: #219150; font-size: 1em; font-weight: 500; padding: 0.36em 1.05em; margin-left: 0.2em; margin-right: 0.2em; transition: background .18s; }
     .copy-btn:active { background: #d1fae5; color: #176d38; }
     .copy-success { color: #16a34a; font-size: 0.95em; margin-left: 0.27em; min-width: 2.4em; display: inline-block; }
-    .receiver-group, .yellow-group {
-      margin-bottom: 1.25em;
-      background: #f6fbfe;
-      border-radius: 7px;
-      padding: 0.9em 1em 0.85em 1em;
-      box-shadow: 0 1px 4px #d0e8fd12;
-    }
-    .receiver-group label, .yellow-group label {
-      font-size: 1.03em;
-      color: #246bfd;
-      margin-bottom: 0.32em;
-      display: block;
-      font-weight: 600;
-    }
-    .receiver-group input, .yellow-group input {
-      margin-top: 0.22em;
-      width: 100%;
-      padding: 0.7em 0.9em;
-      border: 1.3px solid #c7d5ee;
-      border-radius: 6px;
-      font-size: 1em;
-      background: #fafdff;
-      outline: none;
-      margin-bottom: 0.6em;
-    }
+    .receiver-group, .yellow-group { margin-bottom: 1.25em; background: #f6fbfe; border-radius: 7px; padding: 0.9em 1em 0.85em 1em; box-shadow: 0 1px 4px #d0e8fd12;}
+    .receiver-group label, .yellow-group label { font-size: 1.03em; color: #246bfd; margin-bottom: 0.32em; display: block; font-weight: 600;}
+    .receiver-group input, .yellow-group input { margin-top: 0.22em; width: 100%; padding: 0.7em 0.9em; border: 1.3px solid #c7d5ee; border-radius: 6px; font-size: 1em; background: #fafdff; outline: none; margin-bottom: 0.6em;}
     .pw-input { border: 1.5px solid #ffe066; background: #fffbe7;}
     .pw-input:focus { border: 1.5px solid #f6a800; background: #fffdf1; }
     .input-error { border: 2px solid #dc2626 !important; background: #fef2f2;}
     .input-err { color: #dc2626; font-size: 0.97em; margin-bottom: 0.45em;}
-    .mini-btn {
-      width: 100%;
-      background: linear-gradient(90deg, #219150 68%, #246bfd 100%);
-      color: #fff; border: none;
-      font-weight: bold; border-radius: 8px;
-      font-size: 1.08em; margin: 0.36em 0 0.2em 0;
-      padding: 0.68em 0;
-      transition: background .2s, box-shadow .17s;
-      box-shadow: 0 1.5px 9px #60a5fa12;
-      cursor: pointer;
-    }
+    .mini-btn { width: 100%; background: linear-gradient(90deg, #219150 68%, #246bfd 100%); color: #fff; border: none; font-weight: bold; border-radius: 8px; font-size: 1.08em; margin: 0.36em 0 0.2em 0; padding: 0.68em 0; transition: background .2s, box-shadow .17s; box-shadow: 0 1.5px 9px #60a5fa12; cursor: pointer; }
     .mini-btn:active { background: #176d38; }
-    #previewBox {
-      margin-top: 0.4em;
-      padding: 0.9em 0.7em;
-      border-radius: 7px;
-      background: #f0fdf4;
-      font-size: 1.04em;
-      box-shadow: 0 0.7px 4px #67e8f9a2;
-      border-left: 6px solid #15803d;
-      min-height: 2.2em;
-    }
+    #previewBox { margin-top: 0.4em; padding: 0.9em 0.7em; border-radius: 7px; background: #f0fdf4; font-size: 1.04em; box-shadow: 0 0.7px 4px #67e8f9a2; border-left: 6px solid #15803d; min-height: 2.2em;}
     #qr-reader { margin-top: 1.2em; }
-    @media (max-width: 540px) {
-      .container { padding: 1em 0.1em 1.3em 0.1em; border-radius: 0; }
-      .row { flex-direction: column; gap: 0.12em;}
-      .mini-btn { font-size: 1em; }
-    }
+    .export-btn { margin-top: 0.7em; width: 100%; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 600; padding: 0.69em 0; font-size: 1em;}
+    .export-btn:active { background: #1747a1;}
+    @media (max-width: 540px) { .container { padding: 1em 0.1em 1.3em 0.1em; border-radius: 0; } .row { flex-direction: column; gap: 0.12em;} .mini-btn, .export-btn { font-size: 1em; } }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="back-btn" onclick="history.back()">← Back</button>
+    <div class="step">Step 4/4: Transfer QR Ownership</div>
+    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
     <h2>Transfer QR</h2>
 
     <div class="row">
@@ -181,11 +75,13 @@
     <button class="mini-btn" onclick="preview()" type="button" id="previewBtn">Preview Transfer</button>
     <div id="previewBox"></div>
     <button class="mini-btn" onclick="confirmTransfer()" type="button" style="display:none;" id="confirmBtn">Confirm Transfer</button>
+    <button class="export-btn" style="display:none;" id="exportLogBtn">Export Transfer Log (JSON)</button>
 
     <div id="qr-reader"></div>
   </div>
   <script>
     let qrReader = null;
+    let lastTransferLog = null;
     window.onload = function() {
       document.getElementById('qrhash').focus();
       if (!navigator.clipboard) {
@@ -271,13 +167,16 @@
       const isValid = validateInputs();
       const previewBox = document.getElementById('previewBox');
       const confirmBtn = document.getElementById('confirmBtn');
+      const exportBtn = document.getElementById('exportLogBtn');
       if (!isValid) {
         previewBox.textContent = "⚠️ Please complete all fields correctly.";
         confirmBtn.style.display = "none";
+        exportBtn.style.display = "none";
         return;
       }
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
+      const timestamp = new Date().toISOString();
       previewBox.innerHTML =
         `<b>Preview Transfer</b><br>
         <b>QR Hash:</b> <code>${hash}</code><br>
@@ -288,22 +187,44 @@
   "to_pubkey": "${pub}",
   "signed_by": "(your_address)",
   "sig": "(private_sign)",
-  "timestamp": "${new Date().toISOString()}"
+  "timestamp": "${timestamp}"
 }</pre>
         <small style="color:#666;">(Sign this payload with your private key derived from password+PIN.)</small>`;
       confirmBtn.style.display = "block";
+      exportBtn.style.display = "none";
     }
     function confirmTransfer() {
       document.getElementById('confirmBtn').disabled = true;
-      alert('✅ Transfer submitted! (You can add backend logic here)');
-      document.getElementById('previewBox').textContent = "";
+      const hash = document.getElementById('qrhash').value.trim();
+      const pub = document.getElementById('recipientpk').value.trim();
+      const timestamp = new Date().toISOString();
+      lastTransferLog = {
+        qr_hash: hash,
+        to_pubkey: pub,
+        signed_by: "(your_address)",
+        sig: "(private_sign)",
+        timestamp
+      };
+      document.getElementById('previewBox').innerHTML = `<b>✅ Transfer submitted!</b><br>
+        <span style="color:#15803d">You can now export this log as JSON for your records.</span>`;
       document.getElementById('confirmBtn').style.display = "none";
+      document.getElementById('exportLogBtn').style.display = "block";
       document.getElementById('qrhash').value = "";
       document.getElementById('recipientpk').value = "";
       document.getElementById('password').value = "";
       document.getElementById('pin').value = "";
       setTimeout(()=>{document.getElementById('confirmBtn').disabled = false;},800);
     }
+    document.getElementById('exportLogBtn').addEventListener('click', ()=>{
+      if (!lastTransferLog) return;
+      const blob = new Blob([JSON.stringify(lastTransferLog, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `qr_transfer_log_${Date.now()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+    });
     function copyField(id) {
       const el = document.getElementById(id);
       el.select(); el.setSelectionRange(0, 9999);
