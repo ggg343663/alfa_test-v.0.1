@@ -111,6 +111,13 @@
       margin-top: 0.2em;
       margin-bottom: 0.2em;
     }
+    .input-row { margin-bottom: 1.3em; }
+    .input-label { margin-bottom: 0.35em; font-weight: bold; }
+    input[type="text"] {
+      width: 100%; padding: 0.7em; font-size: 1em;
+      border-radius: 8px; border: 1.5px solid #ffe066;
+      background: #fffbe7; margin-bottom: 0.18em;
+    }
     @media (max-width: 600px) {
       .container { padding: 1em 0.2em 1.5em 0.2em; border-radius: 0; }
       .action-row { flex-direction: column; gap: 0.3em; }
@@ -122,14 +129,11 @@
     <div class="step">Step 2/3</div>
     <h2>Generate QR Hash from Public Key</h2>
 
-    <div class="warn" id="warn-missing" style="display:none;">
-      <b>⚠ Public Key Not Found!</b> <br>
-      Please generate a Public Key before using this page.
-    </div>
-
     <div class="info" id="pub-info">
-      <span style="font-weight:bold;">Current Public Key:</span>
-      <div id="pub-key-display" style="color:#26733e; font-weight:bold; word-break:break-all; font-size:1.05em;">Loading...</div>
+      <span style="font-weight:bold;">Your Public Key:</span>
+      <div class="input-row">
+        <input id="pub-key-input" type="text" maxlength="64" placeholder="Paste or enter your Public Key here" autocomplete="off" />
+      </div>
     </div>
 
     <button id="gen-qr-btn" class="btn" type="button">Generate New QR Hash</button>
@@ -151,7 +155,9 @@
     <a id="next-btn" class="btn" href="register.html" aria-disabled="true" tabindex="-1">Go to QR Registration</a>
     <a href="index.html" class="btn" style="background:#e0e7ef; color:#26733e; margin-top: 0.25em; font-weight:500;">Back to Home</a>
 
-    <p class="note">(You must have a Public Key. If not, you will be redirected to generate one.<br>
+    <p class="note">
+      You must have a Public Key. <br>
+      Paste or enter it above. The QR Hash will be generated deterministically.<br>
       <b>Please backup your key information. The system does not store any data for you.</b>
     </p>
   </div>
@@ -166,7 +172,7 @@
     }
 
     // Elements
-    const pubKeyDisplay = document.getElementById('pub-key-display');
+    const pubKeyInput = document.getElementById('pub-key-input');
     const genBtn = document.getElementById('gen-qr-btn');
     const qrContainer = document.getElementById('qr-container');
     const qrOutput = document.getElementById('qr-hash-output');
@@ -176,30 +182,18 @@
     const nextBtn = document.getElementById('next-btn');
     const timestampEl = document.getElementById('timestamp');
     const nonceEl = document.getElementById('nonce');
-    const warnMissing = document.getElementById('warn-missing');
 
     let lastQRLog = null;
 
-    // On page load, show data if available
+    // Autofill pubkey if exists in localStorage
     window.addEventListener('DOMContentLoaded', () => {
       let pubKey = localStorage.getItem('dtc_publicKey');
-      if (!pubKey) {
-        pubKeyDisplay.textContent = '(Public Key Not Found)';
-        warnMissing.style.display = '';
-        setTimeout(() => {
-          window.location.href = 'generate_key.html';
-        }, 1200);
-        genBtn.disabled = true;
-        nextBtn.disabled = true;
-        return;
-      }
-      pubKeyDisplay.textContent = pubKey;
-
+      if (pubKey) pubKeyInput.value = pubKey;
       // load last QR data if available
       const savedQr = localStorage.getItem('dtc_qrHash');
       const ts = localStorage.getItem('dtc_qrTimestamp');
       const nonce = localStorage.getItem('dtc_qrNonce');
-      if (savedQr && ts && nonce) {
+      if (savedQr && ts && nonce && pubKey) {
         qrOutput.textContent = savedQr;
         timestampEl.textContent = `⏰ ${ts}`;
         nonceEl.textContent = `Nonce: ${nonce}`;
@@ -218,12 +212,9 @@
 
     // When Generate QR button is clicked
     genBtn.addEventListener('click', async () => {
-      let pubKey = localStorage.getItem('dtc_publicKey');
+      let pubKey = pubKeyInput.value.trim();
       if (!pubKey) {
-        warnMissing.style.display = '';
-        setTimeout(() => {
-          window.location.href = 'generate_key.html';
-        }, 1000);
+        pubKeyInput.focus();
         return;
       }
       const timestamp = new Date().toISOString();
@@ -235,6 +226,7 @@
       nonceEl.textContent = `Nonce: ${nonce}`;
 
       qrContainer.style.display = 'block';
+      localStorage.setItem('dtc_publicKey', pubKey);
       localStorage.setItem('dtc_qrHash', qrHash);
       localStorage.setItem('dtc_qrTimestamp', timestamp);
       localStorage.setItem('dtc_qrNonce', nonce);
