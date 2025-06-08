@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Create QR Batch (DTC System)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f7fa;
+      color: #222;
+      margin: 0; padding: 0;
+    }
+    .container {
+      max-width: 520px;
+      margin: 2.5em auto;
+      background: #fff;
+      padding: 2em 1.6em 2.2em 1.6em;
+      border-radius: 18px;
+      box-shadow: 0 6px 32px #1771b415, 0 1.5px 5px #7ed9a340;
+    }
+    h2 {
+      text-align: center;
+      color: #219150;
+      margin-bottom: 1.3em;
+    }
+    .input-row {
+      display: flex;
+      align-items: center;
+      gap: 0.7em;
+      margin-bottom: 1.2em;
+    }
+    input[type="number"] {
+      width: 90px;
+      padding: 0.7em 0.9em;
+      font-size: 1.1em;
+      border-radius: 7px;
+      border: 1.5px solid #bee7d6;
+      background: #fafdff;
+      margin-right: 1em;
+    }
+    label {
+      font-weight: bold;
+      color: #246bfd;
+    }
+    .btn {
+      display: block;
+      width: 100%;
+      margin: 1.1em 0 0.7em 0;
+      padding: 0.85em 0;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.13em;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      background: linear-gradient(90deg,#219150 75%,#246bfd 100%);
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.19s, box-shadow 0.22s;
+      box-shadow: 0 2px 12px #21915018;
+    }
+    .btn:active { background: #176d38; }
+    .btn[disabled] {
+      opacity: 0.52;
+      cursor: not-allowed;
+      background: #b2e4c6;
+      pointer-events: none;
+    }
+    .list-row {
+      margin: 1.2em 0 0 0;
+      padding: 1.2em 0.7em;
+      background: #e8f3fe;
+      border-left: 5px solid #246bfd;
+      border-radius: 12px;
+      font-size: 1.04em;
+      min-height: 2.5em;
+      word-break: break-all;
+    }
+    .action-row {
+      display: flex;
+      gap: 0.7em;
+      flex-wrap: wrap;
+      margin-top: 1.3em;
+      margin-bottom: 0.8em;
+    }
+    .copy-btn, .export-btn {
+      background: #246bfd;
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 0.46em 1.2em;
+      font-size: 1em;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 0.1em;
+      transition: background 0.13s;
+    }
+    .copy-btn:active, .export-btn:active { background: #1747a1; }
+    .export-btn { background: #facc15; color: #444; }
+    .export-btn:active { background: #eab308; color: #000; }
+    .msg { color: #26733e; margin-bottom: 1.1em; text-align: center; }
+    .back-btn {
+      display: inline-block;
+      background: #e0e7ef;
+      color: #26733e;
+      border-radius: 7px;
+      border: none;
+      font-size: 1.04em;
+      padding: 0.7em 1.2em;
+      margin-top: 1.2em;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .back-btn:hover { background: #d0f9e8; }
+    @media (max-width: 600px) {
+      .container { padding: 1em 0.2em 1.5em 0.2em; border-radius: 0; }
+      .action-row { flex-direction: column; gap: 0.3em; }
+      .list-row { font-size: 0.99em; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Create QR Batch</h2>
+    <form id="qrForm" autocomplete="off">
+      <div class="input-row">
+        <label for="qrAmount">Number of QR to generate:</label>
+        <input type="number" id="qrAmount" min="1" max="200" value="10" required />
+        <span style="font-size:0.98em;color:#aaa;">(max 200)</span>
+      </div>
+      <button class="btn" type="submit" id="genBtn">Generate QR Batch</button>
+    </form>
+    <div id="msg" class="msg"></div>
+    <div id="qrList" class="list-row" style="display:none;"></div>
+    <div class="action-row" style="display:none;" id="actionRow">
+      <button class="copy-btn" id="copyBtn">Copy All</button>
+      <button class="export-btn" id="exportBtn">Export Log (JSON)</button>
+    </div>
+    <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
+  </div>
+  <script>
+    // --- SHA-256 helper (async)
+    async function sha256hex(str) {
+      const enc = new TextEncoder();
+      const buf = enc.encode(str);
+      const hashBuf = await window.crypto.subtle.digest("SHA-256", buf);
+      return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2,"0")).join("");
+    }
+
+    // --- Main logic ---
+    const form = document.getElementById('qrForm');
+    const genBtn = document.getElementById('genBtn');
+    const msgEl = document.getElementById('msg');
+    const qrListEl = document.getElementById('qrList');
+    const actionRow = document.getElementById('actionRow');
+    const copyBtn = document.getElementById('copyBtn');
+    const exportBtn = document.getElementById('exportBtn');
+
+    form.onsubmit = async function(e){
+      e.preventDefault();
+      let amount = parseInt(document.getElementById('qrAmount').value, 10) || 0;
+      if(amount < 1 || amount > 200) {
+        msgEl.textContent = "Please enter a number between 1 and 200.";
+        qrListEl.style.display = "none";
+        actionRow.style.display = "none";
+        return;
+      }
+      genBtn.disabled = true;
+      msgEl.textContent = "⏳ Generating QR hashes...";
+      let list = [];
+      for(let i=0;i<amount;i++) {
+        // Use timestamp+nonce for randomness
+        const nonce = Math.floor(Math.random()*1e12).toString() + "_" + Date.now() + "_" + Math.random();
+        const hash = await sha256hex("DTC|QR|" + nonce);
+        list.push(hash);
+      }
+      msgEl.textContent = "✅ Generated " + list.length + " QR hashes.";
+      qrListEl.innerHTML = list.map((h,i)=>`${i+1}. <code>${h}</code>`).join("<br>");
+      qrListEl.style.display = "block";
+      actionRow.style.display = "flex";
+      genBtn.disabled = false;
+
+      // Save to lastQRs for copy/export
+      window.lastQRs = list;
+    };
+
+    copyBtn.onclick = function() {
+      if(!window.lastQRs || window.lastQRs.length===0) return;
+      navigator.clipboard.writeText(window.lastQRs.join("\n"));
+      msgEl.textContent = "✅ All QR hashes copied to clipboard!";
+      setTimeout(()=>{ msgEl.textContent = ""; }, 1200);
+    };
+
+    exportBtn.onclick = function() {
+      if(!window.lastQRs || window.lastQRs.length===0) return;
+      const obj = {
+        qr_hashes: window.lastQRs,
+        batch_created_at: new Date().toISOString()
+      };
+      const blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `dtc_qr_batch_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      msgEl.textContent = "✅ JSON exported!";
+      setTimeout(()=>{ msgEl.textContent = ""; }, 1200);
+    };
+  </script>
+</body>
+</html>
