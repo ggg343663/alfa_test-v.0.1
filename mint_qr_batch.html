@@ -32,6 +32,11 @@
     .nav-btns { display: flex; gap: 0.7em; margin-top: 2.1em;}
     .btn-nav { flex: 1; background: #ede7f6; color: #512da8;}
     .btn-nav:active { background: #b39ddb;}
+    .captcha-row { display: flex; align-items: center; gap: 0.5em;}
+    .captcha-label { color: #246bfd; font-weight: bold; }
+    .captcha-refresh { background: #b8cafe; color: #173472; border-radius: 6px; border:none; font-size: 1.09em; padding: 0.15em 0.75em; margin-left: 0.3em; cursor: pointer;}
+    .captcha-refresh:active { background: #97b6ed;}
+    .captcha-error { color: #e74c3c; font-size: 0.98em; margin-left: 0.7em;}
     @media (max-width: 600px) {
       .container { padding: 1em 0.12em 1.2em 0.12em; }
       .qr-preview-section { flex-direction: column; gap: .9em;}
@@ -65,6 +70,14 @@
       </div>
       <button type="button" class="btn-action" id="plusBtn" style="margin-top:0;">+</button>
       <button type="button" class="btn-action" id="minusBtn" style="margin-top:0;">–</button>
+    </div>
+    <!-- Captcha Section -->
+    <div class="input-label" style="margin-top:0.8em;">Captcha</div>
+    <div class="captcha-row">
+      <span id="captchaQ" class="captcha-label"></span>
+      <input id="captcha" type="text" maxlength="6" autocomplete="off" style="width:120px;">
+      <button type="button" class="captcha-refresh" id="refreshCaptcha" title="Refresh captcha">↻</button>
+      <span id="captchaError" class="captcha-error"></span>
     </div>
     <button class="btn-main" id="generateBtn" type="submit">Mint QR (hash1)</button>
   </form>
@@ -109,9 +122,20 @@
     </div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script>
+  // --- Captcha Logic ---
+  let currentCaptcha = "";
+  function randomCaptcha() {
+    const a = Math.floor(Math.random() * 9) + 1, b = Math.floor(Math.random() * 9) + 1;
+    currentCaptcha = (a + b).toString();
+    document.getElementById('captchaQ').textContent = `${a} + ${b} = ?`;
+    document.getElementById('captcha').value = "";
+    document.getElementById('captchaError').textContent = "";
+  }
+  randomCaptcha();
+  document.getElementById("refreshCaptcha").onclick = randomCaptcha;
+
+  // --- Mint QR ---
   const form = document.getElementById("mintForm");
   const previewSection = document.getElementById("previewSection");
   const hash1ListDiv = document.getElementById("hash1List");
@@ -125,7 +149,6 @@
   const qrCanvas = document.getElementById("qrCanvas");
   const plusBtn = document.getElementById("plusBtn");
   const minusBtn = document.getElementById("minusBtn");
-
   let mintData = null, batchData = null;
 
   plusBtn.onclick = () => {
@@ -145,6 +168,7 @@
     const confirmSecret = document.getElementById("confirmSecret").value.trim();
     const batchName = document.getElementById("batchName").value.trim() || "Unnamed";
     const qrAmount = parseInt(document.getElementById("qrAmount").value);
+    const captchaInput = document.getElementById("captcha").value.trim();
 
     if (!password || !pin || !secret || !confirmSecret || isNaN(qrAmount) || qrAmount < 1 || qrAmount > 200) {
       alert("Please fill all required fields correctly."); return;
@@ -152,6 +176,13 @@
     if (secret !== confirmSecret) {
       alert("Secret and Confirm Secret do not match."); return;
     }
+    if (captchaInput !== currentCaptcha) {
+      document.getElementById('captchaError').textContent = "Incorrect!";
+      randomCaptcha();
+      return;
+    }
+    document.getElementById('captchaError').textContent = "";
+
     const qrList = [];
     for (let i = 0; i < qrAmount; i++) {
       const slot_id = i + 1;
@@ -171,7 +202,7 @@
     const commitmentHash = await sha256(combinedHashes + "|" + mintData.batchName);
     const timestamp = new Date().toISOString();
 
-    commitmentHashDiv.textContent = commitmentHash;
+      commitmentHashDiv.textContent = commitmentHash;
     timestampDiv.textContent = timestamp;
     nonceListPre.textContent = mintData.qrList.map(q => `#${q.slot_id}: ${q.nonce}`).join('\n');
     nonceSummary.textContent = `${mintData.qrAmount} items`;
@@ -192,6 +223,7 @@
     previewSection.style.display = 'none';
     hash1ListDiv.innerHTML = "";
     mintData = null;
+    randomCaptcha();
   };
 
   document.getElementById("exportTicket").onclick = () => {
@@ -241,7 +273,7 @@
     // window.location.href = "register.html";
   };
   function downloadText(text, filename) {
-    const blob = new Blob([text], { type: 'text/plain' });
+    const blob = new Blob([text, { type: 'text/plain' }]);
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = filename;
