@@ -1,14 +1,14 @@
 [
   {
-    "slot": 1,                        // slot number (1-based index)
-    "hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890", // hash ของ entry นี้ (sha256 ของข้อมูลหลัก)
-    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000", // hash ของ entry ก่อนหน้า (genesis ใช้ 00...00)
-    "timestamp": "2025-06-01T10:15:00.000Z",     // ISO8601 UTC (เวลาที่บันทึก, ควรเป็น UTC)
-    "qr_hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",   // QR ที่ผูกกับ entry นี้ (sha256)
-    "pubkey": "0x1234567890abcdef1234567890abcdef12345678", // public key ของผู้ดำเนินการ
-    "action": "register",             // ประเภท action ("register", "transfer", "update", "regen", "audit", ...)
-    "detail": "Initial QR registration", // (optional) รายละเอียด, สำหรับอ่านเข้าใจ
-    "sig": "SIGNATURE_BASE64_OR_HEX", // (optional) digital signature (หากมีการ sign)
-    "meta": { }                       // (optional) ข้อมูลเพิ่มเติม/metadata อื่นๆ (future proof)
+    "slot": 1,
+    "hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+    "timestamp": "2025-06-01T10:15:00.000Z",
+    "qr_hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    "pubkey": "0x1234567890abcdef1234567890abcdef12345678",
+    "action": "register",
+    "detail": "Initial QR registration",
+    "sig": "SIGNATURE_BASE64_OR_HEX",
+    "meta": {}
   }
 ]
