@@ -1,5 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Check QR Status – DTC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; background: #f5f7fa; color: #333; margin:0; padding:0;}
+    .container { max-width: 700px; margin: 2.3em auto 0 auto; background: #fff; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2em 1.3em 2.2em 1.3em;}
+    h2 { color: #219150; text-align: center; margin-bottom: 1.35em; font-size: 1.38em;}
+    #nowTimestamp { text-align: right; color: #90a4ae; font-size: 0.97em; margin-bottom: 0.5em; }
+    #batchProgress { margin-bottom: 1.2em;}
+    .progress-block { background: #fafdff; border-radius: 10px; padding: 1em 1em 0.8em 1em; margin-bottom: 0.95em; border:1.5px solid #e0e7ef;}
+    .progress-title { font-weight: bold; color: #246bfd;}
+    .batch-status-bar { display: flex; flex-wrap: wrap; gap: 2.1em; margin: 0.6em 0 0.2em 0; }
+    .progress-stats { color: #26733e; margin-top: 0.4em;}
+    .progress-next { color: #b58900; font-size: 0.98em; margin-top: 0.19em;}
+    #summaryBar { display: flex; gap: 2.3em; justify-content: flex-start; margin-bottom:1em;}
+    #summaryBar > div { color: #26733e; font-size: 1em; }
+    #summaryBar span { font-weight: bold; font-size: 1.1em; color: #173472; display:block; margin-top:0.13em;}
+    #searchBox { width: 100%; padding: 0.73em 1em; margin-bottom: 1.1em; border-radius: 8px; border: 1.3px solid #cfd8dc; background: #fafdff; font-size: 1em;}
+    table { width: 100%; border-collapse: collapse; margin-bottom:1em;}
+    th, td { padding: 0.52em 0.3em; border-bottom: 1px solid #e0e7ef; font-size: 0.99em;}
+    th { color: #219150; background: #f0f8f4; font-weight: 600;}
+    td.status-registered { color: #16a34a; font-weight: 500;}
+    td.status-available { color: #2980b9;}
+    td.status-transferred { color: #b58900; }
+    code { background: #f5f7fa; border-radius: 5px; padding: 0.1em 0.25em; font-size: 0.98em;}
+    .copy-btn { background: #b8cafe; color: #173472; border: none; border-radius: 6px; font-size: 0.93em; padding: 0.22em 0.8em; cursor: pointer; margin-left: 0.5em;}
+    .copy-btn.copied { background: #16a34a; color: #fff; }
+    .btn-export, .btn-action { font-size: 1.1em; border-radius: 8px; border: none; font-weight: bold; min-height: 38px; padding: 0.75em 0.9em; cursor: pointer;}
+    .btn-export { background: #ffd600; color: #222;}
+    .btn-export:active { background: #ffb300;}
+    .btn-action { background: #b8cafe; color: #173472;}
+    .btn-action:active { background: #97b6ed;}
+    .nav-bar { display: flex; gap: 0.7em; margin-top: 2.1em;}
+    .btn-nav { flex: 1; background: #ede7f6; color: #512da8; border: none; border-radius: 8px; font-size:1em; font-weight:600; min-height: 38px; padding:0.8em 0;}
+    .btn-nav:active { background: #b39ddb;}
+    @media (max-width: 700px) { .container { max-width: 99vw; padding: 1.1em 0.2em 1.3em 0.2em;}}
+    @media (max-width: 530px) {
+      .batch-status-bar { flex-direction: column; gap: 0.2em;}
+      #summaryBar { gap: 1em;}
+      th, td { font-size: 0.92em;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Check QR Status / Audit Chain</h2>
+    <div id="nowTimestamp"></div>
+    <div id="batchProgress"></div>
+    <div id="summaryBar"></div>
+    <input id="searchBox" type="text" placeholder="Search QR hash, owner, status..." oninput="renderTable()"/>
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>Batch</th>
+          <th>QR Hash</th>
+          <th>Status</th>
+          <th>Owner</th>
+        </tr>
+      </thead>
+      <tbody id="qrTable"></tbody>
+    </table>
+    <div style="margin-top:1.2em;display:flex;gap:0.8em;">
+      <button onclick="exportQR('csv')" class="btn-export">Export CSV</button>
+      <button onclick="exportQR('json')" class="btn-action">Export JSON</button>
+    </div>
+    <div class="nav-bar">
+      <button class="btn-nav" onclick="location.href='index.html'">Back</button>
+      <button class="btn-nav" onclick="location.href='index.html'">Home</button>
+    </div>
+  </div>
 <script>
-/* ตัวอย่าง logs array (ปกติ fetch logs.json แล้วแปลงเป็น logs) */
+/* ตัวอย่าง logs array (ควร fetch logs.json จริงใน production) */
 const logs = [
   {
     "slot": 1,
@@ -26,7 +100,7 @@ const logs = [
   // ... เพิ่มตามจริง
 ];
 
-// ตัวอย่าง batchConfig (ปรับให้ตรงกับระบบ)
+// ตัวอย่าง batchConfig (ควรปรับตามระบบจริง)
 const batchConfig = [
   {batch:1, label:"Batch 1 (Limited)", size:100, unlockPercent:0.5, nextBatch:2, nextAmount:2000},
   {batch:2, label:"Batch 2", size:2000, unlockPercent:0.5, nextBatch:3, nextAmount:2000},
@@ -35,7 +109,6 @@ const batchConfig = [
 
 // --- แปลง logs เป็น qrList ที่ใช้ในตาราง ---
 function buildQRList(logs) {
-  // ควรสร้าง mapping ที่อัปเดต status/owner ล่าสุด
   const qrMap = {};
   logs.forEach(entry => {
     const hash = entry.qr_hash;
@@ -48,19 +121,15 @@ function buildQRList(logs) {
         index: entry.slot
       };
     } else {
-      // update status/owner ถ้า action มีการเปลี่ยนแปลง (register/transfer)
       if (entry.status) qrMap[hash].status = entry.status;
       if (entry.pubkey) qrMap[hash].owner = entry.pubkey;
     }
   });
-  // รีเทิร์น array สำหรับ render
   return Object.values(qrMap);
 }
 
-// ตัวอย่างวิธีระบุ batch จาก hash (ถ้ามีเลข index หรือลำดับ)
-// ถ้า hash มี batch ฝัง ให้ map hash → batch เลย
+// วิธีหา batch (demo: prefix)
 function findBatch(hash) {
-  // demo: กำหนด batch จาก prefix (เช่น A = 1, B = 2, ...)
   if (hash.startsWith("A")) return 1;
   if (hash.startsWith("B")) return 2;
   if (hash.startsWith("C")) return 3;
@@ -68,11 +137,6 @@ function findBatch(hash) {
 }
 
 let qrList = buildQRList(logs);
-
-// === (โค้ดที่เหลือ render batch, table, export etc. เหมือนเดิม) ===
-
-// ... คัดลอกฟังก์ชัน renderBatchProgress(), renderSummaryBar(), renderTable(), exportQR() ตามโครงเดิม
-// ... เปลี่ยน qrList เป็น global (อัปเดตได้ถ้าข้อมูล logs เปลี่ยน)
 
 function renderBatchProgress() {
   const section = document.getElementById('batchProgress');
@@ -180,3 +244,5 @@ function loadData() {
 }
 loadData();
 </script>
+</body>
+</html>
