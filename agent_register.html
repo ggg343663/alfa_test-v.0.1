@@ -2,123 +2,99 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Register Agent (DTC v.0.1.8d, Dual Sign)</title>
+  <title>Register Agent (DTC v.0.7.5.1)</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial,sans-serif; background: #f4f8fb; margin:0; padding:0;}
-    .container {
-      max-width: 520px; margin:2em auto; background:#fff;
-      padding:2.2em 1.3em 2em 1.3em; border-radius:18px;
-      box-shadow:0 2px 18px #4f8efc19;
-    }
-    h2 { color:#2563eb; text-align:center; margin-bottom:1.5em;}
-    label { font-weight:600; margin-top:0.9em; display:block; color:#26733e;}
-    input[type=text], input[type=password], textarea {
-      width:100%; padding:0.8em 0.9em; font-size:1.07em;
-      border-radius:7px; border:1.2px solid #60a5fa;
-      background:#f0f6ff; color:#1e293b; margin-bottom:0.62em;
-      margin-top:0.16em; transition: border 0.15s;
-      min-height: 40px;
+    body { font-family: Arial,sans-serif; background: #f5f7fa; margin:0; padding:0;}
+    .container { max-width: 470px; margin:2em auto; background:#fff; padding:2.3em 1.1em 2em 1.1em; border-radius:15px; box-shadow:0 2px 16px #90caf933;}
+    h2 { color:#219150; text-align:center; margin-bottom:1.3em; }
+    .section { margin-bottom: 1.2em; }
+    .input-label { font-weight: bold; color: #26733e; margin-bottom: 0.19em; }
+    .input-hint { color: #90a4ae; font-size: 0.95em; margin-top: 0.05em; margin-bottom: 0.14em; }
+    input, textarea {
+      width: 100%; min-height: 38px; max-height: 44px;
+      font-size: 1.07em; border-radius: 8px; border: 1.4px solid #b0bec5;
+      padding: 0.7em 1em; background: #f6faf7; transition: border .2s, background .2s;
       box-sizing: border-box;
+      margin-bottom: 0.58em;
     }
+    input:focus, textarea:focus { border-color: #2196f3; background: #fff; }
     textarea { min-height:3.2em; max-height: 6em; resize:vertical;}
-    .btn-main {
-      width:100%; padding:0.86em 0; background:#2563eb;
-      color:#fff; border:none; border-radius:9px; font-weight:700;
-      font-size:1.13em; margin-top:1.2em; cursor:pointer;
-      letter-spacing:0.01em; transition:background 0.17s;
+    .btn-main, .btn-action, .btn-export, .btn-nav {
+      width:100%; font-size:1.11em; border-radius:8px; border:none; font-weight:bold; min-height:44px;
+      margin-top: 0.6em; padding: 0.8em 0; cursor: pointer; transition: background .18s, color .18s;
     }
-    .btn-main:disabled { background:#a5c7fa; color:#fff;}
-    .btn-main:hover:enabled { background:#1d4ed8;}
-    .hash-row {
-      margin-top:1.1em; word-break:break-all; font-family:monospace;
-      font-size:1.02em; color:#334155; background:#e0e7ef;
-      border-radius:8px; padding:0.7em 1em;
-      position: relative; max-height: 120px; overflow:auto;
+    .btn-main { background: #2196f3; color: #fff; }
+    .btn-main:active { background: #176d38;}
+    .btn-action { background: #b8cafe; color: #173472;}
+    .btn-action:active { background: #97b6ed;}
+    .btn-export { background: #ffd600; color: #222;}
+    .btn-export:active { background: #ffb300;}
+    .hash-row, .output-box {
+      background: #fafdff; border-radius: 8px; border: 1.2px solid #cfd8dc;
+      padding: 0.7em 0.9em; margin-bottom: 0.9em; font-size: 1em; min-height: 38px;
+      word-break: break-all; overflow-x: auto;
     }
-    .step-label {
-      margin:1.05em 0 0.28em 0; font-weight:bold; color:#2563eb;
-      font-size:1.04em;
-      transition: opacity 0.15s;
-    }
-    .step-label.disabled {
-      opacity: 0.38;
-      font-weight: 500;
-    }
-    .copy-btn { background:none; border:none; color:#2563eb; cursor:pointer; font-weight:600;}
+    .warn { color: #b91c1c; background: #fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin-bottom:0.7em; font-size:0.97em;}
+    .success { color:#16a34a; margin-top:0.28em;}
+    .step-label { margin:0.97em 0 0.24em 0; font-weight:bold; color:#219150; font-size:1.02em; }
+    .step-label.disabled { opacity:0.38; font-weight:500;}
+    .copy-btn { background:none; border:none; color:#2563eb; cursor:pointer; font-weight:600; font-size:1em; }
     .copy-success { color:#22c55e; font-size:0.97em; margin-left:0.33em;}
-    .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.97em;}
-    .success { color:#16a34a; }
-    .row { display:flex; gap:0.4em; align-items:center;}
-    .qr-btn { background:#60a5fa; color:#fff; border:none; padding:0.46em 0.9em; border-radius:6px; font-size:1.01em; cursor:pointer;}
-    #qrVideo { width:99%; border-radius:8px; margin-top:0.6em; display:none;}
-    .nav-bar { display:flex; gap:0.5em; margin-top:2em; }
-    .nav-btn { flex:1; border:none; border-radius:7px; padding:0.9em 0;
-      font-weight:600; font-size:1em; cursor:pointer;}
-    .nav-btn-back, .nav-btn-home { background:#cbd5e1; color:#1e293b;}
-    .nav-btn-next { background:#60a5fa; color:#fff;}
+    .nav-bar { display: flex; gap: 0.7em; margin-top: 2.1em;}
+    .btn-nav { flex: 1; background: #ede7f6; color: #512da8;}
+    .btn-nav:active { background: #b39ddb;}
     @media (max-width:600px) {
-      .container { padding:1.2em 0.35em 1.3em 0.35em;}
-      .nav-bar { flex-direction: column; gap:0.45em;}
-      input, textarea { font-size:1em; }
-      h2 { font-size:1.17em; }
+      .container { padding:1.1em 0.22em 1em 0.22em;}
+      .nav-bar { flex-direction: column; gap:0.4em;}
+      h2 { font-size:1.13em;}
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <h2>Register Agent<br>(Dual Sign, DTC v.0.1.8d)</h2>
-  
-  <!-- Step 1: Master สร้าง slot ให้ Agent -->
-  <form id="masterForm" autocomplete="off">
+  <h2>Register Agent<br>(Dual Sign, DTC v.0.7.5.1)</h2>
+  <!-- Section A: Agent Info -->
+  <div class="section">
     <div class="step-label">Step 1: Master creates Agent slot</div>
-    <label>Agent Name (a-z, 0-9, ≤16):<span style="color:#64748b;font-weight:400;font-size:0.93em;"> (No badword)</span></label>
-    <input type="text" id="agentName" maxlength="16" required autocomplete="off" />
+    <div class="input-label">Agent Name (a-z, 0-9, ≤16)</div>
+    <input type="text" id="agentName" maxlength="16" autocomplete="off" />
     <div id="badwordWarn" class="warn" style="display:none;"></div>
-    <label class="row">
-      Agent Public Key:
-      <button type="button" class="qr-btn" onclick="startQRScanner('agentPubKey')">Scan QR</button>
-    </label>
-    <input type="text" id="agentPubKey" maxlength="64" required autocomplete="off" />
-    <label>Nonce (random):</label>
-    <div class="row">
-      <input type="text" id="nonce" maxlength="20" required autocomplete="off" style="flex:1;" />
-      <button type="button" onclick="randomNonce()" class="qr-btn">Random</button>
+    <div class="input-hint">No inappropriate word. Lowercase & numbers only.</div>
+    <div class="input-label">Agent Public Key</div>
+    <input type="text" id="agentPubKey" maxlength="64" autocomplete="off" />
+    <div class="input-label">Nonce (random)</div>
+    <div style="display:flex; gap:7px;">
+      <input type="text" id="nonce" maxlength="20" autocomplete="off" style="flex:1;" />
+      <button type="button" onclick="randomNonce()" class="btn-action" style="flex:0.7;">Random</button>
     </div>
-    <button class="btn-main" type="submit">Create Agent Slot</button>
-  </form>
-  
-  <div class="step-label disabled" id="step2Label" style="margin-top:2.2em;">Step 2: Agent confirms and signs</div>
-  <!-- Step 2: Agent ลงนาม/confirm -->
-  <div id="step2Section" style="display:none;">
-    <div style="font-size:0.98em; margin-bottom:0.27em;">
-      Copy this payload and let the agent sign with their password+pin:
-    </div>
-    <textarea id="agentPayload" readonly></textarea>
-    <button class="copy-btn" type="button" onclick="copyAgentPayload()">Copy Payload</button>
+    <button class="btn-main" onclick="createAgentSlot()">Create Agent Slot</button>
+  </div>
+  <!-- Section B: Agent Signs -->
+  <div class="section" id="section-sign" style="display:none;">
+    <div class="step-label">Step 2: Agent confirms and signs</div>
+    <div class="input-hint">Copy payload & sign with Agent password+PIN</div>
+    <textarea id="agentPayload" readonly class="output-box"></textarea>
+    <button class="copy-btn" onclick="copyAgentPayload()">Copy Payload</button>
     <span id="copyAgentPayloadSuccess" class="copy-success"></span>
-    <div style="margin-top:1.1em;">
-      <label>Agent Password:</label>
-      <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" />
-      <label>Agent PIN:</label>
-      <input type="password" id="agentPin" maxlength="6" autocomplete="new-password" />
-      <button class="btn-main" type="button" onclick="signAgent()" style="margin-top:0.7em;">Agent Sign</button>
-    </div>
-    <div id="sigResult" class="hash-row" style="display:none;"></div>
-    <button type="button" class="btn-main" style="margin-top:1.1em; background:#facc15;color:#3b3b0a;" onclick="exportLog()">Export Log (JSON)</button>
+    <div class="input-label" style="margin-top:0.6em;">Agent Password</div>
+    <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" />
+    <div class="input-label">Agent PIN</div>
+    <input type="password" id="agentPin" maxlength="6" autocomplete="new-password" />
+    <button class="btn-main" type="button" onclick="signAgent()">Agent Sign</button>
+    <div class="output-box" id="sigResult" style="display:none;"></div>
+    <button class="btn-export" type="button" onclick="exportLog()">Export Log (JSON)</button>
     <span id="exportSuccess" class="success"></span>
   </div>
   <div class="nav-bar">
-    <button class="nav-btn nav-btn-back" onclick="location.href='index.html'">Back</button>
-    <button class="nav-btn nav-btn-home" onclick="location.href='index.html'">Home</button>
-    <button class="nav-btn nav-btn-next" onclick="location.href='register.html'">Next</button>
+    <button class="btn-nav" onclick="location.href='index.html'">Back</button>
+    <button class="btn-nav" onclick="location.href='index.html'">Home</button>
+    <button class="btn-nav" onclick="location.href='register.html'">Next</button>
   </div>
 </div>
 <script>
-  // --- Timestamp
+  // --- Timestamp & Nonce
   let lastTimestamp = "";
-
-  // --- Nonce util
   function randomNonce() {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
     let s = "";
@@ -127,31 +103,24 @@
   }
   randomNonce();
 
-  // --- Badwords warn (multi-category)
+  // --- Badwords warn
   let badwords = {};
   let flatBadwords = [];
-  let badwordsReady = false;
-  let badwordsError = false;
-
-  fetch('badwords.json')
-    .then(r=>r.json())
-    .then(list=>{
+  let badwordsReady = false, badwordsError = false;
+  fetch('badwords.json').then(r=>r.json()).then(list=>{
       badwords=list;
       flatBadwords = Object.values(list).flat().map(x=>x.toLowerCase());
       badwordsReady = true;
     }).catch(()=>{
-      badwordsReady = false;
-      badwordsError = true;
+      badwordsReady = false; badwordsError = true;
       document.getElementById('badwordWarn').style.display = "";
       document.getElementById('badwordWarn').textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
     });
-
   function findBadwords(str) {
     if (!badwordsReady || !str) return [];
     const s = str.toLowerCase();
     return flatBadwords.filter(w => w && s.includes(w));
   }
-
   document.getElementById('agentName').addEventListener('input', function(){
     const warn = document.getElementById('badwordWarn');
     const v = this.value.trim().toLowerCase();
@@ -167,78 +136,15 @@
     }
   });
 
-  // --- QR SCANNER
-  let qrTargetInput = null;
-  let qrStream = null;
-  async function startQRScanner(targetId) {
-    qrTargetInput = document.getElementById(targetId);
-    const video = document.getElementById('qrVideo');
-    video.style.display = "block";
-    if (qrStream) { return; }
-    try {
-      qrStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-      video.srcObject = qrStream;
-      video.play();
-      scanQRCode(video);
-    } catch(e) {
-      alert("Camera access denied or not available.");
-      video.style.display = "none";
-    }
-  }
-  // Simple QR decode using jsQR library from CDN
-  async function scanQRCode(video) {
-    if (!window.jsQR) {
-      let script = document.createElement('script');
-      script.src = "https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js";
-      document.body.appendChild(script);
-      await new Promise(res=>script.onload=res);
-    }
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext('2d');
-    let stop = false;
-    function loop() {
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        ctx.drawImage(video,0,0,canvas.width,canvas.height);
-        const imgData = ctx.getImageData(0,0,canvas.width,canvas.height);
-        const code = window.jsQR(imgData.data, imgData.width, imgData.height);
-        if (code) {
-          qrTargetInput.value = code.data;
-          stop = true;
-          stopQRScanner();
-        }
-      }
-      if (!stop) requestAnimationFrame(loop);
-    }
-    loop();
-  }
-  function stopQRScanner() {
-    const video = document.getElementById('qrVideo');
-    if (qrStream) {
-      let tracks = qrStream.getTracks();
-      tracks.forEach(t=>t.stop());
-      qrStream = null;
-    }
-    video.style.display = "none";
-  }
-  window.addEventListener('beforeunload', stopQRScanner);
-
   // --- Step 1: Master Create
-  document.getElementById('masterForm').onsubmit = function(e){
+  function createAgentSlot() {
     const name = document.getElementById('agentName').value.trim();
     if (badwordsReady && findBadwords(name).length) {
-      if (!confirm("Warning: The agent name contains inappropriate words. Are you sure you want to continue?")) {
-        e.preventDefault(); return false;
-      }
+      if (!confirm("Warning: The agent name contains inappropriate words. Are you sure you want to continue?")) return;
     }
     if (badwordsError) {
-      alert("Cannot verify inappropriate words. Please check badwords.json or contact admin.");
-      e.preventDefault(); return false;
+      alert("Cannot verify inappropriate words. Please check badwords.json or contact admin."); return;
     }
-    e.preventDefault();
     const pubkey = document.getElementById('agentPubKey').value.trim();
     const nonce = document.getElementById('nonce').value.trim();
     if (!name || !/^[a-z0-9]{1,16}$/.test(name)) { alert("Invalid agent name"); return; }
@@ -249,14 +155,11 @@
     const agent_hash_str = `${master_hash}:${pubkey}:${name}:${nonce}:${lastTimestamp}`;
     window.agent_hash_data = { master_hash, agent_pubkey:pubkey, agent_name:name, nonce, timestamp:lastTimestamp };
     window.agent_hash_to_sign = agent_hash_str;
-    document.getElementById('step2Section').style.display = "block";
-    document.getElementById('step2Label').classList.remove("disabled");
+    document.getElementById('section-sign').style.display = "block";
     document.getElementById('agentPayload').value = agent_hash_str;
-    window.agent_hash = ""; // clear old
     document.getElementById('sigResult').style.display = "none";
     document.getElementById('exportSuccess').textContent = "";
-    stopQRScanner();
-  };
+  }
 
   // --- PBKDF2 derive (browser)
   async function pbkdf2_sha256(password, pin) {
