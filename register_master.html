@@ -6,103 +6,87 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7fafc; color: #222; }
-    .main { max-width: 410px; margin: 2.5em auto; background: #fff; border-radius: 19px; box-shadow: 0 8px 40px #246bfd17; padding: 2em 1.4em 1.8em 1.4em; }
-    h2 { text-align: center; color: #2971ca; margin-bottom: 1.1em; }
-    .step { text-align: center; color: #26733e; margin-bottom: 1em; }
-    .input-row { margin-bottom: 1.2em; }
-    label { font-weight: bold; color: #185fb0; display: block; margin-bottom: 0.27em; }
-    input[type="text"] {
-      width: 100%; padding: 0.7em; border-radius: 8px; border: 1.5px solid #dde6ee; font-size: 1.11em;
-      margin-bottom: 0.27em; background: #f7fbff;
+    .main { max-width: 410px; margin: 2em auto; background: #fff; border-radius: 17px; box-shadow: 0 8px 40px #246bfd13; padding: 2em 1.4em 1.3em 1.4em; }
+    .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.5em; }
+    .nav-btn {
+      background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.4em;
+      font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background 0.18s;
     }
-    .counter { font-size: 0.96em; color: #789; float: right; }
+    .nav-btn:hover { background: #d1c4e9; }
+    h2 { text-align: center; color: #26733e; margin-bottom: 1.2em; }
+    .input-row { margin-bottom: 1.13em; }
+    label { font-weight: bold; color: #26733e; display: block; margin-bottom: 0.21em; }
+    input[type="text"] {
+      width: 100%; padding: 0.7em; border-radius: 8px; border: 1.5px solid #dde6ee; font-size: 1.08em;
+      margin-bottom: 0.19em; background: #f7fbff;
+    }
+    .counter { font-size: 0.93em; color: #90a4ae; float: right; }
     .btn {
-      display: block; width: 100%; padding: 0.85em 0; border-radius: 10px; border: none;
-      background: linear-gradient(90deg,#26733e 70%,#246bfd 100%);
-      color: #fff; font-size: 1.13em; font-weight: 600;
-      margin: 1.2em 0 0.9em 0; cursor: pointer; box-shadow: 0 2px 8px #246bfd1b; transition: background 0.19s;
+      display: block; width: 100%; padding: 0.9em 0; border-radius: 10px; border: none;
+      background: linear-gradient(90deg,#26733e 70%,#2196f3 100%);
+      color: #fff; font-size: 1.11em; font-weight: 600;
+      margin: 1.2em 0 0.7em 0; cursor: pointer; box-shadow: 0 2px 8px #246bfd1b; transition: background 0.18s;
     }
     .btn:active { background: #176d38; }
     .btn[disabled] { opacity: 0.54; cursor: not-allowed; }
-    .msg { text-align: center; margin: 1.1em 0 0.6em 0; font-size: 1.04em; }
-    .msg-error { color: #c41e1e; background: #fff2f2; border-left: 5px solid #c41e1e; border-radius: 7px; padding: 0.55em; }
-    .msg-success { color: #16774a; background: #eafff1; border-left: 5px solid #31e57a; border-radius: 7px; padding: 0.55em; }
-    .copy-btn { padding: 0.2em 1.1em; margin-left: 0.55em; border: none; border-radius: 5px; background: #246bfd; color: #fff; cursor: pointer; font-size: 0.95em; }
-    .copy-btn:active { background: #185fb0; }
-    .warn { color:#b91c1c; background:#fbe7e7; padding:0.6em 0.8em; border-radius:8px; margin:0.4em 0 0.8em 0; font-size:0.96em;}
-    .back-btn { margin-top: 1.5em; background: #f1f1f1; color: #1a3a4d; border-radius: 8px; border: none; font-size: 1.01em; padding: 0.5em 1.3em; }
-    .note { font-size: 0.98em; color: #789; text-align: center; margin-top: 1.3em;}
+    .msg { text-align: center; margin: 1.1em 0 0.6em 0; font-size: 1.02em; }
+    .msg-error { color: #c41e1e; background: #fff2f2; border-left: 5px solid #c41e1e; border-radius: 7px; padding: 0.5em; }
+    .msg-success { color: #16774a; background: #eafff1; border-left: 5px solid #31e57a; border-radius: 7px; padding: 0.5em; }
+    .copy-btn { padding: 0.2em 1em; margin-left: 0.5em; border: none; border-radius: 5px; background: #2196f3; color: #fff; cursor: pointer; font-size: 0.97em; }
+    .copy-btn:active { background: #176d38; }
+    .warn { color:#b91c1c; background:#fbe7e7; padding:0.5em 0.8em; border-radius:7px; margin:0.36em 0 0.8em 0; font-size:0.96em;}
+    .note { font-size: 0.96em; color: #90a4ae; text-align: center; margin-top: 1.15em;}
     .preview-box {
-      background: #f6fafd;
-      border: 1.5px solid #dde6ee;
-      border-radius: 10px;
-      padding: 1.1em 0.8em 0.9em 0.8em;
-      margin: 1.1em 0 0.5em 0;
-      font-size: 0.96em;
-      color: #246bfd;
-      word-break: break-all;
-      max-height: 160px;
-      overflow-x: auto;
+      background: #f6fafd; border: 1.5px solid #dde6ee;
+      border-radius: 10px; padding: 1em 0.8em 0.8em 0.8em;
+      margin: 1em 0 0.4em 0;
+      font-size: 0.97em; color: #246bfd;
+      word-break: break-all; max-height: 160px; overflow-x: auto;
+      display: none;
     }
-    .preview-title { color: #26733e; font-size: 1.05em; margin-bottom:0.25em;}
-    /* Popup */
-    .popup-bg {
-      position: fixed; left:0; top:0; width:100vw; height:100vh;
-      background: rgba(34,52,102,0.15); z-index:9999; display: flex; align-items:center; justify-content:center;
-    }
-    .popup {
-      background: #fff; border-radius: 14px; max-width: 97vw; width:370px; box-shadow: 0 6px 32px #246bfd18;
-      padding: 2em 1.2em 1.2em 1.2em; position:relative; text-align:left;
-      animation: fadein 0.19s;
-    }
-    @keyframes fadein { from {opacity:0;transform:translateY(40px);} to {opacity:1;transform:none;} }
-    .popup h3 { margin:0 0 0.5em 0; color:#26733e;}
-    .popup-row { margin-bottom:0.65em; }
-    .popup-row label { color:#999; font-size:1em; margin-bottom:0;}
-    .popup-row code { font-size:1em; color:#246bfd; background:#f4f4fa; border-radius:5px; padding:0.08em 0.4em;}
-    .popup .btn { margin:0.6em 0 0.5em 0; font-size:1.07em;}
-    .popup .close-btn { display:block; margin:auto; background:#eee; color:#234; border-radius:6px; border:none; padding:0.45em 1.3em;}
-    .popup .close-btn:active { background:#c1f6dd;}
-    .popup .copy-btn { margin:0.1em 0.5em;}
-    .popup .export-btn { margin:0.3em 0; background:#246bfd;}
-    @media (max-width: 480px) { .main, .popup {padding:1.1em 0.2em 0.7em 0.2em;} .popup{width:98vw;} }
+    .preview-title { color: #26733e; font-size: 1.04em; margin-bottom:0.2em;}
+    @media (max-width: 480px) { .main {padding:1em 0.2em 0.7em 0.2em;} }
   </style>
 </head>
 <body>
   <div class="main">
-    <div class="step">Step 3/4</div>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="window.location.href='index.html'">Back</button>
+      <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
+    </div>
     <h2>Register Master</h2>
     <form id="masterForm" autocomplete="off">
       <div class="input-row">
-        <label>Master Name (A-Z only): <span class="counter" id="nameCounter">0/12</span></label>
-        <input type="text" id="masterName" maxlength="12" pattern="[A-Z]+" placeholder="Enter master name (A-Z)" required />
+        <label>Master Name <span class="counter" id="nameCounter">0/12</span></label>
+        <input type="text" id="masterName" maxlength="12" pattern="[A-Z]+" placeholder="A-Z only (4-12 chars)" required autocomplete="off" />
         <div id="badwordWarn" class="warn" style="display:none;"></div>
       </div>
       <div class="input-row">
-        <label>Public Key (64 HEX): <span class="counter" id="pubkeyCounter">0/64</span></label>
-        <input type="text" id="pubkey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your public key here" required />
+        <label>Public Key <span class="counter" id="pubkeyCounter">0/64</span></label>
+        <input type="text" id="pubkey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your public key here" required autocomplete="off" />
         <button class="copy-btn" type="button" onclick="copyField('pubkey')">Copy</button>
       </div>
       <button class="btn" type="submit" id="reqBtn" disabled>Register Master</button>
       <div id="msgBox" class="msg"></div>
     </form>
-    <div id="previewBox" class="preview-box" style="display:none;">
+    <div id="previewBox" class="preview-box">
       <div class="preview-title">Preview Master Node (Audit Structure):</div>
       <pre id="previewJson" style="background:none;padding:0 0 0 0;font-size:0.96em;color:#246bfd;"></pre>
-      <button class="copy-btn" style="margin-top:0.3em;" onclick="copyPreviewJson()">Copy JSON</button>
+      <button class="copy-btn" style="margin-top:0.2em;" onclick="copyPreviewJson()">Copy JSON</button>
     </div>
-    <button class="back-btn" onclick="window.location.href='index.html'">Back to Home</button>
     <div class="note">
-      *Master name must be A-Z only, 4-12 chars.<br>
-      *Public key must be 64 HEX chars (auto generated from previous step).
+      *Master name = 4-12 chars, A-Z only.<br>
+      *Public key = 64 HEX chars (from previous step).
     </div>
   </div>
-  <div id="popupRoot"></div>
   <script>
-    // ---- DTC Genesis Hash (DEMO: replace with real value in production) ----
     const GENESIS_HASH = "c8a1e35a25dcb2742e17b26f012f13a742b639d94a1a5e6c18e7a12dbcc9bfc7";
+    let badwords = {};
+    let flatBadwords = [];
+    let badwordsReady = false;
+    let badwordsError = false;
 
-    // ---- Auto-fill public key ----
+    // Autofill public key
     window.addEventListener('DOMContentLoaded', function() {
       const localPub = localStorage.getItem('dtc_publicKey');
       if (localPub && localPub.length === 64 && /^[a-fA-F0-9]+$/.test(localPub)) {
@@ -112,11 +96,7 @@
       updateBtnState();
     });
 
-    // ---- Badwords logic ----
-    let badwords = {};
-    let flatBadwords = [];
-    let badwordsReady = false;
-    let badwordsError = false;
+    // Load badwords
     fetch('badwords.json')
       .then(r=>r.json())
       .then(list=>{
@@ -145,7 +125,7 @@
         warn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
       } else if (found.length) {
         warn.style.display = "";
-        warn.textContent = "Warning: This name contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
+        warn.textContent = "Warning: Contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
       } else {
         warn.style.display = "none";
       }
@@ -166,11 +146,9 @@
       livePreview();
     });
 
-    // ---- Enable/disable register button ----
     function updateBtnState() {
       const name = document.getElementById('masterName').value.trim();
       const pk = document.getElementById('pubkey').value.trim();
-      const found = findBadwords(name);
       const btn = document.getElementById('reqBtn');
       btn.disabled = (
         !name || name.length<4 || name.length>12 ||
@@ -179,7 +157,6 @@
       );
     }
 
-    // ---- Copy field utility ----
     function copyField(id) {
       const el = document.getElementById(id);
       el.select();
@@ -187,36 +164,31 @@
       showMsg("Copied!", "success");
     }
 
-    // ---- Message display ----
     function showMsg(msg, type) {
       const box = document.getElementById('msgBox');
       box.innerHTML = msg;
       box.className = "msg" + (type === "error" ? " msg-error" : " msg-success");
-      setTimeout(() => { box.innerHTML = ""; box.className = "msg"; }, 3200);
+      setTimeout(() => { box.innerHTML = ""; box.className = "msg"; }, 3000);
     }
 
-    // ---- SHA256 utility (browser, returns hex string)
     async function sha256Hex(str) {
       const enc = new TextEncoder();
       const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
       return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
     }
 
-    // ---- Nonce (random hex)
     function genNonce() {
       let arr = new Uint8Array(8);
       window.crypto.getRandomValues(arr);
       return Array.from(arr).map(x=>x.toString(16).padStart(2,'0')).join('');
     }
 
-    // ---- Master Node Builder (audit-ready)
     async function buildMasterNode() {
       const masterName = document.getElementById('masterName').value.trim().toUpperCase();
       const publicKey = document.getElementById('pubkey').value.trim();
       if(masterName.length<4 || masterName.length>12 || publicKey.length!==64) return null;
       const timestamp = Math.floor(Date.now() / 1000).toString();
       const nonce = genNonce();
-      // hash = SHA256(genesis_hash + master_id + timestamp + nonce)
       const hashInput = GENESIS_HASH + masterName + timestamp + nonce;
       const hash = await sha256Hex(hashInput);
       return {
@@ -229,7 +201,6 @@
       };
     }
 
-    // ---- Live Preview (on input)
     async function livePreview() {
       const masterName = document.getElementById('masterName').value.trim().toUpperCase();
       const publicKey = document.getElementById('pubkey').value.trim();
@@ -243,14 +214,12 @@
       document.getElementById('previewBox').style.display = "";
     }
 
-    // ---- Copy JSON Preview
     function copyPreviewJson() {
       const txt = document.getElementById('previewJson').textContent;
       navigator.clipboard.writeText(txt);
       showMsg("Copied JSON!", "success");
     }
 
-    // ---- Submit Handler ----
     document.getElementById('masterForm').onsubmit = async function(e){
       e.preventDefault();
       const name = document.getElementById('masterName').value.trim().toUpperCase();
@@ -269,33 +238,20 @@
       if(name === "GENESIS") return showMsg("Cannot use reserved name GENESIS for Master.", "error");
       if(pk.length !== 64 || !/^[a-fA-F0-9]{64}$/.test(pk)) return showMsg("Public key must be exactly 64 HEX chars.", "error");
 
-      // Create audit-ready master node
       const node = await buildMasterNode();
-
-      // Store to localStorage (Demo only)
       let masters = [];
       try { masters = JSON.parse(localStorage.getItem('dtc_masters') || "[]"); } catch(e) {}
       masters.push(node);
       localStorage.setItem('dtc_masters', JSON.stringify(masters));
 
-      // Show popup
-      showPopup(node);
-
-      // Reset form/counters/preview
+      showMsg("Registration successful!", "success");
+      document.getElementById('previewJson').textContent = JSON.stringify(node, null, 2);
+      document.getElementById('previewBox').style.display = "";
       document.getElementById('masterForm').reset();
       document.getElementById('nameCounter').textContent = "0/12";
       document.getElementById('pubkeyCounter').textContent = "0/64";
-      document.getElementById('previewBox').style.display = "none";
       updateBtnState();
     };
-
-    // --- Popup success ---
-    function showPopup(obj) {
-      const root = document.getElementById('popupRoot');
-      let html = `
-      <div class="popup-bg"><div class="popup">
-        <h3>Registration Successful!</h3>
-        <div class="popup-row"><label>Master Name:</label><br><code>${obj.master_id}</code></div>
-        <div class="popup-row"><label>Master Hash:</label><br><code id="hashC">${obj.hash}</code>
-          <button class="copy-btn" onclick="copyToClipboard('${obj.hash}')">Copy</button></div>
-        <div class="popup-row"><label>Public Key:</label
+  </script>
+</body>
+</html>
