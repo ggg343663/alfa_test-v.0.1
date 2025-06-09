@@ -19,130 +19,71 @@
       box-sizing: border-box;
     }
     input:focus, select:focus { border-color: #246bfd; background: #ffffff;}
-    .action-bar { margin-top: 6px; margin-bottom: 0.7em;}
-    .btn-main, .btn-export, .btn-nav, .btn-action {
+    .error { color: #e74c3c; font-size: 1em; margin-bottom: 0.9em;}
+    .row-flex { display: flex; gap: 8px;}
+    .row-flex .col { flex: 1;}
+    .btn-main, .btn-nav {
       font-size: 1.11em; border-radius: 8px; border: none; font-weight: bold; min-height: 44px;
       margin: 6px 0 0 0; padding: 0.77em 0; display: block; width: 100%; cursor: pointer;
       transition: background .2s, color .2s;
     }
     .btn-main { background: #2196f3; color: #fff;}
     .btn-main:active { background: #1976d2;}
-    .btn-export { background: #ffd600; color: #212121;}
-    .btn-export:active { background: #ffb300;}
-    .btn-action { background: #b8cafe; color: #173472;}
-    .btn-action:active { background: #97b6ed;}
     .btn-nav { background: #ede7f6; color: #512da8;}
     .btn-nav:active { background: #b39ddb;}
-    .row-flex { display: flex; gap: 8px;}
-    .row-flex .col { flex: 1;}
-    .output, .preview-box, .commitment-box, .audit-chain-box {
-      background: #fafdff; border-radius: 8px; border: 1.2px solid #cfd8dc;
-      padding: 0.7em 0.9em; margin-bottom: 0.9em; font-size: 1em; min-height: 38px;
-      word-break: break-all; overflow-x: auto;
-    }
-    .preview-box { max-height: 90px; margin-bottom: 0.5em;}
-    .commitment-box { color: #2979ff; font-size: 0.99em;}
-    .audit-chain-box { color: #8c7ae6; font-size: 0.99em; display: none;}
-    .error { color: #e74c3c; font-size: 1em; margin-bottom: 0.9em;}
     .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; gap: 8px;}
     @media (max-width: 530px) {
       .container { padding: 1em 0.2em 1.3em 0.2em;}
-      .btn-main, .btn-nav, .btn-export { font-size: 0.99em; min-height: 38px; }
+      .btn-main, .btn-nav { font-size: 0.99em; min-height: 38px; }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>DTC – One Page Minimal QR Batch</h2>
-
-    <!-- Section A: Key & Batch Info -->
-    <div class="section">
-      <div class="input-row">
-        <div class="input-label">Password</div>
-        <input id="pw" type="password" autocomplete="new-password" placeholder="Password (8-12 ตัว, ตัวเลข/อังกฤษ)" />
-        <div class="input-hint">ต้องมีทั้งตัวอักษรและตัวเลข</div>
-      </div>
-      <div class="input-row">
-        <div class="input-label">PIN</div>
-        <input id="pin" type="password" maxlength="6" placeholder="PIN (6 ตัวเลข)" autocomplete="off"/>
-        <div class="input-hint">PIN 6 หลัก</div>
-      </div>
-      <div class="input-row">
-        <div class="input-label">Secret</div>
-        <input id="secret" type="text" placeholder="Secret Code หรือปล่อยว่าง"/>
-        <div class="input-hint">ระบุหรือไม่ก็ได้ (optional)</div>
-      </div>
-      <div class="input-row">
-        <div class="input-label">Batch Name</div>
-        <input id="batch" type="text" placeholder="เช่น: FirstEdition, Maple100"/>
-        <div class="input-hint">สำหรับอ้างอิงภายหลัง (optional)</div>
-      </div>
-      <div class="input-row row-flex">
-        <div class="col">
-          <div class="input-label">จำนวน QR</div>
-          <input id="qty" type="number" min="1" max="100" value="10"/>
+    <form id="mainForm" autocomplete="off" onsubmit="event.preventDefault(); goNext();">
+      <div class="section">
+        <div class="input-row">
+          <div class="input-label">Password</div>
+          <input id="pw" type="password" autocomplete="new-password" placeholder="Password (6-12 ตัว, ต้องมีตัวเลข+อังกฤษหรือสัญลักษณ์)" />
+          <div class="input-hint">Password must be 6-12 chars, include number and letter or special character.</div>
         </div>
-        <div class="col" style="align-self: flex-end;">
-          <button class="btn-main" style="width: 100%;" onclick="changeQty(1)">+</button>
-          <button class="btn-main" style="width: 100%; margin-top: 2px;" onclick="changeQty(-1)">–</button>
+        <div class="input-row">
+          <div class="input-label">PIN</div>
+          <input id="pin" type="password" maxlength="4" placeholder="PIN (4 ตัวเลข)" autocomplete="off"/>
+          <div class="input-hint">PIN 4 digits only.</div>
+        </div>
+        <div class="input-row">
+          <div class="input-label">Secret</div>
+          <input id="secret" type="text" maxlength="4" placeholder="Secret (4 ตัวอักษรภาษาอังกฤษ)"/>
+          <div class="input-hint">Secret 4 English letters (required).</div>
+        </div>
+        <div class="input-row">
+          <div class="input-label">Batch Name</div>
+          <input id="batch" type="text" placeholder="เช่น: FirstEdition, Maple100"/>
+          <div class="input-hint">สำหรับอ้างอิงภายหลัง (optional)</div>
+        </div>
+        <div class="input-row row-flex">
+          <div class="col">
+            <div class="input-label">จำนวน QR</div>
+            <input id="qty" type="number" min="1" max="100" value="10"/>
+          </div>
+          <div class="col" style="align-self: flex-end;">
+            <button type="button" class="btn-main" style="width: 100%;" onclick="changeQty(1)">+</button>
+            <button type="button" class="btn-main" style="width: 100%; margin-top: 2px;" onclick="changeQty(-1)">–</button>
+          </div>
         </div>
       </div>
-    </div>
-
-    <!-- Section B: Action -->
-    <div class="section action-bar">
-      <button class="btn-main" onclick="generateBatch()">Generate QR Batch</button>
-    </div>
-
-    <!-- Section C: ผลลัพธ์/Preview/Export -->
-    <div class="section">
-      <div class="preview-box" id="qr-preview" style="display: none;"></div>
-      <div class="commitment-box" id="commitment-box" style="display: none;"></div>
-      <div style="display: flex; gap: 8px;">
-        <button class="btn-export" style="flex: 1;" onclick="exportTicket()" id="btn-export-ticket">Export Ticket</button>
-        <button class="btn-action" style="flex: 1;" onclick="exportQR()" id="btn-export-qr">Export QR</button>
-        <button class="btn-action" style="flex: 1;" onclick="exportCommitmentLog()" id="btn-export-commit">Export Log</button>
-      </div>
-    </div>
-
-    <!-- Section D: Regen QR -->
-    <div class="section">
-      <div class="input-row">
-        <div class="input-label">Ticket (txt/json)</div>
-        <input type="text" id="ticket" placeholder="วาง ticket หรือ upload"/>
-      </div>
-      <div class="input-row">
-        <div class="input-label">Password + PIN + Secret (อีกครั้ง)</div>
-        <input id="pw2" type="password" placeholder="Password"/>
-        <input id="pin2" type="password" maxlength="6" placeholder="PIN"/>
-        <input id="secret2" type="text" placeholder="Secret"/>
-      </div>
-      <button class="btn-main" onclick="regenQR()">Regen QR</button>
-      <div class="preview-box" id="regen-preview" style="display:none;"></div>
-      <div class="commitment-box" id="regen-commit" style="display:none;"></div>
-    </div>
-
-    <!-- Section E: Audit Chain -->
-    <div class="section">
-      <div class="input-row">
-        <div class="input-label">QR/Commitment Hash</div>
-        <input id="audit-hash" type="text" placeholder="วาง hash ที่ต้องการ audit"/>
-      </div>
-      <button class="btn-action" onclick="auditChain()">Audit Chain</button>
-      <div class="audit-chain-box" id="audit-chain-box"></div>
-    </div>
-
-    <!-- Section F: Navigation -->
+      <div id="error" class="error" style="display:none;"></div>
+      <button class="btn-main" type="submit" style="margin-top:1.2em;">Next</button>
+    </form>
     <div class="nav-bar">
       <button class="btn-nav" onclick="history.back()">Back</button>
       <a class="btn-nav" href="index.html">Home</a>
-      <button class="btn-nav" onclick="alert('Next step coming soon!')">Next</button>
+      <button class="btn-nav" onclick="goNext()">Next</button>
     </div>
-
-    <div id="error" class="error" style="display:none;"></div>
   </div>
   <script>
-    // Utility: Change QR amount
     function changeQty(val) {
       let qty = parseInt(document.getElementById('qty').value) || 1;
       qty += val;
@@ -151,55 +92,50 @@
       document.getElementById('qty').value = qty;
     }
 
-    // Generate QR Batch: mockup
-    function generateBatch() {
-      const pw = document.getElementById('pw').value, pin = document.getElementById('pin').value, secret = document.getElementById('secret').value;
-      const batch = document.getElementById('batch').value, qty = parseInt(document.getElementById('qty').value);
-      let error = '';
-      if (!pw || pw.length < 8) error = "Password อย่างน้อย 8 ตัว";
-      if (!pin || pin.length !== 6 || !/^\d+$/.test(pin)) error = "PIN ต้องเป็นตัวเลข 6 หลัก";
-      if (error) return showError(error);
-
-      // MOCKUP hash logic – demo only!
-      let hashes = [];
-      for (let i=1; i<=qty; ++i) hashes.push("QR" + i + ": " + sha256(pw + pin + secret + batch + i));
-      document.getElementById('qr-preview').innerHTML = hashes.slice(0, 4).join('<br>') + (qty>4 ? '<div style="font-size:0.92em;">…and '+(qty-4)+' more</div>' : '');
-      document.getElementById('qr-preview').style.display = '';
-      document.getElementById('commitment-box').textContent = "Commitment: " + sha256(pw+pin+secret+batch+qty);
-      document.getElementById('commitment-box').style.display = '';
-      hideError();
-    }
-
-    // Export stubs
-    function exportTicket(){alert("Export Ticket: Coming soon!");}
-    function exportQR(){alert("Export QR: Coming soon!");}
-    function exportCommitmentLog(){alert("Export Log: Coming soon!");}
-    function regenQR(){
-      document.getElementById('regen-preview').innerHTML = "Regen QR: (ตัวอย่าง) " + new Date().toISOString();
-      document.getElementById('regen-preview').style.display = '';
-      document.getElementById('regen-commit').textContent = "Commitment: (ตัวอย่าง)";
-      document.getElementById('regen-commit').style.display = '';
-    }
-    function auditChain(){
-      const hash = document.getElementById('audit-hash').value.trim();
-      if (!hash) return showError("กรุณากรอก hash");
-      document.getElementById('audit-chain-box').textContent = "Audit Chain: (mockup) " + hash.substr(0,12) + "…";
-      document.getElementById('audit-chain-box').style.display = '';
-      hideError();
-    }
-
-    // Simple SHA-256 mock (DEMO only)
-    function sha256(str) {
-      // Fake hash for demo UI only!
-      let h=5381; for(let i=0;i<str.length;i++) h=((h<<5)+h)+str.charCodeAt(i); return ("00000"+(h>>>0).toString(16)).slice(-10);
-    }
-
     function showError(msg) {
       document.getElementById('error').textContent = msg;
       document.getElementById('error').style.display = '';
     }
     function hideError() {
       document.getElementById('error').style.display = 'none';
+    }
+
+    function validateForm() {
+      const pw = document.getElementById('pw').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      const secret = document.getElementById('secret').value.trim();
+      if (!pw || pw.length < 6 || pw.length > 12) {
+        showError("Password ต้อง 6-12 ตัว และต้องมีตัวเลขและอักษรหรือสัญลักษณ์");
+        return false;
+      }
+      if (!/[A-Za-z]/.test(pw) || !/[\d!@#$%^&*()_+]/.test(pw)) {
+        showError("Password ต้องมีตัวอักษรและตัวเลขหรือสัญลักษณ์");
+        return false;
+      }
+      if (!pin || !/^\d{4}$/.test(pin)) {
+        showError("PIN ต้องเป็นตัวเลข 4 หลัก");
+        return false;
+      }
+      if (!secret || !/^[A-Za-z]{4}$/.test(secret)) {
+        showError("Secret ต้องเป็นตัวอักษรภาษาอังกฤษ 4 ตัว");
+        return false;
+      }
+      hideError();
+      return true;
+    }
+
+    function goNext() {
+      if (!validateForm()) return false;
+      // คุณสามารถเซฟข้อมูลใน localStorage หรือส่งไปหน้าถัดไปได้ที่นี่
+      // เช่น
+      localStorage.setItem('dtc_pw', document.getElementById('pw').value);
+      localStorage.setItem('dtc_pin', document.getElementById('pin').value);
+      localStorage.setItem('dtc_secret', document.getElementById('secret').value);
+      localStorage.setItem('dtc_batch', document.getElementById('batch').value);
+      localStorage.setItem('dtc_qty', document.getElementById('qty').value);
+      // ไปหน้า mint_qr_hash.html (หรือไฟล์ถัดไปที่คุณสร้าง)
+      window.location.href = "mint_qr_hash.html";
+      return false;
     }
   </script>
 </body>
