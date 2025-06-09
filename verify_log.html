@@ -6,56 +6,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 530px; margin: 2em auto; background: #f9fafd;}
-    .container { background: #fff; padding: 2em 1.3em; border-radius: 15px; box-shadow: 0 2px 14px #e1e5f5; }
-    h2 { text-align: center; color: #26733e; margin-bottom: 1.2em;}
-    label { font-weight: bold; margin-bottom: 0.3em; }
-    input { width: 100%; padding: 0.6em; font-size: 1em; border-radius: 6px; border: 1.4px solid #d0d7e5; margin-bottom: 0.7em;}
-    button { margin-top: 0.4em; padding: 0.6em 1.1em; font-size: 1em; background: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer;}
+    body { font-family: Arial, sans-serif; background: #f9fafd; }
+    .container { max-width: 520px; margin: 2.2em auto; background: #fff; padding: 2em 1.3em; border-radius: 15px; box-shadow: 0 2px 14px #e1e5f5;}
+    .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.3em; }
+    .nav-btn {
+      background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.4em;
+      font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background 0.18s;
+    }
+    .nav-btn:hover { background: #d1c4e9; }
+    h2 { text-align: center; color: #26733e; margin-bottom: 1.1em;}
+    label { font-weight: bold; margin-bottom: 0.23em; color: #219150; }
+    input { width: 100%; padding: 0.65em; font-size: 1em; border-radius: 6px; border: 1.4px solid #d0d7e5; margin-bottom: 0.67em; background: #f9fcff;}
+    button { margin-top: 0.38em; padding: 0.6em 1.1em; font-size: 1em; background: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer;}
     button:hover { background: #176d38;}
-    .clear-btn { background: #f1f5fa; color: #234bb6; border: 1px solid #c5d8e6; margin-left: 0.5em;}
+    .clear-btn { background: #f1f5fa; color: #234bb6; border: 1px solid #c5d8e6; margin-left: 0.4em;}
     .clear-btn:hover { background: #e6f4ff;}
-    .result-box { margin-top: 1.5em; padding: 1.1em; border-radius: 9px; font-size: 1.09em; }
+    .result-box { margin-top: 1.18em; padding: 1em; border-radius: 8px; font-size: 1.08em; }
     .ok { background: #eafaf0; color: #26733e; border: 1.7px solid #64bc6d;}
     .registered { background: #e3eafe; color: #234bb6; border: 1.7px solid #6c85e3;}
     .fail { background: #ffe9e9; color: #b61b1b; border: 1.7px solid #ef8888;}
-    .info { margin-top: 0.8em; }
-    .back-btn { margin-top: 1.5em; background: #dbeafe; color: #324275; border-radius: 6px; border: 1px solid #b3c4df; }
-    .back-btn:hover { background: #bae6fd;}
-    code { background: #f0f2f9; padding: 0.15em 0.5em; border-radius: 5px;}
-    .lineage-box { margin-top:1.3em; font-size:0.98em;}
-    .lineage-chain { margin-top: 0.7em; }
+    .info { margin-top: 0.75em; }
+    code { background: #f0f2f9; padding: 0.15em 0.45em; border-radius: 5px;}
+    .lineage-box { margin-top:1.15em; font-size:0.99em;}
+    .lineage-chain { margin-top: 0.6em; }
     .copy-btn {
       background: none; border: none; color: #2196F3; font-weight: bold;
-      margin-left: 0.18em; cursor: pointer; font-size: 0.98em;
+      margin-left: 0.13em; cursor: pointer; font-size: 0.98em;
     }
-    .copy-success { color: #1aa34a; font-size: 0.95em; margin-left: 0.29em;}
+    .copy-success { color: #1aa34a; font-size: 0.95em; margin-left: 0.24em;}
     .icon-btn {
-      background: #f1f5fa;
-      border: 1.5px solid #c5d8e6;
-      border-radius: 6px;
-      padding: 0.3em 0.8em;
-      color: #246bfd;
-      font-weight: bold;
-      margin-right: 0.18em;
-      cursor: pointer;
-      font-size: 0.98em;
+      background: #f1f5fa; border: 1.5px solid #c5d8e6; border-radius: 6px;
+      padding: 0.32em 0.7em; color: #246bfd; font-weight: bold;
+      margin-right: 0.15em; cursor: pointer; font-size: 0.98em;
     }
     .icon-btn:active { background: #dbeafe; }
-    #qr-reader { margin-top: 1.2em; display:none; }
+    #qr-reader { margin-top: 1.1em; display:none; }
     @media (max-width:600px){
-      .container {padding:1em 0.3em;}
+      .container {padding:1em 0.1em;}
+      .nav-row {margin-bottom:0.9em;}
     }
   </style>
 </head>
 <body>
   <div class="container">
+    <div class="nav-row">
+      <button class="nav-btn" onclick="window.location.href='index.html'">Back</button>
+      <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
+    </div>
     <h2>Verify QR</h2>
     <label for="qrhash">QR Hash (64 chars):</label>
-    <div style="display:flex;align-items:center;gap:0.2em;">
+    <div style="display:flex;align-items:center;gap:0.16em;">
       <input id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" />
       <button class="copy-btn" title="Copy QR hash" onclick="copyHash('qrhash')">Copy</button>
-      <button class="icon-btn" type="button" onclick="openQRScanner()">Scan QR</button>
+      <button class="icon-btn" type="button" onclick="openQRScanner()">Scan</button>
       <input type="file" accept="image/*" id="imgQRInput" style="display:none;" onchange="scanImageQR(this)">
       <button class="icon-btn" type="button" onclick="document.getElementById('imgQRInput').click()">Img</button>
       <span id="copyHashSuccess" class="copy-success"></span>
@@ -65,7 +68,6 @@
     <button class="clear-btn" onclick="clearQR()">Clear</button>
     <div id="result"></div>
     <div class="lineage-box" id="chainView"></div>
-    <button class="back-btn" onclick="window.history.back()">← Back</button>
   </div>
 <script>
 // DEMO DATA
