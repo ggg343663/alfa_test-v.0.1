@@ -6,22 +6,27 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body { font-family: Arial, sans-serif; max-width: 530px; margin: 2em auto; background: #f9fafd;}
-    .container { background: #fff; padding: 2em 1.3em; border-radius: 15px; box-shadow: 0 2px 14px #e1e5f5; }
-    h2 { text-align: center; color: #26733e; margin-bottom: 1.2em;}
-    label { font-weight: bold; margin-bottom: 0.3em; }
-    .input-row { display: flex; align-items: center; gap: 0.3em; margin-bottom: 0.7em; }
+    body { font-family: Arial, sans-serif; background: #f9fafd; }
+    .container { max-width: 520px; margin: 2.2em auto; background: #fff; padding: 2em 1.3em; border-radius: 15px; box-shadow: 0 2px 14px #e1e5f5;}
+    .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.3em; }
+    .nav-btn {
+      background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.4em;
+      font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background 0.18s;
+    }
+    .nav-btn:hover { background: #d1c4e9; }
+    h2 { text-align: center; color: #26733e; margin-bottom: 1.15em;}
+    label { font-weight: bold; margin-bottom: 0.21em; color: #219150;}
+    .input-row { display: flex; align-items: center; gap: 0.3em; margin-bottom: 0.8em; }
     input[type="text"] {
-      width: 100%; padding: 0.6em; font-size: 1em; border-radius: 6px;
-      border: 1.4px solid #d0d7e5; margin-bottom: 0;
-      transition: border 0.18s;
+      width: 100%; padding: 0.62em; font-size: 1em; border-radius: 6px;
+      border: 1.4px solid #d0d7e5; transition: border 0.18s; background: #f9fcff;
     }
     input[type="text"]:focus { border-color: #2563eb; box-shadow:0 2px 6px #bfdbfe44;}
-    button, .icon-btn {
-      background: none; border: none; color: #26733e; font-size: 1em;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      padding: 0.28em 0.4em; border-radius: 6px;
-      transition: background 0.14s;
+    .icon-btn {
+      background: #f1f5fa; border: 1.5px solid #c5d8e6; border-radius: 6px;
+      padding: 0.32em 0.7em; color: #246bfd; font-weight: bold;
+      margin-right: 0.15em; cursor: pointer; font-size: 0.98em; transition: background 0.15s;
+      display: flex; align-items: center; justify-content: center;
     }
     .icon-btn svg { width: 23px; height: 23px; }
     .icon-btn:hover { background: #e3eefa;}
@@ -33,19 +38,20 @@
     #imgInput { display: none; }
     #scanMsg { font-size: 0.97em; min-height: 1.2em; margin-bottom: 0.25em;}
     #qr-reader { margin: 0.6em 0 0.4em 0;}
-    .result-box { margin-top: 1.2em; padding: 1.1em; border-radius: 9px; font-size: 1.09em; }
+    .result-box { margin-top: 1.2em; padding: 1.05em; border-radius: 9px; font-size: 1.08em;}
     .ok { background: #eafaf0; color: #26733e; border: 1.7px solid #64bc6d;}
     .fail { background: #ffe9e9; color: #b61b1b; border: 1.7px solid #ef8888;}
     .registered { background: #e3eafe; color: #234bb6; border: 1.7px solid #6c85e3;}
-    .back-btn { margin-top: 1.5em; background: #dbeafe; color: #324275; border-radius: 6px; border: 1px solid #b3c4df; font-size: 1em; padding: 0.5em 1.1em;}
-    .back-btn:hover { background: #bae6fd;}
-    code { background: #f0f2f9; padding: 0.15em 0.5em; border-radius: 5px;}
-    @media (max-width:600px){ .container {padding:1em 0.3em;} .input-row{flex-wrap:wrap;} }
+    code { background: #f0f2f9; padding: 0.14em 0.47em; border-radius: 5px;}
+    @media (max-width:600px){ .container {padding:1em 0.15em;} .nav-row{margin-bottom:0.8em;} .input-row{flex-wrap:wrap;} }
   </style>
 </head>
 <body>
   <div class="container">
-    <button class="back-btn" onclick="window.history.back()">← Back</button>
+    <div class="nav-row">
+      <button class="nav-btn" onclick="window.location.href='index.html'">Back</button>
+      <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
+    </div>
     <h2>Check QR Code</h2>
     <label for="qrhash">QR Hash (64 chars):</label>
     <div class="input-row">
