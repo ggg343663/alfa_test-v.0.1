@@ -1,54 +1,13 @@
 <!--
 DTC Minimal UI/UX Logic
-
 - ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
 - กลุ่ม Ticket/Slot/Meta: สีเทาอ่อน #f6f7fa
 - กลุ่ม Password, PIN, Secret: สีเหลืองอ่อน #fffde7
 - กลุ่มปุ่ม Action (Generate/Export/Regen): ฟ้า, เหลือง, ฟ้าอ่อน ตามลำดับ
 - Navigation Bar: ปุ่มม่วงจาง/เทาอ่อน (Back/Home/Next) ขนาดเท่ากันทั้ง site
-
-[Section A] Key & Batch Info  
-    - Password, PIN, Secret, Batch Name, จำนวน QR (ปุ่ม +/– หรือ custom)
-    - label/hint สีเทาอ่อน #90a4ae, ขนาดเล็กใต้ input
-
-[Section B] Action  
-    - ปุ่มฟ้าใหญ่ "Generate QR Batch"
-
-[Section C] ผลลัพธ์/Preview  
-    - QR Preview Box (PNG/SVG), hash1, Commitment Box (hash2 สีฟ้าหรือเทาอ่อน)
-    - ปุ่มเหลือง Export Ticket / ฟ้า Export QR / ฟ้าอ่อน Export Log
-
-[Section D] Regen QR  
-    - ช่อง Ticket (สีเทาอ่อน), ปุ่ม Upload/QR
-    - ช่อง Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
-    - Password, PIN, Secret (เหลืองอ่อน)
-    - ปุ่ม Regen (ฟ้า)
-
-[Section E] Audit Chain  
-    - Input QR/Commitment Hash (hash2) + ปุ่ม Audit (ฟ้าเล็ก)
-    - กล่อง audit chain (เจ้าของ/ลำดับ chain), expand/collapse ได้
-
-[Section F] Navigation Bar  
-    - Back | Home | Next (ปุ่มขนาดเท่ากัน)
-
-Style  
-    - input/box สูง 36–44px, margin/padding 12–20px
-    - label/hint #90a4ae, ขนาดเล็ก
-    - ผลลัพธ์/preview/log ไม่กินพื้นที่หลัก
-    - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
-    - รองรับ mobile (responsive)
-    - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
-
-Timestamp
-- แสดงกล่อง timestamp เฉพาะใต้ section "Committed QR" เท่านั้น (ไม่แสดงซ้ำในแถวของตาราง)
-- Label: **Time (Now):** (หรือ Time (GitHub): ถ้าต้องการเน้นว่าใช้เวลา commit/push จริง)
-- สี #607d8b, ขนาด 1em, จัดขวาล่างของกล่องผลลัพธ์/section
-- เวลาที่แสดงในกล่องนี้จะเป็นเวลาปัจจุบัน (ISO8601) แบบ real-time ขณะใช้งาน เพื่อบอก user ว่าเวลาไหนถูกนำไปคำนวณ hash ในการ mint/regen QR (แต่เวลาที่ใช้ใน hash/log จริง จะเป็นเวลาขณะกดปุ่มเท่านั้น)
-- หากยังไม่มีการ commit QR (ยังไม่มีผลลัพธ์) ให้ขึ้นเป็น "–"
-- เมื่อ export (Ticket, QR, Log ฯลฯ) ต้องแถม timestamp ที่ใช้จริง (ตอน commit QR) ในไฟล์เสมอ  
-  (timestamp ที่ export อาจเหลื่อมกับเวลาที่แสดงบน UI เล็กน้อย แต่ใช้ค่าตอน commit เท่านั้น)
+- Timestamp โชว์เฉพาะในกล่อง Committed QR ผลลัพธ์ (ขวาล่าง, สี #607d8b)
 -->
-!-- DTC Mint QR Batch (Double Hash) UI: เพิ่ม Confirm Secret -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -144,15 +103,20 @@ Timestamp
       <input type="text" id="pubkey" placeholder="Paste your public key here" oninput="onPubKeyChange()">
       <div class="hint">Use only the generated public key (from 'Generate Key').</div>
     </div>
-    <div class="input-row">
+    <div class="input-row" id="batch-row">
       <label>Batch Name (optional)</label>
       <input type="text" id="batch" placeholder="Optional">
       <div class="hint">For grouping/labeling QR batches</div>
     </div>
-    <div class="input-row">
+    <div class="input-row" id="qty-row">
       <label>Number of QR</label>
       <input type="number" id="qty" value="1" min="1" max="50" style="max-width:90px">
-      <div class="hint">How many QR to mint (based on your role/remaining quota)</div>
+      <div class="hint">How many QR to mint (role-dependent)</div>
+    </div>
+    <div class="input-row" id="serial-row" style="display:none;">
+      <label>Slot/Serial</label>
+      <input type="text" id="serial" placeholder="e.g. QR001">
+      <div class="hint">Required for 1 QR (Normal User)</div>
     </div>
   </div>
 
@@ -195,7 +159,7 @@ Timestamp
       </table>
       <!-- Timestamp-zone -->
       <div class="timestamp-zone">
-        <span class="label-timestamp">Time (Now):</span>
+        <span class="label-timestamp">Time:</span>
         <span id="ts-committed" class="timestamp-value">–</span>
       </div>
     </div>
@@ -231,12 +195,26 @@ Timestamp
       box.className = `preview-box ${currentRole.color}`;
       box.innerHTML = `Role: ${currentRole.role} &nbsp;|&nbsp; Quota: ${currentRole.quota} &nbsp;|&nbsp; Status: ${currentRole.status}`;
 
+      // เงื่อนไข UI ตาม role
       let qty = document.getElementById('qty');
+      let batchRow = document.getElementById('batch-row');
+      let qtyRow = document.getElementById('qty-row');
+      let serialRow = document.getElementById('serial-row');
+      if (currentRole.role === "Genesis" || currentRole.role === "Unregistered" || currentRole.role === "–") {
+        // Normal: show only serial, hide batch/qty
+        batchRow.style.display = "none";
+        qtyRow.style.display = "none";
+        serialRow.style.display = "";
+      } else {
+        batchRow.style.display = "";
+        qtyRow.style.display = "";
+        serialRow.style.display = "none";
+      }
+
       qty.value = currentRole.min;
       qty.min = currentRole.min;
       qty.max = currentRole.max;
 
-      // ปุ่ม mint
       let btn = document.getElementById('mint-btn');
       btn.disabled = !currentRole.btn;
     }
@@ -253,20 +231,26 @@ Timestamp
       let secret = document.getElementById('secret').value.trim();
       let csecret = document.getElementById('csecret').value.trim();
       let batch = document.getElementById('batch').value.trim() || '';
+      let serial = document.getElementById('serial') ? document.getElementById('serial').value.trim() : '';
       let qty = parseInt(document.getElementById('qty').value, 10);
-      if (!pubkey || !secret || !csecret || !qty) { alert('Fill all fields'); return; }
+      if (!pubkey || !secret || !csecret) { alert('Fill all fields'); return; }
       if (secret !== csecret) { alert('Secret mismatch!'); return; }
-      if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert('Quantity out of range.'); return; }
+      if (currentRole.role === "Genesis" || currentRole.role === "Unregistered" || currentRole.role === "–") {
+        if (!serial) { alert('Enter serial'); return; }
+        qty = 1;
+      } else {
+        if (!batch) { alert('Batch required'); return; }
+        if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert('Quantity out of range.'); return; }
+      }
       let now = new Date().toISOString();
       committedQR = [];
       for (let i = 1; i <= qty; i++) {
-        let serial = 'QR' + i.toString().padStart(3, "0");
-        let hash1 = await sha256(pubkey + secret + serial);
+        let slot = serial || ('QR' + i.toString().padStart(3, "0"));
+        let hash1 = await sha256(pubkey + secret + slot);
         let hash2 = await sha256(batch + hash1 + now);
         committedQR.push({
           no: i,
-          hash1, hash2, serial, pubkey, secret, batch,
-          timestamp: now
+          hash1, hash2, serial: slot, pubkey, secret, batch, timestamp: now
         });
       }
       commitTimestamp = now;
@@ -307,7 +291,7 @@ Timestamp
 
     function exportQR(idx) {
       let d = committedQR[idx];
-      let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}\nTime (Now): ${commitTimestamp}`;
+      let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}\nTime: ${commitTimestamp}`;
       let fname = `qr_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
@@ -316,7 +300,7 @@ Timestamp
     }
     function exportTicket(idx) {
       let d = committedQR[idx];
-      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime (Now): ${commitTimestamp}`;
+      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime: ${commitTimestamp}`;
       let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
