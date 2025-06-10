@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Regenerate QR Hash | DTC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    body { font-family: Arial, sans-serif; background: #f7fafd; color: #234; }
+    .container { max-width: 430px; margin: 2.5em auto; background: #fff; border-radius: 16px; box-shadow: 0 6px 32px #21915013; padding: 2.2em 1.1em 2em 1.1em;}
+    h2 { text-align: center; color: #219150; margin-bottom: 1.15em; font-size: 1.19em; font-weight: bold;}
+    .input-row { margin-bottom: 1.07em; }
+    label { font-weight: bold; color: #176d38; margin-bottom: 0.22em; display: block;}
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 0.7em 1em; border-radius: 8px; border: 1.3px solid #c9e8d4; font-size: 1.06em;
+      margin-bottom: 0.11em; background: #f7faf9;
+    }
+    .btn-main { width: 100%; background: #219150; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 1.09em; padding: 0.88em 0; margin-top: 0.8em; cursor: pointer;}
+    .btn-main:active { background: #176d38;}
+    .result-box {
+      margin-top: 1.3em; background: #eafaf0; color: #219150; border-radius: 10px; padding: 1.2em 0.9em; font-size: 1.04em;
+      box-shadow: 0 0.7px 5px #a7f3d0; word-break: break-all; min-height: 2.2em;
+    }
+    .error { color: #e74c3c; margin-top: 0.7em; margin-bottom: 0.3em; font-size: 1em;}
+    @media (max-width: 520px) { .container { padding: 1.1em 0.3em 1.4em 0.3em;} }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Regenerate QR Hash</h2>
+    <div class="input-row">
+      <label for="ticket">Ticket (JSON/TXT):</label>
+      <input type="text" id="ticket" placeholder="Paste or upload your ticket here">
+    </div>
+    <div class="input-row">
+      <label for="pw">Password:</label>
+      <input type="password" id="pw" maxlength="12" placeholder="Password (6-12 chars)">
+    </div>
+    <div class="input-row">
+      <label for="pin">PIN:</label>
+      <input type="password" id="pin" maxlength="4" placeholder="PIN (4 digits)">
+    </div>
+    <div class="input-row">
+      <label for="secret">Secret:</label>
+      <input type="text" id="secret" maxlength="4" placeholder="Secret (4 English letters)">
+    </div>
+    <button class="btn-main" onclick="regenQR()">Regenerate</button>
+    <div class="result-box" id="result" style="display:none;"></div>
+    <div class="error" id="error" style="display:none;"></div>
+  </div>
+  <script>
+    function regenQR() {
+      const ticket = document.getElementById('ticket').value.trim();
+      const pw = document.getElementById('pw').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      const secret = document.getElementById('secret').value.trim();
+      const errorEl = document.getElementById('error');
+      const resultEl = document.getElementById('result');
+      errorEl.style.display = 'none';
+      resultEl.style.display = 'none';
+
+      if (!ticket) return showError("Please enter your ticket.");
+      if (!pw || pw.length < 6 || pw.length > 12) return showError("Password must be 6-12 chars.");
+      if (!/^\d{4}$/.test(pin)) return showError("PIN must be exactly 4 digits.");
+      if (!/^[A-Za-z]{4}$/.test(secret)) return showError("Secret must be 4 English letters.");
+
+      // (DEMO) Regenerate QR Hash Logic (จริงควร hash ข้อมูล)
+      const hash = sha256(ticket + pw + pin + secret);
+
+      resultEl.innerHTML = `<b>QR Hash:</b> <code>${hash}</code>`;
+      resultEl.style.display = '';
+    }
+
+    function showError(msg) {
+      const errorEl = document.getElementById('error');
+      errorEl.textContent = msg;
+      errorEl.style.display = '';
+    }
+
+    // Minimal fake hash (DEMO only)
+    function sha256(str) {
+      let h=5381; for(let i=0;i<str.length;i++) h=((h<<5)+h)+str.charCodeAt(i); return ("00000"+(h>>>0).toString(16)).slice(-12);
+    }
+  </script>
+</body>
+</html>
