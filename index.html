@@ -19,75 +19,58 @@
       margin-bottom: 1.2em;
       letter-spacing: 0.02em;
     }
-    .section {
-      border-radius: 15px;
-      box-shadow: 0 2px 10px rgba(30, 80, 170, 0.07);
-      padding: 0.7em 1em 1.1em 1em;
-      margin: 1.3em 0;
-      background: #eafaf0;
-      border-left: 6px solid #219150;
-    }
-    .section-title {
-      display: flex;
-      align-items: center;
-      gap: 0.38em;
-      font-size: 1.17em;
-      font-weight: bold;
-      color: #26733e;
-      margin-bottom: 0.72em;
-    }
-    .desc {
-      color: #657;
-      font-size: 1em;
-      margin-bottom: 0.48em;
-      text-align: center;
-    }
-    .menu-list {
-      display: flex;
-      flex-direction: column;
-      gap: 0.54em;
-      margin-top: 0.1em;
-    }
-    .menu-list a {
-      display: block;
-      width: 100%;
-      padding: 0.77em 0.4em;
-      background: #219150;
-      color: #fff;
-      font-weight: bold;
-      border-radius: 8px;
-      font-size: 1.09em;
-      text-align: center;
-      text-decoration: none;
+    .menu-block { margin: 1.1em 0; padding: 1em; border-radius: 12px; }
+    .block-title { font-size: 1.07em; font-weight: bold; margin-bottom: 0.68em; }
+    .block-green { background: #eafaf0; border-left: 6px solid #219150; }
+    .block-blue  { background: #e3f2fd; border-left: 6px solid #2196f3; }
+    .block-yellow { background: #fff9e5; border-left: 6px solid #ffd600; }
+    .block-purple { background: #f3eafe; border-left: 6px solid #9575cd; }
+    .menu-block a {
+      display: block; width: 100%; padding: 0.77em 0.4em; margin-bottom: 0.53em;
+      background: #219150; color: #fff; font-weight: bold; border-radius: 8px;
+      font-size: 1.09em; text-align: center; text-decoration: none;
       box-shadow: 0 2px 7px rgba(39,174,96,0.07);
       transition: background 0.13s, color 0.13s;
     }
-    .menu-list a:hover { background: #176d38; color: #fff;}
-    /* Responsive */
+    .menu-block.block-blue a { background: #2196f3; }
+    .menu-block.block-yellow a { background: #ffd600; color: #222; }
+    .menu-block.block-purple a { background: #9575cd; }
+    .menu-block a:hover { filter: brightness(0.93);}
     @media (max-width: 600px) {
       body { margin: 0.4em; padding: 0.07em;}
-      .section { padding: 0.34em 0.17em 0.5em 0.17em; }
-      .menu-list a { font-size: 1em; padding: 0.6em 0.2em; }
+      .menu-block { padding: 0.7em 0.2em;}
+      .menu-block a { font-size: 1em; padding: 0.6em 0.2em; }
     }
   </style>
 </head>
 <body>
   <h1>DTC: Magic Chain System</h1>
-  <div class="section">
-    <div class="section-title">🟩 All Features (Step-by-step)</div>
-    <div class="desc">Start here – ทุกคนสามารถสร้าง/ใช้งาน QR, Master, Agent ได้เอง</div>
-    <div class="menu-list">
-      <a href="generate_key.html">Generate Public Key</a>
-      <a href="mint_qr_batch.html">Mint QR Batch</a>
-      <a href="regen_qr.html">Regenerate QR Hash</a>
-      <a href="register.html">Register QR</a>
-      <a href="transfer.html">Transfer QR</a>
-      <a href="verify_log.html">Check QR Status</a>
-      <a href="register_master.html">Register Master</a>
-      <a href="master_dashboard.html">Master Dashboard</a>
-      <a href="agent_register.html">Register Agent</a>
-    </div>
+
+  <div class="menu-block block-green">
+    <div class="block-title">Step 1: User Key & QR</div>
+    <a href="generate_key.html">Generate Public Key</a>
+    <a href="mint_qr_batch.html">Mint QR Batch</a>
+    <a href="regen_qr.html">Regenerate QR Hash</a>
   </div>
+
+  <div class="menu-block block-blue">
+    <div class="block-title">Step 2: Register & Transfer</div>
+    <a href="register.html">Register QR</a>
+    <a href="transfer.html">Transfer QR</a>
+  </div>
+
+  <div class="menu-block block-yellow">
+    <div class="block-title">Step 3: Audit & Status</div>
+    <a href="verify_log.html">Check QR Status</a>
+  </div>
+
+  <div class="menu-block block-purple">
+    <div class="block-title">Step 4: Admin</div>
+    <a href="register_master.html">Register Master</a>
+    <a href="master_dashboard.html">Master Dashboard</a>
+    <a href="agent_register.html">Register Agent</a>
+  </div>
+
   <p class="footer-note" style="text-align:center;margin-top:2.4em;color:#b0bec5;font-size:0.95em;">
     Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
   </p>
