@@ -262,14 +262,15 @@ export ทุกแบบแนบ timestamp ในไฟล์เหมือ�
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
     function exportTicket(idx) {
-      let d = committedQR[idx];
-      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPassword: ${d.password}\nPIN: ${d.pin}\nSecret: ${d.secret}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime (GitHub): ${currentTimestamp}`;
-      let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
-      let blob = new Blob([txt], {type:"text/plain"});
-      let link = document.createElement('a');
-      link.href = URL.createObjectURL(blob); link.download = fname; link.click();
-      setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
-    }
+  let d = committedQR[idx];
+  let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime (GitHub): ${currentTimestamp}`;
+  let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
+  let blob = new Blob([txt], {type:"text/plain"});
+  let link = document.createElement('a');
+  link.href = URL.createObjectURL(blob); link.download = fname; link.click();
+  setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
+}
+
     function exportCSV(idx) {
       let d = committedQR[idx];
       let csv = "serial,commitment_hash2,timestamp,github_time\n";
