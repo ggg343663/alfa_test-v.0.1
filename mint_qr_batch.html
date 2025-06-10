@@ -1,4 +1,4 @@
- <!--
+  <!--
 DTC Minimal UI/UX Logic
 
 - ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
@@ -39,16 +39,15 @@ Style
     - รองรับ mobile (responsive)
     - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
 
-## 6.Timestamp 
-จะแสดงใต้ section Committed QR เท่านั้น (ไม่แสดงซ้ำในตารางแต่ละแถว)
+## 6. Timestamp
 
-Label คือ Time (GitHub):
-
-สี #607d8b ขนาด 1em
-
-export ทุกแบบแนบ timestamp ในไฟล์เหมือนเดิม
-
-หากไม่มี timestamp (เช่น ยังไม่ commit QR) ให้ขึ้นเป็น “–”
+- แสดงกล่อง timestamp เฉพาะใต้ section "Committed QR" เท่านั้น (ไม่แสดงซ้ำในแถวของตาราง)
+- Label: **Time (Now):** (หรือ Time (GitHub): ถ้าต้องการเน้นว่าใช้เวลา commit/push จริง)
+- สี #607d8b, ขนาด 1em, จัดขวาล่างของกล่องผลลัพธ์/section
+- เวลาที่แสดงในกล่องนี้จะเป็นเวลาปัจจุบัน (ISO8601) แบบ real-time ขณะใช้งาน เพื่อบอก user ว่าเวลาไหนถูกนำไปคำนวณ hash ในการ mint/regen QR (แต่เวลาที่ใช้ใน hash/log จริง จะเป็นเวลาขณะกดปุ่มเท่านั้น)
+- หากยังไม่มีการ commit QR (ยังไม่มีผลลัพธ์) ให้ขึ้นเป็น "–"
+- เมื่อ export (Ticket, QR, Log ฯลฯ) ต้องแถม timestamp ที่ใช้จริง (ตอน commit QR) ในไฟล์เสมอ  
+  (timestamp ที่ export อาจเหลื่อมกับเวลาที่แสดงบน UI เล็กน้อย แต่ใช้ค่าตอน commit เท่านั้น)
 -->
 
 <!DOCTYPE html>
