@@ -38,9 +38,15 @@
       transition: background .19s;
       display: block;
     }
-    .btn-next:hover { background: #b0bec5; }
+    .btn-next:disabled {
+      background: #ececec;
+      color: #b0bec5;
+      cursor: not-allowed;
+    }
+    .btn-next:hover:enabled { background: #b0bec5; }
     #resultBox {
-      display:none; margin-top:1.8em; border-radius:12px; background:#eafaf2; border:1.5px solid #b0dab6; padding:1.1em;
+      margin-top:1.8em; border-radius:12px; background:#eafaf2; border:1.5px solid #b0dab6; padding:1.1em;
+      /* ไม่ซ่อน */
     }
     #publicKeyOut {
       width:100%; font-size:1em; background:#f5fff8; border:1.2px solid #b0dab6; border-radius:8px; padding:0.6em; margin-bottom:0.7em;
@@ -124,9 +130,9 @@
     <button class="btn-main" onclick="validateAndGenerate()">Generate Key</button>
     <div id="resultBox">
       <div style="font-weight:bold; color:#166534; margin-bottom:0.3em;">Public Key:</div>
-      <textarea id="publicKeyOut" readonly rows="2"></textarea>
-      <button onclick="copyKey()" style="margin:0.8em 0.5em 0 0; background:#2196f3; color:#fff; font-weight:bold; border:none; border-radius:8px; padding:0.55em 1.5em; font-size:1em;">Copy</button>
-      <button class="btn-next" onclick="gotoMintQR()">Next: Mint QR Batch</button>
+      <textarea id="publicKeyOut" readonly rows="2" placeholder="Public Key will appear here"></textarea>
+      <button id="copyBtn" onclick="copyKey()" style="margin:0.8em 0.5em 0 0; background:#2196f3; color:#fff; font-weight:bold; border:none; border-radius:8px; padding:0.55em 1.5em; font-size:1em;" disabled>Copy</button>
+      <button class="btn-next" id="mintBtn" onclick="gotoMintQR()" disabled>Next: Mint QR Batch</button>
       <div id="createdAt"></div>
       <div style="font-size:0.97em;color:#1565c0;margin-top:1em;">
         <b>*Your Public Key is generated deterministically from your Password and PIN.</b>
@@ -166,6 +172,15 @@
       else if (strength === 3) { bar.style.background="#4ade80"; text.textContent="Strong"; text.style.color="#16a34a";}
       else { bar.style.background="#eee"; text.textContent=""; }
     });
+
+    // ตั้งค่าหน้าแรก: disable ปุ่ม copy, mint
+    window.onload = function() {
+      document.getElementById('publicKeyOut').value = '';
+      document.getElementById('createdAt').textContent = '';
+      document.getElementById('copyBtn').disabled = true;
+      document.getElementById('mintBtn').disabled = true;
+    };
+
     function validateAndGenerate() {
       const pw = document.getElementById('pw').value.trim();
       const pw2 = document.getElementById('pw2').value.trim();
@@ -182,7 +197,9 @@
       const publicKey = generatePublicKey(pw, pin);
       document.getElementById('publicKeyOut').value = publicKey;
       document.getElementById('createdAt').textContent = 'Created at: ' + new Date().toISOString();
-      document.getElementById('resultBox').style.display = '';
+      // เปิดปุ่ม copy, mint
+      document.getElementById('copyBtn').disabled = false;
+      document.getElementById('mintBtn').disabled = false;
       // Save for next step if needed
       localStorage.setItem('dtc_publicKey_pw', pw);
       localStorage.setItem('dtc_publicKey_pin', pin);
@@ -196,20 +213,23 @@
     }
     function copyKey() {
       const pk = document.getElementById('publicKeyOut').value;
-      navigator.clipboard.writeText(pk);
-      alert('Copied!');
+      if (pk) {
+        navigator.clipboard.writeText(pk);
+        alert('Copied!');
+      }
     }
     function gotoMintQR() {
       window.location.href = "mint_qr_hash.html";
     }
     function generatePublicKey(password, pin) {
+      // *** Example only! Use real crypto for production ***
       let str = password + "|" + pin + "|dtc";
       let hash = 5381;
       for (let i = 0; i < str.length; i++) {
         hash = ((hash << 5) + hash) + str.charCodeAt(i);
         hash = hash & 0xFFFFFFFF;
       }
-      // คืนค่าเป็น hex string 64 หลักแบบปลอม ๆ (demo)
+      // คืนค่าเป็น hex string 64 หลัก (mockup)
       return (
         Math.abs(hash).toString(16).padStart(16, "0") +
         "d4c6e7a29f" + pin +
