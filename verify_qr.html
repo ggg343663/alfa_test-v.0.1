@@ -1,4 +1,5 @@
 <!--
+<!--
 DTC Minimal UI/UX Logic
 
 - ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
@@ -43,30 +44,31 @@ Style
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Check QR - DTC System</title>
+  <title>Check QR Status - DTC</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
-    body { font-family: Arial, sans-serif; background: #f9fafd; }
-    .container { max-width: 520px; margin: 2.2em auto; background: #fff; padding: 2em 1.3em; border-radius: 15px; box-shadow: 0 2px 14px #e1e5f5;}
+    body { font-family: Arial, sans-serif; background: #f6f7fa; color: #234;}
+    .container { max-width: 520px; margin: 2em auto; background: #fff; padding: 2em 1.2em; border-radius: 15px; box-shadow: 0 2px 14px #e1e5f5;}
     .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.3em; }
     .nav-btn {
-      background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.4em;
-      font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background 0.18s;
+      background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.3em;
+      font-size: 1.02em; font-weight: 500; cursor: pointer; transition: background 0.17s;
     }
     .nav-btn:hover { background: #d1c4e9; }
-    h2 { text-align: center; color: #26733e; margin-bottom: 1.15em;}
-    label { font-weight: bold; margin-bottom: 0.21em; color: #219150;}
-    .input-row { display: flex; align-items: center; gap: 0.3em; margin-bottom: 0.8em; }
+    h2 { text-align: center; color: #219150; margin-bottom: 1.1em;}
+    label { font-weight: bold; margin-bottom: 0.18em; color: #219150;}
+    .input-row { display: flex; align-items: center; gap: 0.3em; margin-bottom: 1em; }
     input[type="text"] {
       width: 100%; padding: 0.62em; font-size: 1em; border-radius: 6px;
-      border: 1.4px solid #d0d7e5; transition: border 0.18s; background: #f9fcff;
+      border: 1.4px solid #d0d7e5; background: #f6f7fa;
+      transition: border 0.16s;
     }
-    input[type="text"]:focus { border-color: #2563eb; box-shadow:0 2px 6px #bfdbfe44;}
+    input[type="text"]:focus { border-color: #2196f3; box-shadow:0 2px 6px #bfdbfe44;}
     .icon-btn {
-      background: #f1f5fa; border: 1.5px solid #c5d8e6; border-radius: 6px;
-      padding: 0.32em 0.7em; color: #246bfd; font-weight: bold;
-      margin-right: 0.15em; cursor: pointer; font-size: 0.98em; transition: background 0.15s;
+      background: #f1f5fa; border: 1.4px solid #c5d8e6; border-radius: 6px;
+      padding: 0.31em 0.6em; color: #246bfd; font-weight: bold;
+      margin-right: 0.11em; cursor: pointer; font-size: 0.97em;
       display: flex; align-items: center; justify-content: center;
     }
     .icon-btn svg { width: 23px; height: 23px; }
@@ -77,14 +79,21 @@ Style
     }
     .copy-success { color: #16a34a; font-size: 0.93em; margin-left: 0.2em;}
     #imgInput { display: none; }
-    #scanMsg { font-size: 0.97em; min-height: 1.2em; margin-bottom: 0.25em;}
+    #scanMsg { font-size: 0.97em; min-height: 1.2em; margin-bottom: 0.3em;}
     #qr-reader { margin: 0.6em 0 0.4em 0;}
-    .result-box { margin-top: 1.2em; padding: 1.05em; border-radius: 9px; font-size: 1.08em;}
+    .result-box { margin-top: 1.2em; padding: 1em; border-radius: 10px; font-size: 1.09em;}
     .ok { background: #eafaf0; color: #26733e; border: 1.7px solid #64bc6d;}
     .fail { background: #ffe9e9; color: #b61b1b; border: 1.7px solid #ef8888;}
     .registered { background: #e3eafe; color: #234bb6; border: 1.7px solid #6c85e3;}
-    code { background: #f0f2f9; padding: 0.14em 0.47em; border-radius: 5px;}
-    @media (max-width:600px){ .container {padding:1em 0.15em;} .nav-row{margin-bottom:0.8em;} .input-row{flex-wrap:wrap;} }
+    .chain-box { background: #f4f6fd; border: 1.3px solid #b4cafb; border-radius: 9px; margin-top: 1.1em; padding: 0.8em 1em;}
+    .chain-header { font-weight: bold; color: #246bfd; margin-bottom: 0.38em; }
+    .chain-table { width: 100%; font-size: 0.97em; border-collapse: collapse;}
+    .chain-table th, .chain-table td { padding: 0.32em 0.6em; }
+    .chain-table th { color: #246bfd;}
+    .chain-table tr { border-bottom: 1px solid #dde5f5;}
+    .expand-btn { background: #e3f2fd; color: #246bfd; border: none; border-radius: 5px; padding: 0.27em 0.88em; margin-top: 0.5em; cursor:pointer;}
+    code { background: #f0f2f9; padding: 0.15em 0.5em; border-radius: 5px;}
+    @media (max-width:600px){ .container {padding:1em 0.09em;} .nav-row{margin-bottom:0.9em;} .input-row{flex-wrap:wrap;} }
   </style>
 </head>
 <body>
@@ -93,15 +102,13 @@ Style
       <button class="nav-btn" onclick="window.location.href='index.html'">Back</button>
       <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
     </div>
-    <h2>Check QR Code</h2>
+    <h2>Check QR Status</h2>
     <label for="qrhash">QR Hash (64 chars):</label>
     <div class="input-row">
       <input type="text" id="qrhash" maxlength="64" placeholder="Enter QR hash" autocomplete="off" autofocus />
-      <!-- Camera Icon Button -->
       <button class="icon-btn" id="scanBtn" onclick="toggleCameraScan()" type="button" title="Scan QR">
         <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2.5" stroke="#26733e" stroke-width="2"/><path d="M9 11a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z" stroke="#26733e" stroke-width="2"/><rect x="7" y="2" width="10" height="4" rx="1.5" stroke="#26733e" stroke-width="2"/></svg>
       </button>
-      <!-- Image Icon Button -->
       <input type="file" id="imgInput" accept="image/*" onchange="importQR(this)" />
       <button class="icon-btn" onclick="document.getElementById('imgInput').click()" type="button" title="Import from Image">
         <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="#2563eb" stroke-width="2"/><circle cx="8.5" cy="9.5" r="1.5" fill="#2563eb"/><path d="M21 17v-1.2a2 2 0 0 0-.6-1.43l-3.39-3.1a2 2 0 0 0-2.62 0l-1.25 1.15a2 2 0 0 1-2.62 0l-3.39-3.1A2 2 0 0 0 3 15.8V17" stroke="#2563eb" stroke-width="2"/></svg>
@@ -111,8 +118,9 @@ Style
     </div>
     <div id="scanMsg"></div>
     <div id="qr-reader" style="display:none;"></div>
-    <button onclick="checkQR()" id="checkBtn" type="button">Check</button>
+    <button onclick="checkQR()" id="checkBtn" type="button" style="width:100%;background:#2196f3;color:#fff;font-weight:bold;border:none;padding:0.75em 0;border-radius:9px;font-size:1.09em;margin-top:0.3em;box-shadow:0 1px 8px #e3eefa;">Check</button>
     <div id="resultArea"></div>
+    <div id="logChainArea" style="display:none;"></div>
   </div>
 <script>
   // DEMO DATA
@@ -123,9 +131,10 @@ Style
     "A013FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF11AA",
     "0A4D1234567890ABCDEF1234567890ABCDEF1234567890ABCDEF1234567890F1B2"
   ];
-  const registered = [
-    { hash: "A9F1BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB1CDE", owner: "0x0fAba11A11111111111111111111111111111123", timestamp: "2024-06-01T12:01:00Z" },
-    { hash: "C4EEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA1AF0", owner: "0xB4A998877665544332211000AABBCCDDEEFF999", timestamp: "2024-06-01T13:22:00Z" }
+  // สมมุติ log chain ทั้งสาย (อาจมาจาก log.json)
+  const qrLogs = [
+    { hash: "A9F1BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB1CDE", owner: "0x0fAba11A11111111111111111111111111111123", action: "register", timestamp: "2024-06-01T12:01:00Z", slot_id: "slot_001", prev_hash: "0000...", commitment: "COMMIT1" },
+    { hash: "A9F1BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB1CDE", owner: "0x8888888888888888888888888888888888888888", action: "transfer", timestamp: "2024-06-09T16:32:00Z", slot_id: "slot_001", prev_hash: "PREV_HASH...", commitment: "COMMIT2" }
   ];
 
   window.onload = ()=>{ document.getElementById('qrhash').focus(); };
@@ -197,26 +206,57 @@ Style
   function checkQR() {
     const hash = document.getElementById('qrhash').value.trim();
     const result = document.getElementById('resultArea');
-    result.innerHTML = "";
+    const logChainArea = document.getElementById('logChainArea');
+    result.innerHTML = ""; logChainArea.innerHTML = ""; logChainArea.style.display = "none";
     if (hash.length !== 64) {
       result.innerHTML = `<div class="result-box fail">Invalid QR hash. Please enter 64 characters.</div>`;
       return;
     }
-    if (!whitelist.includes(hash)) {
-      result.innerHTML = `<div class="result-box fail">❌ This QR is not in whitelist.<br>Registration not allowed.</div>`;
+    // ตรวจ whitelist ก่อน
+    let whitelistMsg = whitelist.includes(hash)
+      ? `<span style="color:#188b16;">✅ In whitelist</span>`
+      : `<span style="color:#b61b1b;">❌ Not in whitelist</span>`;
+
+    // ดู log ล่าสุด
+    const logs = qrLogs.filter(q => q.hash === hash);
+    if (logs.length === 0) {
+      result.innerHTML = `<div class="result-box fail">${whitelistMsg}<br>QR not found in log.<br>May be unregistered or not valid.</div>`;
       return;
     }
-    const reg = registered.find(q => q.hash === hash);
-    if (reg) {
-      result.innerHTML = `<div class="result-box registered" style="color:#0ea5e9;">
-        ✅ Registered!<br>
-        Owner: <b id="ownerText">${reg.owner}</b>
+
+    // ข้อมูลล่าสุด (อาจมี transfer ได้)
+    const lastLog = logs[logs.length-1];
+    result.innerHTML = `
+      <div class="result-box registered" style="color:#0ea5e9;">
+        ${whitelistMsg}<br>
+        Status: <b>${lastLog.action === "register" ? "Registered" : "Transferred"}</b><br>
+        Owner: <b id="ownerText">${lastLog.owner}</b>
         <button class="copy-btn" onclick="copyText('ownerText')">Copy</button><br>
-        Timestamp: ${reg.timestamp}
-        </div>`;
-    } else {
-      result.innerHTML = `<div class="result-box ok" style="color:#188b16;">🟩 Not registered yet.<br>This QR can be registered.</div>`;
+        Timestamp: ${lastLog.timestamp}<br>
+        Commitment: <code>${lastLog.commitment}</code>
+        <button class="expand-btn" onclick="showChain('${hash}')">Show Log Chain</button>
+      </div>
+    `;
+  }
+
+  // Popup/expand log chain
+  function showChain(hash) {
+    const logs = qrLogs.filter(q => q.hash === hash);
+    const logChainArea = document.getElementById('logChainArea');
+    if (logs.length === 0) return;
+    let html = `<div class="chain-box"><div class="chain-header">Log Chain:</div><table class="chain-table"><tr><th>Action</th><th>Owner</th><th>Timestamp</th><th>Commitment</th></tr>`;
+    for (const l of logs) {
+      html += `<tr>
+        <td>${l.action}</td>
+        <td>${l.owner.slice(0,10)}...</td>
+        <td>${l.timestamp}</td>
+        <td><code>${l.commitment}</code></td>
+      </tr>`;
     }
+    html += `</table></div>`;
+    logChainArea.innerHTML = html;
+    logChainArea.style.display = "";
+    logChainArea.scrollIntoView({behavior:"smooth"});
   }
 
   function copyText(id) {
@@ -235,6 +275,7 @@ Style
     document.getElementById("qrhash").value = "";
     document.getElementById("resultArea").innerHTML = "";
     document.getElementById("scanMsg").innerHTML = "";
+    document.getElementById("logChainArea").innerHTML = "";
     document.getElementById("qrhash").focus();
   }
 </script>
