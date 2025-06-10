@@ -298,17 +298,263 @@ Timestamp
 
     // อัปเดต timestamp โชว์ realtime (ISO8601)
     function setTimestampZone(ts) {
+<!--
+DTC Minimal UI/UX Logic
+
+- กลุ่มสีและ Section ตามมาตรฐาน DTC UI
+- Timestamp แสดงเฉพาะกล่อง Committed QR ด้านล่างขวา สี #607d8b, ขนาด 1em
+- ตำแหน่ง Number of QR อยู่ในกลุ่ม meta ถัดจาก Batch Name
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DTC: Mint QR Batch (Double Hash)</title>
+  <style>
+    body { font-family: Arial,sans-serif; background: #f5f7fa; max-width: 700px; margin: 2.5em auto; color: #222; }
+    h2 { color: #247551; text-align: center; margin-bottom: 1.5em; }
+    .section { border-radius: 16px; margin-bottom: 1.5em; padding: 1.3em 1.2em; box-shadow: 0 2px 9px #edf1f6; }
+    .meta-group { background: #f6f7fa; }
+    .secret-group { background: #fffde7; }
+    .action-group { background: #e3f2fd; text-align: center; }
+    .committed-group { background: #e3f2fd; }
+    .input-row { margin-bottom: 1.1em; }
+    label { font-weight: bold; color: #247551; display:block; }
+    .hint { color: #90a4ae; font-size: 0.94em; margin-top: 2px; }
+    input[type="text"], input[type="password"], input[type="number"] {
+      width: 100%; padding:0.7em 0.8em; border:1px solid #b0bec5; border-radius:8px;
+      font-size:1em; background: #f9fafb; margin-top: 0.18em; box-sizing: border-box; height: 44px;
+    }
+    .btn {
+      margin:0.3em 0.7em 0.3em 0; padding:0.65em 1.5em; border-radius:15px;
+      font-size:1.13em; border:none; cursor:pointer; font-weight:600;
+      box-shadow: 0 1px 4px #dde;
+      transition: background 0.2s;
+    }
+    .btn-blue    { background:#2196f3; color:#fff; }
+    .btn-yellow  { background:#ffd600; color:#333; }
+    .btn-light   { background:#e3f2fd; color:#247551; }
+    .preview-box {
+      border-radius: 10px;
+      padding: 0.9em 1em;
+      margin-bottom: 1.2em;
+      font-size: 1.06em;
+      font-weight: bold;
+      box-shadow: 0 1px 7px #e8eaf6;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4em;
+      transition: background 0.18s;
+    }
+    .preview-ready { background: #e3f2fd; color: #1565c0;}
+    .preview-minted { background: #fffde7; color: #bf8500;}
+    .preview-none { background: #f6f7fa; color: #b0bec5;}
+    .preview-error { background: #ef9a9a; color: #b71c1c;}
+    .table-zone  { margin-top: 2em;}
+    .table-title { font-weight: 700; font-size: 1.06em; color: #247551; margin: 0.3em 0 0.6em 0;}
+    table { width: 100%; border-collapse: collapse; margin-top: 0.4em; }
+    th, td { padding: 0.6em; border-bottom: 1px solid #e0e0e0; text-align: center; }
+    th { background: #f6f7fa; color: #2196f3; }
+    .export-btn { font-size: 0.99em; background:#e3f2fd; color:#247551; padding:0.4em 0.8em; border-radius:7px; border:none; cursor:pointer; }
+    .status-badge { font-size: 0.92em; border-radius: 7px; padding: 0.23em 0.9em; margin-left: 0.3em;}
+    .status-committed { background: #2196f3; color: #fff; }
+    .timestamp-zone {
+      color: #607d8b;
+      font-size: 1em;
+      text-align: right;
+      margin: 1em 0 0.1em 0;
+      letter-spacing: 0.01em;
+      user-select: text;
+    }
+    @media (max-width: 600px) {
+      body { padding:0.4em;}
+      .section { padding:1em 0.4em; }
+      .btn { width:100%; margin-bottom:0.7em; }
+      .timestamp-zone { font-size: 0.97em; margin-right:0;}
+    }
+    .nav-bar {
+      margin: 2em 0 0 0; display: flex; gap: 16px; justify-content: center;
+    }
+    .nav-btn {
+      background: #ede7f6; color: #4a4582; border: none; border-radius: 10px;
+      padding: 0.7em 1.5em; font-size: 1.08em; font-weight: 600; min-width: 95px;
+      transition: background 0.2s;
+      cursor: pointer;
+    }
+    .nav-btn:hover { background: #d1c4e9; }
+  </style>
+</head>
+<body>
+  <h2>Mint QR (Double Hash System)</h2>
+
+  <!-- Preview Box: Role, Quota, Status -->
+  <div id="role-preview" class="preview-box preview-none">
+    Role: – &nbsp;|&nbsp; Quota: – &nbsp;|&nbsp; Status: –
+  </div>
+
+  <!-- Section A: Key & Batch Info (Meta) -->
+  <div class="section meta-group">
+    <div class="input-row">
+      <label>Public Key</label>
+      <input type="text" id="pubkey" placeholder="Paste your public key here" oninput="onPubKeyChange()">
+      <div class="hint">Use only the generated public key (from 'Generate Key').</div>
+    </div>
+    <div class="input-row">
+      <label>Batch Name (optional)</label>
+      <input type="text" id="batch" placeholder="Optional">
+      <div class="hint">For grouping/labeling QR batches</div>
+    </div>
+    <div class="input-row">
+      <label>Number of QR</label>
+      <input type="number" id="qty" value="1" min="1" max="50" style="max-width:90px">
+      <div class="hint">How many QR to mint (based on your role/remaining quota)</div>
+    </div>
+  </div>
+
+  <!-- Section B: Secret (Password/Secret) -->
+  <div class="section secret-group">
+    <div class="input-row">
+      <label>Secret</label>
+      <input type="password" id="secret" placeholder="For secure minting (keep private)">
+      <div class="hint">Required for ticket backup and regen. Never share this secret!</div>
+    </div>
+  </div>
+
+  <!-- Section C: Action -->
+  <div class="section action-group">
+    <button id="mint-btn" class="btn btn-blue" onclick="mintQR()" disabled>Generate QR Batch</button>
+  </div>
+
+  <!-- Section D: Committed QR Result -->
+  <div id="committed-zone" class="table-zone" style="display:none;">
+    <div class="section committed-group">
+      <div class="table-title">Committed QR</div>
+      <table>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>QR Hash (hash1)</th>
+            <th>Commitment Hash (hash2)</th>
+            <th>Slot/Serial</th>
+            <th>Export QR</th>
+            <th>Export Ticket</th>
+            <th>Export Log</th>
+          </tr>
+        </thead>
+        <tbody id="committed-tbl"></tbody>
+      </table>
+      <!-- Timestamp-zone -->
+      <div class="timestamp-zone">
+        <span class="label-timestamp">Time (Now):</span>
+        <span id="ts-committed" class="timestamp-value">–</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Section F: Navigation Bar -->
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="window.history.back()">Back</button>
+    <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
+    <button class="nav-btn" onclick="window.location.href='#'">Next</button>
+  </div>
+
+  <script>
+    // MOCK: สิทธิ์ของแต่ละ role (ตัวอย่าง)
+    function checkRole(pubkey) {
+      if (!pubkey) return {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
+      if (/^G/.test(pubkey)) return {role:"Genesis", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
+      if (/^M/.test(pubkey)) return {role:"Master", quota:"100", status:"Ready", color:"preview-ready", btn:true, min:1, max:100};
+      if (/^A/.test(pubkey)) return {role:"Agent", quota:"5,000", status:"Ready", color:"preview-ready", btn:true, min:1, max:5000};
+      if (/^X/.test(pubkey)) return {role:"Master", quota:"0", status:"Already minted", color:"preview-minted", btn:false, min:0, max:0};
+      return {role:"Unregistered", quota:"–", status:"No Permission", color:"preview-error", btn:false, min:0, max:0};
+    }
+
+    let committedQR = [];
+    let commitTimestamp = "–";
+    let currentRole = checkRole("");
+
+    function onPubKeyChange() {
+      let pubkey = document.getElementById('pubkey').value.trim();
+      currentRole = checkRole(pubkey);
+
+      let box = document.getElementById('role-preview');
+      box.className = `preview-box ${currentRole.color}`;
+      box.innerHTML = `Role: ${currentRole.role} &nbsp;|&nbsp; Quota: ${currentRole.quota} &nbsp;|&nbsp; Status: ${currentRole.status}`;
+
+      let qty = document.getElementById('qty');
+      qty.value = currentRole.min;
+      qty.min = currentRole.min;
+      qty.max = currentRole.max;
+
+      // ปุ่ม mint
+      let btn = document.getElementById('mint-btn');
+      btn.disabled = !currentRole.btn;
+    }
+
+    // SHA256
+    async function sha256(str) {
+      const msgBuffer = new TextEncoder().encode(str);
+      const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+      return Array.from(new Uint8Array(hashBuffer)).map(x=>x.toString(16).padStart(2,'0')).join('');
+    }
+
+    async function mintQR() {
+      let pubkey = document.getElementById('pubkey').value.trim();
+      let secret = document.getElementById('secret').value.trim();
+      let batch = document.getElementById('batch').value.trim() || '';
+      let qty = parseInt(document.getElementById('qty').value, 10);
+      if (!pubkey || !secret || !qty) { alert('Fill all fields'); return; }
+      if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert('Quantity out of range.'); return; }
+      let now = new Date().toISOString();
+      committedQR = [];
+      for (let i = 1; i <= qty; i++) {
+        let serial = 'QR' + i.toString().padStart(3, "0");
+        let hash1 = await sha256(pubkey + secret + serial);
+        let hash2 = await sha256(batch + hash1 + now);
+        committedQR.push({
+          no: i,
+          hash1, hash2, serial, pubkey, secret, batch,
+          timestamp: now
+        });
+      }
+      commitTimestamp = now;
+      updateCommittedTable();
+      setTimestampZone();
+    }
+
+    function updateCommittedTable() {
+      const tbl = document.getElementById('committed-tbl');
+      if (!committedQR.length) {
+        document.getElementById('committed-zone').style.display = 'none';
+        setTimestampZone("–");
+        return;
+      }
+      document.getElementById('committed-zone').style.display = '';
+      tbl.innerHTML = committedQR.map((d, i) => `
+        <tr>
+          <td>${i+1} <span class="status-badge status-committed">Committed</span></td>
+          <td>${d.hash1.slice(0,14)}...</td>
+          <td>${d.hash2.slice(0,14)}...</td>
+          <td>${d.serial}</td>
+          <td><button class="export-btn" onclick="exportQR(${i})">QR</button></td>
+          <td><button class="export-btn" onclick="exportTicket(${i})">Ticket</button></td>
+          <td><button class="export-btn" onclick="exportCSV(${i})">Log</button></td>
+        </tr>
+      `).join('');
+    }
+
+    function setTimestampZone(ts) {
       let el = document.getElementById('ts-committed');
       el.textContent = ts || commitTimestamp || "–";
     }
-    // แสดงเวลาปัจจุบันในกล่อง timestamp แบบ real-time
     setInterval(()=>{
       let el = document.getElementById('ts-committed');
       if (!committedQR.length) { el.textContent = "–"; return; }
       el.textContent = new Date().toISOString();
     }, 950);
 
-    // export logic แนบ timestamp ตอน commit จริง
     function exportQR(idx) {
       let d = committedQR[idx];
       let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}\nTime (Now): ${commitTimestamp}`;
@@ -337,10 +583,7 @@ Timestamp
       link.href = URL.createObjectURL(blob); link.download = fname; link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
-    // รีเซ็ต timestamp ตอนโหลดหน้า
     window.onload = () => { setTimestampZone("–"); onPubKeyChange(); };
   </script>
 </body>
 </html>
-
-
