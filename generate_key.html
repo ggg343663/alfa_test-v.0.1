@@ -268,11 +268,10 @@ function generatePublicKey(password, pin) {
     hash = hash & 0xFFFFFFFF;  
   }  
   // คืนค่าเป็น hex string 64 หลัก (mockup)  
-  return (  
-    Math.abs(hash).toString(16).padStart(16, "0") +  
-    "d4c6e7a29f" + pin +  
-    "b13e8
-
+  return (
+  Math.abs(hash).toString(16).padStart(16, "0") +
+  "d4c6e7a29f" + pin +
+  "b13e8"
 ).padEnd(64, "1");
 }
 </script>
