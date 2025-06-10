@@ -55,6 +55,8 @@ Style
     .secret-group { background: #fffde7; }
     .action-group { background: #e3f2fd; text-align: center; }
     .preview-group { background: #f6f7fa; }
+    .committed-group { background: #e3f2fd; }
+    .pending-group { background: #ffd6001a; }
     
     .input-row { margin-bottom: 1.1em; }
     label { font-weight: bold; color: #247551; display:block; }
@@ -74,13 +76,20 @@ Style
     .btn-blue    { background:#2196f3; color:#fff; }
     .btn-yellow  { background:#ffd600; color:#333; }
     .btn-light   { background:#e3f2fd; color:#247551; }
+    .btn-grey    { background:#f6f7fa; color:#789262; }
+    .btn-red     { background:#ef9a9a; color:#b71c1c; }
 
-    .warn { color:#c62828;font-size:1em;margin:1em 0;}
-    table { width: 100%; border-collapse: collapse; margin-top: 1.1em; }
+    .table-zone  { margin-top: 2em;}
+    .table-title { font-weight: 700; font-size: 1.06em; color: #247551; margin: 0.3em 0 0.6em 0;}
+    table { width: 100%; border-collapse: collapse; margin-top: 0.4em; }
     th, td { padding: 0.6em; border-bottom: 1px solid #e0e0e0; text-align: center; }
     th { background: #f6f7fa; color: #2196f3; }
     .export-btn { font-size: 0.99em; background:#e3f2fd; color:#247551; padding:0.4em 0.8em; border-radius:7px; border:none; cursor:pointer; }
     .commit-box { background:#e3f2fd; border-radius:12px; padding:0.6em 0.7em; margin:1em 0; font-size:1.02em; word-break: break-all; }
+    .status-badge { font-size: 0.92em; border-radius: 7px; padding: 0.23em 0.9em; margin-left: 0.3em;}
+    .status-pending { background: #ffd600; color: #666; }
+    .status-committed { background: #2196f3; color: #fff; }
+
     @media (max-width: 600px) {
       body { padding:0.4em;}
       .section { padding:1em 0.4em; }
@@ -139,12 +148,10 @@ Style
     <button class="btn btn-blue" onclick="mintQR()">Generate QR</button>
   </div>
 
-  <!-- Section D: Warning/Backup -->
-  <div class="warn" id="warn">⚠️ Please backup your <b>ticket & secret</b> securely. Losing them means you CANNOT regenerate this QR!</div>
-
-  <!-- Section E: Preview/Result -->
-  <div id="result" style="display:none;">
-    <div class="section preview-group">
+  <!-- Section E: Pending QR (Preview, Commit/Exit) -->
+  <div id="pending-zone" class="table-zone" style="display:none;">
+    <div class="section pending-group">
+      <div class="table-title">Pending QR (not yet committed)</div>
       <table>
         <thead>
           <tr>
@@ -152,25 +159,35 @@ Style
             <th>QR Hash (hash1)</th>
             <th>Commitment Hash (hash2)</th>
             <th>Slot/Serial</th>
-            <th>Export QR</th>
-            <th>Export Ticket</th>
+            <th>Timestamp</th>
+            <th>Commit</th>
+            <th>Exit</th>
           </tr>
         </thead>
-        <tbody id="tbl"></tbody>
+        <tbody id="pending-tbl"></tbody>
       </table>
+    </div>
+  </div>
 
-      <div class="commit-box" id="commit-box" style="display:none;"></div>
-      <div style="margin:1em 0 0.5em 0; display: flex; gap:12px; flex-wrap: wrap;">
-        <button class="btn btn-yellow" onclick="exportTicket(0)">Export Ticket</button>
-        <button class="btn btn-blue" onclick="exportQR(0)">Export QR</button>
-        <button class="btn btn-light" onclick="exportCSV()">Export Log</button>
-      </div>
-      <div class="hint" style="margin-top:1em;">
-        hash1 = SHA256(public_key + secret + serial) <br>
-        hash2 = SHA256(batch_name + hash1 + timestamp) <br>
-        Only hash2 (commitment) is published.<br>
-        <b>Timestamp:</b> <span id="ts"></span>
-      </div>
+  <!-- Section E: Committed QR -->
+  <div id="committed-zone" class="table-zone" style="display:none;">
+    <div class="section committed-group">
+      <div class="table-title">Committed QR</div>
+      <table>
+        <thead>
+          <tr>
+            <th>No.</th>
+            <th>QR Hash (hash1)</th>
+            <th>Commitment Hash (hash2)</th>
+            <th>Slot/Serial</th>
+            <th>Timestamp</th>
+            <th>Export QR</th>
+            <th>Export Ticket</th>
+            <th>Export Log</th>
+          </tr>
+        </thead>
+        <tbody id="committed-tbl"></tbody>
+      </table>
     </div>
   </div>
 
@@ -189,7 +206,9 @@ Style
       return Array.from(new Uint8Array(hashBuffer)).map(x=>x.toString(16).padStart(2,'0')).join('');
     }
 
-    let ticketData = [];
+    let pendingQR = [];
+    let committedQR = [];
+
     async function mintQR() {
       let pubkey = document.getElementById('pubkey').value.trim();
       let secret = document.getElementById('secret').value.trim();
@@ -202,10 +221,8 @@ Style
       let now = new Date().toISOString();
       let hash1 = await sha256(pubkey + secret + serial);
       let hash2 = await sha256(batch + hash1 + now);
-      document.getElementById('result').style.display = '';
-      document.getElementById('ts').textContent = now;
-      ticketData = [{
-        no: 1,
+      let data = {
+        no: pendingQR.length + 1,
         hash1,
         hash2,
         serial,
@@ -213,23 +230,69 @@ Style
         secret,
         batch,
         timestamp: now
-      }];
-      // Table
-      let row = `<tr>
-        <td>1</td>
-        <td>${hash1.slice(0,12)}...</td>
-        <td>${hash2.slice(0,12)}...</td>
-        <td>${serial}</td>
-        <td><button class="export-btn" onclick="exportQR(0)">QR (txt)</button></td>
-        <td><button class="export-btn" onclick="exportTicket(0)">Ticket (txt)</button></td>
-      </tr>`;
-      document.getElementById('tbl').innerHTML = row;
-      document.getElementById('commit-box').style.display = 'block';
-      document.getElementById('commit-box').innerHTML = `<b>Commitment Hash (hash2):</b> <br>${hash2}`;
+      };
+      pendingQR = [data]; // รองรับแค่ 1 pending ต่อครั้ง
+      updatePendingTable();
+    }
+
+    function updatePendingTable() {
+      if (pendingQR.length === 0) {
+        document.getElementById('pending-zone').style.display = 'none';
+        return;
+      }
+      document.getElementById('pending-zone').style.display = '';
+      let rows = pendingQR.map((d, i) => `
+        <tr>
+          <td>1 <span class="status-badge status-pending">Pending</span></td>
+          <td>${d.hash1.slice(0,12)}...</td>
+          <td>${d.hash2.slice(0,12)}...</td>
+          <td>${d.serial}</td>
+          <td>${d.timestamp}</td>
+          <td><button class="btn btn-blue" onclick="commitQR(${i})">Commit</button></td>
+          <td><button class="btn btn-red" onclick="exitPending(${i})">Exit</button></td>
+        </tr>
+      `).join('');
+      document.getElementById('pending-tbl').innerHTML = rows;
+    }
+
+    function commitQR(idx) {
+      if (pendingQR.length === 0) return;
+      let d = pendingQR[idx];
+      d.no = committedQR.length + 1;
+      committedQR.push(d);
+      pendingQR = [];
+      updatePendingTable();
+      updateCommittedTable();
+    }
+
+    function exitPending(idx) {
+      pendingQR = [];
+      updatePendingTable();
+    }
+
+    function updateCommittedTable() {
+      if (committedQR.length === 0) {
+        document.getElementById('committed-zone').style.display = 'none';
+        return;
+      }
+      document.getElementById('committed-zone').style.display = '';
+      let rows = committedQR.map((d, i) => `
+        <tr>
+          <td>${i+1} <span class="status-badge status-committed">Committed</span></td>
+          <td>${d.hash1.slice(0,12)}...</td>
+          <td>${d.hash2.slice(0,12)}...</td>
+          <td>${d.serial}</td>
+          <td>${d.timestamp}</td>
+          <td><button class="export-btn" onclick="exportQR(${i})">QR</button></td>
+          <td><button class="export-btn" onclick="exportTicket(${i})">Ticket</button></td>
+          <td><button class="export-btn" onclick="exportCSV(${i})">Log</button></td>
+        </tr>
+      `).join('');
+      document.getElementById('committed-tbl').innerHTML = rows;
     }
 
     function exportQR(idx) {
-      let d = ticketData[idx];
+      let d = committedQR[idx];
       let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}`;
       let fname = `qr_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
@@ -239,8 +302,8 @@ Style
     }
 
     function exportTicket(idx) {
-      let d = ticketData[idx];
-      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nSecret: ${d.secret}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\n(Backup this file safely. Do NOT share your secret.)`;
+      let d = committedQR[idx];
+      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nSecret: ${d.secret}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}`;
       let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
@@ -248,8 +311,8 @@ Style
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
 
-    function exportCSV() {
-      let d = ticketData[0];
+    function exportCSV(idx) {
+      let d = committedQR[idx];
       let csv = "serial,commitment_hash2,timestamp\n";
       csv += `${d.serial},${d.hash2},${d.timestamp}\n`;
       let fname = `commitment_log_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.csv`;
