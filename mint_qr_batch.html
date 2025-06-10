@@ -1,4 +1,4 @@
-<!--
+ <!--
 DTC Minimal UI/UX Logic
 
 - ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
@@ -38,6 +38,17 @@ Style
     - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
     - รองรับ mobile (responsive)
     - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
+
+## 6.Timestamp 
+จะแสดงใต้ section Committed QR เท่านั้น (ไม่แสดงซ้ำในตารางแต่ละแถว)
+
+Label คือ Time (GitHub):
+
+สี #607d8b ขนาด 1em
+
+export ทุกแบบแนบ timestamp ในไฟล์เหมือนเดิม
+
+หากไม่มี timestamp (เช่น ยังไม่ commit QR) ให้ขึ้นเป็น “–”
 -->
 
 <!DOCTYPE html>
@@ -49,7 +60,6 @@ Style
   <style>
     body { font-family: Arial,sans-serif; background: #f5f7fa; max-width: 700px; margin: 2.5em auto; color: #222; }
     h2 { color: #247551; text-align: center; margin-bottom: 1.5em; }
-
     .section { border-radius: 16px; margin-bottom: 1.5em; padding: 1.3em 1.2em; box-shadow: 0 2px 9px #edf1f6; }
     .meta-group { background: #f6f7fa; }
     .secret-group { background: #fffde7; }
@@ -57,16 +67,13 @@ Style
     .preview-group { background: #f6f7fa; }
     .committed-group { background: #e3f2fd; }
     .pending-group { background: #ffd6001a; }
-    
     .input-row { margin-bottom: 1.1em; }
     label { font-weight: bold; color: #247551; display:block; }
     .hint { color: #90a4ae; font-size: 0.94em; margin-top: 2px; }
-
     input[type="text"], input[type="password"] {
       width: 100%; padding:0.7em 0.8em; border:1px solid #b0bec5; border-radius:8px;
       font-size:1em; background: #f9fafb; margin-top: 0.18em; box-sizing: border-box; height: 44px;
     }
-
     .btn {
       margin:0.3em 0.7em 0.3em 0; padding:0.65em 1.5em; border-radius:15px;
       font-size:1.13em; border:none; cursor:pointer; font-weight:600;
@@ -78,22 +85,28 @@ Style
     .btn-light   { background:#e3f2fd; color:#247551; }
     .btn-grey    { background:#f6f7fa; color:#789262; }
     .btn-red     { background:#ef9a9a; color:#b71c1c; }
-
     .table-zone  { margin-top: 2em;}
     .table-title { font-weight: 700; font-size: 1.06em; color: #247551; margin: 0.3em 0 0.6em 0;}
     table { width: 100%; border-collapse: collapse; margin-top: 0.4em; }
     th, td { padding: 0.6em; border-bottom: 1px solid #e0e0e0; text-align: center; }
     th { background: #f6f7fa; color: #2196f3; }
     .export-btn { font-size: 0.99em; background:#e3f2fd; color:#247551; padding:0.4em 0.8em; border-radius:7px; border:none; cursor:pointer; }
-    .commit-box { background:#e3f2fd; border-radius:12px; padding:0.6em 0.7em; margin:1em 0; font-size:1.02em; word-break: break-all; }
     .status-badge { font-size: 0.92em; border-radius: 7px; padding: 0.23em 0.9em; margin-left: 0.3em;}
     .status-pending { background: #ffd600; color: #666; }
     .status-committed { background: #2196f3; color: #fff; }
-
+    .timestamp-zone {
+      color: #607d8b;
+      font-size: 1em;
+      text-align: right;
+      margin: 1em 0 0.1em 0;
+      letter-spacing: 0.01em;
+      user-select: text;
+    }
     @media (max-width: 600px) {
       body { padding:0.4em;}
       .section { padding:1em 0.4em; }
       .btn { width:100%; margin-bottom:0.7em; }
+      .timestamp-zone { font-size: 0.97em; margin-right:0;}
     }
     .nav-bar {
       margin: 2em 0 0 0; display: flex; gap: 16px; justify-content: center;
@@ -113,63 +126,38 @@ Style
   <!-- Section A: Key & Batch Info -->
   <div class="section meta-group">
     <div class="input-row">
-      <label>Public Key</label>
-      <input type="text" id="pubkey" placeholder="Paste your public key here">
-      <div class="hint">Use only the generated public key (from 'Generate Key')</div>
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password">
+      <div class="hint">Password for slot key derivation.</div>
     </div>
     <div class="input-row">
-      <label>Slot/Serial</label>
-      <input type="text" id="serial" placeholder="e.g. QR001">
-      <div class="hint">Unique for each QR (e.g., QR001, QR002...)</div>
+      <label>PIN</label>
+      <input type="text" id="pin" placeholder="4-6 digits">
+      <div class="hint">PIN (for slot key), 4-6 digits only.</div>
     </div>
-    <div class="input-row">
-      <label>Batch Name (optional)</label>
-      <input type="text" id="batch" placeholder="Optional">
-      <div class="hint">For grouping/labeling QR batches</div>
-    </div>
-  </div>
-
-  <!-- Section B: Secret/Password -->
-  <div class="section secret-group">
     <div class="input-row">
       <label>Secret</label>
       <input type="password" id="secret" placeholder="For secure minting (keep private)">
       <div class="hint">Required for ticket backup and regen. Never share this secret!</div>
     </div>
     <div class="input-row">
-      <label>Confirm Secret</label>
-      <input type="password" id="csecret" placeholder="Type your secret again">
-      <div class="hint">Type your secret again for confirmation.</div>
+      <label>Batch Name (optional)</label>
+      <input type="text" id="batch" placeholder="Optional">
+      <div class="hint">For grouping/labeling QR batches</div>
+    </div>
+    <div class="input-row">
+      <label>Number of QR</label>
+      <input type="number" id="qty" value="1" min="1" max="50" style="max-width:90px">
+      <div class="hint">How many QR to mint (1–50)</div>
     </div>
   </div>
 
-  <!-- Section C: Action -->
+  <!-- Section B: Action -->
   <div class="section action-group">
-    <button class="btn btn-blue" onclick="mintQR()">Generate QR</button>
+    <button class="btn btn-blue" onclick="mintQR()">Generate QR Batch</button>
   </div>
 
-  <!-- Section E: Pending QR (Preview, Commit/Exit) -->
-  <div id="pending-zone" class="table-zone" style="display:none;">
-    <div class="section pending-group">
-      <div class="table-title">Pending QR (not yet committed)</div>
-      <table>
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>QR Hash (hash1)</th>
-            <th>Commitment Hash (hash2)</th>
-            <th>Slot/Serial</th>
-            <th>Timestamp</th>
-            <th>Commit</th>
-            <th>Exit</th>
-          </tr>
-        </thead>
-        <tbody id="pending-tbl"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- Section E: Committed QR -->
+  <!-- Section C: Committed QR Result -->
   <div id="committed-zone" class="table-zone" style="display:none;">
     <div class="section committed-group">
       <div class="table-title">Committed QR</div>
@@ -180,7 +168,6 @@ Style
             <th>QR Hash (hash1)</th>
             <th>Commitment Hash (hash2)</th>
             <th>Slot/Serial</th>
-            <th>Timestamp</th>
             <th>Export QR</th>
             <th>Export Ticket</th>
             <th>Export Log</th>
@@ -188,6 +175,11 @@ Style
         </thead>
         <tbody id="committed-tbl"></tbody>
       </table>
+      <!-- Timestamp-zone ตรงนี้ -->
+      <div class="timestamp-zone">
+        <span class="label-timestamp">Time (GitHub):</span>
+        <span id="ts-committed" class="timestamp-value">–</span>
+      </div>
     </div>
   </div>
 
@@ -206,121 +198,90 @@ Style
       return Array.from(new Uint8Array(hashBuffer)).map(x=>x.toString(16).padStart(2,'0')).join('');
     }
 
-    let pendingQR = [];
     let committedQR = [];
+    let currentTimestamp = "–";
 
     async function mintQR() {
-      let pubkey = document.getElementById('pubkey').value.trim();
+      let password = document.getElementById('password').value.trim();
+      let pin = document.getElementById('pin').value.trim();
       let secret = document.getElementById('secret').value.trim();
-      let csecret = document.getElementById('csecret').value.trim();
-      let serial = document.getElementById('serial').value.trim();
       let batch = document.getElementById('batch').value.trim() || '';
-      if (!pubkey || !secret || !serial) { alert('Fill all fields'); return; }
-      if (secret !== csecret) { alert('Secret mismatch!'); return; }
-      // Generate hash1, hash2
+      let qty = parseInt(document.getElementById('qty').value, 10);
+      if (!password || !pin || !secret || !qty) { alert('Fill all fields'); return; }
+      if (isNaN(qty) || qty < 1 || qty > 50) { alert('Quantity out of range.'); return; }
       let now = new Date().toISOString();
-      let hash1 = await sha256(pubkey + secret + serial);
-      let hash2 = await sha256(batch + hash1 + now);
-      let data = {
-        no: pendingQR.length + 1,
-        hash1,
-        hash2,
-        serial,
-        pubkey,
-        secret,
-        batch,
-        timestamp: now
-      };
-      pendingQR = [data]; // รองรับแค่ 1 pending ต่อครั้ง
-      updatePendingTable();
-    }
-
-    function updatePendingTable() {
-      if (pendingQR.length === 0) {
-        document.getElementById('pending-zone').style.display = 'none';
-        return;
+      committedQR = [];
+      for (let i = 1; i <= qty; i++) {
+        let serial = 'QR' + i.toString().padStart(3, "0");
+        let hash1 = await sha256(password + pin + secret + serial);
+        let hash2 = await sha256(batch + hash1 + now);
+        committedQR.push({
+          no: i,
+          hash1, hash2, serial, password, pin, secret, batch,
+          timestamp: now
+        });
       }
-      document.getElementById('pending-zone').style.display = '';
-      let rows = pendingQR.map((d, i) => `
-        <tr>
-          <td>1 <span class="status-badge status-pending">Pending</span></td>
-          <td>${d.hash1.slice(0,12)}...</td>
-          <td>${d.hash2.slice(0,12)}...</td>
-          <td>${d.serial}</td>
-          <td>${d.timestamp}</td>
-          <td><button class="btn btn-blue" onclick="commitQR(${i})">Commit</button></td>
-          <td><button class="btn btn-red" onclick="exitPending(${i})">Exit</button></td>
-        </tr>
-      `).join('');
-      document.getElementById('pending-tbl').innerHTML = rows;
-    }
-
-    function commitQR(idx) {
-      if (pendingQR.length === 0) return;
-      let d = pendingQR[idx];
-      d.no = committedQR.length + 1;
-      committedQR.push(d);
-      pendingQR = [];
-      updatePendingTable();
+      currentTimestamp = now;
       updateCommittedTable();
-    }
-
-    function exitPending(idx) {
-      pendingQR = [];
-      updatePendingTable();
+      setTimestampZone();
     }
 
     function updateCommittedTable() {
-      if (committedQR.length === 0) {
+      const tbl = document.getElementById('committed-tbl');
+      if (!committedQR.length) {
         document.getElementById('committed-zone').style.display = 'none';
+        setTimestampZone("–");
         return;
       }
       document.getElementById('committed-zone').style.display = '';
-      let rows = committedQR.map((d, i) => `
+      tbl.innerHTML = committedQR.map((d, i) => `
         <tr>
           <td>${i+1} <span class="status-badge status-committed">Committed</span></td>
-          <td>${d.hash1.slice(0,12)}...</td>
-          <td>${d.hash2.slice(0,12)}...</td>
+          <td>${d.hash1.slice(0,14)}...</td>
+          <td>${d.hash2.slice(0,14)}...</td>
           <td>${d.serial}</td>
-          <td>${d.timestamp}</td>
           <td><button class="export-btn" onclick="exportQR(${i})">QR</button></td>
           <td><button class="export-btn" onclick="exportTicket(${i})">Ticket</button></td>
           <td><button class="export-btn" onclick="exportCSV(${i})">Log</button></td>
         </tr>
       `).join('');
-      document.getElementById('committed-tbl').innerHTML = rows;
+    }
+
+    function setTimestampZone(ts) {
+      let el = document.getElementById('ts-committed');
+      el.textContent = ts || currentTimestamp || "–";
     }
 
     function exportQR(idx) {
       let d = committedQR[idx];
-      let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}`;
+      let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}\nTime (GitHub): ${currentTimestamp}`;
       let fname = `qr_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob); link.download = fname; link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
-
     function exportTicket(idx) {
       let d = committedQR[idx];
-      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nSecret: ${d.secret}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}`;
+      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPassword: ${d.password}\nPIN: ${d.pin}\nSecret: ${d.secret}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime (GitHub): ${currentTimestamp}`;
       let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob); link.download = fname; link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
-
     function exportCSV(idx) {
       let d = committedQR[idx];
-      let csv = "serial,commitment_hash2,timestamp\n";
-      csv += `${d.serial},${d.hash2},${d.timestamp}\n`;
+      let csv = "serial,commitment_hash2,timestamp,github_time\n";
+      csv += `${d.serial},${d.hash2},${d.timestamp},${currentTimestamp}\n`;
       let fname = `commitment_log_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.csv`;
       let blob = new Blob([csv], {type:"text/csv"});
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob); link.download = fname; link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
+    // โหลดหน้า หรือรีเซ็ต ให้ timestamp เป็น "–"
+    window.onload = () => { setTimestampZone("–"); };
   </script>
 </body>
 </html>
