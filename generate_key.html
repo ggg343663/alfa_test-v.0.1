@@ -2,139 +2,126 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>DTC – One Page Minimal</title>
+  <title>Generate Public Key</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; background: #f6f7fa; color: #333; margin: 0; padding: 0;}
-    .container { max-width: 470px; background: #fff; margin: 28px auto; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2.2em 1.1em 2em 1.1em;}
-    h2 { text-align: center; color: #246bfd; margin-bottom: 1.5em; font-size: 1.36em; font-weight: bold;}
-    .section { margin-bottom: 1.25em; }
-    .input-row { margin-bottom: 1.1em;}
-    .input-label { font-weight: bold; color: #7e8b9a; margin-bottom: 0.19em;}
-    .input-hint { color: #90a4ae; font-size: 0.96em; margin-top: 0.08em; margin-bottom: 0.18em;}
-    input, select {
-      width: 100%; min-height: 38px; max-height: 44px;
-      font-size: 1.07em; border-radius: 8px; border: 1.6px solid #cfd8dc;
-      padding: 0.7em 1em; background: #fffde7; transition: border .2s, background .2s;
-      box-sizing: border-box;
+    body { font-family: Arial, sans-serif; background: #f6f7fa; margin: 0; }
+    .container { max-width: 450px; background: #fff; margin: 32px auto; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2.2em 1.1em 2em 1.1em;}
+    h2 { text-align: center; color: #246bfd; margin-bottom: 1.3em; font-size: 1.18em; font-weight: bold;}
+    .input-label { font-weight: bold; color: #2d3846; margin-bottom: 0.18em;}
+    .input-row { margin-bottom: 1em; }
+    .input-wrap { position: relative; }
+    input[type="password"], input[type="text"] {
+      width: 100%; font-size: 1.09em; border-radius: 8px; border: 1.5px solid #cfd8dc;
+      padding: 0.73em 2.6em 0.73em 1em; background: #fffde7; transition: border .2s;
+      margin-bottom: 0.07em; box-sizing: border-box;
     }
-    input:focus, select:focus { border-color: #246bfd; background: #ffffff;}
-    .error { color: #e74c3c; font-size: 1em; margin-bottom: 0.9em;}
-    .row-flex { display: flex; gap: 8px;}
-    .row-flex .col { flex: 1;}
-    .btn-main, .btn-nav {
-      font-size: 1.11em; border-radius: 8px; border: none; font-weight: bold; min-height: 44px;
-      margin: 6px 0 0 0; padding: 0.77em 0; display: block; width: 100%; cursor: pointer;
-      transition: background .2s, color .2s;
+    input:focus { border-color: #246bfd; background: #ffffff;}
+    .eye-btn {
+      position: absolute; top: 0.26em; right: 0.68em; background: none; border: none;
+      cursor: pointer; color: #999; font-size: 1.25em;
     }
-    .btn-main { background: #2196f3; color: #fff;}
-    .btn-main:active { background: #1976d2;}
-    .btn-nav { background: #ede7f6; color: #512da8;}
-    .btn-nav:active { background: #b39ddb;}
-    .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-top: 32px; gap: 8px;}
-    @media (max-width: 530px) {
-      .container { padding: 1em 0.2em 1.3em 0.2em;}
-      .btn-main, .btn-nav { font-size: 0.99em; min-height: 38px; }
-    }
+    .hint, .error, .strength-bar, .strength-text { font-size: 0.95em; }
+    .hint { color: #90a4ae; margin-bottom: 0.15em; }
+    .error { color: #e74c3c; margin-bottom: 0.3em; }
+    .strength-bar { height: 5px; border-radius: 4px; background: #eee; margin: 2px 0 2px 0;}
+    .strength-bar-inner { height: 100%; border-radius: 4px; transition: width .2s, background .2s;}
+    .strength-text { margin-bottom: 0.3em; }
+    .btn-main { width: 100%; font-size: 1.1em; border-radius: 8px; border: none; font-weight: bold; min-height: 42px;
+      margin: 8px 0 0 0; padding: 0.75em 0; background: #2196f3; color: #fff; cursor: pointer;
+      transition: background .19s; }
+    .btn-main:active { background: #1769aa; }
+    .nav-link { display: block; text-align: center; margin: 1.1em 0 0 0; color: #246bfd; font-weight: bold; font-size: 1em;}
+    .nav-link:hover { text-decoration: underline; }
+    @media (max-width: 500px) { .container{padding:1.2em 0.2em 1.4em 0.2em;} }
   </style>
 </head>
 <body>
   <div class="container">
-    <h2>DTC – One Page Minimal QR Batch</h2>
-    <form id="mainForm" autocomplete="off" onsubmit="event.preventDefault(); goNext();">
-      <div class="section">
-        <div class="input-row">
-          <div class="input-label">Password</div>
-          <input id="pw" type="password" autocomplete="new-password" placeholder="Password (6-12 ตัว, ต้องมีตัวเลข+อังกฤษหรือสัญลักษณ์)" />
-          <div class="input-hint">Password must be 6-12 chars, include number and letter or special character.</div>
-        </div>
-        <div class="input-row">
-          <div class="input-label">PIN</div>
-          <input id="pin" type="password" maxlength="4" placeholder="PIN (4 ตัวเลข)" autocomplete="off"/>
-          <div class="input-hint">PIN 4 digits only.</div>
-        </div>
-        <div class="input-row">
-          <div class="input-label">Secret</div>
-          <input id="secret" type="text" maxlength="4" placeholder="Secret (4 ตัวอักษรภาษาอังกฤษ)"/>
-          <div class="input-hint">Secret 4 English letters (required).</div>
-        </div>
-        <div class="input-row">
-          <div class="input-label">Batch Name</div>
-          <input id="batch" type="text" placeholder="เช่น: FirstEdition, Maple100"/>
-          <div class="input-hint">สำหรับอ้างอิงภายหลัง (optional)</div>
-        </div>
-        <div class="input-row row-flex">
-          <div class="col">
-            <div class="input-label">จำนวน QR</div>
-            <input id="qty" type="number" min="1" max="100" value="10"/>
-          </div>
-          <div class="col" style="align-self: flex-end;">
-            <button type="button" class="btn-main" style="width: 100%;" onclick="changeQty(1)">+</button>
-            <button type="button" class="btn-main" style="width: 100%; margin-top: 2px;" onclick="changeQty(-1)">–</button>
-          </div>
-        </div>
+    <h2>1. Generate Public Key from Password + PIN</h2>
+    <div class="input-row">
+      <div class="input-label">Password:</div>
+      <div class="input-wrap">
+        <input id="pw" type="password" placeholder="Password (6-12 ตัว)" autocomplete="new-password" maxlength="12">
+        <button type="button" class="eye-btn" onclick="toggleEye('pw')">&#128065;</button>
       </div>
-      <div id="error" class="error" style="display:none;"></div>
-      <button class="btn-main" type="submit" style="margin-top:1.2em;">Next</button>
-    </form>
-    <div class="nav-bar">
-      <button class="btn-nav" onclick="history.back()">Back</button>
-      <a class="btn-nav" href="index.html">Home</a>
-      <button class="btn-nav" onclick="goNext()">Next</button>
+      <div class="hint">Password must be 6-12 chars, include number and letter or special character.</div>
+      <div class="strength-bar"><div class="strength-bar-inner" id="pwStrengthBar"></div></div>
+      <div class="strength-text" id="pwStrengthText"></div>
     </div>
+    <div class="input-row">
+      <div class="input-label">Confirm Password:</div>
+      <div class="input-wrap">
+        <input id="pw2" type="password" placeholder="Confirm Password" maxlength="12">
+        <button type="button" class="eye-btn" onclick="toggleEye('pw2')">&#128065;</button>
+      </div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">PIN (4 digits):</div>
+      <div class="input-wrap">
+        <input id="pin" type="password" maxlength="4" placeholder="PIN (4 digits)">
+        <button type="button" class="eye-btn" onclick="toggleEye('pin')">&#128065;</button>
+      </div>
+      <div class="hint">PIN should be exactly 4 digits.</div>
+    </div>
+    <div class="input-row">
+      <div class="input-label">Confirm PIN:</div>
+      <div class="input-wrap">
+        <input id="pin2" type="password" maxlength="4" placeholder="Confirm PIN">
+        <button type="button" class="eye-btn" onclick="toggleEye('pin2')">&#128065;</button>
+      </div>
+    </div>
+    <div class="error" id="error" style="display:none;"></div>
+    <button class="btn-main" onclick="validateAndNext()">Generate Key</button>
+    <a class="nav-link" href="mint_qr_hash.html">Next: Generate QR Hash</a>
   </div>
   <script>
-    function changeQty(val) {
-      let qty = parseInt(document.getElementById('qty').value) || 1;
-      qty += val;
-      if (qty < 1) qty = 1;
-      if (qty > 100) qty = 100;
-      document.getElementById('qty').value = qty;
+    function toggleEye(id) {
+      const input = document.getElementById(id);
+      input.type = (input.type === "password") ? "text" : "password";
     }
 
-    function showError(msg) {
-      document.getElementById('error').textContent = msg;
-      document.getElementById('error').style.display = '';
-    }
-    function hideError() {
-      document.getElementById('error').style.display = 'none';
-    }
+    // Password Strength
+    document.getElementById('pw').addEventListener('input', function() {
+      const val = this.value;
+      let strength = 0;
+      if (val.length >= 6) strength++;
+      if (/[A-Za-z]/.test(val) && /\d/.test(val)) strength++;
+      if (/[^A-Za-z0-9]/.test(val)) strength++;
+      let percent = [0, 40, 70, 100][strength];
+      let bar = document.getElementById('pwStrengthBar');
+      let text = document.getElementById('pwStrengthText');
+      bar.style.width = percent + "%";
+      if (strength === 1) { bar.style.background="#facc15"; text.textContent="Weak"; text.style.color="#d97706";}
+      else if (strength === 2) { bar.style.background="#fcd34d"; text.textContent="Medium"; text.style.color="#eab308";}
+      else if (strength === 3) { bar.style.background="#4ade80"; text.textContent="Strong"; text.style.color="#16a34a";}
+      else { bar.style.background="#eee"; text.textContent=""; }
+    });
 
-    function validateForm() {
+    function validateAndNext() {
       const pw = document.getElementById('pw').value.trim();
+      const pw2 = document.getElementById('pw2').value.trim();
       const pin = document.getElementById('pin').value.trim();
-      const secret = document.getElementById('secret').value.trim();
-      if (!pw || pw.length < 6 || pw.length > 12) {
-        showError("Password ต้อง 6-12 ตัว และต้องมีตัวเลขและอักษรหรือสัญลักษณ์");
-        return false;
-      }
-      if (!/[A-Za-z]/.test(pw) || !/[\d!@#$%^&*()_+]/.test(pw)) {
-        showError("Password ต้องมีตัวอักษรและตัวเลขหรือสัญลักษณ์");
-        return false;
-      }
-      if (!pin || !/^\d{4}$/.test(pin)) {
-        showError("PIN ต้องเป็นตัวเลข 4 หลัก");
-        return false;
-      }
-      if (!secret || !/^[A-Za-z]{4}$/.test(secret)) {
-        showError("Secret ต้องเป็นตัวอักษรภาษาอังกฤษ 4 ตัว");
-        return false;
-      }
-      hideError();
-      return true;
+      const pin2 = document.getElementById('pin2').value.trim();
+      const errorEl = document.getElementById('error');
+      // Check password
+      if (!pw || pw.length < 6 || pw.length > 12) return showErr("Password must be 6-12 chars.");
+      if (!(/[A-Za-z]/.test(pw) && (/\d/.test(pw) || /[^A-Za-z0-9]/.test(pw)))) return showErr("Password must include letter + number or special char.");
+      if (pw !== pw2) return showErr("Password and Confirm Password do not match.");
+      // Check PIN
+      if (!/^\d{4}$/.test(pin)) return showErr("PIN must be exactly 4 digits.");
+      if (pin !== pin2) return showErr("PIN and Confirm PIN do not match.");
+      errorEl.style.display = "none";
+      // Save to localStorage or next step
+      localStorage.setItem('dtc_publicKey_pw', pw);
+      localStorage.setItem('dtc_publicKey_pin', pin);
+      alert('Key is ready to be generated! (ฟังก์ชันจริงจะไปขั้นตอนถัดไป)');
+      // window.location.href = "mint_qr_hash.html";
     }
-
-    function goNext() {
-      if (!validateForm()) return false;
-      // คุณสามารถเซฟข้อมูลใน localStorage หรือส่งไปหน้าถัดไปได้ที่นี่
-      // เช่น
-      localStorage.setItem('dtc_pw', document.getElementById('pw').value);
-      localStorage.setItem('dtc_pin', document.getElementById('pin').value);
-      localStorage.setItem('dtc_secret', document.getElementById('secret').value);
-      localStorage.setItem('dtc_batch', document.getElementById('batch').value);
-      localStorage.setItem('dtc_qty', document.getElementById('qty').value);
-      // ไปหน้า mint_qr_hash.html (หรือไฟล์ถัดไปที่คุณสร้าง)
-      window.location.href = "mint_qr_hash.html";
+    function showErr(msg) {
+      const errorEl = document.getElementById('error');
+      errorEl.textContent = msg;
+      errorEl.style.display = '';
       return false;
     }
   </script>
