@@ -82,8 +82,12 @@ Times
       margin: 8px 0 0 0; padding: 0.75em 0; background: #2196f3; color: #fff; cursor: pointer;
       transition: background .19s; }
     .btn-main:active { background: #1769aa; }
-    .nav-link { display: block; text-align: center; margin: 1.1em 0 0 0; color: #246bfd; font-weight: bold; font-size: 1em;}
-    .nav-link:hover { text-decoration: underline; }
+    .nav-link, .btn-next {
+      display: block; text-align: center; margin: 1.1em 0 0 0; color: #fff; background: #90a4ae; font-weight: bold; font-size: 1em; border: none; border-radius: 8px; padding: 0.75em 0;
+      text-decoration: none; cursor: pointer;
+      transition: background .19s;
+    }
+    .nav-link:hover, .btn-next:hover { background: #b0bec5; }
     #resultBox {
       display:none; margin-top:1.8em; border-radius:12px; background:#eafaf2; border:1.5px solid #b0dab6; padding:1.1em;
     }
@@ -171,7 +175,7 @@ Times
       <div style="font-weight:bold; color:#166534; margin-bottom:0.3em;">Public Key:</div>
       <textarea id="publicKeyOut" readonly rows="2"></textarea>
       <button onclick="copyKey()" style="margin:0.8em 0.5em 0 0; background:#2196f3; color:#fff; font-weight:bold; border:none; border-radius:8px; padding:0.55em 1.5em; font-size:1em;">Copy</button>
-      <button onclick="exportLog()" style="margin:0.8em 0 0 0; background:#f6c544; color:#222; font-weight:bold; border:none; border-radius:8px; padding:0.55em 1.5em; font-size:1em;">Export Log</button>
+      <button class="btn-next" style="background:#90a4ae; color:#fff; margin-top:0.8em;" onclick="gotoMintQR()">Next: Mint QR Batch</button>
       <div id="createdAt"></div>
       <div style="font-size:0.97em;color:#1565c0;margin-top:1em;">
         <b>*Your Public Key is generated deterministically from your Password and PIN.</b>
@@ -180,7 +184,6 @@ Times
         You can always regenerate the same public key if you enter the same info.
       </div>
     </div>
-    <a class="nav-link" href="mint_qr_hash.html" style="margin-top:2.4em;">Next: Mint QR Batch</a>
   </div>
   <script>
     function toggleEye(btn, id) {
@@ -226,7 +229,6 @@ Times
       if (!/^\d{4}$/.test(pin)) return showErr("PIN must be exactly 4 digits.");
       if (pin !== pin2) return showErr("PIN and Confirm PIN do not match.");
       errorEl.style.display = "none";
-
       // Generate deterministic Public Key (mockup)
       const publicKey = generatePublicKey(pw, pin);
       document.getElementById('publicKeyOut').value = publicKey;
@@ -248,17 +250,10 @@ Times
       navigator.clipboard.writeText(pk);
       alert('Copied!');
     }
-    function exportLog() {
-      const pk = document.getElementById('publicKeyOut').value;
-      const ts = document.getElementById('createdAt').textContent;
-      const log = { publicKey: pk, timestamp: ts, type: 'dtc_public_key' };
-      const blob = new Blob([JSON.stringify(log, null, 2)], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'dtc_public_key_log.json';
-      a.click();
+    function gotoMintQR() {
+      window.location.href = "mint_qr_hash.html";
     }
-  // Mockup deterministic public key generator (replace with real one if needed)
+    // Mockup deterministic public key generator (replace with real one if needed)
     function generatePublicKey(password, pin) {
       // *** ควรใช้ hash/crypto จริง (เช่น SHA256(password+pin)) ***
       // ตัวอย่างนี้ใช้ simple hash สำหรับ demo เท่านั้น (ห้ามใช้ใน production)
@@ -275,4 +270,4 @@ Times
     }
   </script>
 </body>
-</html>)
+</html
