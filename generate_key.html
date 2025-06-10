@@ -46,7 +46,6 @@
     .btn-next:hover:enabled { background: #b0bec5; }
     #resultBox {
       margin-top:1.8em; border-radius:12px; background:#eafaf2; border:1.5px solid #b0dab6; padding:1.1em;
-      /* ไม่ซ่อน */
     }
     #publicKeyOut {
       width:100%; font-size:1em; background:#f5fff8; border:1.2px solid #b0dab6; border-radius:8px; padding:0.6em; margin-bottom:0.7em;
@@ -157,6 +156,7 @@
         closedEye.style.display = "none";
       }
     }
+
     document.getElementById('pw').addEventListener('input', function() {
       const val = this.value;
       let strength = 0;
@@ -173,12 +173,14 @@
       else { bar.style.background="#eee"; text.textContent=""; }
     });
 
-    // ตั้งค่าหน้าแรก: disable ปุ่ม copy, mint
+    // โหลดค่า public key เดิม ถ้ามี
     window.onload = function() {
-      document.getElementById('publicKeyOut').value = '';
-      document.getElementById('createdAt').textContent = '';
-      document.getElementById('copyBtn').disabled = true;
-      document.getElementById('mintBtn').disabled = true;
+      let pk = localStorage.getItem('dtc_publicKey_result') || '';
+      let time = localStorage.getItem('dtc_publicKey_time') || '';
+      document.getElementById('publicKeyOut').value = pk;
+      document.getElementById('createdAt').textContent = time ? 'Created at: ' + time : '';
+      document.getElementById('copyBtn').disabled = !pk;
+      document.getElementById('mintBtn').disabled = !pk;
     };
 
     function validateAndGenerate() {
@@ -196,7 +198,8 @@
       // Generate deterministic Public Key (mockup)
       const publicKey = generatePublicKey(pw, pin);
       document.getElementById('publicKeyOut').value = publicKey;
-      document.getElementById('createdAt').textContent = 'Created at: ' + new Date().toISOString();
+      const now = new Date().toISOString();
+      document.getElementById('createdAt').textContent = 'Created at: ' + now;
       // เปิดปุ่ม copy, mint
       document.getElementById('copyBtn').disabled = false;
       document.getElementById('mintBtn').disabled = false;
@@ -204,6 +207,7 @@
       localStorage.setItem('dtc_publicKey_pw', pw);
       localStorage.setItem('dtc_publicKey_pin', pin);
       localStorage.setItem('dtc_publicKey_result', publicKey);
+      localStorage.setItem('dtc_publicKey_time', now);
     }
     function showErr(msg) {
       const errorEl = document.getElementById('error');
