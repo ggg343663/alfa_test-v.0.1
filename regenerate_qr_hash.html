@@ -11,7 +11,7 @@
     h2 { text-align: center; color: #219150; margin-bottom: 1.1em; font-size: 1.18em; font-weight: bold;}
     .input-row { margin-bottom: 1em; }
     label { font-weight: bold; color: #176d38; margin-bottom: 0.2em; display: block;}
-    textarea, input[type="text"], input[type="password"] {
+    input[type="text"], input[type="password"], textarea {
       width: 100%; padding: 0.7em 1em; border-radius: 8px; border: 1.3px solid #c9e8d4; font-size: 1.05em;
       margin-bottom: 0.13em; background: #f7faf9; resize: vertical;
     }
@@ -43,16 +43,32 @@
     <h2>Regenerate QR Hash</h2>
     <div class="input-row">
       <label>Ticket (JSON/TXT):</label>
-      <textarea id="ticket" rows="2" placeholder="Paste, scan, or upload your ticket here"></textarea>
+      <textarea id="ticket" rows="2" placeholder="Paste or scan/upload your ticket here"></textarea>
       <div class="action-row">
         <input type="file" id="fileInput" style="display:none;" accept=".txt,.json" onchange="importTicketFile(this)">
         <button class="file-btn" onclick="document.getElementById('fileInput').click()">Upload File</button>
         <button class="qr-btn" onclick="openQRScanner()">Scan QR</button>
       </div>
-      <div class="hint">Use your ticket for this QR slot (from backup/export, or scan QR/JSON/TXT).</div>
+      <div class="hint">Paste/scan/upload your slot ticket (JSON/TXT), or fill below manually.</div>
       <span id="copySuccess" class="copy-success"></span>
     </div>
     <div id="qr-reader" style="display:none;"></div>
+    <div class="input-row">
+      <label>Slot ID:</label>
+      <input type="text" id="slot_id" placeholder="slot_001">
+    </div>
+    <div class="input-row">
+      <label>Prev Hash:</label>
+      <input type="text" id="prev_hash" maxlength="64" placeholder="Previous hash">
+    </div>
+    <div class="input-row">
+      <label>Timestamp:</label>
+      <input type="text" id="timestamp" maxlength="25" placeholder="2025-06-10T11:54:32Z">
+    </div>
+    <div class="input-row">
+      <label>Nonce:</label>
+      <input type="text" id="nonce" maxlength="12" placeholder="Nonce">
+    </div>
     <div class="input-row">
       <label>Password:</label>
       <input type="password" id="pw" maxlength="12" placeholder="Password (6-12 chars)">
@@ -68,7 +84,6 @@
     <button class="btn-main" onclick="regenQR()">Regenerate</button>
     <div class="result-box" id="result" style="display:none;"></div>
     <div class="error" id="error" style="display:none;"></div>
-
     <div class="nav-bar">
       <button class="nav-btn" onclick="history.back()">Back</button>
       <button class="nav-btn home" onclick="location.href='index.html'">Home</button>
@@ -88,6 +103,7 @@
         { fps: 10, qrbox: 200 },
         qrCodeMessage => {
           document.getElementById('ticket').value = qrCodeMessage;
+          parseTicketAndFill(qrCodeMessage);
           qrScanner.stop();
           qrDiv.style.display = 'none';
         }
@@ -101,34 +117,44 @@
       if (input.files && input.files.length) {
         const file = input.files[0];
         const reader = new FileReader();
-        reader.onload = e => { document.getElementById('ticket').value = e.target.result; };
+        reader.onload = e => {
+          document.getElementById('ticket').value = e.target.result;
+          parseTicketAndFill(e.target.result);
+        };
         reader.readAsText(file);
       }
     }
 
-    // Parse ticket: Support JSON or slot info
-    function parseTicket(ticketStr) {
+    // Parse ticket and autofill slot fields
+    function parseTicketAndFill(ticketStr) {
+      let t;
       try {
-        // Try parse as JSON
-        const t = JSON.parse(ticketStr);
-        return {
-          slot_id: t.slot_id,
-          prev_hash: t.prev_hash,
-          timestamp: t.timestamp,
-          nonce: t.nonce,
-        };
+        t = JSON.parse(ticketStr);
       } catch (e) {
-        // Fallback: plain text or legacy format (แนะนำใช้ JSON เสมอ)
-        // ex: slot_001|prev_hash|ts|nonce
+        // Fallback: plain text or legacy format
         const arr = ticketStr.split("|");
-        if (arr.length >= 4)
-          return { slot_id: arr[0], prev_hash: arr[1], timestamp: arr[2], nonce: arr[3] };
-        return null;
+        if (arr.length >= 4) {
+          t = { slot_id: arr[0], prev_hash: arr[1], timestamp: arr[2], nonce: arr[3] };
+        }
+      }
+      if (t && t.slot_id && t.prev_hash && t.timestamp && t.nonce) {
+        document.getElementById('slot_id').value = t.slot_id;
+        document.getElementById('prev_hash').value = t.prev_hash;
+        document.getElementById('timestamp').value = t.timestamp;
+        document.getElementById('nonce').value = t.nonce;
       }
     }
 
+    // Manual: autofill if ticket changes
+    document.getElementById('ticket').addEventListener('input', function() {
+      parseTicketAndFill(this.value);
+    });
+
     function regenQR() {
-      const ticketStr = document.getElementById('ticket').value.trim();
+      const slot_id = document.getElementById('slot_id').value.trim();
+      const prev_hash = document.getElementById('prev_hash').value.trim();
+      const timestamp = document.getElementById('timestamp').value.trim();
+      const nonce = document.getElementById('nonce').value.trim();
       const pw = document.getElementById('pw').value.trim();
       const pin = document.getElementById('pin').value.trim();
       const secret = document.getElementById('secret').value.trim();
@@ -136,28 +162,25 @@
       const resultEl = document.getElementById('result');
       errorEl.style.display = 'none'; resultEl.style.display = 'none';
 
-      if (!ticketStr) return showError("Please enter, scan, or upload your ticket.");
+      if (!slot_id || !prev_hash || !timestamp || !nonce)
+        return showError("Please fill all slot fields (slot id, prev hash, timestamp, nonce).");
       if (!pw || pw.length < 6 || pw.length > 12) return showError("Password must be 6-12 chars.");
       if (!/^\d{4}$/.test(pin)) return showError("PIN must be exactly 4 digits.");
       if (!/^[a-z]{4}$/.test(secret)) return showError("Secret must be 4 lowercase English letters.");
 
-      const t = parseTicket(ticketStr);
-      if (!t || !t.slot_id || !t.prev_hash || !t.timestamp || !t.nonce)
-        return showError("Ticket format invalid or missing fields (slot_id, prev_hash, timestamp, nonce).");
-
-      // Regen hash ตามสูตรจริง DTC (minimal demo)
-      const data = pw + pin + secret + t.slot_id + t.prev_hash + t.timestamp + t.nonce;
+      // Regen hash
+      const data = pw + pin + secret + slot_id + prev_hash + timestamp + nonce;
       const qr_hash = sha256(data);
 
-      // Show result (qr_hash, meta)
+      // Show result
       resultEl.innerHTML =
         `<div><b>QR Hash:</b> <code id="qrResult">${qr_hash}</code>
           <button class="copy-btn" onclick="copyQR()">Copy</button></div>
         <div class="meta-row">
-          <b>Slot ID:</b> ${t.slot_id} &nbsp; 
-          <b>Timestamp:</b> ${t.timestamp} <br>
-          <b>Nonce:</b> ${t.nonce} &nbsp; 
-          <b>Prev Hash:</b> ${t.prev_hash.slice(0, 6)}...
+          <b>Slot ID:</b> ${slot_id} &nbsp; 
+          <b>Timestamp:</b> ${timestamp} <br>
+          <b>Nonce:</b> ${nonce} &nbsp; 
+          <b>Prev Hash:</b> ${prev_hash.slice(0, 6)}...
         </div>`;
       resultEl.style.display = '';
     }
