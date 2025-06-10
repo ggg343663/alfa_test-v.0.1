@@ -40,7 +40,6 @@ Style
     - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
 
 ## 6. Timestamp
-
 - แสดงกล่อง timestamp เฉพาะใต้ section "Committed QR" เท่านั้น (ไม่แสดงซ้ำในแถวของตาราง)
 - Label: **Time (Now):** (หรือ Time (GitHub): ถ้าต้องการเน้นว่าใช้เวลา commit/push จริง)
 - สี #607d8b, ขนาด 1em, จัดขวาล่างของกล่องผลลัพธ์/section
@@ -69,7 +68,7 @@ Style
     .input-row { margin-bottom: 1.1em; }
     label { font-weight: bold; color: #247551; display:block; }
     .hint { color: #90a4ae; font-size: 0.94em; margin-top: 2px; }
-    input[type="text"], input[type="password"] {
+    input[type="text"], input[type="password"], input[type="number"] {
       width: 100%; padding:0.7em 0.8em; border:1px solid #b0bec5; border-radius:8px;
       font-size:1em; background: #f9fafb; margin-top: 0.18em; box-sizing: border-box; height: 44px;
     }
@@ -91,7 +90,6 @@ Style
     th { background: #f6f7fa; color: #2196f3; }
     .export-btn { font-size: 0.99em; background:#e3f2fd; color:#247551; padding:0.4em 0.8em; border-radius:7px; border:none; cursor:pointer; }
     .status-badge { font-size: 0.92em; border-radius: 7px; padding: 0.23em 0.9em; margin-left: 0.3em;}
-    .status-pending { background: #ffd600; color: #666; }
     .status-committed { background: #2196f3; color: #fff; }
     .timestamp-zone {
       color: #607d8b;
@@ -125,14 +123,9 @@ Style
   <!-- Section A: Key & Batch Info -->
   <div class="section meta-group">
     <div class="input-row">
-      <label>Password</label>
-      <input type="password" id="password" placeholder="Enter password">
-      <div class="hint">Password for slot key derivation.</div>
-    </div>
-    <div class="input-row">
-      <label>PIN</label>
-      <input type="text" id="pin" placeholder="4-6 digits">
-      <div class="hint">PIN (for slot key), 4-6 digits only.</div>
+      <label>Public Key</label>
+      <input type="text" id="pubkey" placeholder="Paste your public key here">
+      <div class="hint">Use only the generated public key (from 'Generate Key').</div>
     </div>
     <div class="input-row">
       <label>Secret</label>
@@ -176,7 +169,7 @@ Style
       </table>
       <!-- Timestamp-zone ตรงนี้ -->
       <div class="timestamp-zone">
-        <span class="label-timestamp">Time (GitHub):</span>
+        <span class="label-timestamp">Time (Now):</span>
         <span id="ts-committed" class="timestamp-value">–</span>
       </div>
     </div>
@@ -198,29 +191,28 @@ Style
     }
 
     let committedQR = [];
-    let currentTimestamp = "–";
+    let commitTimestamp = "–";
 
     async function mintQR() {
-      let password = document.getElementById('password').value.trim();
-      let pin = document.getElementById('pin').value.trim();
+      let pubkey = document.getElementById('pubkey').value.trim();
       let secret = document.getElementById('secret').value.trim();
       let batch = document.getElementById('batch').value.trim() || '';
       let qty = parseInt(document.getElementById('qty').value, 10);
-      if (!password || !pin || !secret || !qty) { alert('Fill all fields'); return; }
+      if (!pubkey || !secret || !qty) { alert('Fill all fields'); return; }
       if (isNaN(qty) || qty < 1 || qty > 50) { alert('Quantity out of range.'); return; }
       let now = new Date().toISOString();
       committedQR = [];
       for (let i = 1; i <= qty; i++) {
         let serial = 'QR' + i.toString().padStart(3, "0");
-        let hash1 = await sha256(password + pin + secret + serial);
+        let hash1 = await sha256(pubkey + secret + serial);
         let hash2 = await sha256(batch + hash1 + now);
         committedQR.push({
           no: i,
-          hash1, hash2, serial, password, pin, secret, batch,
+          hash1, hash2, serial, pubkey, secret, batch,
           timestamp: now
         });
       }
-      currentTimestamp = now;
+      commitTimestamp = now;
       updateCommittedTable();
       setTimestampZone();
     }
@@ -246,14 +238,22 @@ Style
       `).join('');
     }
 
+    // อัปเดต timestamp โชว์ realtime (ISO8601)
     function setTimestampZone(ts) {
       let el = document.getElementById('ts-committed');
-      el.textContent = ts || currentTimestamp || "–";
+      el.textContent = ts || commitTimestamp || "–";
     }
+    // แสดงเวลาปัจจุบันในกล่อง timestamp แบบ real-time
+    setInterval(()=>{
+      let el = document.getElementById('ts-committed');
+      if (!committedQR.length) { el.textContent = "–"; return; }
+      el.textContent = new Date().toISOString();
+    }, 950);
 
+    // export logic แนบ timestamp ตอน commit จริง
     function exportQR(idx) {
       let d = committedQR[idx];
-      let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}\nTime (GitHub): ${currentTimestamp}`;
+      let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}\nTime (Now): ${commitTimestamp}`;
       let fname = `qr_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
@@ -261,27 +261,27 @@ Style
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
     function exportTicket(idx) {
-  let d = committedQR[idx];
-  let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime (GitHub): ${currentTimestamp}`;
-  let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
-  let blob = new Blob([txt], {type:"text/plain"});
-  let link = document.createElement('a');
-  link.href = URL.createObjectURL(blob); link.download = fname; link.click();
-  setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
-}
-
+      let d = committedQR[idx];
+      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime (Now): ${commitTimestamp}`;
+      let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
+      let blob = new Blob([txt], {type:"text/plain"});
+      let link = document.createElement('a');
+      link.href = URL.createObjectURL(blob); link.download = fname; link.click();
+      setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
+    }
     function exportCSV(idx) {
       let d = committedQR[idx];
-      let csv = "serial,commitment_hash2,timestamp,github_time\n";
-      csv += `${d.serial},${d.hash2},${d.timestamp},${currentTimestamp}\n`;
+      let csv = "serial,commitment_hash2,timestamp,commit_time\n";
+      csv += `${d.serial},${d.hash2},${d.timestamp},${commitTimestamp}\n`;
       let fname = `commitment_log_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.csv`;
       let blob = new Blob([csv], {type:"text/csv"});
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob); link.download = fname; link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
-    // โหลดหน้า หรือรีเซ็ต ให้ timestamp เป็น "–"
+    // รีเซ็ต timestamp ตอนโหลดหน้า
     window.onload = () => { setTimestampZone("–"); };
   </script>
 </body>
 </html>
+
