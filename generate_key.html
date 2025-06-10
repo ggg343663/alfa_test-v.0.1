@@ -1,4 +1,4 @@
-<!--
+  <!--
 DTC Minimal UI/UX Logic
 
 - ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
@@ -38,6 +38,15 @@ Style
     - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
     - รองรับ mobile (responsive)
     - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
+
+Times
+- แสดงกล่อง times เฉพาะใต้ section "Committed QR" เท่านั้น (ไม่แสดงซ้ำในแถวของตาราง)
+- Label: **Time (Now):** (หรือ Time (GitHub): ถ้าต้องการเน้นว่าใช้เวลา commit/push จริง)
+- สี #607d8b, ขนาด 1em, จัดขวาล่างของกล่องผลลัพธ์/section
+- เวลาที่แสดงในกล่องนี้จะเป็นเวลาปัจจุบัน (ISO8601) แบบ real-time ขณะใช้งาน เพื่อบอก user ว่าเวลาไหนถูกนำไปคำนวณ hash ในการ mint/regen QR (แต่เวลาที่ใช้ใน hash/log จริง จะเป็นเวลาขณะกดปุ่มเท่านั้น)
+- หากยังไม่มีการ commit QR (ยังไม่มีผลลัพธ์) ให้ขึ้นเป็น "–"
+- เมื่อ export (Ticket, QR, Log ฯลฯ) ต้องแถม timestamp ที่ใช้จริง (ตอน commit QR) ในไฟล์เสมอ  
+  (timestamp ที่ export อาจเหลื่อมกับเวลาที่แสดงบน UI เล็กน้อย แต่ใช้ค่าตอน commit เท่านั้น)
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -75,6 +84,13 @@ Style
     .btn-main:active { background: #1769aa; }
     .nav-link { display: block; text-align: center; margin: 1.1em 0 0 0; color: #246bfd; font-weight: bold; font-size: 1em;}
     .nav-link:hover { text-decoration: underline; }
+    #resultBox {
+      display:none; margin-top:1.8em; border-radius:12px; background:#eafaf2; border:1.5px solid #b0dab6; padding:1.1em;
+    }
+    #publicKeyOut {
+      width:100%; font-size:1em; background:#f5fff8; border:1.2px solid #b0dab6; border-radius:8px; padding:0.6em; margin-bottom:0.7em;
+    }
+    #createdAt { font-size:0.95em; color:#607d8b; margin-top:0.7em; text-align:right;}
     @media (max-width: 500px) { .container{padding:1.2em 0.2em 1.4em 0.2em;} }
   </style>
 </head>
@@ -84,7 +100,7 @@ Style
     <div class="input-row">
       <div class="input-label">Password:</div>
       <div class="input-wrap">
-        <input id="pw" type="password" placeholder="Password (6-12 ตัว)" autocomplete="new-password" maxlength="12">
+        <input id="pw" type="password" placeholder="Password (6-12 chars)" autocomplete="new-password" maxlength="12">
         <button type="button" class="eye-btn" onclick="toggleEye(this, 'pw')">
           <svg id="eye-open-pw" viewBox="0 0 24 24" fill="none" stroke-width="2">
             <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" stroke="currentColor"/>
@@ -143,15 +159,28 @@ Style
             <circle cx="12" cy="12" r="3" stroke="currentColor"/>
           </svg>
           <svg id="eye-closed-pin2" style="display:none;" viewBox="0 0 24 24" fill="none" stroke-width="2">
-            <path d="M17.94 17.94A10.96 10.96 0 0 1 12 19c-7 0-10.5-7-10.5-7a21.8 21.8 0 0 1 5.05-6.44m4.64-2.17c7 0 10.5 7 10.5 7a21.74 21.74 0 0 1-3.14 4.1M2 2l20 20" stroke="currentColor"/>
+            <path d="M17.94 17.94A10.96 10.96 0 0 1 12 19c-7 0-10.5-7-10.5-7a21.8 21.8 0 0 1-3.14 4.1M2 2l20 20" stroke="currentColor"/>
             <circle cx="12" cy="12" r="3" stroke="currentColor"/>
           </svg>
         </button>
       </div>
     </div>
     <div class="error" id="error" style="display:none;"></div>
-    <button class="btn-main" onclick="validateAndNext()">Generate Key</button>
-    <a class="nav-link" href="mint_qr_hash.html">Next: Generate QR Hash</a>
+    <button class="btn-main" onclick="validateAndGenerate()">Generate Key</button>
+    <div id="resultBox">
+      <div style="font-weight:bold; color:#166534; margin-bottom:0.3em;">Public Key:</div>
+      <textarea id="publicKeyOut" readonly rows="2"></textarea>
+      <button onclick="copyKey()" style="margin:0.8em 0.5em 0 0; background:#2196f3; color:#fff; font-weight:bold; border:none; border-radius:8px; padding:0.55em 1.5em; font-size:1em;">Copy</button>
+      <button onclick="exportLog()" style="margin:0.8em 0 0 0; background:#f6c544; color:#222; font-weight:bold; border:none; border-radius:8px; padding:0.55em 1.5em; font-size:1em;">Export Log</button>
+      <div id="createdAt"></div>
+      <div style="font-size:0.97em;color:#1565c0;margin-top:1em;">
+        <b>*Your Public Key is generated deterministically from your Password and PIN.</b>
+        <br>Keep your password &amp; PIN safe!<br>
+        We never store or show your private key.<br>
+        You can always regenerate the same public key if you enter the same info.
+      </div>
+    </div>
+    <a class="nav-link" href="mint_qr_hash.html" style="margin-top:2.4em;">Next: Mint QR Batch</a>
   </div>
   <script>
     function toggleEye(btn, id) {
@@ -169,7 +198,6 @@ Style
       }
     }
 
-    // Password Strength
     document.getElementById('pw').addEventListener('input', function() {
       const val = this.value;
       let strength = 0;
@@ -186,7 +214,7 @@ Style
       else { bar.style.background="#eee"; text.textContent=""; }
     });
 
-    function validateAndNext() {
+    function validateAndGenerate() {
       const pw = document.getElementById('pw').value.trim();
       const pw2 = document.getElementById('pw2').value.trim();
       const pin = document.getElementById('pin').value.trim();
@@ -198,10 +226,16 @@ Style
       if (!/^\d{4}$/.test(pin)) return showErr("PIN must be exactly 4 digits.");
       if (pin !== pin2) return showErr("PIN and Confirm PIN do not match.");
       errorEl.style.display = "none";
+
+      // Generate deterministic Public Key (mockup)
+      const publicKey = generatePublicKey(pw, pin);
+      document.getElementById('publicKeyOut').value = publicKey;
+      document.getElementById('createdAt').textContent = 'Created at: ' + new Date().toISOString();
+      document.getElementById('resultBox').style.display = '';
+      // Save for next step if needed
       localStorage.setItem('dtc_publicKey_pw', pw);
       localStorage.setItem('dtc_publicKey_pin', pin);
-      alert('Key is ready to be generated!');
-      // window.location.href = "mint_qr_hash.html";
+      localStorage.setItem('dtc_publicKey_result', publicKey);
     }
     function showErr(msg) {
       const errorEl = document.getElementById('error');
@@ -209,6 +243,36 @@ Style
       errorEl.style.display = '';
       return false;
     }
+    function copyKey() {
+      const pk = document.getElementById('publicKeyOut').value;
+      navigator.clipboard.writeText(pk);
+      alert('Copied!');
+    }
+    function exportLog() {
+      const pk = document.getElementById('publicKeyOut').value;
+      const ts = document.getElementById('createdAt').textContent;
+      const log = { publicKey: pk, timestamp: ts, type: 'dtc_public_key' };
+      const blob = new Blob([JSON.stringify(log, null, 2)], {type: 'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'dtc_public_key_log.json';
+      a.click();
+    }
+  // Mockup deterministic public key generator (replace with real one if needed)
+    function generatePublicKey(password, pin) {
+      // *** ควรใช้ hash/crypto จริง (เช่น SHA256(password+pin)) ***
+      // ตัวอย่างนี้ใช้ simple hash สำหรับ demo เท่านั้น (ห้ามใช้ใน production)
+      let str = password + "|" + pin + "|dtc";
+      let hash = 5381;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) + hash) + str.charCodeAt(i);
+        hash = hash & 0xFFFFFFFF;
+      }
+      // คืนค่าเป็น hex string 64 หลักแบบปลอม ๆ (demo)
+      return (Math.abs(hash).toString(16).padStart(16, "0") +
+        "d4c6e7a29f" + pin +
+        "b13e8").padEnd(64, "1");
+    }
   </script>
 </body>
-</html>
+</html>)
