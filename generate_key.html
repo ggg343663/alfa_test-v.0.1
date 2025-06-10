@@ -18,9 +18,10 @@
     }
     input:focus { border-color: #246bfd; background: #ffffff;}
     .eye-btn {
-      position: absolute; top: 0.26em; right: 0.68em; background: none; border: none;
-      cursor: pointer; color: #999; font-size: 1.25em;
+      position: absolute; top: 0.31em; right: 0.72em; background: none; border: none;
+      cursor: pointer; padding: 0; display: flex; align-items: center;
     }
+    .eye-btn svg { width: 24px; height: 24px; stroke: #646a72; }
     .hint, .error, .strength-bar, .strength-text { font-size: 0.95em; }
     .hint { color: #90a4ae; margin-bottom: 0.15em; }
     .error { color: #e74c3c; margin-bottom: 0.3em; }
@@ -43,7 +44,16 @@
       <div class="input-label">Password:</div>
       <div class="input-wrap">
         <input id="pw" type="password" placeholder="Password (6-12 ตัว)" autocomplete="new-password" maxlength="12">
-        <button type="button" class="eye-btn" onclick="toggleEye('pw')">&#128065;</button>
+        <button type="button" class="eye-btn" onclick="toggleEye(this, 'pw')">
+          <svg id="eye-open-pw" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+          </svg>
+          <svg id="eye-closed-pw" style="display:none;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M17.94 17.94A10.96 10.96 0 0 1 12 19c-7 0-10.5-7-10.5-7a21.8 21.8 0 0 1 5.05-6.44m4.64-2.17c7 0 10.5 7 10.5 7a21.74 21.74 0 0 1-3.14 4.1M2 2l20 20" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+          </svg>
+        </button>
       </div>
       <div class="hint">Password must be 6-12 chars, include number and letter or special character.</div>
       <div class="strength-bar"><div class="strength-bar-inner" id="pwStrengthBar"></div></div>
@@ -53,14 +63,32 @@
       <div class="input-label">Confirm Password:</div>
       <div class="input-wrap">
         <input id="pw2" type="password" placeholder="Confirm Password" maxlength="12">
-        <button type="button" class="eye-btn" onclick="toggleEye('pw2')">&#128065;</button>
+        <button type="button" class="eye-btn" onclick="toggleEye(this, 'pw2')">
+          <svg id="eye-open-pw2" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+          </svg>
+          <svg id="eye-closed-pw2" style="display:none;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M17.94 17.94A10.96 10.96 0 0 1 12 19c-7 0-10.5-7-10.5-7a21.8 21.8 0 0 1 5.05-6.44m4.64-2.17c7 0 10.5 7 10.5 7a21.74 21.74 0 0 1-3.14 4.1M2 2l20 20" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+          </svg>
+        </button>
       </div>
     </div>
     <div class="input-row">
       <div class="input-label">PIN (4 digits):</div>
       <div class="input-wrap">
         <input id="pin" type="password" maxlength="4" placeholder="PIN (4 digits)">
-        <button type="button" class="eye-btn" onclick="toggleEye('pin')">&#128065;</button>
+        <button type="button" class="eye-btn" onclick="toggleEye(this, 'pin')">
+          <svg id="eye-open-pin" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+          </svg>
+          <svg id="eye-closed-pin" style="display:none;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M17.94 17.94A10.96 10.96 0 0 1 12 19c-7 0-10.5-7-10.5-7a21.8 21.8 0 0 1 5.05-6.44m4.64-2.17c7 0 10.5 7 10.5 7a21.74 21.74 0 0 1-3.14 4.1M2 2l20 20" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+          </svg>
+        </button>
       </div>
       <div class="hint">PIN should be exactly 4 digits.</div>
     </div>
@@ -68,7 +96,16 @@
       <div class="input-label">Confirm PIN:</div>
       <div class="input-wrap">
         <input id="pin2" type="password" maxlength="4" placeholder="Confirm PIN">
-        <button type="button" class="eye-btn" onclick="toggleEye('pin2')">&#128065;</button>
+        <button type="button" class="eye-btn" onclick="toggleEye(this, 'pin2')">
+          <svg id="eye-open-pin2" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+          </svg>
+          <svg id="eye-closed-pin2" style="display:none;" viewBox="0 0 24 24" fill="none" stroke-width="2">
+            <path d="M17.94 17.94A10.96 10.96 0 0 1 12 19c-7 0-10.5-7-10.5-7a21.8 21.8 0 0 1 5.05-6.44m4.64-2.17c7 0 10.5 7 10.5 7a21.74 21.74 0 0 1-3.14 4.1M2 2l20 20" stroke="currentColor"/>
+            <circle cx="12" cy="12" r="3" stroke="currentColor"/>
+          </svg>
+        </button>
       </div>
     </div>
     <div class="error" id="error" style="display:none;"></div>
@@ -76,9 +113,19 @@
     <a class="nav-link" href="mint_qr_hash.html">Next: Generate QR Hash</a>
   </div>
   <script>
-    function toggleEye(id) {
+    function toggleEye(btn, id) {
       const input = document.getElementById(id);
-      input.type = (input.type === "password") ? "text" : "password";
+      const openEye = btn.querySelector('svg[id^="eye-open"]');
+      const closedEye = btn.querySelector('svg[id^="eye-closed"]');
+      if (input.type === "password") {
+        input.type = "text";
+        openEye.style.display = "none";
+        closedEye.style.display = "";
+      } else {
+        input.type = "password";
+        openEye.style.display = "";
+        closedEye.style.display = "none";
+      }
     }
 
     // Password Strength
@@ -104,18 +151,15 @@
       const pin = document.getElementById('pin').value.trim();
       const pin2 = document.getElementById('pin2').value.trim();
       const errorEl = document.getElementById('error');
-      // Check password
       if (!pw || pw.length < 6 || pw.length > 12) return showErr("Password must be 6-12 chars.");
       if (!(/[A-Za-z]/.test(pw) && (/\d/.test(pw) || /[^A-Za-z0-9]/.test(pw)))) return showErr("Password must include letter + number or special char.");
       if (pw !== pw2) return showErr("Password and Confirm Password do not match.");
-      // Check PIN
       if (!/^\d{4}$/.test(pin)) return showErr("PIN must be exactly 4 digits.");
       if (pin !== pin2) return showErr("PIN and Confirm PIN do not match.");
       errorEl.style.display = "none";
-      // Save to localStorage or next step
       localStorage.setItem('dtc_publicKey_pw', pw);
       localStorage.setItem('dtc_publicKey_pin', pin);
-      alert('Key is ready to be generated! (ฟังก์ชันจริงจะไปขั้นตอนถัดไป)');
+      alert('Key is ready to be generated!');
       // window.location.href = "mint_qr_hash.html";
     }
     function showErr(msg) {
