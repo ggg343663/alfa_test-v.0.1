@@ -10,16 +10,27 @@
     .container { max-width: 430px; margin: 2em auto; background: #fff; border-radius: 16px; box-shadow: 0 6px 32px #21915013; padding: 2em 1.1em 1.4em 1.1em;}
     h2 { text-align: center; color: #219150; margin-bottom: 1.1em; font-size: 1.18em; font-weight: bold;}
     .input-row { margin-bottom: 1em; }
-    label { font-weight: bold; color: #176d38; margin-bottom: 0.2em; display: block;}
-    input[type="text"], input[type="password"], textarea {
-      width: 100%; padding: 0.7em 1em; border-radius: 8px; border: 1.3px solid #c9e8d4; font-size: 1.05em;
-      margin-bottom: 0.13em; background: #f7faf9; resize: vertical;
+    label { font-weight: bold; color: #176d38; margin-bottom: 0.18em; display: block;}
+    /* Ticket textarea สีเทาอ่อน */
+    .ticket-input {
+      width: 100%; padding: 0.7em 1em; border-radius: 8px;
+      border: 1.5px solid #e3e6ec; font-size: 1.07em; margin-bottom: 0.13em;
+      background: #f6f7fa; color: #2d3846; transition: border .2s, background .2s;
     }
+    .ticket-input:focus { border-color: #2196f3; background: #f0f5fa; }
+    /* ช่อง input ทั่วไป */
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 0.7em 1em; border-radius: 8px;
+      border: 1.3px solid #c9e8d4; font-size: 1.05em; margin-bottom: 0.13em;
+      background: #f7faf9; resize: vertical; transition: border .2s;
+    }
+    /* สีเหลืองอ่อนสำหรับ pass/pin/secret */
+    .security-input { background: #fffde7 !important; border: 1.3px solid #ffe29a; }
+    .security-input:focus { border-color: #ffd600; background: #fffce3 !important; }
     .hint { color: #90a4ae; font-size: 0.94em; margin: 0 0 0.2em 0; }
     .action-row { display: flex; gap: 0.7em; margin-bottom: 1em;}
     .file-btn, .qr-btn {
-      flex: 1;
-      background: #eafaf0; color: #219150; border: 1.2px solid #b7ebc9;
+      flex: 1; background: #eafaf0; color: #219150; border: 1.2px solid #b7ebc9;
       border-radius: 8px; padding: 0.55em 0; font-weight: bold; font-size: 1.09em; cursor: pointer;
       margin: 0; text-align: center;
     }
@@ -43,7 +54,7 @@
     <h2>Regenerate QR Hash</h2>
     <div class="input-row">
       <label>Ticket (JSON/TXT):</label>
-      <textarea id="ticket" rows="2" placeholder="Paste or scan/upload your ticket here"></textarea>
+      <textarea id="ticket" rows="2" class="ticket-input" placeholder="Paste or scan/upload your ticket here"></textarea>
       <div class="action-row">
         <input type="file" id="fileInput" style="display:none;" accept=".txt,.json" onchange="importTicketFile(this)">
         <button class="file-btn" onclick="document.getElementById('fileInput').click()">Upload File</button>
@@ -71,15 +82,15 @@
     </div>
     <div class="input-row">
       <label>Password:</label>
-      <input type="password" id="pw" maxlength="12" placeholder="Password (6-12 chars)">
+      <input type="password" id="pw" maxlength="12" class="security-input" placeholder="Password (6-12 chars)">
     </div>
     <div class="input-row">
       <label>PIN:</label>
-      <input type="password" id="pin" maxlength="4" placeholder="PIN (4 digits)">
+      <input type="password" id="pin" maxlength="4" class="security-input" placeholder="PIN (4 digits)">
     </div>
     <div class="input-row">
       <label>Secret:</label>
-      <input type="text" id="secret" maxlength="4" placeholder="Secret (4 English letters)">
+      <input type="text" id="secret" maxlength="4" class="security-input" placeholder="Secret (4 English letters)">
     </div>
     <button class="btn-main" onclick="regenQR()">Regenerate</button>
     <div class="result-box" id="result" style="display:none;"></div>
