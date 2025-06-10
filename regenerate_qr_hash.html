@@ -4,43 +4,54 @@
   <meta charset="UTF-8" />
   <title>Regenerate QR Hash | DTC</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     body { font-family: Arial, sans-serif; background: #f7fafd; color: #234; }
-    .container { max-width: 430px; margin: 2.5em auto; background: #fff; border-radius: 16px; box-shadow: 0 6px 32px #21915013; padding: 2.2em 1.1em 2em 1.1em;}
-    h2 { text-align: center; color: #219150; margin-bottom: 1.15em; font-size: 1.19em; font-weight: bold;}
-    .input-row { margin-bottom: 1.07em; }
-    label { font-weight: bold; color: #176d38; margin-bottom: 0.22em; display: block;}
-    input[type="text"], input[type="password"] {
-      width: 100%; padding: 0.7em 1em; border-radius: 8px; border: 1.3px solid #c9e8d4; font-size: 1.06em;
-      margin-bottom: 0.11em; background: #f7faf9;
+    .container { max-width: 430px; margin: 2em auto; background: #fff; border-radius: 16px; box-shadow: 0 6px 32px #21915013; padding: 2em 1.1em 1.4em 1.1em;}
+    h2 { text-align: center; color: #219150; margin-bottom: 1.1em; font-size: 1.18em; font-weight: bold;}
+    .input-row { margin-bottom: 1em; }
+    label { font-weight: bold; color: #176d38; margin-bottom: 0.2em; display: block;}
+    textarea, input[type="text"], input[type="password"] {
+      width: 100%; padding: 0.7em 1em; border-radius: 8px; border: 1.3px solid #c9e8d4; font-size: 1.05em;
+      margin-bottom: 0.11em; background: #f7faf9; resize: vertical;
     }
-    .btn-main { width: 100%; background: #219150; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 1.09em; padding: 0.88em 0; margin-top: 0.8em; cursor: pointer;}
+    .btn-main { width: 100%; background: #219150; color: #fff; border: none; border-radius: 10px; font-weight: bold; font-size: 1.09em; padding: 0.88em 0; margin-top: 0.7em; cursor: pointer;}
     .btn-main:active { background: #176d38;}
-    .result-box {
-      margin-top: 1.3em; background: #eafaf0; color: #219150; border-radius: 10px; padding: 1.2em 0.9em; font-size: 1.04em;
-      box-shadow: 0 0.7px 5px #a7f3d0; word-break: break-all; min-height: 2.2em;
+    .qr-btn, .file-btn {
+      background: #eafaf0; color: #219150; border: 1.2px solid #b7ebc9;
+      border-radius: 6px; padding: 0.47em 0.93em; font-weight: bold; margin-right: 0.7em; font-size: 1em; cursor: pointer;
     }
+    .result-box { margin-top: 1.3em; background: #eafaf0; color: #219150; border-radius: 10px; padding: 1.1em 0.9em; font-size: 1.04em;
+      box-shadow: 0 0.7px 5px #a7f3d0; word-break: break-all; min-height: 2.1em;}
+    .copy-btn { background: #e3f2fd; color: #176d38; border: none; border-radius: 6px; padding: 0.24em 1.1em; margin-left: 0.6em; font-weight: bold; cursor: pointer;}
+    .copy-success { color: #219150; margin-left: 0.5em;}
     .error { color: #e74c3c; margin-top: 0.7em; margin-bottom: 0.3em; font-size: 1em;}
-    @media (max-width: 520px) { .container { padding: 1.1em 0.3em 1.4em 0.3em;} }
+    #qr-reader { margin: 0.7em 0 0.5em 0; }
+    @media (max-width: 520px) { .container { padding: 1.1em 0.2em 1.2em 0.2em;} }
   </style>
 </head>
 <body>
   <div class="container">
     <h2>Regenerate QR Hash</h2>
     <div class="input-row">
-      <label for="ticket">Ticket (JSON/TXT):</label>
-      <input type="text" id="ticket" placeholder="Paste or upload your ticket here">
+      <label>Ticket (JSON/TXT):</label>
+      <textarea id="ticket" rows="2" placeholder="Paste or scan/upload your ticket here"></textarea>
+      <input type="file" id="fileInput" style="display:none;" accept=".txt,.json" onchange="importTicketFile(this)">
+      <button class="file-btn" onclick="document.getElementById('fileInput').click()">Upload File</button>
+      <button class="qr-btn" onclick="openQRScanner()">Scan QR</button>
+      <span id="copySuccess" class="copy-success"></span>
     </div>
+    <div id="qr-reader" style="display:none;"></div>
     <div class="input-row">
-      <label for="pw">Password:</label>
+      <label>Password:</label>
       <input type="password" id="pw" maxlength="12" placeholder="Password (6-12 chars)">
     </div>
     <div class="input-row">
-      <label for="pin">PIN:</label>
+      <label>PIN:</label>
       <input type="password" id="pin" maxlength="4" placeholder="PIN (4 digits)">
     </div>
     <div class="input-row">
-      <label for="secret">Secret:</label>
+      <label>Secret:</label>
       <input type="text" id="secret" maxlength="4" placeholder="Secret (4 English letters)">
     </div>
     <button class="btn-main" onclick="regenQR()">Regenerate</button>
@@ -48,6 +59,36 @@
     <div class="error" id="error" style="display:none;"></div>
   </div>
   <script>
+    // Scan QR
+    let qrScanner = null;
+    function openQRScanner() {
+      const qrDiv = document.getElementById('qr-reader');
+      qrDiv.innerHTML = '';
+      qrDiv.style.display = 'block';
+      qrScanner = new Html5Qrcode("qr-reader");
+      qrScanner.start(
+        { facingMode: "environment" },
+        { fps: 10, qrbox: 200 },
+        qrCodeMessage => {
+          document.getElementById('ticket').value = qrCodeMessage;
+          qrScanner.stop();
+          qrDiv.style.display = 'none';
+        }
+      ).catch(() => {
+        qrDiv.innerHTML = "Cannot access camera.";
+      });
+    }
+
+    // Import ticket file
+    function importTicketFile(input) {
+      if (input.files && input.files.length) {
+        const file = input.files[0];
+        const reader = new FileReader();
+        reader.onload = e => { document.getElementById('ticket').value = e.target.result; };
+        reader.readAsText(file);
+      }
+    }
+
     function regenQR() {
       const ticket = document.getElementById('ticket').value.trim();
       const pw = document.getElementById('pw').value.trim();
@@ -55,18 +96,18 @@
       const secret = document.getElementById('secret').value.trim();
       const errorEl = document.getElementById('error');
       const resultEl = document.getElementById('result');
-      errorEl.style.display = 'none';
-      resultEl.style.display = 'none';
+      errorEl.style.display = 'none'; resultEl.style.display = 'none';
 
-      if (!ticket) return showError("Please enter your ticket.");
+      if (!ticket) return showError("Please enter or scan/upload your ticket.");
       if (!pw || pw.length < 6 || pw.length > 12) return showError("Password must be 6-12 chars.");
       if (!/^\d{4}$/.test(pin)) return showError("PIN must be exactly 4 digits.");
       if (!/^[A-Za-z]{4}$/.test(secret)) return showError("Secret must be 4 English letters.");
 
-      // (DEMO) Regenerate QR Hash Logic (จริงควร hash ข้อมูล)
+      // (DEMO) Regenerate QR Hash Logic
       const hash = sha256(ticket + pw + pin + secret);
 
-      resultEl.innerHTML = `<b>QR Hash:</b> <code>${hash}</code>`;
+      resultEl.innerHTML = `<b>QR Hash:</b> <code id="qrResult">${hash}</code>
+        <button class="copy-btn" onclick="copyQR()">Copy</button>`;
       resultEl.style.display = '';
     }
 
@@ -74,6 +115,14 @@
       const errorEl = document.getElementById('error');
       errorEl.textContent = msg;
       errorEl.style.display = '';
+    }
+
+    function copyQR() {
+      const qrHash = document.getElementById('qrResult').textContent;
+      navigator.clipboard.writeText(qrHash);
+      const el = document.getElementById('copySuccess');
+      el.textContent = "Copied!";
+      setTimeout(()=>{el.textContent="";},1100);
     }
 
     // Minimal fake hash (DEMO only)
