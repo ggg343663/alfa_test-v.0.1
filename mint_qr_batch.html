@@ -83,6 +83,22 @@ Timestamp
     .btn-light   { background:#e3f2fd; color:#247551; }
     .btn-grey    { background:#f6f7fa; color:#789262; }
     .btn-red     { background:#ef9a9a; color:#b71c1c; }
+    .preview-box {
+      border-radius: 10px;
+      padding: 0.9em 1em;
+      margin-bottom: 1.2em;
+      font-size: 1.06em;
+      font-weight: bold;
+      box-shadow: 0 1px 7px #e8eaf6;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4em;
+      transition: background 0.18s;
+    }
+    .preview-ready { background: #e3f2fd; color: #1565c0;}
+    .preview-minted { background: #fffde7; color: #bf8500;}
+    .preview-none { background: #f6f7fa; color: #b0bec5;}
+    .preview-error { background: #ef9a9a; color: #b71c1c;}
     .table-zone  { margin-top: 2em;}
     .table-title { font-weight: 700; font-size: 1.06em; color: #247551; margin: 0.3em 0 0.6em 0;}
     table { width: 100%; border-collapse: collapse; margin-top: 0.4em; }
@@ -120,11 +136,16 @@ Timestamp
 <body>
   <h2>Mint QR (Double Hash System)</h2>
 
+  <!-- Preview Box: Role, Quota, Status -->
+  <div id="role-preview" class="preview-box preview-none">
+    Role: – &nbsp;|&nbsp; Quota: – &nbsp;|&nbsp; Status: –
+  </div>
+
   <!-- Section A: Key & Batch Info -->
   <div class="section meta-group">
     <div class="input-row">
       <label>Public Key</label>
-      <input type="text" id="pubkey" placeholder="Paste your public key here">
+      <input type="text" id="pubkey" placeholder="Paste your public key here" oninput="onPubKeyChange()">
       <div class="hint">Use only the generated public key (from 'Generate Key').</div>
     </div>
     <div class="input-row">
@@ -140,13 +161,13 @@ Timestamp
     <div class="input-row">
       <label>Number of QR</label>
       <input type="number" id="qty" value="1" min="1" max="50" style="max-width:90px">
-      <div class="hint">How many QR to mint (1–50)</div>
+      <div class="hint">How many QR to mint (based on your role/remaining quota)</div>
     </div>
   </div>
 
   <!-- Section B: Action -->
   <div class="section action-group">
-    <button class="btn btn-blue" onclick="mintQR()">Generate QR Batch</button>
+    <button id="mint-btn" class="btn btn-blue" onclick="mintQR()" disabled>Generate QR Batch</button>
   </div>
 
   <!-- Section C: Committed QR Result -->
@@ -183,6 +204,46 @@ Timestamp
   </div>
 
   <script>
+    // MOCK: สิทธิ์ของแต่ละ role (ตัวอย่าง)
+    function checkRole(pubkey) {
+      // แค่ mock logic ตัวอย่าง สำหรับโปรดักชันให้เช็คจาก whitelist หรือ backend ฯลฯ
+      if (!pubkey) return {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
+      if (/^G/.test(pubkey)) return {role:"Genesis", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
+      if (/^M/.test(pubkey)) return {role:"Master", quota:"100", status:"Ready", color:"preview-ready", btn:true, min:1, max:100};
+      if (/^A/.test(pubkey)) return {role:"Agent", quota:"5,000", status:"Ready", color:"preview-ready", btn:true, min:1, max:5000};
+      if (/^X/.test(pubkey)) return {role:"Master", quota:"0", status:"Already minted", color:"preview-minted", btn:false, min:0, max:0};
+      return {role:"Unregistered", quota:"–", status:"No Permission", color:"preview-error", btn:false, min:0, max:0};
+    }
+
+    let committedQR = [];
+    let commitTimestamp = "–";
+    let currentRole = checkRole("");
+
+    function onPubKeyChange() {
+      // ตรวจสอบ role/สิทธิ์
+      let pubkey = document.getElementById('pubkey').value.trim();
+      currentRole = checkRole(pubkey);
+
+      // อัปเดต preview box
+      let box = document.getElementById('role-preview');
+      box.className = `preview-box ${currentRole.color}`;
+      box.innerHTML = `Role: ${currentRole.role} &nbsp;|&nbsp; Quota: ${currentRole.quota} &nbsp;|&nbsp; Status: ${currentRole.status}`;
+
+      // ปรับ/disable ช่องจำนวนตาม role
+      let qty = document.getElementById('qty');
+      qty.value = currentRole.min;
+      qty.min = currentRole.min;
+      qty.max = currentRole.max;
+
+      // รีเซ็ต input อื่น
+      document.getElementById('secret').value = "";
+      document.getElementById('batch').value = "";
+
+      // ปุ่ม mint
+      let btn = document.getElementById('mint-btn');
+      btn.disabled = !currentRole.btn;
+    }
+
     // SHA256
     async function sha256(str) {
       const msgBuffer = new TextEncoder().encode(str);
@@ -190,16 +251,13 @@ Timestamp
       return Array.from(new Uint8Array(hashBuffer)).map(x=>x.toString(16).padStart(2,'0')).join('');
     }
 
-    let committedQR = [];
-    let commitTimestamp = "–";
-
     async function mintQR() {
       let pubkey = document.getElementById('pubkey').value.trim();
       let secret = document.getElementById('secret').value.trim();
       let batch = document.getElementById('batch').value.trim() || '';
       let qty = parseInt(document.getElementById('qty').value, 10);
       if (!pubkey || !secret || !qty) { alert('Fill all fields'); return; }
-      if (isNaN(qty) || qty < 1 || qty > 50) { alert('Quantity out of range.'); return; }
+      if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert('Quantity out of range.'); return; }
       let now = new Date().toISOString();
       committedQR = [];
       for (let i = 1; i <= qty; i++) {
@@ -280,8 +338,9 @@ Timestamp
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
     // รีเซ็ต timestamp ตอนโหลดหน้า
-    window.onload = () => { setTimestampZone("–"); };
+    window.onload = () => { setTimestampZone("–"); onPubKeyChange(); };
   </script>
 </body>
 </html>
+
 
