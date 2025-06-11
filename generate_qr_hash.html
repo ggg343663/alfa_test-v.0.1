@@ -1,13 +1,53 @@
 <!--
 DTC Minimal UI/UX Logic
+
 - ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
 - กลุ่ม Ticket/Slot/Meta: สีเทาอ่อน #f6f7fa
 - กลุ่ม Password, PIN, Secret: สีเหลืองอ่อน #fffde7
 - กลุ่มปุ่ม Action (Generate/Export/Regen): ฟ้า, เหลือง, ฟ้าอ่อน ตามลำดับ
 - Navigation Bar: ปุ่มม่วงจาง/เทาอ่อน (Back/Home/Next) ขนาดเท่ากันทั้ง site
-- Timestamp โชว์เฉพาะในกล่อง Committed QR ผลลัพธ์ (ขวาล่าง, สี #607d8b)
--->
 
+[Section A] Key & Batch Info  
+    - Password, PIN, Secret, Batch Name, จำนวน QR (ปุ่ม +/– หรือ custom)
+    - label/hint สีเทาอ่อน #90a4ae, ขนาดเล็กใต้ input
+
+[Section B] Action  
+    - ปุ่มฟ้าใหญ่ "Generate QR Batch"
+
+[Section C] ผลลัพธ์/Preview  
+    - QR Preview Box (PNG/SVG), hash1, Commitment Box (hash2 สีฟ้าหรือเทาอ่อน)
+    - ปุ่มเหลือง Export Ticket / ฟ้า Export QR / ฟ้าอ่อน Export Log
+
+[Section D] Regen QR  
+    - ช่อง Ticket (สีเทาอ่อน), ปุ่ม Upload/QR
+    - ช่อง Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
+    - Password, PIN, Secret (เหลืองอ่อน)
+    - ปุ่ม Regen (ฟ้า)
+
+[Section E] Audit Chain  
+    - Input QR/Commitment Hash (hash2) + ปุ่ม Audit (ฟ้าเล็ก)
+    - กล่อง audit chain (เจ้าของ/ลำดับ chain), expand/collapse ได้
+
+[Section F] Navigation Bar  
+    - Back | Home | Next (ปุ่มขนาดเท่ากัน)
+
+Style  
+    - input/box สูง 36–44px, margin/padding 12–20px
+    - label/hint #90a4ae, ขนาดเล็ก
+    - ผลลัพธ์/preview/log ไม่กินพื้นที่หลัก
+    - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
+    - รองรับ mobile (responsive)
+    - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
+
+Times
+- แสดงกล่อง times เฉพาะใต้ section "Committed QR" เท่านั้น (ไม่แสดงซ้ำในแถวของตาราง)
+- Label: **Time (Now):** (หรือ Time (GitHub): ถ้าต้องการเน้นว่าใช้เวลา commit/push จริง)
+- สี #607d8b, ขนาด 1em, จัดขวาล่างของกล่องผลลัพธ์/section
+- เวลาที่แสดงในกล่องนี้จะเป็นเวลาปัจจุบัน (ISO8601) แบบ real-time ขณะใช้งาน เพื่อบอก user ว่าเวลาไหนถูกนำไปคำนวณ hash ในการ mint/regen QR (แต่เวลาที่ใช้ใน hash/log จริง จะเป็นเวลาขณะกดปุ่มเท่านั้น)
+- หากยังไม่มีการ commit QR (ยังไม่มีผลลัพธ์) ให้ขึ้นเป็น "–"
+- เมื่อ export (Ticket, QR, Log ฯลฯ) ต้องแถม timestamp ที่ใช้จริง (ตอน commit QR) ในไฟล์เสมอ  
+  (timestamp ที่ export อาจเหลื่อมกับเวลาที่แสดงบน UI เล็กน้อย แต่ใช้ค่าตอน commit เท่านั้น)
+-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,6 +78,8 @@ DTC Minimal UI/UX Logic
     .btn-blue    { background:#2196f3; color:#fff; }
     .btn-yellow  { background:#ffd600; color:#333; }
     .btn-light   { background:#e3f2fd; color:#247551; }
+    .btn-red     { background:#ff5252; color:#fff; }
+    .btn-green   { background:#4caf50; color:#fff; }
     .preview-box {
       border-radius: 10px;
       padding: 0.9em 1em;
@@ -60,7 +102,9 @@ DTC Minimal UI/UX Logic
     th, td { padding: 0.6em; border-bottom: 1px solid #e0e0e0; text-align: center; }
     th { background: #f6f7fa; color: #2196f3; }
     .export-btn { font-size: 0.99em; background:#e3f2fd; color:#247551; padding:0.4em 0.8em; border-radius:7px; border:none; cursor:pointer; }
+    .export-btn:disabled { background: #eee; color:#bbb; cursor: not-allowed;}
     .status-badge { font-size: 0.92em; border-radius: 7px; padding: 0.23em 0.9em; margin-left: 0.3em;}
+    .status-pending { background: #ffd600; color: #333;}
     .status-committed { background: #2196f3; color: #fff; }
     .timestamp-zone {
       color: #607d8b;
@@ -70,6 +114,7 @@ DTC Minimal UI/UX Logic
       letter-spacing: 0.01em;
       user-select: text;
     }
+    .warn { color: #d32f2f; background: #fff3e0; border-radius: 10px; padding: 0.7em 1em; margin-bottom: 1em;}
     @media (max-width: 600px) {
       body { padding:0.4em;}
       .section { padding:1em 0.4em; }
@@ -87,6 +132,7 @@ DTC Minimal UI/UX Logic
     }
     .nav-btn:hover { background: #d1c4e9; }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 </head>
 <body>
   <h2> Generate QR Hash (Double Hash Function)</h2>
@@ -101,22 +147,22 @@ DTC Minimal UI/UX Logic
     <div class="input-row">
       <label>Public Key</label>
       <input type="text" id="pubkey" placeholder="Paste your public key here" oninput="onPubKeyChange()">
-      <div class="hint">Use only the generated public key (from 'Generate Key').</div>
+      <div class="hint">Paste the generated public key (from Generate Key page).</div>
     </div>
-    <div class="input-row" id="batch-row">
+    <div class="input-row" id="batch-row" style="display:none;">
       <label>Batch Name (optional)</label>
       <input type="text" id="batch" placeholder="Optional">
       <div class="hint">For grouping/labeling QR batches</div>
     </div>
-    <div class="input-row" id="qty-row">
+    <div class="input-row" id="qty-row" style="display:none;">
       <label>Number of QR</label>
-      <input type="number" id="qty" value="1" min="1" max="50" style="max-width:90px">
+      <input type="number" id="qty" value="1" min="1" max="1" style="max-width:90px">
       <div class="hint">How many QR to mint (role-dependent)</div>
     </div>
-    <div class="input-row" id="serial-row" style="display:none;">
+    <div class="input-row" id="serial-row">
       <label>Slot/Serial</label>
       <input type="text" id="serial" placeholder="e.g. QR001">
-      <div class="hint">Required for 1 QR (Normal User)</div>
+      <div class="hint">Required for Normal user / auto for batch</div>
     </div>
   </div>
 
@@ -136,10 +182,37 @@ DTC Minimal UI/UX Logic
 
   <!-- Section C: Action -->
   <div class="section action-group">
-    <button id="mint-btn" class="btn btn-blue" onclick="mintQR()" disabled>Generate QR Batch</button>
+    <button id="mint-btn" class="btn btn-blue" onclick="mintQR()" disabled>Generate QR (Mint)</button>
   </div>
 
-  <!-- Section D: Committed QR Result -->
+  <!-- Section D: Review/Commit/Exit -->
+  <div id="review-zone" style="display:none;">
+    <div class="warn">
+      <b>QR Minted (Pending Registration):</b><br>
+      ยังไม่ได้ commit! QR เหล่านี้ยังไม่ได้ลงทะเบียนรับสิทธิ์<br>
+      <span style="color:#c62828;">**หากออกจากหน้านี้ QR จะถือว่าไม่มีสิทธิ์ลงทะเบียน**</span>
+    </div>
+    <div style="text-align:center;">
+      <button class="btn btn-green" onclick="commitQRs()">Commit/Register All</button>
+      <button class="btn btn-red" onclick="exitQRs()">Exit/Out (ไม่ลงทะเบียน)</button>
+    </div>
+    <br>
+    <div class="table-title">QR Minted (Pending)</div>
+    <table>
+      <thead>
+        <tr>
+          <th>No.</th>
+          <th>QR Hash (hash1)</th>
+          <th>Slot/Serial</th>
+          <th>Status</th>
+          <th>QR PNG</th>
+        </tr>
+      </thead>
+      <tbody id="review-tbl"></tbody>
+    </table>
+  </div>
+
+  <!-- Section E: Committed QR Result -->
   <div id="committed-zone" class="table-zone" style="display:none;">
     <div class="section committed-group">
       <div class="table-title">Committed QR</div>
@@ -150,6 +223,7 @@ DTC Minimal UI/UX Logic
             <th>QR Hash (hash1)</th>
             <th>Commitment Hash (hash2)</th>
             <th>Slot/Serial</th>
+            <th>Status</th>
             <th>Export QR</th>
             <th>Export Ticket</th>
             <th>Export Log</th>
@@ -157,7 +231,6 @@ DTC Minimal UI/UX Logic
         </thead>
         <tbody id="committed-tbl"></tbody>
       </table>
-      <!-- Timestamp-zone -->
       <div class="timestamp-zone">
         <span class="label-timestamp">Time:</span>
         <span id="ts-committed" class="timestamp-value">–</span>
@@ -165,7 +238,7 @@ DTC Minimal UI/UX Logic
     </div>
   </div>
 
-  <!-- Section F: Navigation Bar -->
+  <!-- Navigation Bar -->
   <div class="nav-bar">
     <button class="nav-btn" onclick="window.history.back()">Back</button>
     <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
@@ -173,16 +246,15 @@ DTC Minimal UI/UX Logic
   </div>
 
   <script>
-    // MOCK: สิทธิ์ของแต่ละ role (ตัวอย่าง)
     function checkRole(pubkey) {
       if (!pubkey) return {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
       if (/^G/.test(pubkey)) return {role:"Genesis", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
       if (/^M/.test(pubkey)) return {role:"Master", quota:"100", status:"Ready", color:"preview-ready", btn:true, min:1, max:100};
       if (/^A/.test(pubkey)) return {role:"Agent", quota:"5,000", status:"Ready", color:"preview-ready", btn:true, min:1, max:5000};
-      if (/^X/.test(pubkey)) return {role:"Master", quota:"0", status:"Already minted", color:"preview-minted", btn:false, min:0, max:0};
-      return {role:"Unregistered", quota:"–", status:"No Permission", color:"preview-error", btn:false, min:0, max:0};
+      return {role:"Normal", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
     }
 
+    let mintedQR = []; // hash1 only, pending
     let committedQR = [];
     let commitTimestamp = "–";
     let currentRole = checkRole("");
@@ -190,31 +262,26 @@ DTC Minimal UI/UX Logic
     function onPubKeyChange() {
       let pubkey = document.getElementById('pubkey').value.trim();
       currentRole = checkRole(pubkey);
-
       let box = document.getElementById('role-preview');
       box.className = `preview-box ${currentRole.color}`;
       box.innerHTML = `Role: ${currentRole.role} &nbsp;|&nbsp; Quota: ${currentRole.quota} &nbsp;|&nbsp; Status: ${currentRole.status}`;
-
-      // เงื่อนไข UI ตาม role
-      let qty = document.getElementById('qty');
+      // UI field toggle
       let batchRow = document.getElementById('batch-row');
       let qtyRow = document.getElementById('qty-row');
       let serialRow = document.getElementById('serial-row');
-      if (currentRole.role === "Genesis" || currentRole.role === "Unregistered" || currentRole.role === "–") {
-        // Normal: show only serial, hide batch/qty
-        batchRow.style.display = "none";
-        qtyRow.style.display = "none";
-        serialRow.style.display = "";
-      } else {
+      let qty = document.getElementById('qty');
+      if (currentRole.role === "Master" || currentRole.role === "Agent") {
         batchRow.style.display = "";
         qtyRow.style.display = "";
         serialRow.style.display = "none";
+        qty.value = currentRole.min;
+        qty.min = currentRole.min;
+        qty.max = currentRole.max;
+      } else {
+        batchRow.style.display = "none";
+        qtyRow.style.display = "none";
+        serialRow.style.display = "";
       }
-
-      qty.value = currentRole.min;
-      qty.min = currentRole.min;
-      qty.max = currentRole.max;
-
       let btn = document.getElementById('mint-btn');
       btn.disabled = !currentRole.btn;
     }
@@ -232,30 +299,88 @@ DTC Minimal UI/UX Logic
       let csecret = document.getElementById('csecret').value.trim();
       let batch = document.getElementById('batch').value.trim() || '';
       let serial = document.getElementById('serial') ? document.getElementById('serial').value.trim() : '';
-      let qty = parseInt(document.getElementById('qty').value, 10);
+      let qty = parseInt(document.getElementById('qty') ? document.getElementById('qty').value : "1", 10);
       if (!pubkey || !secret || !csecret) { alert('Fill all fields'); return; }
       if (secret !== csecret) { alert('Secret mismatch!'); return; }
-      if (currentRole.role === "Genesis" || currentRole.role === "Unregistered" || currentRole.role === "–") {
-        if (!serial) { alert('Enter serial'); return; }
-        qty = 1;
-      } else {
+      if (currentRole.role === "Master" || currentRole.role === "Agent") {
         if (!batch) { alert('Batch required'); return; }
         if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert('Quantity out of range.'); return; }
+      } else {
+        if (!serial) { alert('Enter serial'); return; }
+        qty = 1;
       }
+      mintedQR = [];
+      for (let i = 1; i <= qty; i++) {
+        let slot = (currentRole.role === "Master" || currentRole.role === "Agent")
+          ? ('QR' + i.toString().padStart(3, "0"))
+          : serial;
+        let hash1 = await sha256(pubkey + secret + slot);
+        mintedQR.push({
+          no: i,
+          hash1, serial: slot, pubkey, batch
+        });
+      }
+      // Show review zone
+      updateReviewTable();
+      document.getElementById('review-zone').style.display = '';
+      document.getElementById('committed-zone').style.display = 'none';
+    }
+
+    function updateReviewTable() {
+      const tbl = document.getElementById('review-tbl');
+      tbl.innerHTML = mintedQR.map((d, i) => `
+        <tr>
+          <td>${i+1}</td>
+          <td>${d.hash1.slice(0,14)}...</td>
+          <td>${d.serial}</td>
+          <td><span class="status-badge status-pending">Pending</span></td>
+          <td><button class="export-btn" onclick="exportQRPNG(${i})">QR PNG</button></td>
+        </tr>
+      `).join('');
+    }
+
+    async function exportQRPNG(idx) {
+      let d = mintedQR[idx];
+      // สร้าง QR image ด้วย qrious
+      let qr = new QRious({
+        value: d.hash1,
+        size: 280,
+        background: '#fff',
+        foreground: '#2196f3'
+      });
+      // สร้าง <a> download image
+      let link = document.createElement('a');
+      link.href = qr.toDataURL('image/png');
+      link.download = `qr_${d.serial}_${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(()=>{ document.body.removeChild(link); }, 1000);
+    }
+
+    async function commitQRs() {
       let now = new Date().toISOString();
       committedQR = [];
-      for (let i = 1; i <= qty; i++) {
-        let slot = serial || ('QR' + i.toString().padStart(3, "0"));
-        let hash1 = await sha256(pubkey + secret + slot);
-        let hash2 = await sha256(batch + hash1 + now);
+      for (let d of mintedQR) {
+        let hash2 = await sha256(d.batch + d.hash1 + now);
         committedQR.push({
-          no: i,
-          hash1, hash2, serial: slot, pubkey, secret, batch, timestamp: now
+          ...d, hash2, timestamp: now
         });
       }
       commitTimestamp = now;
       updateCommittedTable();
       setTimestampZone();
+      // Hide review zone
+      document.getElementById('review-zone').style.display = 'none';
+      document.getElementById('committed-zone').style.display = '';
+    }
+
+    function exitQRs() {
+      mintedQR = [];
+      committedQR = [];
+      document.getElementById('review-zone').style.display = 'none';
+      document.getElementById('committed-zone').style.display = 'none';
+      setTimestampZone("–");
+      alert('ออกจากการลงทะเบียนแล้ว QR เหล่านี้จะไม่ได้รับสิทธิ์ในระบบ');
     }
 
     function updateCommittedTable() {
@@ -268,15 +393,33 @@ DTC Minimal UI/UX Logic
       document.getElementById('committed-zone').style.display = '';
       tbl.innerHTML = committedQR.map((d, i) => `
         <tr>
-          <td>${i+1} <span class="status-badge status-committed">Committed</span></td>
+          <td>${i+1}</td>
           <td>${d.hash1.slice(0,14)}...</td>
           <td>${d.hash2.slice(0,14)}...</td>
           <td>${d.serial}</td>
-          <td><button class="export-btn" onclick="exportQR(${i})">QR</button></td>
+          <td><span class="status-badge status-committed">Committed</span></td>
+          <td><button class="export-btn" onclick="exportQRPNG_Commit(${i})">QR PNG</button></td>
           <td><button class="export-btn" onclick="exportTicket(${i})">Ticket</button></td>
           <td><button class="export-btn" onclick="exportCSV(${i})">Log</button></td>
         </tr>
       `).join('');
+    }
+
+    // export PNG (หลัง commit)
+    async function exportQRPNG_Commit(idx) {
+      let d = committedQR[idx];
+      let qr = new QRious({
+        value: d.hash1,
+        size: 280,
+        background: '#fff',
+        foreground: '#2196f3'
+      });
+      let link = document.createElement('a');
+      link.href = qr.toDataURL('image/png');
+      link.download = `qr_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.png`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(()=>{ document.body.removeChild(link); }, 1000);
     }
 
     function setTimestampZone(ts) {
@@ -289,24 +432,18 @@ DTC Minimal UI/UX Logic
       el.textContent = new Date().toISOString();
     }, 950);
 
-    function exportQR(idx) {
-      let d = committedQR[idx];
-      let txt = `QR (hash1): ${d.hash1}\nSlot/Serial: ${d.serial}\nBatch: ${d.batch}\nGenerated: ${d.timestamp}\nTime: ${commitTimestamp}`;
-      let fname = `qr_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
-      let blob = new Blob([txt], {type:"text/plain"});
-      let link = document.createElement('a');
-      link.href = URL.createObjectURL(blob); link.download = fname; link.click();
-      setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
-    }
+    // Export Ticket (หลัง commit)
     function exportTicket(idx) {
       let d = committedQR[idx];
-      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime: ${commitTimestamp}`;
+      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime: ${commitTimestamp}\n\n[Secret is NOT included in this ticket. Keep it safe!]`;
       let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob); link.download = fname; link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
+
+    // Export Log (หลัง commit)
     function exportCSV(idx) {
       let d = committedQR[idx];
       let csv = "serial,commitment_hash2,timestamp,commit_time\n";
@@ -317,6 +454,7 @@ DTC Minimal UI/UX Logic
       link.href = URL.createObjectURL(blob); link.download = fname; link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
+
     window.onload = () => { setTimestampZone("–"); onPubKeyChange(); };
   </script>
 </body>
