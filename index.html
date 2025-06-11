@@ -1,5 +1,124 @@
 <!--
-DTC Minimal UI/UX Logic
+DTC Minimal UI<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DTC: Magic Chain System</title>
+  <style>
+    /* Base Styles - Keep consistent with your existing design */
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 2em auto;
+      padding: 1em;
+      background: #f5f7fa;
+      color: #333;
+    }
+    h1 {
+      text-align: center;
+      color: #219150; /* Dark green for the main title */
+      margin-bottom: 1.2em;
+      letter-spacing: 0.02em;
+    }
+    .menu-block {
+      margin: 1.1em 0;
+      padding: 1em;
+      border-radius: 12px;
+      box-shadow: 0 2px 9px #edf1f6; /* Consistent shadow for sections */
+    }
+    .block-title {
+      font-size: 1.07em;
+      font-weight: bold;
+      margin-bottom: 0.68em;
+      padding-bottom: 0.5em; /* Separator for title */
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    /* Section specific background and left border colors */
+    .block-green { background: #eafaf0; border-left: 6px solid #219150; }
+    .block-blue  { background: #e3f2fd; border-left: 6px solid #2196f3; }
+    .block-yellow { background: #fff9e5; border-left: 6px solid #ffd600; }
+    .block-purple { background: #f3eafe; border-left: 6px solid #9575cd; }
+    
+    /* Button styling within each section */
+    .menu-block a {
+      display: block;
+      width: 100%;
+      padding: 0.77em 0.4em;
+      margin-bottom: 0.53em;
+      color: #fff; /* Default text color for buttons */
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 1.09em;
+      text-align: center;
+      text-decoration: none;
+      box-shadow: 0 2px 7px rgba(39,174,96,0.07); /* Shadow for buttons */
+      transition: background 0.13s, filter 0.13s; /* Smooth transition on hover */
+    }
+    /* Specific button background colors */
+    .menu-block.block-green a { background: #219150; }
+    .menu-block.block-blue a { background: #2196f3; }
+    .menu-block.block-yellow a { background: #ffd600; color: #222; } /* Dark text on yellow for contrast */
+    .menu-block.block-purple a { background: #9575cd; }
+    
+    .menu-block a:hover {
+      filter: brightness(0.93); /* Slightly darken button on hover */
+    }
+    
+    /* Responsive adjustments for mobile devices */
+    @media (max-width: 600px) {
+      body { margin: 0.4em; padding: 0.07em;}
+      .menu-block { padding: 0.7em 0.2em;}
+      .menu-block a { font-size: 1em; padding: 0.6em 0.2em; }
+    }
+
+    .footer-note {
+      text-align:center;
+      margin-top:2.4em;
+      color:#b0bec5;
+      font-size:0.95em;
+    }
+  </style>
+</head>
+<body>
+  <h1>DTC: Magic Chain System</h1>
+
+  <!-- Step 1: User Key & QR - Green Theme -->
+  <div class="menu-block block-green">
+    <div class="block-title">Step 1: User Key & QR</div>
+    <a href="generate_key.html">Generate Public Key</a>
+    <a href="generate_qr_hash.html">Generate QR Hash</a>
+    <a href="regenerate_qr_hash.html">Regenerate QR Hash</a>
+  </div>
+
+  <!-- Step 2: Register & Transfer - Blue Theme -->
+  <div class="menu-block block-blue">
+    <div class="block-title">Step 2: Register & Transfer</div>
+    <a href="register_qr.html">Register QR</a>
+    <a href="transfer.html">Transfer QR</a>
+  </div>
+
+  <!-- Step 3: Audit & Status - Yellow Theme -->
+  <div class="menu-block block-yellow">
+    <div class="block-title">Step 3: Audit & Status</div>
+    <a href="verify_log.html">Check QR Status</a>
+  </div>
+
+  <!-- Step 4: Authority Tools - Purple Theme -->
+  <div class="menu-block block-purple">
+    <div class="block-title">Step 4: Authority Tools</div>
+    <a href="register_master.html">Register Master</a>
+    <a href="master_dashboard.html">Master Dashboard</a>
+    <a href="agent_register.html">Register Agent</a>
+  </div>
+
+  <p class="footer-note">
+    Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
+  </p>
+</body>
+</html>
+
+UX Logic
 
 - ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
 - กลุ่ม Ticket/Slot/Meta: สีเทาอ่อน #f6f7fa
