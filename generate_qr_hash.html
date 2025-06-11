@@ -300,43 +300,6 @@
     </div>
   </div>
 
-  <div class="section regen-group" style="margin-top: 2em;">
-    <div class="table-title">Regen QR</div>
-    <div class="input-row">
-      <label>Ticket (or Upload)</label>
-      <input type="text" id="ticket-input" placeholder="Paste Ticket data or use Upload button">
-      <div class="hint">Paste raw ticket data or upload ticket file.</div>
-    </div>
-    <div style="text-align: right; margin-bottom: 1.1em;">
-      <button class="btn btn-light">Upload Ticket</button>
-    </div>
-    <div class="input-row">
-      <label>Password</label>
-      <input type="password" id="regen-password" placeholder="Re-enter your password">
-    </div>
-    <div class="input-row">
-      <label>PIN</label>
-      <input type="password" id="regen-pin" placeholder="Re-enter your PIN">
-    </div>
-    <div class="input-row">
-      <label>Secret</label>
-      <input type="password" id="regen-secret" placeholder="Re-enter your secret">
-      <div class="hint">Secret is required for regeneration.</div>
-    </div>
-    <div style="text-align:center; margin-top: 1.5em;">
-      <button class="btn btn-blue" onclick="regenQR()">Regen QR</button>
-    </div>
-    <div id="regen-preview" style="display:none; margin-top: 1.5em;">
-        <div class="qr-preview-box">
-            <img id="regen-qr-img" style="display:none;">
-            <span id="regen-qr-hash1" style="font-size:0.9em; color:#607d8b;"></span>
-        </div>
-        <div class="commitment-hash-box">
-            <span id="regen-commitment-hash2" style="font-size:0.9em;"></span>
-        </div>
-    </div>
-  </div>
-
   <div class="section audit-group" style="margin-top: 2em;">
     <div class="table-title">Audit Chain</div>
     <div class="input-row">
@@ -366,6 +329,7 @@
 
     let currentRole = {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
     let generatedQRData = null; // Store the single generated QR data for the result section
+    let committedQR = []; // Placeholder for committed QRs to simulate prev_hash
 
     function checkRole(pubkey) {
       if (!pubkey) return {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
@@ -614,48 +578,7 @@
     }
 
     // --- Placeholder Functions for Regen/Audit (original from your code) ---
-    async function regenQR() {
-        alert('ฟังก์ชัน Regen QR ยังไม่เปิดใช้งานเต็มรูปแบบในเวอร์ชันนี้');
-        let ticketData = document.getElementById('ticket-input').value.trim();
-        let regenPassword = document.getElementById('regen-password').value.trim();
-        let regenPIN = document.getElementById('regen-pin').value.trim();
-        let regenSecret = document.getElementById('regen-secret').value.trim();
-
-        if (!ticketData || !regenPassword || !regenPIN || !regenSecret) {
-            alert('กรุณากรอกข้อมูล Ticket, Password, PIN และ Secret ให้ครบถ้วนสำหรับการ Regen QR');
-            return;
-        }
-
-        try {
-            const qrHash1Match = ticketData.match(/QR Hash \(hash1\):\s*([a-f0-9]+)/i);
-            const commitmentHash2Match = ticketData.match(/Commitment Hash \(hash2\):\s*([a-f0-9]+)/i);
-            const serialIdMatch = ticketData.match(/Serial ID:\s*([a-zA-Z0-9_]+)/i);
-
-            if (!qrHash1Match || !commitmentHash2Match || !serialIdMatch) {
-                throw new Error("Invalid ticket format or missing Serial ID.");
-            }
-
-            const parsedHash1 = qrHash1Match[1];
-            const parsedHash2 = commitmentHash2Match[1];
-            const parsedSerialId = serialIdMatch[1];
-
-            document.getElementById('regen-qr-img').style.display = 'block';
-            let qr = new QRious({
-                value: parsedHash1,
-                size: 90,
-                background: '#fff',
-                foreground: '#2196f3'
-            });
-            document.getElementById('regen-qr-img').src = qr.toDataURL('image/png');
-            document.getElementById('regen-qr-hash1').textContent = `QR Hash: ${parsedHash1.slice(0, 14)}... (Serial: ${parsedSerialId})`;
-            document.getElementById('regen-commitment-hash2').textContent = `Commitment Hash: ${parsedHash2.slice(0, 14)}...`;
-            document.getElementById('regen-preview').style.display = 'block';
-
-        } catch (error) {
-            alert(`เกิดข้อผิดพลาดในการ Regen QR: ${error.message}`);
-            document.getElementById('regen-preview').style.display = 'none';
-        }
-    }
+    // Removed regenQR function and associated HTML section as requested.
 
     async function auditChain() {
         alert('ฟังก์ชัน Audit Chain ยังไม่เปิดใช้งานเต็มรูปแบบในเวอร์ชันนี้');
