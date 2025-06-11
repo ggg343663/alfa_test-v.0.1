@@ -149,17 +149,12 @@
       <input type="text" id="batch" placeholder="Optional">
       <div class="hint">For grouping/labeling QR batches</div>
     </div>
-    <div class="input-row" id="qty-row" style="display:none;">
-      <label>Number of QR</label>
+    <div class="input-row" id="qty-row">
+      <label>Number of QR to Generate</label>
       <input type="number" id="qty" value="1" min="1" max="1" style="max-width:90px">
       <div class="hint">How many QR to mint (role-dependent)</div>
     </div>
-    <div class="input-row" id="serial-row">
-      <label>Slot/Serial</label>
-      <input type="text" id="serial" placeholder="e.g. QR001">
-      <div class="hint">Required for Normal user / auto for batch</div>
     </div>
-  </div>
 
   <div class="section secret-group">
     <div class="input-row">
@@ -195,8 +190,7 @@
         <tr>
           <th>No.</th>
           <th>QR Hash (hash1)</th>
-          <th>Slot/Serial</th>
-          <th>Status</th>
+          <th>Serial ID</th> <th>Status</th>
           <th>QR PNG</th>
         </tr>
       </thead>
@@ -213,8 +207,7 @@
             <th>No.</th>
             <th>QR Hash (hash1)</th>
             <th>Commitment Hash (hash2)</th>
-            <th>Slot/Serial</th>
-            <th>Status</th>
+            <th>Serial ID</th> <th>Status</th>
             <th>Export QR</th>
             <th>Export Ticket</th>
             <th>Export Log</th>
@@ -287,11 +280,11 @@
   </div>
 
   <script>
-    [span_0](start_span)// Note: The UI/UX spec mentions "Password" and "PIN" separately, but the White Paper[span_0](end_span)
-    [span_1](start_span)// combines them into a single private key derivation process (SHA256(password:PIN))[span_1](end_span).
-    [span_2](start_span)// For this UI, I've kept "Secret" as the primary input for minting/regen for simplicity[span_2](end_span).
+    // Note: The UI/UX spec mentions "Password" and "PIN" separately, but the White Paper
+    // combines them into a single private key derivation process (SHA256(password:PIN)).
+    // For this UI, I've kept "Secret" as the primary input for minting/regen for simplicity.
     // The "Regen QR" section includes Password, PIN, and Secret fields for potential future
-    [span_3](start_span)// full private key derivation on the client-side as hinted by the White Paper[span_3](end_span).
+    // full private key derivation on the client-side as hinted by the White Paper.
 
     function checkRole(pubkey) {
       if (!pubkey) return {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
@@ -315,21 +308,15 @@
       
       // UI field toggle based on role
       let batchRow = document.getElementById('batch-row');
-      let qtyRow = document.getElementById('qty-row');
-      let serialRow = document.getElementById('serial-row');
       let qty = document.getElementById('qty');
 
       if (currentRole.role === "Master" || currentRole.role === "Agent") {
         batchRow.style.display = "";
-        qtyRow.style.display = "";
-        serialRow.style.display = "none";
         qty.value = currentRole.min;
         qty.min = currentRole.min;
         qty.max = currentRole.max;
       } else {
         batchRow.style.display = "none";
-        qtyRow.style.display = "none";
-        serialRow.style.display = "";
         qty.value = currentRole.min; // Ensure value is 1 for Normal users
         qty.min = currentRole.min;
         qty.max = currentRole.max;
@@ -338,7 +325,7 @@
       btn.disabled = !currentRole.btn;
     }
 
-    [span_4](start_span)// SHA256 function[span_4](end_span)
+    // SHA256 function
     async function sha256(str) {
       const msgBuffer = new TextEncoder().encode(str);
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -350,30 +337,33 @@
       let secret = document.getElementById('secret').value.trim();
       let csecret = document.getElementById('csecret').value.trim();
       let batch = document.getElementById('batch').value.trim() || '';
-      let serial = document.getElementById('serial') ? document.getElementById('serial').value.trim() : '';
-      let qty = parseInt(document.getElementById('qty') ? document.getElementById('qty').value : "1", 10);
+      let qty = parseInt(document.getElementById('qty').value, 10);
       
       if (!pubkey || !secret || !csecret) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
       if (secret !== csecret) { alert('Secret ไม่ตรงกัน!'); return; }
 
-      [span_5](start_span)// Role-specific validation[span_5](end_span)
+      // Role-specific validation and serial ID generation
       if (currentRole.role === "Master" || currentRole.role === "Agent") {
-        if (!batch) { alert('ต้องระบุ Batch Name'); return; }
+        if (!batch) { alert('ต้องระบุ Batch Name สำหรับ Master/Agent'); return; }
         if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert(`จำนวน QR ต้องอยู่ระหว่าง ${currentRole.min} ถึง ${currentRole.max} สำหรับบทบาทนี้`); return; }
-      [span_6](start_span)} else { // Normal user[span_6](end_span)
-        if (!serial) { alert('ต้องระบุ Slot/Serial'); return; }
-        qty = 1; [span_7](start_span)// Force quantity to 1 for Normal user[span_7](end_span)
+      } else { // Normal user
+        qty = 1; // Force quantity to 1 for Normal user
       }
 
       mintedQR = [];
       for (let i = 1; i <= qty; i++) {
-        let slot = (currentRole.role === "Master" || currentRole.role === "Agent")
-          ? (batch ? `${batch}_${i.toString().padStart(3, "0")}` : `QR${i.toString().padStart(3, "0")}`) // Use batch name if available, otherwise generic QRxxx
-          : serial;
-        let hash1 = await sha256(pubkey + secret + slot); [span_8](start_span)// Simplified hash for UI display[span_8](end_span)
+        let serialId;
+        if (currentRole.role === "Master" || currentRole.role === "Agent") {
+          serialId = batch ? `${batch}_${i.toString().padStart(3, "0")}` : `QR${i.toString().padStart(3, "0")}`;
+        } else {
+          // Generate a unique serial ID for Normal users, e.g., QR_PUBKEYHASH_TIMESTAMP_INDEX
+          serialId = `QR_${pubkey.slice(0,5).toUpperCase()}_${Date.now()}_${i.toString().padStart(3, "0")}`;
+        }
+        
+        let hash1 = await sha256(pubkey + secret + serialId); // Use serialId here
         mintedQR.push({
           no: i,
-          hash1, serial: slot, pubkey, batch
+          hash1, serial: serialId, pubkey, batch
         });
       }
       
@@ -415,9 +405,10 @@
       let now = new Date().toISOString();
       committedQR = [];
       for (let d of mintedQR) {
-        [span_9](start_span)// According to White Paper, hash2 (commitment hash) uses master_hash/agent_hash + qr_hash + timestamp[span_9](end_span).
+        // According to White Paper, hash2 (commitment hash) uses master_hash/agent_hash + qr_hash + timestamp.
         // For simplified UI, using batch + hash1 + timestamp as a placeholder.
-        let hash2 = await sha256(d.batch + d.hash1 + now);
+        // Use serial ID in hash2 calculation as well, if it represents the unique identifier in the chain.
+        let hash2 = await sha256(d.batch + d.hash1 + d.serial + now); // Added d.serial for more robustness in hash2
         committedQR.push({
           ...d, hash2, timestamp: now
         });
@@ -486,13 +477,13 @@
     setInterval(()=>{
       let el = document.getElementById('ts-committed');
       if (!committedQR.length) { el.textContent = "–"; return; }
-      [span_10](start_span)el.textContent = new Date().toISOString(); // Real-time display[span_10](end_span)
+      el.textContent = new Date().toISOString(); // Real-time display
     }, 950);
 
     // Export Ticket (หลัง commit)
     function exportTicket(idx) {
       let d = committedQR[idx];
-      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\n\n[Secret is NOT included in this ticket. Keep it safe!]`; [span_11](start_span)// Timestamp from committed QR[span_11](end_span)
+      let txt = `Ticket (DTC)\n-------------------\nSerial ID: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\n\n[Secret is NOT included in this ticket. Keep it safe!]`; // Timestamp from committed QR
       let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
@@ -504,7 +495,7 @@
     function exportCSV(idx) {
       let d = committedQR[idx];
       let csv = "serial,commitment_hash2,timestamp,commit_time\n";
-      csv += `${d.serial},${d.hash2},${d.timestamp},${commitTimestamp}\n`; [span_12](start_span)// Include commitTimestamp[span_12](end_span)
+      csv += `${d.serial},${d.hash2},${d.timestamp},${commitTimestamp}\n`; // Include commitTimestamp
       let fname = `commitment_log_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.csv`;
       let blob = new Blob([csv], {type:"text/csv"});
       let link = document.createElement('a');
@@ -514,12 +505,12 @@
 
     async function regenQR() {
         alert('ฟังก์ชัน Regen QR ยังไม่เปิดใช้งานเต็มรูปแบบในเวอร์ชันนี้');
-        [span_13](start_span)// Placeholder for future implementation based on White Paper[span_13](end_span)
+        // Placeholder for future implementation based on White Paper
         // This would involve:
-        [span_14](start_span)// 1. Parsing ticket data[span_14](end_span)
-        [span_15](start_span)// 2. Re-deriving private key from password/PIN[span_15](end_span)
-        [span_16](start_span)// 3. Re-calculating hash1 and hash2 using the original data and timestamps[span_16](end_span)
-        [span_17](start_span)// 4. Displaying preview[span_17](end_span)
+        // 1. Parsing ticket data
+        // 2. Re-deriving private key from password/PIN
+        // 3. Re-calculating hash1 and hash2 using the original data and timestamps
+        // 4. Displaying preview
         let ticketData = document.getElementById('ticket-input').value.trim();
         let regenPassword = document.getElementById('regen-password').value.trim();
         let regenPIN = document.getElementById('regen-pin').value.trim();
@@ -535,13 +526,16 @@
             // Simulate ticket parsing
             const qrHash1Match = ticketData.match(/QR Hash \(hash1\):\s*([a-f0-9]+)/i);
             const commitmentHash2Match = ticketData.match(/Commitment Hash \(hash2\):\s*([a-f0-9]+)/i);
+            const serialIdMatch = ticketData.match(/Serial ID:\s*([a-zA-Z0-9_]+)/i);
 
-            if (!qrHash1Match || !commitmentHash2Match) {
-                throw new Error("Invalid ticket format.");
+
+            if (!qrHash1Match || !commitmentHash2Match || !serialIdMatch) {
+                throw new Error("Invalid ticket format or missing Serial ID.");
             }
 
             const parsedHash1 = qrHash1Match[1];
             const parsedHash2 = commitmentHash2Match[1];
+            const parsedSerialId = serialIdMatch[1];
 
             // In a real scenario, you would use password, PIN, and secret to re-derive
             // the original private key and re-calculate hash1 and hash2 to verify.
@@ -555,7 +549,7 @@
                 foreground: '#2196f3'
             });
             document.getElementById('regen-qr-img').src = qr.toDataURL('image/png');
-            document.getElementById('regen-qr-hash1').textContent = `QR Hash: ${parsedHash1.slice(0, 14)}...`;
+            document.getElementById('regen-qr-hash1').textContent = `QR Hash: ${parsedHash1.slice(0, 14)}... (Serial: ${parsedSerialId})`;
             document.getElementById('regen-commitment-hash2').textContent = `Commitment Hash: ${parsedHash2.slice(0, 14)}...`;
             document.getElementById('regen-preview').style.display = 'block';
 
@@ -567,11 +561,11 @@
 
     async function auditChain() {
         alert('ฟังก์ชัน Audit Chain ยังไม่เปิดใช้งานเต็มรูปแบบในเวอร์ชันนี้');
-        [span_18](start_span)// Placeholder for future implementation based on White Paper[span_18](end_span)
+        // Placeholder for future implementation based on White Paper
         // This would involve:
-        [span_19](start_span)// 1. Taking the input hash (hash2)[span_19](end_span)
-        [span_20](start_span)// 2. Tracing back the hash chain: QR -> Agent -> Master -> Genesis[span_20](end_span)
-        [span_21](start_span)// 3. Displaying the ownership and chain links[span_21](end_span)
+        // 1. Taking the input hash (hash2)
+        // 2. Tracing back the hash chain: QR -> Agent -> Master -> Genesis
+        // 3. Displaying the ownership and chain links
         let auditHash = document.getElementById('audit-hash').value.trim();
         if (!auditHash) {
             alert('กรุณากรอก QR/Commitment Hash เพื่อ Audit Chain');
@@ -580,15 +574,15 @@
 
         // Dummy audit results for demonstration
         let auditResults = `Audit Chain for: ${auditHash}\n\n`;
-        [span_22](start_span)if (auditHash.startsWith('f2c')) { // Example for the provided image's hash[span_22](end_span)
-            auditResults += `1. [span_23](start_span)Current QR: ${auditHash} (Status: Pending)[span_23](end_span)\n`;
-            [span_24](start_span)auditResults += `   Slot/Serial: 1000[span_24](end_span)\n\n`;
-            auditResults += `2. [span_25](start_span)Linked to Agent: maple:888 (dummy agent hash)[span_25](end_span)\n`;
-            [span_26](start_span)[span_27](start_span)auditResults += `   (Link from QR hash to agent hash via deterministic slot assignment)[span_26](end_span)[span_27](end_span)\n\n`;
-            auditResults += `3. [span_28](start_span)Linked to Master: MAPLE_000 (dummy master hash)[span_28](end_span)\n`;
-            [span_29](start_span)auditResults += `   (Link from agent hash to master hash)[span_29](end_span)\n\n`;
-            auditResults += `4. [span_30](start_span)Linked to Genesis: GENESIS_000 (0x0000...)[span_30](end_span)\n`;
-            [span_31](start_span)auditResults += `   (Root of the chain)[span_31](end_span)`;
+        if (auditHash.startsWith('f2c')) { // Example for the provided image's hash
+            auditResults += `1. Current QR: ${auditHash} (Status: Pending)\n`;
+            auditResults += `   Serial ID: ABC_DEF_123 (Example Generated ID)\n\n`; // Use a generated ID here
+            auditResults += `2. Linked to Agent: maple:888 (dummy agent hash)\n`;
+            auditResults += `   (Link from QR hash to agent hash via deterministic serial ID assignment)\n\n`;
+            auditResults += `3. Linked to Master: MAPLE_000 (dummy master hash)\n`;
+            auditResults += `   (Link from agent hash to master hash)\n\n`;
+            auditResults += `4. Linked to Genesis: GENESIS_000 (0x0000...)\n`;
+            auditResults += `   (Root of the chain)`;
         } else {
             auditResults += "No audit path found for this hash in the current dummy data.";
         }
