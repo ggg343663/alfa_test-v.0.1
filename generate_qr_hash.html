@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DTC: Generate QR hash (Double Hash)</title>
+  <title>DTC: Generate QR (v.0.1.8+)</title>
   <style>
     body { font-family: Arial,sans-serif; background: #f5f7fa; max-width: 700px; margin: 2.5em auto; color: #222; }
     h2 { color: #247551; text-align: center; margin-bottom: 1.5em; }
@@ -11,11 +11,11 @@
 
     /* Custom Section Colors */
     .meta-group { background: #f6f7fa; } /* สีเทาอ่อนสำหรับ Ticket/Slot/Meta */
-    .secret-group { background: #fffde7; } /* สีเหลืองอ่อนสำหรับ Password, PIN, Secret */
+    .secret-group { background: #fff; } /* สีขาวสำหรับ Secret */
     .action-group { background: #e3f2fd; text-align: center; } /* สีฟ้าอ่อนสำหรับ Action */
-    .committed-group { background: #e3f2fd; } /* สีฟ้าอ่อนสำหรับ Committed QR */
-    .regen-group { background: #f6f7fa; } /* สีเทาอ่อนสำหรับ Regen QR */
-    .audit-group { background: #f6f7fa; } /* สีเทาอ่อนสำหรับ Audit Chain */
+    .committed-group { background: #f6f7fa; } /* สีเทาอ่อนสำหรับ Committed QR (เปลี่ยนจากฟ้าอ่อนเพื่อแยกจาก action) */
+    .regen-group { background: #fff; } /* สีขาวสำหรับ Regen QR */
+    .audit-group { background: #fff; } /* สีขาวสำหรับ Audit Chain */
 
     .input-row { margin-bottom: 1.1em; }
     label { font-weight: bold; color: #247551; display:block; }
@@ -24,18 +24,27 @@
       width: 100%; padding:0.7em 0.8em; border:1px solid #b0bec5; border-radius:8px;
       font-size:1em; background: #f9fafb; margin-top: 0.18em; box-sizing: border-box; height: 44px; /* input/box สูง 44px */
     }
+    input.invalid { border-color: #ff5252; } /* แดงเมื่อ invalid */
+    input.valid { border-color: #4caf50; } /* เขียวเมื่อ valid */
+
     .btn {
       margin:0.3em 0.7em 0.3em 0; padding:0.65em 1.5em; border-radius:15px;
       font-size:1.13em; border:none; cursor:pointer; font-weight:600;
       box-shadow: 0 1px 4px #dde;
       transition: background 0.2s;
     }
+    .btn:disabled { background: #cfd8dc; color: #90a4ae; cursor: not-allowed; }
     /* Button Colors */
     .btn-blue    { background:#2196f3; color:#fff; } /* ฟ้า */
     .btn-yellow  { background:#ffd600; color:#333; } /* เหลือง */
     .btn-light   { background:#e3f2fd; color:#247551; } /* ฟ้าอ่อน */
     .btn-red     { background:#ff5252; color:#fff; }
     .btn-green   { background:#4caf50; color:#fff; }
+
+    .qty-buttons { display: flex; gap: 0.5em; margin-top: 0.5em; flex-wrap: wrap;}
+    .qty-buttons .btn { flex-grow: 1; margin: 0; padding: 0.5em 1em; font-size: 0.9em; border-radius: 8px;}
+    .qty-buttons input { flex-grow: 1; max-width: 100px; margin-left: 0.5em;}
+
 
     .preview-box {
       border-radius: 10px;
@@ -89,44 +98,79 @@
     }
     .nav-btn:hover { background: #d1c4e9; }
 
-    /* Specific styles for Regen QR inputs */
-    #ticket-input, #slot-id, #prev-hash, #timestamp-regen, #nonce-regen {
-        background: #f9fafb; /* Consistent with other inputs */
-    }
-
     /* Adjustments for preview boxes to match UI/UX spec */
-    .qr-preview-box, .commitment-hash-box {
+    .qr-preview-box, .commitment-hash-box, .hash-components-box {
         border-radius: 10px;
         padding: 0.9em 1em;
         margin-bottom: 0.8em; /* Slightly less margin for tighter layout */
         font-size: 1.06em;
         font-weight: bold;
         box-shadow: 0 1px 7px #e8eaf6;
-        background: #e3f2fd; /* Default light blue, can change based on content */
-        color: #1565c0; /* Default blue text */
+        background: #f6f7fa; /* สีเทาอ่อน */
+        color: #607d8b; /* สีเทาเข้ม */
     }
     .qr-preview-box {
-        height: 120px; /* Example fixed height for QR preview */
+        min-height: 120px; /* Example fixed height for QR preview */
         display: flex;
         align-items: center;
         justify-content: center;
-        overflow-y: auto; /* Scrollable if many QRs */
         flex-direction: column;
+        gap: 0.5em;
+        font-size: 0.9em;
+        color: #333;
     }
     .qr-preview-box img {
         max-width: 90px; /* Small QR preview */
         max-height: 90px;
+        border: 1px solid #ddd;
+        padding: 4px;
+        background: #fff;
     }
     .commitment-hash-box {
-        background: #f6f7fa; /* สีเทาอ่อนตาม UI/UX */
-        color: #90a4ae; /* สีเทาอ่อนตาม UI/UX */
         word-break: break-all;
+        font-size: 0.9em;
+        color: #333;
     }
-    /* Ensure no prominent display for QR Preview Box and Commitment Box if empty */
-    .qr-preview-box:empty::before, .commitment-hash-box:empty::before {
-        content: "No QR Preview";
-        color: #b0bec5;
-        font-weight: normal;
+    .hash-components-box {
+        word-break: break-all;
+        font-size: 0.85em;
+        color: #607d8b;
+        margin-top: 0.5em;
+        padding: 0.7em 1em;
+    }
+    .hash-components-box strong { color: #333; }
+
+    /* Specific styles for Secret input and confirmation */
+    .secret-input-wrapper {
+        position: relative;
+        margin-bottom: 0.5em; /* Reduce margin to make error message closer */
+    }
+    .secret-feedback {
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.2em;
+    }
+    .secret-feedback.valid { color: #4caf50; }
+    .secret-feedback.invalid { color: #ff5252; }
+    .secret-error {
+        color: #d32f2f;
+        font-size: 0.9em;
+        margin-top: 0.2em;
+        margin-left: 0.2em;
+        display: none;
+    }
+    .secret-error.show { display: block; }
+
+    /* Result section display */
+    #result-section {
+        display: none; /* Hidden by default */
+        margin-top: 2em;
+        padding: 1.3em 1.2em;
+        border-radius: 16px;
+        box-shadow: 0 2px 9px #edf1f6;
+        background: #fff;
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
@@ -141,36 +185,70 @@
   <div class="section meta-group">
     <div class="input-row">
       <label>Public Key</label>
-      <input type="text" id="pubkey" placeholder="Paste your public key here" oninput="onPubKeyChange()">
+      <input type="text" id="pubkey" placeholder="Paste your public key here" oninput="onPubKeyChange(); checkFormValidity();">
       <div class="hint">Paste the generated public key (from Generate Key page).</div>
     </div>
     <div class="input-row" id="batch-row" style="display:none;">
       <label>Batch Name (optional)</label>
-      <input type="text" id="batch" placeholder="Optional">
+      <input type="text" id="batch" placeholder="Optional" oninput="checkFormValidity()">
       <div class="hint">For grouping/labeling QR batches</div>
     </div>
     <div class="input-row" id="qty-row">
       <label>Number of QR to Generate</label>
-      <input type="number" id="qty" value="1" min="1" max="1" style="max-width:90px">
-      <div class="hint">How many QR to mint (role-dependent)</div>
+      <div class="qty-buttons">
+          <button type="button" class="btn btn-light" onclick="setQty(100)">100</button>
+          <button type="button" class="btn btn-light" onclick="setQty(500)">500</button>
+          <button type="button" class="btn btn-light" onclick="setQty(1000)">1000</button>
+          <button type="button" class="btn btn-light" onclick="setQty(3000)">3000</button>
+          <button type="button" class="btn btn-light" onclick="setQty(5000)">5000</button>
+          <input type="number" id="qty" value="1" min="1" max="1" oninput="checkFormValidity()">
+      </div>
+      <div class="hint">Select from popular options or enter a custom amount.</div>
     </div>
-    </div>
+  </div>
 
   <div class="section secret-group">
-    <div class="input-row">
+    <div class="input-row secret-input-wrapper">
       <label>Secret</label>
-      <input type="password" id="secret" placeholder="For secure minting (keep private)">
-      <div class="hint">Required for ticket backup and regen. Never share this secret!</div>
+      <input type="password" id="secret" placeholder="For secure minting (keep private)" oninput="validateSecret()">
+      <div class="hint">4 characters a-z (lowercase)</div>
     </div>
-    <div class="input-row">
+    <div class="input-row secret-input-wrapper">
       <label>Confirm Secret</label>
-      <input type="password" id="csecret" placeholder="Type secret again">
-      <div class="hint">Type your secret again for confirmation</div>
+      <input type="password" id="csecret" placeholder="Type secret again" oninput="validateSecret()">
+      <span id="csecret-feedback" class="secret-feedback"></span>
+      <div id="secret-error-message" class="secret-error">Secret ไม่ตรงกัน</div>
     </div>
   </div>
 
   <div class="section action-group">
-    <button id="mint-btn" class="btn btn-blue" onclick="mintQR()" disabled>Generate QR (Mint)</button>
+    <button id="mint-btn" class="btn btn-blue" onclick="generateQRBatch()" disabled>Generate QR Batch</button>
+  </div>
+
+  <div id="result-section" class="section">
+    <h3 class="table-title" style="text-align: center; margin-top:0;">QR Batch Generated</h3>
+
+    <div class="qr-preview-box">
+        <img id="generated-qr-img" style="display:none;">
+        <span id="generated-qr-hash1" style="font-size:0.9em; color:#607d8b;"></span>
+        <div class="commitment-hash-box" style="margin-top: 0.8em; width: 100%; text-align: center;">
+            Commitment Hash (hash2): <span id="generated-commitment-hash2"></span>
+        </div>
+    </div>
+
+    <div class="hash-components-box">
+        ส่วนประกอบสำคัญสำหรับ Hash:
+        <div>Timestamp: <span id="display-timestamp"></span> <button class="export-btn" onclick="copyToClipboard('display-timestamp')">copy</button></div>
+        <div>Nonce: <span id="display-nonce"></span> <button class="export-btn" onclick="copyToClipboard('display-nonce')">copy</button></div>
+        <div>Slot ID (example): <span id="display-slot-id"></span> <button class="export-btn" onclick="copyToClipboard('display-slot-id')">copy</button></div>
+        <div>Prev Hash (first 6 chars): <span id="display-prev-hash"></span> <button class="export-btn" onclick="copyToClipboard('display-prev-hash')">copy</button></div>
+    </div>
+
+    <div style="text-align:center; margin-top: 1.5em;">
+      <button class="btn btn-yellow" onclick="exportTicket()">Export Ticket (TXT/JSON)</button>
+      <button class="btn btn-blue" onclick="exportQR()">Export QR (PNG/ZIP)</button>
+      <button class="btn btn-light" onclick="exportCommitmentLog()">Export Commitment Log (CSV/JSON)</button>
+    </div>
   </div>
 
   <div id="review-zone" style="display:none;">
@@ -286,6 +364,9 @@
     // The "Regen QR" section includes Password, PIN, and Secret fields for potential future
     // full private key derivation on the client-side as hinted by the White Paper.
 
+    let currentRole = {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
+    let generatedQRData = null; // Store the single generated QR data for the result section
+
     function checkRole(pubkey) {
       if (!pubkey) return {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
       if (pubkey.startsWith('G')) return {role:"Genesis", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
@@ -294,11 +375,6 @@
       return {role:"Normal", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
     }
 
-    let mintedQR = []; // hash1 only, pending
-    let committedQR = [];
-    let commitTimestamp = "–";
-    let currentRole = checkRole("");
-
     function onPubKeyChange() {
       let pubkey = document.getElementById('pubkey').value.trim();
       currentRole = checkRole(pubkey);
@@ -306,23 +382,29 @@
       box.className = `preview-box ${currentRole.color}`;
       box.innerHTML = `Role: ${currentRole.role} &nbsp;|&nbsp; Quota: ${currentRole.quota} &nbsp;|&nbsp; Status: ${currentRole.status}`;
       
-      // UI field toggle based on role
       let batchRow = document.getElementById('batch-row');
-      let qty = document.getElementById('qty');
+      let qtyInput = document.getElementById('qty');
 
       if (currentRole.role === "Master" || currentRole.role === "Agent") {
         batchRow.style.display = "";
-        qty.value = currentRole.min;
-        qty.min = currentRole.min;
-        qty.max = currentRole.max;
+        qtyInput.min = currentRole.min;
+        qtyInput.max = currentRole.max;
+        if (parseInt(qtyInput.value) < currentRole.min || parseInt(qtyInput.value) > currentRole.max) {
+            qtyInput.value = currentRole.min; // Set to min if out of range
+        }
       } else {
         batchRow.style.display = "none";
-        qty.value = currentRole.min; // Ensure value is 1 for Normal users
-        qty.min = currentRole.min;
-        qty.max = currentRole.max;
+        qtyInput.value = currentRole.min; // Ensure value is 1 for Normal users
+        qtyInput.min = currentRole.min;
+        qtyInput.max = currentRole.max;
       }
-      let btn = document.getElementById('mint-btn');
-      btn.disabled = !currentRole.btn;
+      checkFormValidity();
+    }
+
+    function setQty(amount) {
+        const qtyInput = document.getElementById('qty');
+        qtyInput.value = amount;
+        checkFormValidity();
     }
 
     // SHA256 function
@@ -332,185 +414,208 @@
       return Array.from(new Uint8Array(hashBuffer)).map(x=>x.toString(16).padStart(2,'0')).join('');
     }
 
-    async function mintQR() {
-      let pubkey = document.getElementById('pubkey').value.trim();
-      let secret = document.getElementById('secret').value.trim();
-      let csecret = document.getElementById('csecret').value.trim();
-      let batch = document.getElementById('batch').value.trim() || '';
-      let qty = parseInt(document.getElementById('qty').value, 10);
-      
-      if (!pubkey || !secret || !csecret) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
-      if (secret !== csecret) { alert('Secret ไม่ตรงกัน!'); return; }
+    // --- Secret Validation Logic ---
+    function validateSecret() {
+        const secretInput = document.getElementById('secret');
+        const csecretInput = document.getElementById('csecret');
+        const csecretFeedback = document.getElementById('csecret-feedback');
+        const secretErrorMessage = document.getElementById('secret-error-message');
 
-      // Role-specific validation and serial ID generation
-      if (currentRole.role === "Master" || currentRole.role === "Agent") {
-        if (!batch) { alert('ต้องระบุ Batch Name สำหรับ Master/Agent'); return; }
-        if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert(`จำนวน QR ต้องอยู่ระหว่าง ${currentRole.min} ถึง ${currentRole.max} สำหรับบทบาทนี้`); return; }
-      } else { // Normal user
-        qty = 1; // Force quantity to 1 for Normal user
-      }
+        const secret = secretInput.value;
+        const csecret = csecretInput.value;
 
-      mintedQR = [];
-      for (let i = 1; i <= qty; i++) {
-        let serialId;
-        if (currentRole.role === "Master" || currentRole.role === "Agent") {
-          serialId = batch ? `${batch}_${i.toString().padStart(3, "0")}` : `QR${i.toString().padStart(3, "0")}`;
-        } else {
-          // Generate a unique serial ID for Normal users, e.g., QR_PUBKEYHASH_TIMESTAMP_INDEX
-          serialId = `QR_${pubkey.slice(0,5).toUpperCase()}_${Date.now()}_${i.toString().padStart(3, "0")}`;
+        // Reset states
+        secretInput.classList.remove('valid', 'invalid');
+        csecretInput.classList.remove('valid', 'invalid');
+        csecretFeedback.className = 'secret-feedback';
+        secretErrorMessage.classList.remove('show');
+
+        // Secret format validation (4 chars a-z lowercase)
+        const secretRegex = /^[a-z]{4}$/;
+        if (secret.length > 0 && !secretRegex.test(secret)) {
+            secretInput.classList.add('invalid');
+            // This is a global rule, not just for confirmation
+            secretErrorMessage.textContent = "Secret ต้องเป็น 4 ตัวอักษร a-z (พิมพ์เล็ก)";
+            secretErrorMessage.classList.add('show');
+            checkFormValidity();
+            return;
+        } else if (secret.length > 0) {
+            secretInput.classList.add('valid');
         }
+
+        // Confirmation validation
+        if (csecret.length > 0) {
+            if (secret === csecret) {
+                csecretInput.classList.add('valid');
+                csecretFeedback.classList.add('valid');
+                csecretFeedback.textContent = '✓';
+            } else {
+                csecretInput.classList.add('invalid');
+                csecretFeedback.classList.add('invalid');
+                csecretFeedback.textContent = '✗';
+                secretErrorMessage.textContent = "Secret ไม่ตรงกัน";
+                secretErrorMessage.classList.add('show');
+            }
+        }
+        checkFormValidity();
+    }
+
+    // --- Form Validity Check ---
+    function checkFormValidity() {
+        const pubkey = document.getElementById('pubkey').value.trim();
+        const secret = document.getElementById('secret').value.trim();
+        const csecret = document.getElementById('csecret').value.trim();
+        const batch = document.getElementById('batch').value.trim();
+        const qty = parseInt(document.getElementById('qty').value, 10);
+
+        const isSecretValid = (secret === csecret) && /^[a-z]{4}$/.test(secret);
+        const isQtyValid = !isNaN(qty) && qty >= currentRole.min && qty <= currentRole.max;
+        const isBatchValid = (currentRole.role === "Master" || currentRole.role === "Agent") ? batch !== '' : true;
+
+        const mintBtn = document.getElementById('mint-btn');
+        mintBtn.disabled = !(pubkey && isSecretValid && isQtyValid && isBatchValid);
+    }
+
+    async function generateQRBatch() {
+        // Re-validate everything before generating
+        const pubkey = document.getElementById('pubkey').value.trim();
+        const secret = document.getElementById('secret').value.trim();
+        const csecret = document.getElementById('csecret').value.trim();
+        let batch = document.getElementById('batch').value.trim() || '';
+        let qty = parseInt(document.getElementById('qty').value, 10);
+
+        if (!pubkey || !secret || !csecret) { alert('กรุณากรอก Public Key, Secret และ Confirm Secret'); return; }
+        if (secret !== csecret || !/^[a-z]{4}$/.test(secret)) { alert('Secret ไม่ถูกต้องหรือไม่ตรงกัน'); return; }
+
+        if (currentRole.role === "Master" || currentRole.role === "Agent") {
+            if (!batch) { alert('ต้องระบุ Batch Name สำหรับ Master/Agent'); return; }
+            if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert(`จำนวน QR ต้องอยู่ระหว่าง ${currentRole.min} ถึง ${currentRole.max} สำหรับบทบาทนี้`); return; }
+        } else { // Normal user
+            qty = 1; // Force quantity to 1 for Normal user
+        }
+
+        // --- Core Logic for generating QR (Focus on 1 QR for this UI) ---
+        // For a single QR, we'll use the first one if qty > 1
+        const serialId = (currentRole.role === "Master" || currentRole.role === "Agent") ?
+                         `${batch}_001` : // Example for batch, assume first slot
+                         `QR_${pubkey.slice(0,5).toUpperCase()}_${Date.now()}_001`; // Unique for Normal user
         
-        let hash1 = await sha256(pubkey + secret + serialId); // Use serialId here
-        mintedQR.push({
-          no: i,
-          hash1, serial: serialId, pubkey, batch
+        const timestamp = new Date().toISOString();
+        const nonce = Math.random().toString(36).substring(2, 8); // Example 6-char random nonce
+        const prevHash = (committedQR.length > 0 && committedQR[committedQR.length - 1].hash2) ? 
+                         committedQR[committedQR.length - 1].hash2 : '0x000000000000'; // Placeholder for prev_hash
+
+        // hash1: pubkey + secret + serialId + timestamp + nonce
+        const hash1_input = pubkey + secret + serialId + timestamp + nonce;
+        const hash1 = await sha256(hash1_input);
+
+        // hash2 (commitment hash): batch + hash1 + serialId + timestamp
+        // Using batch here as it represents the overall "master_hash/agent_hash" concept
+        const hash2_input = batch + hash1 + serialId + timestamp;
+        const hash2 = await sha256(hash2_input);
+
+        generatedQRData = {
+            serial: serialId,
+            pubkey: pubkey,
+            batch: batch,
+            hash1: hash1,
+            hash2: hash2,
+            timestamp: timestamp,
+            nonce: nonce,
+            prev_hash: prevHash
+        };
+
+        displayGeneratedQR();
+    }
+
+    function displayGeneratedQR() {
+        const qrImg = document.getElementById('generated-qr-img');
+        const qrHash1Display = document.getElementById('generated-qr-hash1');
+        const commitmentHash2Display = document.getElementById('generated-commitment-hash2');
+        const displayTimestamp = document.getElementById('display-timestamp');
+        const displayNonce = document.getElementById('display-nonce');
+        const displaySlotId = document.getElementById('display-slot-id');
+        const displayPrevHash = document.getElementById('display-prev-hash');
+        const resultSection = document.getElementById('result-section');
+
+        if (generatedQRData) {
+            let qr = new QRious({
+                value: generatedQRData.hash1,
+                size: 90,
+                background: '#fff',
+                foreground: '#2196f3'
+            });
+            qrImg.src = qr.toDataURL('image/png');
+            qrImg.style.display = 'block';
+            qrHash1Display.textContent = `QR Hash (hash1): ${generatedQRData.hash1.slice(0, 14)}...`;
+            commitmentHash2Display.textContent = `${generatedQRData.hash2.slice(0, 14)}...`;
+
+            displayTimestamp.textContent = generatedQRData.timestamp;
+            displayNonce.textContent = generatedQRData.nonce;
+            displaySlotId.textContent = generatedQRData.serial;
+            displayPrevHash.textContent = generatedQRData.prev_hash.slice(0, 6);
+
+            resultSection.style.display = 'block'; // Show result section
+        } else {
+            resultSection.style.display = 'none'; // Hide if no data
+        }
+    }
+
+    // --- Export Functions for Result Section (A. E) ---
+    function exportTicket() {
+        if (!generatedQRData) { alert('No QR data to export ticket.'); return; }
+        const d = generatedQRData;
+        const txt = `Ticket (DTC)\n-------------------\nSerial ID: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nNonce: ${d.nonce}\nPrev Hash: ${d.prev_hash}\n\n[Secret is NOT included in this ticket. Keep it safe!]`;
+        const fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
+        const blob = new Blob([txt], {type:"text/plain"});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob); link.download = fname; link.click();
+        setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
+    }
+
+    function exportQR() {
+        if (!generatedQRData) { alert('No QR data to export QR.'); return; }
+        const d = generatedQRData;
+        const qr = new QRious({
+            value: d.hash1,
+            size: 280,
+            background: '#fff',
+            foreground: '#2196f3'
         });
-      }
-      
-      updateReviewTable();
-      document.getElementById('review-zone').style.display = '';
-      document.getElementById('committed-zone').style.display = 'none';
+        const link = document.createElement('a');
+        link.href = qr.toDataURL('image/png');
+        link.download = `qr_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.png`;
+        document.body.appendChild(link);
+        link.click();
+        setTimeout(()=>{ document.body.removeChild(link); }, 1000);
     }
 
-    function updateReviewTable() {
-      const tbl = document.getElementById('review-tbl');
-      tbl.innerHTML = mintedQR.map((d, i) => `
-        <tr>
-          <td>${i+1}</td>
-          <td>${d.hash1.slice(0,14)}...</td>
-          <td>${d.serial}</td>
-          <td><span class="status-badge status-pending">Pending</span></td>
-          <td><button class="export-btn" onclick="exportQRPNG(${i})">QR PNG</button></td>
-        </tr>
-      `).join('');
+    function exportCommitmentLog() {
+        if (!generatedQRData) { alert('No QR data to export log.'); return; }
+        const d = generatedQRData;
+        const csv = "serial,qr_hash1,commitment_hash2,timestamp,nonce,prev_hash\n" +
+                    `${d.serial},${d.hash1},${d.hash2},${d.timestamp},${d.nonce},${d.prev_hash}\n`;
+        const fname = `commitment_log_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.csv`;
+        const blob = new Blob([csv], {type:"text/csv"});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob); link.download = fname; link.click();
+        setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
     }
 
-    async function exportQRPNG(idx) {
-      let d = mintedQR[idx];
-      let qr = new QRious({
-        value: d.hash1,
-        size: 280,
-        background: '#fff',
-        foreground: '#2196f3'
-      });
-      let link = document.createElement('a');
-      link.href = qr.toDataURL('image/png');
-      link.download = `qr_${d.serial}_${Date.now()}.png`;
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(()=>{ document.body.removeChild(link); }, 1000);
-    }
-
-    async function commitQRs() {
-      let now = new Date().toISOString();
-      committedQR = [];
-      for (let d of mintedQR) {
-        // According to White Paper, hash2 (commitment hash) uses master_hash/agent_hash + qr_hash + timestamp.
-        // For simplified UI, using batch + hash1 + timestamp as a placeholder.
-        // Use serial ID in hash2 calculation as well, if it represents the unique identifier in the chain.
-        let hash2 = await sha256(d.batch + d.hash1 + d.serial + now); // Added d.serial for more robustness in hash2
-        committedQR.push({
-          ...d, hash2, timestamp: now
+    function copyToClipboard(elementId) {
+        const element = document.getElementById(elementId);
+        const textToCopy = element.textContent;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            alert('คัดลอกข้อมูลแล้ว!');
+        }).catch(err => {
+            console.error('Failed to copy: ', err);
+            alert('ไม่สามารถคัดลอกได้');
         });
-      }
-      commitTimestamp = now;
-      updateCommittedTable();
-      setTimestampZone(commitTimestamp); // Set the initial timestamp to the committed time
-      
-      document.getElementById('review-zone').style.display = 'none';
-      document.getElementById('committed-zone').style.display = '';
     }
 
-    function exitQRs() {
-      mintedQR = [];
-      committedQR = [];
-      document.getElementById('review-zone').style.display = 'none';
-      document.getElementById('committed-zone').style.display = 'none';
-      setTimestampZone("–");
-      alert('ออกจากการลงทะเบียนแล้ว QR เหล่านี้จะไม่ได้รับสิทธิ์ในระบบ');
-    }
-
-    function updateCommittedTable() {
-      const tbl = document.getElementById('committed-tbl');
-      if (!committedQR.length) {
-        document.getElementById('committed-zone').style.display = 'none';
-        setTimestampZone("–");
-        return;
-      }
-      document.getElementById('committed-zone').style.display = '';
-      tbl.innerHTML = committedQR.map((d, i) => `
-        <tr>
-          <td>${i+1}</td>
-          <td>${d.hash1.slice(0,14)}...</td>
-          <td>${d.hash2.slice(0,14)}...</td>
-          <td>${d.serial}</td>
-          <td><span class="status-badge status-committed">Committed</span></td>
-          <td><button class="export-btn" onclick="exportQRPNG_Commit(${i})">QR PNG</button></td>
-          <td><button class="export-btn" onclick="exportTicket(${i})">Ticket</button></td>
-          <td><button class="export-btn" onclick="exportCSV(${i})">Log</button></td>
-        </tr>
-      `).join('');
-    }
-
-    // export PNG (หลัง commit)
-    async function exportQRPNG_Commit(idx) {
-      let d = committedQR[idx];
-      let qr = new QRious({
-        value: d.hash1,
-        size: 280,
-        background: '#fff',
-        foreground: '#2196f3'
-      });
-      let link = document.createElement('a');
-      link.href = qr.toDataURL('image/png');
-      link.download = `qr_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.png`;
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(()=>{ document.body.removeChild(link); }, 1000);
-    }
-
-    function setTimestampZone(ts) {
-      let el = document.getElementById('ts-committed');
-      el.textContent = ts || commitTimestamp || "–";
-    }
-    // Update timestamp every second if committed QRs exist
-    setInterval(()=>{
-      let el = document.getElementById('ts-committed');
-      if (!committedQR.length) { el.textContent = "–"; return; }
-      el.textContent = new Date().toISOString(); // Real-time display
-    }, 950);
-
-    // Export Ticket (หลัง commit)
-    function exportTicket(idx) {
-      let d = committedQR[idx];
-      let txt = `Ticket (DTC)\n-------------------\nSerial ID: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\n\n[Secret is NOT included in this ticket. Keep it safe!]`; // Timestamp from committed QR
-      let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
-      let blob = new Blob([txt], {type:"text/plain"});
-      let link = document.createElement('a');
-      link.href = URL.createObjectURL(blob); link.download = fname; link.click();
-      setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
-    }
-
-    // Export Log (หลัง commit)
-    function exportCSV(idx) {
-      let d = committedQR[idx];
-      let csv = "serial,commitment_hash2,timestamp,commit_time\n";
-      csv += `${d.serial},${d.hash2},${d.timestamp},${commitTimestamp}\n`; // Include commitTimestamp
-      let fname = `commitment_log_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.csv`;
-      let blob = new Blob([csv], {type:"text/csv"});
-      let link = document.createElement('a');
-      link.href = URL.createObjectURL(blob); link.download = fname; link.click();
-      setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
-    }
-
+    // --- Placeholder Functions for Regen/Audit (original from your code) ---
     async function regenQR() {
         alert('ฟังก์ชัน Regen QR ยังไม่เปิดใช้งานเต็มรูปแบบในเวอร์ชันนี้');
-        // Placeholder for future implementation based on White Paper
-        // This would involve:
-        // 1. Parsing ticket data
-        // 2. Re-deriving private key from password/PIN
-        // 3. Re-calculating hash1 and hash2 using the original data and timestamps
-        // 4. Displaying preview
         let ticketData = document.getElementById('ticket-input').value.trim();
         let regenPassword = document.getElementById('regen-password').value.trim();
         let regenPIN = document.getElementById('regen-pin').value.trim();
@@ -521,13 +626,10 @@
             return;
         }
 
-        // Dummy regen logic for demonstration (replace with actual hash logic)
         try {
-            // Simulate ticket parsing
             const qrHash1Match = ticketData.match(/QR Hash \(hash1\):\s*([a-f0-9]+)/i);
             const commitmentHash2Match = ticketData.match(/Commitment Hash \(hash2\):\s*([a-f0-9]+)/i);
             const serialIdMatch = ticketData.match(/Serial ID:\s*([a-zA-Z0-9_]+)/i);
-
 
             if (!qrHash1Match || !commitmentHash2Match || !serialIdMatch) {
                 throw new Error("Invalid ticket format or missing Serial ID.");
@@ -536,10 +638,6 @@
             const parsedHash1 = qrHash1Match[1];
             const parsedHash2 = commitmentHash2Match[1];
             const parsedSerialId = serialIdMatch[1];
-
-            // In a real scenario, you would use password, PIN, and secret to re-derive
-            // the original private key and re-calculate hash1 and hash2 to verify.
-            // For now, just display the parsed hashes.
 
             document.getElementById('regen-qr-img').style.display = 'block';
             let qr = new QRious({
@@ -561,22 +659,16 @@
 
     async function auditChain() {
         alert('ฟังก์ชัน Audit Chain ยังไม่เปิดใช้งานเต็มรูปแบบในเวอร์ชันนี้');
-        // Placeholder for future implementation based on White Paper
-        // This would involve:
-        // 1. Taking the input hash (hash2)
-        // 2. Tracing back the hash chain: QR -> Agent -> Master -> Genesis
-        // 3. Displaying the ownership and chain links
         let auditHash = document.getElementById('audit-hash').value.trim();
         if (!auditHash) {
             alert('กรุณากรอก QR/Commitment Hash เพื่อ Audit Chain');
             return;
         }
 
-        // Dummy audit results for demonstration
         let auditResults = `Audit Chain for: ${auditHash}\n\n`;
-        if (auditHash.startsWith('f2c')) { // Example for the provided image's hash
+        if (auditHash.startsWith('f2c')) {
             auditResults += `1. Current QR: ${auditHash} (Status: Pending)\n`;
-            auditResults += `   Serial ID: ABC_DEF_123 (Example Generated ID)\n\n`; // Use a generated ID here
+            auditResults += `   Serial ID: ABC_DEF_123 (Example Generated ID)\n\n`;
             auditResults += `2. Linked to Agent: maple:888 (dummy agent hash)\n`;
             auditResults += `   (Link from QR hash to agent hash via deterministic serial ID assignment)\n\n`;
             auditResults += `3. Linked to Master: MAPLE_000 (dummy master hash)\n`;
@@ -591,7 +683,10 @@
         document.getElementById('audit-results').style.display = 'block';
     }
 
-    window.onload = () => { setTimestampZone("–"); onPubKeyChange(); };
+    window.onload = () => { 
+        onPubKeyChange(); // Initialize role and quantity settings
+        validateSecret(); // Validate secret on load to set initial button state
+    };
   </script>
 </body>
 </html>
