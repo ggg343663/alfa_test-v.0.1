@@ -1,53 +1,3 @@
-<!--
-DTC Minimal UI/UX Logic
-
-- ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
-- กลุ่ม Ticket/Slot/Meta: สีเทาอ่อน #f6f7fa
-- กลุ่ม Password, PIN, Secret: สีเหลืองอ่อน #fffde7
-- กลุ่มปุ่ม Action (Generate/Export/Regen): ฟ้า, เหลือง, ฟ้าอ่อน ตามลำดับ
-- Navigation Bar: ปุ่มม่วงจาง/เทาอ่อน (Back/Home/Next) ขนาดเท่ากันทั้ง site
-
-[Section A] Key & Batch Info  
-    - Password, PIN, Secret, Batch Name, จำนวน QR (ปุ่ม +/– หรือ custom)
-    - label/hint สีเทาอ่อน #90a4ae, ขนาดเล็กใต้ input
-
-[Section B] Action  
-    - ปุ่มฟ้าใหญ่ "Generate QR Batch"
-
-[Section C] ผลลัพธ์/Preview  
-    - QR Preview Box (PNG/SVG), hash1, Commitment Box (hash2 สีฟ้าหรือเทาอ่อน)
-    - ปุ่มเหลือง Export Ticket / ฟ้า Export QR / ฟ้าอ่อน Export Log
-
-[Section D] Regen QR  
-    - ช่อง Ticket (สีเทาอ่อน), ปุ่ม Upload/QR
-    - ช่อง Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
-    - Password, PIN, Secret (เหลืองอ่อน)
-    - ปุ่ม Regen (ฟ้า)
-
-[Section E] Audit Chain  
-    - Input QR/Commitment Hash (hash2) + ปุ่ม Audit (ฟ้าเล็ก)
-    - กล่อง audit chain (เจ้าของ/ลำดับ chain), expand/collapse ได้
-
-[Section F] Navigation Bar  
-    - Back | Home | Next (ปุ่มขนาดเท่ากัน)
-
-Style  
-    - input/box สูง 36–44px, margin/padding 12–20px
-    - label/hint #90a4ae, ขนาดเล็ก
-    - ผลลัพธ์/preview/log ไม่กินพื้นที่หลัก
-    - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
-    - รองรับ mobile (responsive)
-    - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
-
-Times
-- แสดงกล่อง times เฉพาะใต้ section "Committed QR" เท่านั้น (ไม่แสดงซ้ำในแถวของตาราง)
-- Label: **Time (Now):** (หรือ Time (GitHub): ถ้าต้องการเน้นว่าใช้เวลา commit/push จริง)
-- สี #607d8b, ขนาด 1em, จัดขวาล่างของกล่องผลลัพธ์/section
-- เวลาที่แสดงในกล่องนี้จะเป็นเวลาปัจจุบัน (ISO8601) แบบ real-time ขณะใช้งาน เพื่อบอก user ว่าเวลาไหนถูกนำไปคำนวณ hash ในการ mint/regen QR (แต่เวลาที่ใช้ใน hash/log จริง จะเป็นเวลาขณะกดปุ่มเท่านั้น)
-- หากยังไม่มีการ commit QR (ยังไม่มีผลลัพธ์) ให้ขึ้นเป็น "–"
-- เมื่อ export (Ticket, QR, Log ฯลฯ) ต้องแถม timestamp ที่ใช้จริง (ตอน commit QR) ในไฟล์เสมอ  
-  (timestamp ที่ export อาจเหลื่อมกับเวลาที่แสดงบน UI เล็กน้อย แต่ใช้ค่าตอน commit เท่านั้น)
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,16 +8,21 @@ Times
     body { font-family: Arial,sans-serif; background: #f5f7fa; max-width: 700px; margin: 2.5em auto; color: #222; }
     h2 { color: #247551; text-align: center; margin-bottom: 1.5em; }
     .section { border-radius: 16px; margin-bottom: 1.5em; padding: 1.3em 1.2em; box-shadow: 0 2px 9px #edf1f6; }
-    .meta-group { background: #f6f7fa; }
-    .secret-group { background: #fffde7; }
-    .action-group { background: #e3f2fd; text-align: center; }
-    .committed-group { background: #e3f2fd; }
+
+    /* Custom Section Colors */
+    .meta-group { background: #f6f7fa; } /* สีเทาอ่อนสำหรับ Ticket/Slot/Meta */
+    .secret-group { background: #fffde7; } /* สีเหลืองอ่อนสำหรับ Password, PIN, Secret */
+    .action-group { background: #e3f2fd; text-align: center; } /* สีฟ้าอ่อนสำหรับ Action */
+    .committed-group { background: #e3f2fd; } /* สีฟ้าอ่อนสำหรับ Committed QR */
+    .regen-group { background: #f6f7fa; } /* สีเทาอ่อนสำหรับ Regen QR */
+    .audit-group { background: #f6f7fa; } /* สีเทาอ่อนสำหรับ Audit Chain */
+
     .input-row { margin-bottom: 1.1em; }
     label { font-weight: bold; color: #247551; display:block; }
     .hint { color: #90a4ae; font-size: 0.94em; margin-top: 2px; }
     input[type="text"], input[type="password"], input[type="number"] {
       width: 100%; padding:0.7em 0.8em; border:1px solid #b0bec5; border-radius:8px;
-      font-size:1em; background: #f9fafb; margin-top: 0.18em; box-sizing: border-box; height: 44px;
+      font-size:1em; background: #f9fafb; margin-top: 0.18em; box-sizing: border-box; height: 44px; /* input/box สูง 44px */
     }
     .btn {
       margin:0.3em 0.7em 0.3em 0; padding:0.65em 1.5em; border-radius:15px;
@@ -75,11 +30,13 @@ Times
       box-shadow: 0 1px 4px #dde;
       transition: background 0.2s;
     }
-    .btn-blue    { background:#2196f3; color:#fff; }
-    .btn-yellow  { background:#ffd600; color:#333; }
-    .btn-light   { background:#e3f2fd; color:#247551; }
+    /* Button Colors */
+    .btn-blue    { background:#2196f3; color:#fff; } /* ฟ้า */
+    .btn-yellow  { background:#ffd600; color:#333; } /* เหลือง */
+    .btn-light   { background:#e3f2fd; color:#247551; } /* ฟ้าอ่อน */
     .btn-red     { background:#ff5252; color:#fff; }
     .btn-green   { background:#4caf50; color:#fff; }
+
     .preview-box {
       border-radius: 10px;
       padding: 0.9em 1em;
@@ -126,23 +83,61 @@ Times
     }
     .nav-btn {
       background: #ede7f6; color: #4a4582; border: none; border-radius: 10px;
-      padding: 0.7em 1.5em; font-size: 1.08em; font-weight: 600; min-width: 95px;
+      padding: 0.7em 1.5em; font-size: 1.08em; font-weight: 600; min-width: 95px; /* ปุ่มขนาดเท่ากัน */
       transition: background 0.2s;
       cursor: pointer;
     }
     .nav-btn:hover { background: #d1c4e9; }
+
+    /* Specific styles for Regen QR inputs */
+    #ticket-input, #slot-id, #prev-hash, #timestamp-regen, #nonce-regen {
+        background: #f9fafb; /* Consistent with other inputs */
+    }
+
+    /* Adjustments for preview boxes to match UI/UX spec */
+    .qr-preview-box, .commitment-hash-box {
+        border-radius: 10px;
+        padding: 0.9em 1em;
+        margin-bottom: 0.8em; /* Slightly less margin for tighter layout */
+        font-size: 1.06em;
+        font-weight: bold;
+        box-shadow: 0 1px 7px #e8eaf6;
+        background: #e3f2fd; /* Default light blue, can change based on content */
+        color: #1565c0; /* Default blue text */
+    }
+    .qr-preview-box {
+        height: 120px; /* Example fixed height for QR preview */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow-y: auto; /* Scrollable if many QRs */
+        flex-direction: column;
+    }
+    .qr-preview-box img {
+        max-width: 90px; /* Small QR preview */
+        max-height: 90px;
+    }
+    .commitment-hash-box {
+        background: #f6f7fa; /* สีเทาอ่อนตาม UI/UX */
+        color: #90a4ae; /* สีเทาอ่อนตาม UI/UX */
+        word-break: break-all;
+    }
+    /* Ensure no prominent display for QR Preview Box and Commitment Box if empty */
+    .qr-preview-box:empty::before, .commitment-hash-box:empty::before {
+        content: "No QR Preview";
+        color: #b0bec5;
+        font-weight: normal;
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
 </head>
 <body>
   <h2> Generate QR Hash (Double Hash Function)</h2>
 
-  <!-- Preview Box: Role, Quota, Status -->
   <div id="role-preview" class="preview-box preview-none">
     Role: – &nbsp;|&nbsp; Quota: – &nbsp;|&nbsp; Status: –
   </div>
 
-  <!-- Section A: Key & Batch Info (Meta) -->
   <div class="section meta-group">
     <div class="input-row">
       <label>Public Key</label>
@@ -166,7 +161,6 @@ Times
     </div>
   </div>
 
-  <!-- Section B: Secret (Password/Secret) -->
   <div class="section secret-group">
     <div class="input-row">
       <label>Secret</label>
@@ -180,12 +174,10 @@ Times
     </div>
   </div>
 
-  <!-- Section C: Action -->
   <div class="section action-group">
     <button id="mint-btn" class="btn btn-blue" onclick="mintQR()" disabled>Generate QR (Mint)</button>
   </div>
 
-  <!-- Section D: Review/Commit/Exit -->
   <div id="review-zone" style="display:none;">
     <div class="warn">
       <b>QR Minted (Pending Registration):</b><br>
@@ -212,7 +204,6 @@ Times
     </table>
   </div>
 
-  <!-- Section E: Committed QR Result -->
   <div id="committed-zone" class="table-zone" style="display:none;">
     <div class="section committed-group">
       <div class="table-title">Committed QR</div>
@@ -232,13 +223,63 @@ Times
         <tbody id="committed-tbl"></tbody>
       </table>
       <div class="timestamp-zone">
-        <span class="label-timestamp">Time:</span>
+        <span class="label-timestamp">Time (Now):</span>
         <span id="ts-committed" class="timestamp-value">–</span>
       </div>
     </div>
   </div>
 
-  <!-- Navigation Bar -->
+  <div class="section regen-group" style="margin-top: 2em;">
+    <div class="table-title">Regen QR</div>
+    <div class="input-row">
+      <label>Ticket (or Upload)</label>
+      <input type="text" id="ticket-input" placeholder="Paste Ticket data or use Upload button">
+      <div class="hint">Paste raw ticket data or upload ticket file.</div>
+    </div>
+    <div style="text-align: right; margin-bottom: 1.1em;">
+      <button class="btn btn-light">Upload Ticket</button>
+    </div>
+    <div class="input-row">
+      <label>Password</label>
+      <input type="password" id="regen-password" placeholder="Re-enter your password">
+    </div>
+    <div class="input-row">
+      <label>PIN</label>
+      <input type="password" id="regen-pin" placeholder="Re-enter your PIN">
+    </div>
+    <div class="input-row">
+      <label>Secret</label>
+      <input type="password" id="regen-secret" placeholder="Re-enter your secret">
+      <div class="hint">Secret is required for regeneration.</div>
+    </div>
+    <div style="text-align:center; margin-top: 1.5em;">
+      <button class="btn btn-blue" onclick="regenQR()">Regen QR</button>
+    </div>
+    <div id="regen-preview" style="display:none; margin-top: 1.5em;">
+        <div class="qr-preview-box">
+            <img id="regen-qr-img" style="display:none;">
+            <span id="regen-qr-hash1" style="font-size:0.9em; color:#607d8b;"></span>
+        </div>
+        <div class="commitment-hash-box">
+            <span id="regen-commitment-hash2" style="font-size:0.9em;"></span>
+        </div>
+    </div>
+  </div>
+
+  <div class="section audit-group" style="margin-top: 2em;">
+    <div class="table-title">Audit Chain</div>
+    <div class="input-row">
+      <label>QR/Commitment Hash (hash2)</label>
+      <input type="text" id="audit-hash" placeholder="Paste QR or Commitment hash (hash2)">
+    </div>
+    <div style="text-align:center; margin-top: 1.5em;">
+      <button class="btn btn-blue" onclick="auditChain()">Audit Chain</button>
+    </div>
+    <div id="audit-results" style="display:none; margin-top: 1.5em; background:#f9fafb; padding:1em; border-radius:10px; border:1px solid #e0e0e0;">
+      <pre id="audit-pre" style="white-space: pre-wrap; word-break: break-all; font-size:0.9em; color:#333;"></pre>
+    </div>
+  </div>
+
   <div class="nav-bar">
     <button class="nav-btn" onclick="window.history.back()">Back</button>
     <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
@@ -246,11 +287,17 @@ Times
   </div>
 
   <script>
+    [span_0](start_span)// Note: The UI/UX spec mentions "Password" and "PIN" separately, but the White Paper[span_0](end_span)
+    [span_1](start_span)// combines them into a single private key derivation process (SHA256(password:PIN))[span_1](end_span).
+    [span_2](start_span)// For this UI, I've kept "Secret" as the primary input for minting/regen for simplicity[span_2](end_span).
+    // The "Regen QR" section includes Password, PIN, and Secret fields for potential future
+    [span_3](start_span)// full private key derivation on the client-side as hinted by the White Paper[span_3](end_span).
+
     function checkRole(pubkey) {
       if (!pubkey) return {role:"–", quota:"–", status:"–", color:"preview-none", btn:false, min:1, max:1};
-      if (/^G/.test(pubkey)) return {role:"Genesis", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
-      if (/^M/.test(pubkey)) return {role:"Master", quota:"100", status:"Ready", color:"preview-ready", btn:true, min:1, max:100};
-      if (/^A/.test(pubkey)) return {role:"Agent", quota:"5,000", status:"Ready", color:"preview-ready", btn:true, min:1, max:5000};
+      if (pubkey.startsWith('G')) return {role:"Genesis", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
+      if (pubkey.startsWith('M')) return {role:"Master", quota:"100", status:"Ready", color:"preview-ready", btn:true, min:1, max:100};
+      if (pubkey.startsWith('A')) return {role:"Agent", quota:"5,000", status:"Ready", color:"preview-ready", btn:true, min:1, max:5000};
       return {role:"Normal", quota:"1", status:"Ready", color:"preview-ready", btn:true, min:1, max:1};
     }
 
@@ -265,11 +312,13 @@ Times
       let box = document.getElementById('role-preview');
       box.className = `preview-box ${currentRole.color}`;
       box.innerHTML = `Role: ${currentRole.role} &nbsp;|&nbsp; Quota: ${currentRole.quota} &nbsp;|&nbsp; Status: ${currentRole.status}`;
-      // UI field toggle
+      
+      // UI field toggle based on role
       let batchRow = document.getElementById('batch-row');
       let qtyRow = document.getElementById('qty-row');
       let serialRow = document.getElementById('serial-row');
       let qty = document.getElementById('qty');
+
       if (currentRole.role === "Master" || currentRole.role === "Agent") {
         batchRow.style.display = "";
         qtyRow.style.display = "";
@@ -281,12 +330,15 @@ Times
         batchRow.style.display = "none";
         qtyRow.style.display = "none";
         serialRow.style.display = "";
+        qty.value = currentRole.min; // Ensure value is 1 for Normal users
+        qty.min = currentRole.min;
+        qty.max = currentRole.max;
       }
       let btn = document.getElementById('mint-btn');
       btn.disabled = !currentRole.btn;
     }
 
-    // SHA256
+    [span_4](start_span)// SHA256 function[span_4](end_span)
     async function sha256(str) {
       const msgBuffer = new TextEncoder().encode(str);
       const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
@@ -300,27 +352,31 @@ Times
       let batch = document.getElementById('batch').value.trim() || '';
       let serial = document.getElementById('serial') ? document.getElementById('serial').value.trim() : '';
       let qty = parseInt(document.getElementById('qty') ? document.getElementById('qty').value : "1", 10);
-      if (!pubkey || !secret || !csecret) { alert('Fill all fields'); return; }
-      if (secret !== csecret) { alert('Secret mismatch!'); return; }
+      
+      if (!pubkey || !secret || !csecret) { alert('กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
+      if (secret !== csecret) { alert('Secret ไม่ตรงกัน!'); return; }
+
+      [span_5](start_span)// Role-specific validation[span_5](end_span)
       if (currentRole.role === "Master" || currentRole.role === "Agent") {
-        if (!batch) { alert('Batch required'); return; }
-        if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert('Quantity out of range.'); return; }
-      } else {
-        if (!serial) { alert('Enter serial'); return; }
-        qty = 1;
+        if (!batch) { alert('ต้องระบุ Batch Name'); return; }
+        if (isNaN(qty) || qty < currentRole.min || qty > currentRole.max) { alert(`จำนวน QR ต้องอยู่ระหว่าง ${currentRole.min} ถึง ${currentRole.max} สำหรับบทบาทนี้`); return; }
+      [span_6](start_span)} else { // Normal user[span_6](end_span)
+        if (!serial) { alert('ต้องระบุ Slot/Serial'); return; }
+        qty = 1; [span_7](start_span)// Force quantity to 1 for Normal user[span_7](end_span)
       }
+
       mintedQR = [];
       for (let i = 1; i <= qty; i++) {
         let slot = (currentRole.role === "Master" || currentRole.role === "Agent")
-          ? ('QR' + i.toString().padStart(3, "0"))
+          ? (batch ? `${batch}_${i.toString().padStart(3, "0")}` : `QR${i.toString().padStart(3, "0")}`) // Use batch name if available, otherwise generic QRxxx
           : serial;
-        let hash1 = await sha256(pubkey + secret + slot);
+        let hash1 = await sha256(pubkey + secret + slot); [span_8](start_span)// Simplified hash for UI display[span_8](end_span)
         mintedQR.push({
           no: i,
           hash1, serial: slot, pubkey, batch
         });
       }
-      // Show review zone
+      
       updateReviewTable();
       document.getElementById('review-zone').style.display = '';
       document.getElementById('committed-zone').style.display = 'none';
@@ -341,14 +397,12 @@ Times
 
     async function exportQRPNG(idx) {
       let d = mintedQR[idx];
-      // สร้าง QR image ด้วย qrious
       let qr = new QRious({
         value: d.hash1,
         size: 280,
         background: '#fff',
         foreground: '#2196f3'
       });
-      // สร้าง <a> download image
       let link = document.createElement('a');
       link.href = qr.toDataURL('image/png');
       link.download = `qr_${d.serial}_${Date.now()}.png`;
@@ -361,6 +415,8 @@ Times
       let now = new Date().toISOString();
       committedQR = [];
       for (let d of mintedQR) {
+        [span_9](start_span)// According to White Paper, hash2 (commitment hash) uses master_hash/agent_hash + qr_hash + timestamp[span_9](end_span).
+        // For simplified UI, using batch + hash1 + timestamp as a placeholder.
         let hash2 = await sha256(d.batch + d.hash1 + now);
         committedQR.push({
           ...d, hash2, timestamp: now
@@ -368,8 +424,8 @@ Times
       }
       commitTimestamp = now;
       updateCommittedTable();
-      setTimestampZone();
-      // Hide review zone
+      setTimestampZone(commitTimestamp); // Set the initial timestamp to the committed time
+      
       document.getElementById('review-zone').style.display = 'none';
       document.getElementById('committed-zone').style.display = '';
     }
@@ -426,16 +482,17 @@ Times
       let el = document.getElementById('ts-committed');
       el.textContent = ts || commitTimestamp || "–";
     }
+    // Update timestamp every second if committed QRs exist
     setInterval(()=>{
       let el = document.getElementById('ts-committed');
       if (!committedQR.length) { el.textContent = "–"; return; }
-      el.textContent = new Date().toISOString();
+      [span_10](start_span)el.textContent = new Date().toISOString(); // Real-time display[span_10](end_span)
     }, 950);
 
     // Export Ticket (หลัง commit)
     function exportTicket(idx) {
       let d = committedQR[idx];
-      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\nTime: ${commitTimestamp}\n\n[Secret is NOT included in this ticket. Keep it safe!]`;
+      let txt = `Ticket (DTC)\n-------------------\nSlot/Serial: ${d.serial}\nPublic Key: ${d.pubkey}\nBatch: ${d.batch}\nQR Hash (hash1): ${d.hash1}\nCommitment Hash (hash2): ${d.hash2}\nTimestamp: ${d.timestamp}\n\n[Secret is NOT included in this ticket. Keep it safe!]`; [span_11](start_span)// Timestamp from committed QR[span_11](end_span)
       let fname = `ticket_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.txt`;
       let blob = new Blob([txt], {type:"text/plain"});
       let link = document.createElement('a');
@@ -447,12 +504,97 @@ Times
     function exportCSV(idx) {
       let d = committedQR[idx];
       let csv = "serial,commitment_hash2,timestamp,commit_time\n";
-      csv += `${d.serial},${d.hash2},${d.timestamp},${commitTimestamp}\n`;
+      csv += `${d.serial},${d.hash2},${d.timestamp},${commitTimestamp}\n`; [span_12](start_span)// Include commitTimestamp[span_12](end_span)
       let fname = `commitment_log_${d.serial}_${d.timestamp.replace(/[:.]/g,"-")}.csv`;
       let blob = new Blob([csv], {type:"text/csv"});
       let link = document.createElement('a');
       link.href = URL.createObjectURL(blob); link.download = fname; link.click();
       setTimeout(()=>URL.revokeObjectURL(link.href), 2000);
+    }
+
+    async function regenQR() {
+        alert('ฟังก์ชัน Regen QR ยังไม่เปิดใช้งานเต็มรูปแบบในเวอร์ชันนี้');
+        [span_13](start_span)// Placeholder for future implementation based on White Paper[span_13](end_span)
+        // This would involve:
+        [span_14](start_span)// 1. Parsing ticket data[span_14](end_span)
+        [span_15](start_span)// 2. Re-deriving private key from password/PIN[span_15](end_span)
+        [span_16](start_span)// 3. Re-calculating hash1 and hash2 using the original data and timestamps[span_16](end_span)
+        [span_17](start_span)// 4. Displaying preview[span_17](end_span)
+        let ticketData = document.getElementById('ticket-input').value.trim();
+        let regenPassword = document.getElementById('regen-password').value.trim();
+        let regenPIN = document.getElementById('regen-pin').value.trim();
+        let regenSecret = document.getElementById('regen-secret').value.trim();
+
+        if (!ticketData || !regenPassword || !regenPIN || !regenSecret) {
+            alert('กรุณากรอกข้อมูล Ticket, Password, PIN และ Secret ให้ครบถ้วนสำหรับการ Regen QR');
+            return;
+        }
+
+        // Dummy regen logic for demonstration (replace with actual hash logic)
+        try {
+            // Simulate ticket parsing
+            const qrHash1Match = ticketData.match(/QR Hash \(hash1\):\s*([a-f0-9]+)/i);
+            const commitmentHash2Match = ticketData.match(/Commitment Hash \(hash2\):\s*([a-f0-9]+)/i);
+
+            if (!qrHash1Match || !commitmentHash2Match) {
+                throw new Error("Invalid ticket format.");
+            }
+
+            const parsedHash1 = qrHash1Match[1];
+            const parsedHash2 = commitmentHash2Match[1];
+
+            // In a real scenario, you would use password, PIN, and secret to re-derive
+            // the original private key and re-calculate hash1 and hash2 to verify.
+            // For now, just display the parsed hashes.
+
+            document.getElementById('regen-qr-img').style.display = 'block';
+            let qr = new QRious({
+                value: parsedHash1,
+                size: 90,
+                background: '#fff',
+                foreground: '#2196f3'
+            });
+            document.getElementById('regen-qr-img').src = qr.toDataURL('image/png');
+            document.getElementById('regen-qr-hash1').textContent = `QR Hash: ${parsedHash1.slice(0, 14)}...`;
+            document.getElementById('regen-commitment-hash2').textContent = `Commitment Hash: ${parsedHash2.slice(0, 14)}...`;
+            document.getElementById('regen-preview').style.display = 'block';
+
+        } catch (error) {
+            alert(`เกิดข้อผิดพลาดในการ Regen QR: ${error.message}`);
+            document.getElementById('regen-preview').style.display = 'none';
+        }
+    }
+
+    async function auditChain() {
+        alert('ฟังก์ชัน Audit Chain ยังไม่เปิดใช้งานเต็มรูปแบบในเวอร์ชันนี้');
+        [span_18](start_span)// Placeholder for future implementation based on White Paper[span_18](end_span)
+        // This would involve:
+        [span_19](start_span)// 1. Taking the input hash (hash2)[span_19](end_span)
+        [span_20](start_span)// 2. Tracing back the hash chain: QR -> Agent -> Master -> Genesis[span_20](end_span)
+        [span_21](start_span)// 3. Displaying the ownership and chain links[span_21](end_span)
+        let auditHash = document.getElementById('audit-hash').value.trim();
+        if (!auditHash) {
+            alert('กรุณากรอก QR/Commitment Hash เพื่อ Audit Chain');
+            return;
+        }
+
+        // Dummy audit results for demonstration
+        let auditResults = `Audit Chain for: ${auditHash}\n\n`;
+        [span_22](start_span)if (auditHash.startsWith('f2c')) { // Example for the provided image's hash[span_22](end_span)
+            auditResults += `1. [span_23](start_span)Current QR: ${auditHash} (Status: Pending)[span_23](end_span)\n`;
+            [span_24](start_span)auditResults += `   Slot/Serial: 1000[span_24](end_span)\n\n`;
+            auditResults += `2. [span_25](start_span)Linked to Agent: maple:888 (dummy agent hash)[span_25](end_span)\n`;
+            [span_26](start_span)[span_27](start_span)auditResults += `   (Link from QR hash to agent hash via deterministic slot assignment)[span_26](end_span)[span_27](end_span)\n\n`;
+            auditResults += `3. [span_28](start_span)Linked to Master: MAPLE_000 (dummy master hash)[span_28](end_span)\n`;
+            [span_29](start_span)auditResults += `   (Link from agent hash to master hash)[span_29](end_span)\n\n`;
+            auditResults += `4. [span_30](start_span)Linked to Genesis: GENESIS_000 (0x0000...)[span_30](end_span)\n`;
+            [span_31](start_span)auditResults += `   (Root of the chain)[span_31](end_span)`;
+        } else {
+            auditResults += "No audit path found for this hash in the current dummy data.";
+        }
+        
+        document.getElementById('audit-pre').textContent = auditResults;
+        document.getElementById('audit-results').style.display = 'block';
     }
 
     window.onload = () => { setTimestampZone("–"); onPubKeyChange(); };
