@@ -3,593 +3,185 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Generate QR Hash - DTC: Magic Chain System</title>
+  <title>Mint QR Hash (Double Hash Function) - DTC</title>
   <style>
-    /* Base Styles */
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 2em auto;
-      padding: 1em;
-      background: #f5f7fa;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #219150;
-      margin-bottom: 1.2em;
-      letter-spacing: 0.02em;
-    }
-    .section-block {
-      margin: 1.1em 0;
-      padding: 1em;
-      border-radius: 12px;
-      box-shadow: 0 2px 9px #edf1f6;
-      background: #fff;
-    }
-    .block-title {
-      font-size: 1.07em;
-      font-weight: bold;
-      margin-bottom: 0.68em;
-      padding-bottom: 0.5em;
-      border-bottom: 1px solid rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin-bottom: 0.5em;
-      font-weight: bold;
-      color: #555;
-    }
-    input[type="text"],
-    input[type="password"],
-    input[type="number"] {
-      width: calc(100% - 1.6em); /* Account for padding */
-      padding: 0.8em;
-      margin-bottom: 1em;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1em;
-    }
-    input:disabled { /* Style for disabled inputs */
-      background-color: #e9ecef;
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .hint {
-      font-size: 0.9em;
-      color: #777;
-      margin-top: -0.8em;
-      margin-bottom: 1em;
-      display: block;
-    }
-
-    /* Styles for Role, Quota, Status info */
-    .info-bar {
-      text-align: center;
-      margin-bottom: 1.5em;
-      font-size: 1em;
-      color: #555;
-    }
-    .info-bar span {
-      font-weight: bold;
-      color: #219150;
-      margin: 0 0.5em;
-    }
-
-    /* Styles for QR quantity selection */
-    .quantity-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8em;
-      justify-content: center;
-      margin-top: 1em;
-      margin-bottom: 1em;
-    }
-    .quantity-options button {
-      padding: 0.8em 1.2em;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background: #f0f0f0;
-      cursor: pointer;
-      font-size: 0.95em;
-      transition: background 0.2s, border-color 0.2s, opacity 0.2s;
-    }
-    .quantity-options button:hover:not(:disabled) {
-      background: #e0e0e0;
-      border-color: #aaa;
-    }
-    .quantity-options button.selected {
-      background: #2196f3;
-      color: #fff;
-      border-color: #2196f3;
-    }
-    .quantity-options button:disabled { /* Style for disabled buttons */
-      opacity: 0.4;
-      cursor: not-allowed;
-      background: #f0f0f0;
-      border-color: #ccc;
-      color: #777;
-    }
-    .quantity-options button.selected:disabled { /* Selected button when disabled */
-      background: #89c5f8;
-      color: #eee;
-    }
-
-    .quantity-input-container {
-      margin-bottom: 1em;
-    }
-    .quantity-input-container input {
-      margin-bottom: 0.5em;
-    }
-
-    /* Main Button */
-    .main-button {
-      display: block;
-      width: 100%;
-      padding: 1em 0.5em;
-      margin-top: 1.5em;
-      margin-bottom: 1.5em;
-      color: #fff;
-      font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.15em;
-      text-align: center;
-      text-decoration: none;
-      background: #2196f3;
-      box-shadow: 0 2px 7px rgba(33,150,243,0.3);
-      cursor: pointer;
-      transition: background 0.13s, filter 0.13s, opacity 0.13s;
-    }
-    .main-button:hover:not(:disabled) {
-      filter: brightness(0.93);
-    }
-    .main-button:disabled {
-      background: #b0d8f7;
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    /* QR Preview Section (New) */
-    .qr-preview-section {
-      display: none; /* Hidden by default */
-      margin-top: 2em;
-    }
-    .qr-preview-item {
-      margin-bottom: 1em;
-      padding-bottom: 0.8em;
-      border-bottom: 1px dashed #eee;
-    }
-    .qr-preview-item:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-    }
-    .qr-preview-item strong {
-      display: block;
-      margin-bottom: 0.5em;
-      color: #219150;
-    }
-    .qr-preview-hash-container {
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-    }
-    .qr-preview-hash {
-      background: #e0f2f7;
-      border: 1px solid #cce5ed;
-      border-radius: 5px;
-      padding: 0.8em;
-      flex-grow: 1; /* Allows it to take available space */
-      font-size: 0.9em;
-      color: #333;
-      word-break: break-all;
-      min-height: 1.5em;
-      display: flex;
-      align-items: center;
-      user-select: all; /* Allows easy selection */
-    }
-    .copy-btn {
-      padding: 0.6em 0.9em;
-      border: none;
-      border-radius: 5px;
-      background: #2196f3;
-      color: #fff;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.13s;
-      flex-shrink: 0; /* Prevents button from shrinking */
-    }
-    .copy-btn:hover {
-      background: #1976d2;
-    }
-    .copy-all-btn {
-        width: 100%;
-        margin-top: 1.5em;
-        padding: 0.8em 1.2em;
-        background: #007bff; /* Bootstrap primary blue */
-    }
-    .copy-all-btn:hover {
-        background: #0056b3;
-    }
-
-    /* Audit Chain Action Buttons (for preview section) */
-    .audit-action-buttons {
-      display: flex;
-      gap: 1em;
-      margin-top: 1.5em;
-    }
-    .audit-action-buttons button {
-      flex: 1;
-      padding: 0.8em 0.5em;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.09em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.13s, filter 0.13s;
-      color: #fff;
-    }
-    .audit-action-buttons .exit-btn {
-      background: #dc3545;
-    }
-    .audit-action-buttons .exit-btn:hover {
-      filter: brightness(0.9);
-    }
-    .audit-action-buttons .commit-btn {
-      background: #28a745;
-    }
-    .audit-action-buttons .commit-btn:hover {
-      filter: brightness(0.9);
-    }
-
-    /* Bottom Navigation Buttons */
-    .navigation-buttons {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 2em;
-    }
-    .navigation-buttons button {
-      padding: 0.8em 1.5em;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      font-weight: bold;
-      cursor: pointer;
-      background: #e0e0e0;
-      color: #333;
-      transition: background 0.13s;
-    }
-    .navigation-buttons button:hover {
-      background: #d0d0d0;
-    }
-
-    /* Responsive adjustments for mobile devices */
-    @media (max-width: 600px) {
-      body { margin: 0.4em; padding: 0.07em;}
-      .section-block { padding: 0.7em 0.2em;}
-      input[type="text"], input[type="password"], input[type="number"] {
-        width: calc(100% - 1.2em);
-        padding: 0.6em;
-      }
-      .main-button { font-size: 1.05em; padding: 0.8em 0.4em; }
-      .quantity-options { flex-direction: row; justify-content: space-between; }
-      .quantity-options button { flex-basis: calc(33% - 0.8em); padding: 0.6em 0.8em; font-size: 0.9em; }
-      .audit-action-buttons { flex-direction: column; gap: 0.5em; }
-    }
-
+    body { font-family: Arial, sans-serif; max-width: 700px; margin: 2em auto; padding: 1em; background: #f5f7fa; color: #333; }
+    h1 { text-align: center; color: #219150; }
+    .section-block { margin: 1.1em 0; padding: 1em; border-radius: 12px; box-shadow: 0 2px 9px #edf1f6; background: #fff; }
+    label { font-weight: bold; margin-top: 1em; display: block; }
+    input[type="text"], input[type="number"], input[type="password"] { width: 100%; padding: 0.7em; margin: 0.5em 0 1em 0; border-radius: 5px; border: 1px solid #ccc; font-size: 1em; }
+    .hint { font-size: 0.92em; color: #777; margin-bottom: 1em; }
+    .info-bar { text-align: center; margin-bottom: 1.1em; font-size: 1em; color: #555; }
+    .info-bar span { font-weight: bold; color: #219150; margin: 0 0.3em; }
+    .quantity-options { display: flex; gap: 0.8em; justify-content: center; margin-bottom: 1em; }
+    .quantity-options button { padding: 0.8em 1.2em; border: 1px solid #ccc; border-radius: 5px; background: #f0f0f0; cursor: pointer; font-size: 1em; transition: background 0.2s, border-color 0.2s; }
+    .quantity-options button.selected { background: #2196f3; color: #fff; border-color: #2196f3; }
+    .quantity-options button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .main-button { width: 100%; padding: 1em 0; margin: 1.4em 0 1em 0; color: #fff; font-weight: bold; border: none; border-radius: 8px; font-size: 1.15em; background: #2196f3; cursor: pointer; transition: background 0.13s; }
+    .main-button:disabled { background: #b0d8f7; cursor: not-allowed; }
+    .preview-section { background: #e7f4ea; border: 1px solid #b0d9ca; border-radius: 6px; padding: 1em; margin: 1.5em 0 1em 0; }
+    .preview-title { font-weight: bold; color: #297f43; margin-bottom: 0.6em; }
+    .preview-hash { font-size: 1.05em; word-break: break-all; margin: 0.25em 0 0.9em 0;}
+    .audit-action-buttons { display: flex; gap: 1em; margin-top: 1em;}
+    .audit-action-buttons button { flex: 1; padding: 0.8em 0.5em; border: none; border-radius: 8px; font-size: 1.09em; font-weight: bold; color: #fff; cursor: pointer; transition: background 0.13s;}
+    .exit-btn { background: #dc3545; }
+    .commit-btn { background: #28a745; }
+    @media (max-width: 600px) { body { margin: 0.5em; padding: 0.09em; } .section-block { padding: 0.7em 0.25em;} .main-button { font-size: 1.04em; } }
   </style>
 </head>
 <body>
-  <h1>Generate QR Hash (Double Hash Function)</h1>
-
+  <h1>Mint QR Hash (Double Hash Function)</h1>
   <div class="info-bar">
-    Role: <span id="role-display">Normal</span> | Quota: <span id="quota-display">1000</span> | Status: <span id="status-display">Available</span>
+    Role: <span id="role-display">Normal</span> |
+    Quota: <span id="quota-display">1000</span> |
+    Status: <span id="status-display">Available</span>
   </div>
 
-  <div id="mint-section">
-    <div class="section-block">
-      <div class="block-title">Public Key</div>
-      <input type="text" id="publicKeyInput" value="000000004a8d87ffd4c6e7a29f1221b13e81" readonly>
-      <span class="hint">Paste the public key generated from the "Generate Key" page.</span>
-    </div>
-
-    <div class="section-block">
-      <div class="block-title">Mint QR Hash / Quantity (QTY)</div>
-      <div class="quantity-input-container">
-        <input type="number" id="qrQuantityInput" value="1" min="1" onchange="updateQuantityButtons()">
-        <span class="hint">Select from popular options or enter a custom quantity.</span>
-      </div>
-      <div class="quantity-options">
-        <button onclick="selectQuantity(100)">100</button>
-        <button onclick="selectQuantity(500)">500</button>
-        <button onclick="selectQuantity(1000)">1000</button>
-        <button onclick="selectQuantity(3000)">3000</button>
-        <button onclick="selectQuantity(5000)">5000</button>
-      </div>
-    </div>
-
-    <div class="section-block">
-      <div class="block-title">Secret</div>
-      <label for="secretInput">For secure minting (keep private)</label>
-      <input type="password" id="secretInput" placeholder="4 lowercase a-z characters">
-      <label for="confirmSecretInput">Confirm Secret</label>
-      <input type="password" id="confirmSecretInput" placeholder="Enter secret again">
-      <span class="hint">Secret should be 4 lowercase a-z characters.</span>
-    </div>
-
-    <button class="main-button" id="generateQrBatchBtn" onclick="generateQRBatch()">Generate QR Batch</button>
+  <div class="section-block">
+    <label for="publicKeyInput">Public Key</label>
+    <input type="text" id="publicKeyInput" placeholder="Paste your public key">
+    <div class="hint">Use the public key from the "Generate Key" page (64 hex).</div>
   </div>
 
-  <div id="qr-preview-section" class="section-block qr-preview-section">
-    <div class="block-title">Generated Hashes</div>
-
-    <div class="qr-preview-item">
-      <strong>QR Hash (hash1)</strong>
-      <div class="qr-preview-hash-container">
-        <div class="qr-preview-hash" id="hash1Display"></div>
-        <button class="copy-btn" onclick="copyHash('hash1Display')">Copy</button>
-      </div>
+  <div class="section-block">
+    <label for="qrQuantityInput">Quantity (QTY)</label>
+    <input type="number" id="qrQuantityInput" value="1" min="1" max="5000">
+    <div class="quantity-options">
+      <button onclick="selectQuantity(1)">1</button>
+      <button onclick="selectQuantity(100)">100</button>
+      <button onclick="selectQuantity(500)">500</button>
+      <button onclick="selectQuantity(1000)">1000</button>
+      <button onclick="selectQuantity(3000)">3000</button>
+      <button onclick="selectQuantity(5000)">5000</button>
     </div>
+    <div class="hint" id="quota-hint"></div>
+  </div>
 
-    <div class="qr-preview-item">
-      <strong>Commitment Hash (hash2)</strong>
-      <div class="qr-preview-hash-container">
-        <div class="qr-preview-hash" id="hash2Display"></div>
-        <button class="copy-btn" onclick="copyHash('hash2Display')">Copy</button>
-      </div>
-    </div>
+  <div class="section-block">
+    <label for="secretInput">Secret (4 a-z, for minting only)</label>
+    <input type="password" id="secretInput" placeholder="e.g. abcd" maxlength="4">
+    <label for="confirmSecretInput">Confirm Secret</label>
+    <input type="password" id="confirmSecretInput" placeholder="Re-enter secret" maxlength="4">
+    <div class="hint">You must enter the same secret both times. Keep it safe for future regen.</div>
+  </div>
 
-    <button class="main-button copy-all-btn" onclick="copyAllHashes()">Copy All Hashes</button>
+  <button class="main-button" id="generateBtn" onclick="generatePreview()">Generate QR Batch</button>
 
+  <div class="preview-section" id="previewSection" style="display:none;">
+    <div class="preview-title">Preview QR Batch (Double Hash)</div>
+    <div><b>hash1:</b> <span class="preview-hash" id="hash1Preview"></span></div>
+    <div><b>hash2:</b> <span class="preview-hash" id="hash2Preview"></span></div>
     <div class="audit-action-buttons">
-      <button class="exit-btn" onclick="resetToMintSection()">Exit</button>
-      <button class="commit-btn" onclick="handleCommit()">Commit</button>
+      <button class="exit-btn" onclick="resetForm()">Exit</button>
+      <button class="commit-btn" onclick="commitBatch()">Commit</button>
     </div>
-  </div>
-
-  <div class="navigation-buttons">
-    <button onclick="window.history.back()">Back</button>
-    <button onclick="window.location.href='index.html'">Home</button>
-    <button onclick="handleNext()">Next</button>
   </div>
 
   <script>
-    // Mock data for Role and Quota for demonstration purposes
+    // --- CONFIG ---
     let userRole = 'Normal'; // 'Normal', 'Agent', 'Master'
-    let userQuota = 1000; // Remaining quota
+    let userQuota = 1000;
 
-    // --- DOM Elements ---
-    const roleDisplay = document.getElementById('role-display');
-    const quotaDisplay = document.getElementById('quota-display');
-    const statusDisplay = document.getElementById('status-display');
-
-    const mintSection = document.getElementById('mint-section');
-    const qrPreviewSection = document.getElementById('qr-preview-section');
-
-    const qrQuantityInput = document.getElementById('qrQuantityInput');
-    const quantityButtons = document.querySelectorAll('.quantity-options button');
-    const generateButton = document.getElementById('generateQrBatchBtn');
-    const secretInput = document.getElementById('secretInput');
-    const confirmSecretInput = document.getElementById('confirmSecretInput');
-
-    const hash1Display = document.getElementById('hash1Display');
-    const hash2Display = document.getElementById('hash2Display');
-
-    // --- Event Listeners and Initial Setup ---
-    document.addEventListener('DOMContentLoaded', function() {
-        updateRoleAndQuotaDisplay();
-        applyMintingPermissions();
-        updateQuantityButtons(); // Highlight the selected quantity button on load
-        // Initially show mint section, hide preview section
-        mintSection.style.display = 'block';
-        qrPreviewSection.style.display = 'none';
-    });
-
-    // --- Functions ---
-
-    // Generates a mock hash for demonstration
-    function generateMockHash() {
-      const chars = '0123456789abcdef';
-      let hash = '0x';
-      for (let i = 0; i < 64; i++) { // Typical hash length
-        hash += chars[Math.floor(Math.random() * chars.length)];
+    function updateQuotaDisplay() {
+      document.getElementById('role-display').textContent = userRole;
+      if (userRole === 'Master' || userRole === 'Agent') {
+        document.getElementById('quota-display').textContent = 'Unlimited';
+        document.getElementById('status-display').textContent = 'Available';
+      } else {
+        document.getElementById('quota-display').textContent = userQuota;
+        document.getElementById('status-display').textContent = (userQuota > 0 ? 'Available' : 'Not Available');
       }
-      return hash;
+      validateQty();
     }
 
-    // Updates the displayed role, quota, and status
-    function updateRoleAndQuotaDisplay() {
-        roleDisplay.textContent = userRole;
-        if (userRole === 'Master' || userRole === 'Agent') {
-            quotaDisplay.textContent = 'Unlimited';
-            statusDisplay.textContent = 'Available'; // Always available for unlimited roles
-        } else {
-            quotaDisplay.textContent = userQuota;
-            statusDisplay.textContent = userQuota > 0 ? 'Available' : 'Not Available';
-        }
-    }
-
-    // Applies disabled/enabled state to minting-related elements based on permissions and quota
-    function applyMintingPermissions() {
-        let canMintOverall = true; // Overall flag if minting is allowed
-
-        // Master and Agent roles have unlimited minting
-        if (userRole === 'Master' || userRole === 'Agent') {
-            canMintOverall = true;
-        } else {
-            // Normal role: check quota
-            if (userQuota <= 0) {
-                canMintOverall = false;
-            }
-        }
-
-        // Apply disabled state to input fields and main button
-        qrQuantityInput.disabled = !canMintOverall;
-        secretInput.disabled = !canMintOverall;
-        confirmSecretInput.disabled = !canMintOverall;
-        generateButton.disabled = !canMintOverall;
-
-        // Apply disabled state to quantity selection buttons
-        quantityButtons.forEach(button => {
-            const qty = parseInt(button.textContent);
-            // Disable button if overall minting is not allowed, or if quantity exceeds user's quota (for non-Master/Agent roles)
-            if (!canMintOverall || ((userRole === 'Normal') && qty > userQuota)) {
-                button.disabled = true;
-            } else {
-                button.disabled = false;
-            }
-        });
-
-        // Optional: Provide feedback to the user if minting is not allowed
-        if (!canMintOverall && userRole === 'Normal') {
-            console.warn('User cannot mint QR Hash due to insufficient quota.');
-            // You might display a specific message on the UI here
-        }
-    }
-
-    // Sets the quantity input and updates button selection
     function selectQuantity(qty) {
       document.getElementById('qrQuantityInput').value = qty;
-      updateQuantityButtons(); // Update button highlighting and permissions
+      highlightSelectedQty(qty);
+      validateQty();
     }
 
-    // Highlights the selected quantity button and re-applies permissions
-    function updateQuantityButtons() {
-        const inputQty = parseInt(document.getElementById('qrQuantityInput').value);
-        const buttons = document.querySelectorAll('.quantity-options button');
-        buttons.forEach(btn => {
-            if (parseInt(btn.textContent) === inputQty) {
-                btn.classList.add('selected');
-            } else {
-                btn.classList.remove('selected');
-            }
-        });
-        applyMintingPermissions(); // Re-apply permissions based on potentially new quantity
+    function highlightSelectedQty(qty) {
+      let buttons = document.querySelectorAll('.quantity-options button');
+      buttons.forEach(btn => {
+        if (parseInt(btn.textContent) === qty) btn.classList.add('selected');
+        else btn.classList.remove('selected');
+      });
     }
 
-    // Handles the "Generate QR Batch" button click
-    function generateQRBatch() {
-      const secret = secretInput.value;
-      const confirmSecret = confirmSecretInput.value;
-      const quantity = parseInt(qrQuantityInput.value);
+    function validateQty() {
+      let qty = parseInt(document.getElementById('qrQuantityInput').value);
+      let generateBtn = document.getElementById('generateBtn');
+      let quotaHint = document.getElementById('quota-hint');
+      if ((userRole !== 'Master' && userRole !== 'Agent') && qty > userQuota) {
+        generateBtn.disabled = true;
+        quotaHint.textContent = 'Selected QTY exceeds your available quota.';
+      } else {
+        generateBtn.disabled = false;
+        quotaHint.textContent = '';
+      }
+    }
 
-      if (secret === '' || confirmSecret === '') {
-        alert('Please enter Secret and confirm Secret.');
+    // Validate public key format: 64 hex
+    function isValidPubKey(key) {
+      return /^[a-f0-9]{64}$/i.test(key.trim());
+    }
+
+    // Add event listeners for live validation
+    document.getElementById('qrQuantityInput').addEventListener('input', validateQty);
+
+    // Main: Generate preview (simulate hash1, hash2)
+    function generatePreview() {
+      // Validate inputs
+      let pubkey = document.getElementById('publicKeyInput').value.trim();
+      let qty = parseInt(document.getElementById('qrQuantityInput').value);
+      let secret = document.getElementById('secretInput').value;
+      let confirmSecret = document.getElementById('confirmSecretInput').value;
+
+      if (!isValidPubKey(pubkey)) {
+        alert('Invalid public key format.');
         return;
       }
-      if (secret !== confirmSecret) {
-        alert('Secrets do not match. Please try again.');
+      if (!/^[a-z]{4}$/.test(secret) || secret !== confirmSecret) {
+        alert('Secret must be 4 lowercase a-z and match both fields.');
         return;
       }
-      if (!/^[a-z]{4}$/.test(secret)) {
-        alert('Secret must be 4 lowercase a-z characters.');
-        return;
-      }
-      if (isNaN(quantity) || quantity <= 0) {
-        alert('Please enter a valid QR quantity.');
+      if (isNaN(qty) || qty < 1 || ((userRole !== 'Master' && userRole !== 'Agent') && qty > userQuota)) {
+        alert('Invalid or excessive QTY.');
         return;
       }
 
-      // Final quota check before initiating batch generation for Normal role
-      if (userRole === 'Normal' && quantity > userQuota) {
-          alert(`You have ${userQuota} quota remaining, which is insufficient for generating ${quantity} QR(s).`);
-          return;
-      }
+      // Mock hash1/hash2 (replace with real logic)
+      let hash1 = sha256(pubkey + qty + secret);
+      let meta = (new Date().toISOString());
+      let hash2 = sha256(hash1 + meta);
 
-      // Simulate generating hashes and displaying them
-      const mockHash1 = generateMockHash(); // Replace with actual hash generation
-      const mockHash2 = generateMockHash(); // Replace with actual hash generation
+      document.getElementById('hash1Preview').textContent = hash1;
+      document.getElementById('hash2Preview').textContent = hash2;
 
-      hash1Display.textContent = mockHash1;
-      hash2Display.textContent = mockHash2;
-
-      // Deduct quota if user is 'Normal' and not unlimited
-      if (userRole === 'Normal') {
-          userQuota -= quantity;
-          if (userQuota < 0) userQuota = 0; // Ensure quota doesn't go negative
-      }
-
-      // Update quota display and re-apply permissions for next time
-      updateRoleAndQuotaDisplay();
-      applyMintingPermissions();
-
-      // Show preview section, hide mint section
-      mintSection.style.display = 'none';
-      qrPreviewSection.style.display = 'block';
-
-      alert(`Generated ${quantity} QR Hash(es). Showing preview.`);
+      document.getElementById('previewSection').style.display = 'block';
     }
 
-    // Copies a hash to the clipboard
-    function copyHash(elementId) {
-        const element = document.getElementById(elementId);
-        const textToCopy = element.textContent;
-        navigator.clipboard.writeText(textToCopy)
-            .then(() => {
-                alert(`Copied "${textToCopy}" to clipboard!`);
-            })
-            .catch(err => {
-                console.error('Failed to copy text: ', err);
-                alert('Failed to copy hash. Please copy manually.');
-            });
+    function resetForm() {
+      document.getElementById('previewSection').style.display = 'none';
+      document.getElementById('secretInput').value = '';
+      document.getElementById('confirmSecretInput').value = '';
     }
 
-    // Copies both hashes to the clipboard
-    function copyAllHashes() {
-        const hash1 = hash1Display.textContent;
-        const hash2 = hash2Display.textContent;
-        const allHashes = `QR Hash (hash1): ${hash1}\nCommitment Hash (hash2): ${hash2}`;
-        navigator.clipboard.writeText(allHashes)
-            .then(() => {
-                alert('Copied both hashes to clipboard!');
-            })
-            .catch(err => {
-                console.error('Failed to copy all hashes: ', err);
-                alert('Failed to copy all hashes. Please copy manually.');
-            });
+    function commitBatch() {
+      // Implement logic to save hash1, hash2, meta (e.g. save to file, log, or backend)
+      alert('Committed QR Batch!\nhash1 and hash2 saved to ledger/log.');
+      resetForm();
     }
 
-    // Handles the "Commit" action from the preview section
-    function handleCommit() {
-      const hash1 = hash1Display.textContent;
-      const hash2 = hash2Display.textContent;
-      alert(`Committing QR Hash: ${hash1} and Commitment Hash: ${hash2}. \n(This is where audit chain log/proof would be shown.)`);
-      // Implement your actual commit logic here
-      // After commit, you might reset or navigate away
-      resetToMintSection(); // For demonstration, reset to mint section
+    // --- sha256 mock for demo (not cryptographically secure) ---
+    function sha256(str) {
+      let h = 0, l = str.length;
+      for(let i = 0; i < l; i++) { h = Math.imul(31, h) + str.charCodeAt(i) | 0; }
+      return (h >>> 0).toString(16).padStart(8, '0').repeat(8).substr(0, 64);
     }
 
-    // Resets the view back to the mint section
-    function resetToMintSection() {
-        // Clear input fields
-        qrQuantityInput.value = 1;
-        secretInput.value = '';
-        confirmSecretInput.value = '';
-
-        // Reset hash displays
-        hash1Display.textContent = '';
-        hash2Display.textContent = '';
-
-        // Re-apply permissions and quantity button highlighting
-        updateQuantityButtons();
-        applyMintingPermissions();
-
-        // Show mint section, hide preview section
-        mintSection.style.display = 'block';
-        qrPreviewSection.style.display = 'none';
-        alert('Returned to Mint section.');
-    }
-
-    // Handles the "Back" navigation button click
-    function handleBack() {
-      window.history.back();
-    }
-
-    // Handles the "Next" navigation button click
-    function handleNext() {
-      alert('Proceeding to next page!');
-      // window.location.href = 'next_page.html';
-    }
+    // Init
+    updateQuotaDisplay();
   </script>
 </body>
 </html>
