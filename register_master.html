@@ -1,298 +1,535 @@
-<!--
-DTC Minimal UI/UX Logic
-
-- ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
-- กลุ่ม Ticket/Slot/Meta: สีเทาอ่อน #f6f7fa
-- กลุ่ม Password, PIN, Secret: สีเหลืองอ่อน #fffde7
-- กลุ่มปุ่ม Action (Generate/Export/Regen): ฟ้า, เหลือง, ฟ้าอ่อน ตามลำดับ
-- Navigation Bar: ปุ่มม่วงจาง/เทาอ่อน (Back/Home/Next) ขนาดเท่ากันทั้ง site
-
-[Section A] Key & Batch Info  
-    - Password, PIN, Secret, Batch Name, จำนวน QR (ปุ่ม +/– หรือ custom)
-    - label/hint สีเทาอ่อน #90a4ae, ขนาดเล็กใต้ input
-
-[Section B] Action  
-    - ปุ่มฟ้าใหญ่ "Generate QR Batch"
-
-[Section C] ผลลัพธ์/Preview  
-    - QR Preview Box (PNG/SVG), hash1, Commitment Box (hash2 สีฟ้าหรือเทาอ่อน)
-    - ปุ่มเหลือง Export Ticket / ฟ้า Export QR / ฟ้าอ่อน Export Log
-
-[Section D] Regen QR  
-    - ช่อง Ticket (สีเทาอ่อน), ปุ่ม Upload/QR
-    - ช่อง Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
-    - Password, PIN, Secret (เหลืองอ่อน)
-    - ปุ่ม Regen (ฟ้า)
-
-[Section E] Audit Chain  
-    - Input QR/Commitment Hash (hash2) + ปุ่ม Audit (ฟ้าเล็ก)
-    - กล่อง audit chain (เจ้าของ/ลำดับ chain), expand/collapse ได้
-
-[Section F] Navigation Bar  
-    - Back | Home | Next (ปุ่มขนาดเท่ากัน)
-
-Style  
-    - input/box สูง 36–44px, margin/padding 12–20px
-    - label/hint #90a4ae, ขนาดเล็ก
-    - ผลลัพธ์/preview/log ไม่กินพื้นที่หลัก
-    - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
-    - รองรับ mobile (responsive)
-    - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Register Master | DTC Magic Chain</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f7fafc; color: #222; }
-    .main { max-width: 410px; margin: 2em auto; background: #fff; border-radius: 17px; box-shadow: 0 8px 40px #246bfd13; padding: 2em 1.4em 1.3em 1.4em; }
-    .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.5em; }
-    .nav-btn {
-      background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.4em;
-      font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background 0.18s;
-    }
-    .nav-btn:hover { background: #d1c4e9; }
-    h2 { text-align: center; color: #26733e; margin-bottom: 1.2em; }
-    .input-row { margin-bottom: 1.13em; }
-    label { font-weight: bold; color: #26733e; display: block; margin-bottom: 0.21em; }
-    input[type="text"] {
-      width: 100%; padding: 0.7em; border-radius: 8px; border: 1.5px solid #dde6ee; font-size: 1.08em;
-      margin-bottom: 0.19em; background: #f7fbff;
-    }
-    .counter { font-size: 0.93em; color: #90a4ae; float: right; }
-    .btn {
-      display: block; width: 100%; padding: 0.9em 0; border-radius: 10px; border: none;
-      background: linear-gradient(90deg,#26733e 70%,#2196f3 100%);
-      color: #fff; font-size: 1.11em; font-weight: 600;
-      margin: 1.2em 0 0.7em 0; cursor: pointer; box-shadow: 0 2px 8px #246bfd1b; transition: background 0.18s;
-    }
-    .btn:active { background: #176d38; }
-    .btn[disabled] { opacity: 0.54; cursor: not-allowed; }
-    .msg { text-align: center; margin: 1.1em 0 0.6em 0; font-size: 1.02em; }
-    .msg-error { color: #c41e1e; background: #fff2f2; border-left: 5px solid #c41e1e; border-radius: 7px; padding: 0.5em; }
-    .msg-success { color: #16774a; background: #eafff1; border-left: 5px solid #31e57a; border-radius: 7px; padding: 0.5em; }
-    .copy-btn { padding: 0.2em 1em; margin-left: 0.5em; border: none; border-radius: 5px; background: #2196f3; color: #fff; cursor: pointer; font-size: 0.97em; }
-    .copy-btn:active { background: #176d38; }
-    .warn { color:#b91c1c; background:#fbe7e7; padding:0.5em 0.8em; border-radius:7px; margin:0.36em 0 0.8em 0; font-size:0.96em;}
-    .note { font-size: 0.96em; color: #90a4ae; text-align: center; margin-top: 1.15em;}
-    .preview-box {
-      background: #f6fafd; border: 1.5px solid #dde6ee;
-      border-radius: 10px; padding: 1em 0.8em 0.8em 0.8em;
-      margin: 1em 0 0.4em 0;
-      font-size: 0.97em; color: #246bfd;
-      word-break: break-all; max-height: 160px; overflow-x: auto;
-      display: none;
-    }
-    .preview-title { color: #26733e; font-size: 1.04em; margin-bottom:0.2em;}
-    @media (max-width: 480px) { .main {padding:1em 0.2em 0.7em 0.2em;} }
-  </style>
-</head>
-<body>
-  <div class="main">
-    <div class="nav-row">
-      <button class="nav-btn" onclick="window.location.href='index.html'">Back</button>
-      <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
-    </div>
-    <h2>Register Master</h2>
-    <form id="masterForm" autocomplete="off">
-      <div class="input-row">
-        <label>Master Name <span class="counter" id="nameCounter">0/12</span></label>
-        <input type="text" id="masterName" maxlength="12" pattern="[A-Z]+" placeholder="A-Z only (4-12 chars)" required autocomplete="off" />
-        <div id="badwordWarn" class="warn" style="display:none;"></div>
-      </div>
-      <div class="input-row">
-        <label>Public Key <span class="counter" id="pubkeyCounter">0/64</span></label>
-        <input type="text" id="pubkey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your public key here" required autocomplete="off" />
-        <button class="copy-btn" type="button" onclick="copyField('pubkey')">Copy</button>
-      </div>
-      <button class="btn" type="submit" id="reqBtn" disabled>Register Master</button>
-      <div id="msgBox" class="msg"></div>
-    </form>
-    <div id="previewBox" class="preview-box">
-      <div class="preview-title">Preview Master Node (Audit Structure):</div>
-      <pre id="previewJson" style="background:none;padding:0 0 0 0;font-size:0.96em;color:#246bfd;"></pre>
-      <button class="copy-btn" style="margin-top:0.2em;" onclick="copyPreviewJson()">Copy JSON</button>
-    </div>
-    <div class="note">
-      *Master name = 4-12 chars, A-Z only.<br>
-      *Public key = 64 HEX chars (from previous step).
-    </div>
-  </div>
-  <script>
-    const GENESIS_HASH = "c8a1e35a25dcb2742e17b26f012f13a742b639d94a1a5e6c18e7a12dbcc9bfc7";
-    let badwords = {};
-    let flatBadwords = [];
-    let badwordsReady = false;
-    let badwordsError = false;
-
-    // Autofill public key
-    window.addEventListener('DOMContentLoaded', function() {
-      const localPub = localStorage.getItem('dtc_publicKey');
-      if (localPub && localPub.length === 64 && /^[a-fA-F0-9]+$/.test(localPub)) {
-        document.getElementById('pubkey').value = localPub;
-        document.getElementById('pubkeyCounter').textContent = localPub.length + "/64";
-      }
-      updateBtnState();
-    });
-
-    // Load badwords
-    fetch('badwords.json')
-      .then(r=>r.json())
-      .then(list=>{
-        badwords=list;
-        flatBadwords = Object.values(list).flat().map(x=>x.toLowerCase());
-        badwordsReady = true;
-      }).catch(()=>{
-        badwordsReady = false;
-        badwordsError = true;
-        document.getElementById('badwordWarn').style.display = "";
-        document.getElementById('badwordWarn').textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
-      });
-
-    function findBadwords(str) {
-      if (!badwordsReady || !str) return [];
-      const s = str.toLowerCase();
-      return flatBadwords.filter(w => w && s.includes(w));
-    }
-
-    document.getElementById('masterName').addEventListener('input', function(){
-      const warn = document.getElementById('badwordWarn');
-      const v = this.value.trim().toLowerCase();
-      const found = findBadwords(v);
-      if (badwordsError) {
-        warn.style.display = "";
-        warn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
-      } else if (found.length) {
-        warn.style.display = "";
-        warn.textContent = "Warning: Contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
-      } else {
-        warn.style.display = "none";
-      }
-      updateBtnState();
-      livePreview();
-    });
-
-    document.getElementById('masterName').addEventListener('input', function() {
-      this.value = this.value.replace(/[^A-Z]/g,'').toUpperCase();
-      document.getElementById('nameCounter').textContent = this.value.length + "/12";
-      updateBtnState();
-      livePreview();
-    });
-    document.getElementById('pubkey').addEventListener('input', function() {
-      this.value = this.value.replace(/[^a-fA-F0-9]/g,'');
-      document.getElementById('pubkeyCounter').textContent = this.value.length + "/64";
-      updateBtnState();
-      livePreview();
-    });
-
-    function updateBtnState() {
-      const name = document.getElementById('masterName').value.trim();
-      const pk = document.getElementById('pubkey').value.trim();
-      const btn = document.getElementById('reqBtn');
-      btn.disabled = (
-        !name || name.length<4 || name.length>12 ||
-        !pk || pk.length!==64 ||
-        badwordsError
-      );
-    }
-
-    function copyField(id) {
-      const el = document.getElementById(id);
-      el.select();
-      navigator.clipboard.writeText(el.value);
-      showMsg("Copied!", "success");
-    }
-
-    function showMsg(msg, type) {
-      const box = document.getElementById('msgBox');
-      box.innerHTML = msg;
-      box.className = "msg" + (type === "error" ? " msg-error" : " msg-success");
-      setTimeout(() => { box.innerHTML = ""; box.className = "msg"; }, 3000);
-    }
-
-    async function sha256Hex(str) {
-      const enc = new TextEncoder();
-      const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
-      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
-    }
-
-    function genNonce() {
-      let arr = new Uint8Array(8);
-      window.crypto.getRandomValues(arr);
-      return Array.from(arr).map(x=>x.toString(16).padStart(2,'0')).join('');
-    }
-
-    async function buildMasterNode() {
-      const masterName = document.getElementById('masterName').value.trim().toUpperCase();
-      const publicKey = document.getElementById('pubkey').value.trim();
-      if(masterName.length<4 || masterName.length>12 || publicKey.length!==64) return null;
-      const timestamp = Math.floor(Date.now() / 1000).toString();
-      const nonce = genNonce();
-      const hashInput = GENESIS_HASH + masterName + timestamp + nonce;
-      const hash = await sha256Hex(hashInput);
-      return {
-        master_id: masterName,
-        public_key: publicKey,
-        timestamp: timestamp,
-        nonce: nonce,
-        prev_hash: GENESIS_HASH,
-        hash: hash
-      };
-    }
-
-    async function livePreview() {
-      const masterName = document.getElementById('masterName').value.trim().toUpperCase();
-      const publicKey = document.getElementById('pubkey').value.trim();
-      if(masterName.length<4 || masterName.length>12 || publicKey.length!==64) {
-        document.getElementById('previewBox').style.display = "none";
-        return;
-      }
-      const node = await buildMasterNode();
-      if(!node) return;
-      document.getElementById('previewJson').textContent = JSON.stringify(node, null, 2);
-      document.getElementById('previewBox').style.display = "";
-    }
-
-    function copyPreviewJson() {
-      const txt = document.getElementById('previewJson').textContent;
-      navigator.clipboard.writeText(txt);
-      showMsg("Copied JSON!", "success");
-    }
-
-    document.getElementById('masterForm').onsubmit = async function(e){
-      e.preventDefault();
-      const name = document.getElementById('masterName').value.trim().toUpperCase();
-      const pk = document.getElementById('pubkey').value.trim();
-      if (badwordsReady && findBadwords(name).length) {
-        if (!confirm("Warning: The master name contains inappropriate words. Are you sure you want to continue?")) {
-          return false;
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Master | DTC Magic Chain</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', Arial, sans-serif; /* Changed to Inter for consistency */
+            background-color: #f0f4f8; /* Light gray background */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 1.5rem; /* Responsive padding */
         }
-      }
-      if (badwordsError) {
-        alert("Cannot verify inappropriate words. Please check badwords.json or contact admin.");
-        return false;
-      }
+        .main {
+            background-color: #ffffff;
+            border-radius: 1rem; /* Rounded corners */
+            box-shadow: 0 8px 40px rgba(36, 107, 253, 0.07); /* Soft blue shadow */
+            padding: 2.5rem;
+            width: 100%;
+            max-width: 28rem; /* Max width for mobile responsiveness */
+            text-align: center;
+            box-sizing: border-box; /* Include padding in width */
+        }
+        .nav-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+        }
+        .nav-btn {
+            background-color: #ede7f6; /* Light purple/grey */
+            color: #246bfd; /* Blue */
+            border: none;
+            border-radius: 0.5rem; /* Rounded corners */
+            padding: 0.53em 1.4em; /* Adjust padding */
+            font-size: 1.03em;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.18s ease;
+            height: 44px; /* Fixed height for buttons */
+            min-width: 80px; /* Ensure buttons are roughly same size */
+        }
+        .nav-btn:hover { background-color: #d1c4e9; } /* Darker purple on hover */
 
-      if(name.length < 4 || name.length > 12) return showMsg("Master name must be 4-12 uppercase letters.", "error");
-      if(name === "GENESIS") return showMsg("Cannot use reserved name GENESIS for Master.", "error");
-      if(pk.length !== 64 || !/^[a-fA-F0-9]{64}$/.test(pk)) return showMsg("Public key must be exactly 64 HEX chars.", "error");
+        h2 {
+            text-align: center;
+            color: #26733e; /* Green for titles */
+            margin-bottom: 1.2rem;
+            font-size: 1.875rem; /* Equivalent to text-3xl */
+            font-weight: bold;
+        }
+        .section-title {
+            color: #26733e; /* Green for section titles */
+            font-size: 1.25rem; /* text-xl */
+            font-weight: 600;
+            margin-top: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: left;
+        }
 
-      const node = await buildMasterNode();
-      let masters = [];
-      try { masters = JSON.parse(localStorage.getItem('dtc_masters') || "[]"); } catch(e) {}
-      masters.push(node);
-      localStorage.setItem('dtc_masters', JSON.stringify(masters));
+        .input-group {
+            margin-bottom: 1.13rem;
+            background-color: #fffde7; /* Light yellow background for input groups */
+            border-radius: 0.75rem;
+            padding: 1.25rem;
+            border: 1px solid #ffe0b2; /* Light orange border */
+        }
+        label {
+            font-weight: bold;
+            color: #26733e; /* Green */
+            display: block;
+            margin-bottom: 0.21em;
+            font-size: 0.95em; /* Adjusted font size */
+            text-align: left;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 0.7em;
+            border-radius: 0.5rem; /* Rounded corners */
+            border: 1.5px solid #dde6ee;
+            font-size: 1.08em;
+            margin-bottom: 0.19em;
+            background-color: #f7fbff; /* Light blue background for inputs */
+            height: 44px; /* Fixed height for inputs */
+            box-sizing: border-box; /* Include padding in width */
+            color: #222; /* Default text color */
+        }
+        /* Specific input text color for Public Key */
+        #masterPublicKey {
+            color: #26733e; /* Green text color */
+        }
+        /* Specific input background and text color for Identity QR Hash */
+        #identityQrHash {
+            background-color: #f6f7fa; /* Light gray background */
+            color: #246bfd; /* Blue text color */
+        }
 
-      showMsg("Registration successful!", "success");
-      document.getElementById('previewJson').textContent = JSON.stringify(node, null, 2);
-      document.getElementById('previewBox').style.display = "";
-      document.getElementById('masterForm').reset();
-      document.getElementById('nameCounter').textContent = "0/12";
-      document.getElementById('pubkeyCounter').textContent = "0/64";
-      updateBtnState();
-    };
-  </script>
+        .counter { font-size: 0.85em; color: #90a4ae; float: right; } /* Smaller, lighter gray */
+
+        .btn-action {
+            display: block;
+            width: 100%;
+            padding: 0.9em 0;
+            border-radius: 0.625rem; /* Adjusted border-radius */
+            border: none;
+            background: linear-gradient(90deg, #2196f3 70%, #26733e 100%); /* Blue to Green gradient */
+            color: #fff;
+            font-size: 1.11em;
+            font-weight: 600;
+            margin: 1.2em 0 0.7em 0;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(36, 107, 253, 0.1); /* Soft blue shadow */
+            transition: background 0.18s ease, transform 0.1s ease;
+            height: 48px; /* Slightly taller for action button */
+        }
+        .btn-action:hover {
+            background: linear-gradient(90deg, #1976D2 70%, #1c5e2d 100%); /* Darker on hover */
+            transform: translateY(-1px);
+        }
+        .btn-action:active { background-color: #176d38; transform: translateY(0); }
+        .btn-action[disabled] { opacity: 0.54; cursor: not-allowed; }
+
+        .btn-scan-paste {
+            background-color: #ffd600; /* Yellow */
+            color: #222;
+            padding: 0.4em 1em; /* Adjusted padding */
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: 500;
+            margin-top: 0.5em; /* Spacing */
+            transition: background-color 0.18s ease;
+            display: flex; /* For icon alignment */
+            align-items: center;
+            justify-content: center;
+        }
+        .btn-scan-paste:hover { background-color: #e0b300; } /* Darker yellow */
+        .btn-scan-paste svg { margin-right: 0.3em; }
+
+        .msg-box {
+            text-align: center;
+            margin: 1.1em 0 0.6em 0;
+            font-size: 1.02em;
+            padding: 0.5em;
+            border-radius: 0.5em;
+        }
+        .msg-error { color: #c41e1e; background: #fff2f2; border-left: 5px solid #c41e1e; }
+        .msg-success { color: #16774a; background: #eafff1; border-left: 5px solid #31e57a; }
+        .warn-msg { color:#b91c1c; background:#fbe7e7; padding:0.5em 0.8em; border-radius:7px; margin:0.36em 0 0.8em 0; font-size:0.9em;}
+        .note-text { font-size: 0.9em; color: #90a4ae; text-align: left; margin-top: 1.15em;}
+
+        .preview-box {
+            background-color: #f6fafd; /* Light blue/gray */
+            border: 1.5px solid #dde6ee;
+            border-radius: 0.625rem;
+            padding: 1.2em 1em; /* Adjusted padding */
+            margin: 1em 0 0.4em 0;
+            font-size: 0.97em;
+            color: #246bfd; /* Blue text */
+            word-break: break-all;
+            max-height: 180px; /* Increased height for preview */
+            overflow: auto; /* Changed to auto for combined scroll */
+            display: none;
+            text-align: left;
+        }
+        .preview-title { color: #26733e; font-size: 1.04em; margin-bottom:0.2em;}
+        .preview-box pre {
+            background: none;
+            padding: 0;
+            font-size: 0.95em;
+            color: #246bfd;
+            white-space: pre-wrap; /* Wrap long lines */
+        }
+        .copy-json-btn {
+            background-color: #2196f3; /* Blue */
+            color: #fff;
+            padding: 0.3em 0.8em;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.9em;
+            margin-top: 0.5em;
+            transition: background-color 0.18s ease;
+        }
+        .copy-json-btn:hover { background-color: #1976D2; }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .main { padding: 1.5rem 1rem; max-width: 100%; }
+            .input-group { padding: 1rem; }
+            .nav-btn { font-size: 0.9em; padding: 0.5em 1em; min-width: unset; }
+            .btn-action { font-size: 1em; padding: 0.8em 0; }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="main">
+        <div class="nav-row">
+            <button class="nav-btn" onclick="window.history.back()">Back</button>
+            <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
+        </div>
+
+        <h2>Register Master</h2>
+        <p class="text-gray-600 text-sm mb-6">Step 2: Register your Master role. You must have an Identity QR Hash from Step 1.</p>
+
+        <form id="masterForm" autocomplete="off">
+            <div class="input-group">
+                <label for="masterName">Master Name <span class="counter" id="nameCounter">0/8</span></label>
+                <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" placeholder="A-Z only (4-8 chars)" required autocomplete="off" />
+                <div id="badwordWarn" class="warn-msg" style="display:none;"></div>
+            </div>
+
+            <div class="input-group">
+                <label for="masterPublicKey">Your Public Key <span class="counter" id="pubkeyCounter">0/64</span></label>
+                <input type="text" id="masterPublicKey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your public key here" required autocomplete="off" />
+                <button class="btn-scan-paste" type="button" onclick="handleScanPaste('masterPublicKey')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11l-3-3m0 0L9 11m3-3v7m0 0l-3 3m3-3l3 3m0-3h-6"></path></svg>
+                    Paste / Scan QR
+                </button>
+            </div>
+
+            <!-- Identity QR Hash Field -->
+            <div class="input-group">
+                <label for="identityQrHash">Identity QR Hash <span class="counter" id="identityQrHashCounter">0/64</span></label>
+                <input type="text" id="identityQrHash" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your Identity QR Hash here (from Step 1)" required autocomplete="off" />
+                <button class="btn-scan-paste" type="button" onclick="handleScanPaste('identityQrHash')">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11l-3-3m0 0L9 11m3-3v7m0 0l-3 3m3-3l3 3m0-3h-6"></path></svg>
+                    Paste / Scan QR
+                </button>
+            </div>
+            
+            <button class="btn-action" type="submit" id="reqBtn" disabled>Register Master</button>
+            <div id="msgBox" class="msg-box"></div>
+        </form>
+
+        <div id="previewBox" class="preview-box">
+            <div class="preview-title">Preview Master Node (Audit Structure):</div>
+            <pre id="previewJson"></pre>
+            <button class="copy-json-btn" onclick="copyPreviewJson()">Copy JSON</button>
+        </div>
+
+        <div class="note-text">
+            *Master Name = 4-8 chars, A-Z only.<br>
+            *Your Public Key = 64 HEX chars (from Generate Key page).<br>
+            *Identity QR Hash = 64 HEX chars (from "Generate Identity QR Hash" page/section).
+        </div>
+    </div>
+
+    <script>
+        // --- Global Constants and State ---
+        const GENESIS_HASH = "86b1c0989f61b7f03222d861f67f259740120199e69c7662c1404e132c3f8f11"; // Example Genesis Hash (from simulation)
+        let badwords = {};
+        let flatBadwords = [];
+        let badwordsReady = false;
+        let badwordsError = false;
+
+        // --- UI Element References ---
+        const masterNameInput = document.getElementById('masterName');
+        const masterPublicKeyInput = document.getElementById('masterPublicKey');
+        const identityQrHashInput = document.getElementById('identityQrHash');
+        const nameCounter = document.getElementById('nameCounter');
+        const pubkeyCounter = document.getElementById('pubkeyCounter');
+        const identityQrHashCounter = document.getElementById('identityQrHashCounter');
+        const badwordWarn = document.getElementById('badwordWarn');
+        const registerButton = document.getElementById('reqBtn');
+        const msgBox = document.getElementById('msgBox');
+        const previewBox = document.getElementById('previewBox');
+        const previewJson = document.getElementById('previewJson');
+        const masterForm = document.getElementById('masterForm');
+
+
+        // --- Utility Functions ---
+
+        function showMsg(msg, type) {
+            msgBox.textContent = msg;
+            msgBox.className = "msg-box " + (type === "error" ? "msg-error" : "msg-success");
+            setTimeout(() => { msgBox.textContent = ""; msgBox.className = "msg-box"; }, 5000); // Display for 5 seconds
+        }
+
+        async function sha256Hex(str) {
+            const enc = new TextEncoder();
+            const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
+            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
+        }
+
+        function genNonce() {
+            let arr = new Uint8Array(8);
+            window.crypto.getRandomValues(arr);
+            return Array.from(arr).map(x=>x.toString(16).padStart(2,'0')).join('');
+        }
+
+        // --- Badwords Logic ---
+
+        function findBadwords(str) {
+            if (!badwordsReady || !str) return [];
+            const s = str.toLowerCase();
+            return flatBadwords.filter(w => w && s.includes(w));
+        }
+
+        // --- Input Validation & UI Updates ---
+
+        function updateCounters() {
+            nameCounter.textContent = masterNameInput.value.length + "/8"; // Changed max length to 8
+            pubkeyCounter.textContent = masterPublicKeyInput.value.length + "/64";
+            identityQrHashCounter.textContent = identityQrHashInput.value.length + "/64";
+        }
+
+        function validateInputs() {
+            const name = masterNameInput.value.trim();
+            const pk = masterPublicKeyInput.value.trim();
+            const idQrHash = identityQrHashInput.value.trim();
+
+            const isNameValid = name.length >= 4 && name.length <= 8 && /^[A-Z]+$/.test(name); // Changed max length to 8
+            const isPkValid = pk.length === 64 && /^[a-fA-F0-9]{64}$/.test(pk);
+            const isIdQrHashValid = idQrHash.length === 64 && /^[a-fA-F0-9]{64}$/.test(idQrHash);
+            const isNoBadwords = !findBadwords(name).length;
+
+            if (badwordsError) {
+                badwordWarn.style.display = "";
+                badwordWarn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
+            } else if (!isNoBadwords) {
+                const found = findBadwords(name);
+                badwordWarn.style.display = "";
+                badwordWarn.textContent = "Warning: Contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
+            } else {
+                badwordWarn.style.display = "none";
+            }
+
+            registerButton.disabled = !(isNameValid && isPkValid && isIdQrHashValid && isNoBadwords && !badwordsError);
+        }
+
+        // --- Live Preview ---
+
+        async function buildMasterNodePreview() {
+            const masterName = masterNameInput.value.trim().toUpperCase();
+            const publicKey = masterPublicKeyInput.value.trim();
+            const identityQrHash = identityQrHashInput.value.trim();
+
+            if(masterName.length < 4 || masterName.length > 8 || publicKey.length !== 64 || identityQrHash.length !== 64) { // Changed max length to 8
+                return null;
+            }
+
+            // In a real system, this timestamp might be generated on the backend
+            // or derived from a network-synced clock.
+            const timestamp = Math.floor(Date.now() / 1000).toString(); 
+            const nonce = genNonce();
+
+            // The hash calculation reflects the structure for the Master registration record
+            // prev_hash here is the Identity QR Record Hash
+            // parent_chain_hash is the Genesis Hash for hierarchical linking
+            const rawHashInput = identityQrHash + "master_registration" + masterName + publicKey + "" + GENESIS_HASH + timestamp + nonce;
+            const recordHash = await sha256Hex(rawHashInput);
+
+            return {
+                object_type: "master_registration",
+                object_id: masterName,
+                public_key: publicKey,
+                prev_hash: identityQrHash, // Identity QR Record Hash (assuming this is the record hash from identity_qr_log)
+                parent_chain_hash: GENESIS_HASH, // Hierarchical link
+                timestamp: timestamp,
+                nonce: nonce,
+                hash: recordHash // Hash of this Master registration record
+            };
+        }
+
+        async function livePreview() {
+            const node = await buildMasterNodePreview();
+            if(node) {
+                previewJson.textContent = JSON.stringify(node, null, 2);
+                previewBox.style.display = "block";
+            } else {
+                previewBox.style.display = "none";
+            }
+        }
+
+        // --- Button Actions ---
+
+        async function handleScanPaste(targetId) {
+            const inputElement = document.getElementById(targetId);
+            try {
+                // Attempt to read from clipboard
+                const clipboardText = await navigator.clipboard.readText();
+                if (clipboardText) {
+                    inputElement.value = clipboardText.trim();
+                    showMsg("Pasted from clipboard!", "success");
+                } else {
+                    // Fallback for environments where clipboard read is restricted or empty
+                    const pastedValue = prompt("Please paste your QR Hash or Public Key here:");
+                    if (pastedValue) {
+                        inputElement.value = pastedValue.trim();
+                    }
+                }
+            } catch (err) {
+                // If clipboard API fails (e.g., due to iframe restrictions), use prompt
+                const pastedValue = prompt("Please paste your QR Hash or Public Key here:");
+                if (pastedValue) {
+                    inputElement.value = pastedValue.trim();
+                }
+                showMsg("Clipboard access denied. Please paste manually.", "error");
+            }
+            // Trigger input event to update validation and counters
+            inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+        }
+
+        function copyPreviewJson() {
+            const txt = previewJson.textContent;
+            navigator.clipboard.writeText(txt)
+                .then(() => showMsg("Copied JSON!", "success"))
+                .catch(() => showMsg("Failed to copy JSON. Please copy manually.", "error"));
+        }
+
+        // --- Form Submission ---
+
+        masterForm.onsubmit = async function(e){
+            e.preventDefault();
+
+            // Re-validate everything before submission
+            validateInputs();
+            if (registerButton.disabled) {
+                showMsg("Please ensure all fields are valid before registering.", "error");
+                return false;
+            }
+
+            const name = masterNameInput.value.trim().toUpperCase();
+            if (name === "GENESIS") {
+                showMsg("Cannot use reserved name 'GENESIS' for Master.", "error");
+                return false;
+            }
+
+            // If badwords found and user doesn't confirm (if a real confirm dialog was used)
+            if (badwordWarn.style.display !== "none") {
+                showMsg("Warning: Master name contains inappropriate words. Proceeding with registration.", "warn");
+            }
+            if (badwordsError) {
+                 showMsg("Cannot verify inappropriate words. Please check badwords.json or contact admin.", "error");
+                 return false;
+            }
+
+            // Build the node for submission
+            const node = await buildMasterNodePreview();
+            if (!node) {
+                showMsg("Failed to build Master Node data. Please check inputs.", "error");
+                return false;
+            }
+
+            showMsg("Registering Master...", "success"); // Indicate loading
+
+            try {
+                // --- Simulate Backend API Call (replace with actual fetch to your backend) ---
+                // In a real scenario, you would send 'node' object to your backend API,
+                // which then calls your Python register_master function.
+                
+                await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
+
+                // Simulate a successful response from backend
+                const simulatedResult = {
+                    success: true,
+                    master_hash: node.hash, // Use the generated hash from preview
+                    message: `Master '${node.object_id}' registered successfully!`
+                };
+                
+                if (simulatedResult.success) {
+                    showMsg(`Master '${node.object_id}' registered. Hash: ${simulatedResult.master_hash}.`, "success");
+                    previewJson.textContent = JSON.stringify(node, null, 2); // Ensure preview shows final data
+                    previewBox.style.display = "block"; // Show preview after success
+
+                    // Clear form after successful registration
+                    masterForm.reset();
+                    updateCounters();
+                    validateInputs(); // Re-validate to update button state
+                } else {
+                    throw new Error(simulatedResult.message || "Master registration failed.");
+                }
+
+            } catch (error) {
+                showMsg(`Error registering Master: ${error.message}`, "error");
+                console.error("Master registration error:", error);
+            }
+        };
+
+        // --- Event Listeners and Initial Setup ---
+
+        masterNameInput.addEventListener('input', () => {
+            masterNameInput.value = masterNameInput.value.replace(/[^A-Z]/g,'').toUpperCase();
+            updateCounters();
+            validateInputs();
+            livePreview();
+        });
+
+        masterPublicKeyInput.addEventListener('input', () => {
+            masterPublicKeyInput.value = masterPublicKeyInput.value.replace(/[^a-fA-F0-9]/g,'');
+            updateCounters();
+            validateInputs();
+            livePreview();
+        });
+
+        identityQrHashInput.addEventListener('input', () => {
+            identityQrHashInput.value = identityQrHashInput.value.replace(/[^a-fA-F0-9]/g,'');
+            updateCounters();
+            validateInputs();
+            livePreview();
+        });
+
+        // Load badwords list (simulated)
+        window.addEventListener('DOMContentLoaded', function() {
+            // Simulate fetching badwords.json
+            setTimeout(() => {
+                badwords = {
+                    "common": ["fuck", "shit", "ass", "damn"],
+                    "thai": ["ควย", "เหี้ย"]
+                };
+                flatBadwords = Object.values(badwords).flat().map(x=>x.toLowerCase());
+                badwordsReady = true;
+                validateInputs(); // Re-validate once badwords are loaded
+            }, 500); // Simulate network delay
+
+            // Autofill public key if saved locally (from previous steps like key generation)
+            const localPub = localStorage.getItem('dtc_publicKey');
+            if (localPub && localPub.length === 64 && /^[a-fA-F0-9]+$/.test(localPub)) {
+                masterPublicKeyInput.value = localPub;
+            }
+            
+            updateCounters();
+            validateInputs();
+            livePreview(); // Initial preview
+        });
+
+    </script>
 </body>
 </html>
