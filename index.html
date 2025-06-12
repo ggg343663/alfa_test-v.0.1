@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DTC: Magic Chain System</title>
+  <title>สร้าง QR Hash - DTC: ระบบ Magic Chain</title>
   <style>
-    /* Base Styles - Keep consistent with your existing design */
+    /* สไตล์พื้นฐาน */
     body {
       font-family: Arial, sans-serif;
       max-width: 700px;
@@ -16,116 +16,134 @@
     }
     h1 {
       text-align: center;
-      color: #219150; /* Dark green for the main title */
+      color: #219150;
       margin-bottom: 1.2em;
       letter-spacing: 0.02em;
     }
-    .menu-block {
+    .section-block {
       margin: 1.1em 0;
       padding: 1em;
       border-radius: 12px;
-      box-shadow: 0 2px 9px #edf1f6; /* Consistent shadow for sections */
+      box-shadow: 0 2px 9px #edf1f6;
+      background: #fff;
     }
     .block-title {
       font-size: 1.07em;
       font-weight: bold;
       margin-bottom: 0.68em;
-      padding-bottom: 0.5em; /* Separator for title */
+      padding-bottom: 0.5em;
       border-bottom: 1px solid rgba(0,0,0,0.1);
     }
-    /* Section specific background and left border colors */
-    .block-green { background: #eafaf0; border-left: 6px solid #219150; }
-    .block-blue  { background: #e3f2fd; border-left: 6px solid #2196f3; }
-    .block-yellow { background: #fff9e5; border-left: 6px solid #ffd600; }
-    .block-purple { background: #f3eafe; border-left: 6px solid #9575cd; }
-
-    /* Button styling within each section */
-    .menu-block a {
+    label {
       display: block;
-      width: 100%;
-      padding: 0.77em 0.4em;
-      margin-bottom: 0.53em;
-      color: #fff; /* Default text color for buttons */
+      margin-bottom: 0.5em;
       font-weight: bold;
-      border-radius: 8px;
-      font-size: 1.09em;
+      color: #555;
+    }
+    input[type="text"],
+    input[type="password"] {
+      width: calc(100% - 1.6em); /* หัก padding */
+      padding: 0.8em;
+      margin-bottom: 1em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+    .hint {
+      font-size: 0.9em;
+      color: #777;
+      margin-top: -0.8em;
+      margin-bottom: 1em;
+      display: block;
+    }
+
+    /* สไตล์สำหรับข้อมูล Role, Quota, Status */
+    .info-bar {
       text-align: center;
-      text-decoration: none;
-      box-shadow: 0 2px 7px rgba(39,174,96,0.07); /* Shadow for buttons */
-      transition: background 0.13s, filter 0.13s; /* Smooth transition on hover */
+      margin-bottom: 1.5em;
+      font-size: 1em;
+      color: #555;
     }
-    /* Specific button background colors */
-    .menu-block.block-green a { background: #219150; }
-    .menu-block.block-blue a { background: #2196f3; }
-    .menu-block.block-yellow a { background: #ffd600; color: #222; } /* Dark text on yellow for contrast */
-    .menu-block.block-purple a { background: #9575cd; }
-
-    .menu-block a:hover {
-      filter: brightness(0.93); /* Slightly darken button on hover */
+    .info-bar span {
+      font-weight: bold;
+      color: #219150;
+      margin: 0 0.5em;
     }
 
-    /* Styles for the new "ส่วนประกอบสำคัญสำหรับ Hash" section */
-    .hash-details {
-      background: #eafaf0; /* Light green background */
-      border: 1px solid #d4edda;
-      border-radius: 8px;
-      padding: 1em;
+    /* สไตล์สำหรับส่วนเลือกจำนวน QR */
+    .quantity-options {
+      display: flex;
+      flex-wrap: wrap; /* ให้ขึ้นบรรทัดใหม่ได้ถ้าหน้าจอเล็ก */
+      gap: 0.8em; /* ช่องว่างระหว่างปุ่ม */
+      justify-content: center; /* จัดให้อยู่ตรงกลาง */
+      margin-top: 1em;
       margin-bottom: 1em;
     }
-    .hash-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 0.5em;
-    }
-    .hash-item span {
-      flex-grow: 1;
-    }
-    .hash-item .copy-btn {
-      background: #4CAF50; /* Green for copy buttons */
-      color: white;
-      border: none;
-      padding: 0.3em 0.7em;
-      border-radius: 4px;
+    .quantity-options button {
+      padding: 0.8em 1.2em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background: #f0f0f0;
       cursor: pointer;
-      font-size: 0.85em;
-      margin-left: 0.5em;
-      transition: background 0.2s;
+      font-size: 0.95em;
+      transition: background 0.2s, border-color 0.2s;
     }
-    .hash-item .copy-btn:hover {
-      background: #45a049;
+    .quantity-options button:hover {
+      background: #e0e0e0;
+      border-color: #aaa;
+    }
+    .quantity-options button.selected {
+      background: #2196f3;
+      color: #fff;
+      border-color: #2196f3;
+    }
+    .quantity-input-container {
+      margin-bottom: 1em;
+    }
+    .quantity-input-container input {
+      margin-bottom: 0.5em; /* ลด margin ล่าง */
     }
 
-    .copy-all-hash-btn {
+    /* ปุ่มหลัก */
+    .main-button {
       display: block;
       width: 100%;
-      padding: 0.7em 0;
-      background: #007bff; /* Blue for overall copy hash */
-      color: white;
+      padding: 1em 0.5em;
+      margin-top: 1.5em;
+      margin-bottom: 1.5em;
+      color: #fff;
       font-weight: bold;
+      border: none;
       border-radius: 8px;
+      font-size: 1.15em;
       text-align: center;
       text-decoration: none;
-      margin-top: 1em;
-      transition: background 0.2s;
+      background: #2196f3; /* สีน้ำเงินสำหรับปุ่มหลัก */
+      box-shadow: 0 2px 7px rgba(33,150,243,0.3);
+      cursor: pointer;
+      transition: background 0.13s, filter 0.13s;
     }
-    .copy-all-hash-btn:hover {
-      background: #0056b3;
+    .main-button:hover {
+      filter: brightness(0.93);
+    }
+    .main-button:disabled {
+      background: #b0d8f7; /* สีอ่อนลงเมื่อถูกปิดใช้งาน */
+      cursor: not-allowed;
     }
 
-    /* Styles for the improved Audit Chain */
+    /* ส่วน Audit Chain - สไตล์เหมือนเดิมแต่ฟังก์ชันเปลี่ยน */
     .audit-chain-input {
       margin-bottom: 1em;
     }
     .audit-chain-input input[type="text"] {
-      width: calc(100% - 2em); /* Adjust for padding */
+      width: calc(100% - 1.6em);
       padding: 0.8em;
       border: 1px solid #ccc;
       border-radius: 5px;
       font-size: 1em;
     }
     .hash-preview {
-      background: #e0f2f7; /* Light blue for preview */
+      background: #e0f2f7;
       border: 1px solid #cce5ed;
       border-radius: 5px;
       padding: 0.8em;
@@ -133,22 +151,22 @@
       margin-bottom: 1em;
       font-size: 0.9em;
       color: #333;
-      word-break: break-all; /* Ensures long hashes wrap */
-      min-height: 1.5em; /* Placeholder height */
+      word-break: break-all;
+      min-height: 1.5em;
       display: flex;
       align-items: center;
     }
     .hash-preview.empty::before {
-        content: "No hash entered";
+        content: "ยังไม่มีแฮช";
         color: #999;
     }
 
     .audit-action-buttons {
       display: flex;
-      gap: 1em; /* Space between buttons */
+      gap: 1em;
     }
     .audit-action-buttons button {
-      flex: 1; /* Makes buttons take equal width */
+      flex: 1;
       padding: 0.8em 0.5em;
       border: none;
       border-radius: 8px;
@@ -159,131 +177,184 @@
       color: #fff;
     }
     .audit-action-buttons .exit-btn {
-      background: #dc3545; /* Red for Exit */
+      background: #dc3545;
     }
     .audit-action-buttons .exit-btn:hover {
       filter: brightness(0.9);
     }
     .audit-action-buttons .commit-btn {
-      background: #28a745; /* Green for Commit */
+      background: #28a745;
     }
     .audit-action-buttons .commit-btn:hover {
       filter: brightness(0.9);
     }
 
+    /* ปุ่มนำทางด้านล่าง */
+    .navigation-buttons {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 2em;
+    }
+    .navigation-buttons button {
+      padding: 0.8em 1.5em;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: bold;
+      cursor: pointer;
+      background: #e0e0e0;
+      color: #333;
+      transition: background 0.13s;
+    }
+    .navigation-buttons button:hover {
+      background: #d0d0d0;
+    }
+
     /* Responsive adjustments for mobile devices */
     @media (max-width: 600px) {
       body { margin: 0.4em; padding: 0.07em;}
-      .menu-block { padding: 0.7em 0.2em;}
-      .menu-block a { font-size: 1em; padding: 0.6em 0.2em; }
-      .audit-action-buttons { flex-direction: column; gap: 0.5em; } /* Stack buttons on small screens */
+      .section-block { padding: 0.7em 0.2em;}
+      input[type="text"], input[type="password"] {
+        width: calc(100% - 1.2em);
+        padding: 0.6em;
+      }
+      .main-button { font-size: 1.05em; padding: 0.8em 0.4em; }
+      .quantity-options { flex-direction: row; justify-content: space-between; } /* จัดให้ชิดขอบจอเล็ก */
+      .quantity-options button { flex-basis: calc(33% - 0.8em); padding: 0.6em 0.8em; font-size: 0.9em; } /* 3 ปุ่มต่อแถว */
+      .audit-action-buttons { flex-direction: column; gap: 0.5em; }
     }
 
-    .footer-note {
-      text-align:center;
-      margin-top:2.4em;
-      color:#b0bec5;
-      font-size:0.95em;
-    }
   </style>
 </head>
 <body>
-  <h1>DTC: Magic Chain System</h1>
+  <h1>สร้าง QR Hash (Double Hash Function)</h1>
 
-  <div class="menu-block block-green">
-    <div class="block-title">Hash Details (Ticket Data)</div>
-    <div class="hash-details">
-      <div class="hash-item">
-        <span>Timestamp: <span id="timestamp-value">2025-06-12T01:33:57.142Z</span></span>
-        <button class="copy-btn" onclick="copyToClipboard('timestamp-value')">copy</button>
-      </div>
-      <div class="hash-item">
-        <span>Nonce: <span id="nonce-value">x73vvku</span></span>
-        <button class="copy-btn" onclick="copyToClipboard('nonce-value')">copy</button>
-      </div>
-      <div class="hash-item">
-        <span>Slot ID (example): <span id="slot-id-value">QR_100_1749692037142_001</span></span>
-        <button class="copy-btn" onclick="copyToClipboard('slot-id-value')">copy</button>
-      </div>
-      <div class="hash-item">
-        <span>Prev Hash (first 6 chars): <span id="prev-hash-value">0x0000</span></span>
-        <button class="copy-btn" onclick="copyToClipboard('prev-hash-value')">copy</button>
-      </div>
-      <button class="copy-all-hash-btn" onclick="copyAllHash()">Copy All Hash Data</button>
+  <div class="info-bar">
+    บทบาท: <span id="role-display">Normal</span> | โควตา: <span id="quota-display">1</span> | สถานะ: <span id="status-display">พร้อมใช้งาน</span>
+  </div>
+
+  <div class="section-block">
+    <div class="block-title">Public Key</div>
+    <input type="text" id="publicKeyInput" value="000000004a8d87ffd4c6e7a29f1221b13e81" readonly>
+    <span class="hint">วาง public key ที่สร้างจากหน้า Generate Key</span>
+  </div>
+
+  <div class="section-block">
+    <div class="block-title">Mint QR Hash / Quantity (QTY)</div>
+    <div class="quantity-input-container">
+      <input type="number" id="qrQuantityInput" value="1" min="1" onchange="updateQuantityButtons()">
+      <span class="hint">เลือกจากตัวเลือกยอดนิยมหรือป้อนจำนวนที่กำหนดเอง</span>
     </div>
-
-    <a href="#" class="btn-yellow">Export Ticket (TXT/JSON)</a>
-    <a href="#" class="btn-blue">Export QR (PNG/ZIP)</a>
-    <a href="#" class="btn-green">Export Commitment Log (CSV/JSON)</a>
+    <div class="quantity-options">
+      <button onclick="selectQuantity(100)">100</button>
+      <button onclick="selectQuantity(500)">500</button>
+      <button onclick="selectQuantity(1000)">1000</button>
+      <button onclick="selectQuantity(3000)">3000</button>
+      <button onclick="selectQuantity(5000)">5000</button>
+    </div>
   </div>
 
-
-  <div class="menu-block block-green">
-    <div class="block-title">Step 1: User Key & QR</div>
-    <a href="generate_key.html">Generate Public Key</a>
-    <a href="generate_qr_hash.html">Generate QR Hash</a>
-    <a href="regenerate_qr_hash.html">Regenerate QR Hash</a>
+  <div class="section-block">
+    <div class="block-title">Secret</div>
+    <label for="secretInput">สำหรับ Minting ที่ปลอดภัย (เก็บเป็นส่วนตัว)</label>
+    <input type="password" id="secretInput" placeholder="4 ตัวอักษร a-z (ตัวพิมพ์เล็ก)">
+    <label for="confirmSecretInput">ยืนยัน Secret</label>
+    <input type="password" id="confirmSecretInput" placeholder="ป้อน secret อีกครั้ง">
+    <span class="hint">Secret ควรเป็นตัวอักษรพิมพ์เล็ก 4 ตัว</span>
   </div>
 
-  <div class="menu-block block-blue">
-    <div class="block-title">Step 2: Register & Transfer</div>
-    <a href="register_qr.html">Register QR</a>
-    <a href="transfer.html">Transfer QR</a>
-  </div>
+  <button class="main-button" id="generateQrBatchBtn" onclick="generateQRBatch()">สร้าง QR Batch</button>
 
-  <div class="menu-block block-yellow">
-    <div class="block-title">Step 3: Audit & Status</div>
-    <a href="verify_log.html">Check QR Status</a>
-  </div>
-
-  <div class="menu-block block-yellow">
-    <div class="block-title">Audit Chain</div>
+  <div class="section-block">
+    <div class="block-title">ตรวจสอบห่วงโซ่ (Audit Chain)</div>
     <div class="audit-chain-input">
-      <input type="text" id="qrCommitmentHashInput" placeholder="Paste QR or Commitment hash (hash2)" onkeyup="updateHashPreview()">
+      <input type="text" id="qrCommitmentHashInput" placeholder="วาง QR หรือ Commitment hash (hash2)" onkeyup="updateHashPreview()">
       <div id="hashPreview" class="hash-preview empty"></div>
     </div>
     <div class="audit-action-buttons">
-      <button class="exit-btn" onclick="handleExit()">Exit</button>
-      <button class="commit-btn" onclick="handleCommit()">Commit</button>
+      <button class="exit-btn" onclick="handleExit()">ออก</button>
+      <button class="commit-btn" onclick="handleCommit()">ยืนยัน</button>
     </div>
   </div>
 
-  <div class="menu-block block-purple">
-    <div class="block-title">Step 4: Authority Tools</div>
-    <a href="register_master.html">Register Master</a>
-    <a href="master_dashboard.html">Master Dashboard</a>
-    <a href="agent_register.html">Register Agent</a>
+  <div class="navigation-buttons">
+    <button onclick="window.history.back()">ย้อนกลับ</button>
+    <button onclick="window.location.href='index.html'">หน้าแรก</button>
+    <button onclick="handleNext()">ถัดไป</button>
   </div>
 
-  <p class="footer-note">
-    Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
-  </p>
-
   <script>
-    // JavaScript functions for copying and previewing
-    function copyToClipboard(elementId) {
-      const element = document.getElementById(elementId);
-      if (element) {
-        const textToCopy = element.innerText;
-        navigator.clipboard.writeText(textToCopy)
-          .then(() => alert('Copied: ' + textToCopy))
-          .catch(err => console.error('Failed to copy: ', err));
-      }
+    // ข้อมูลจำลองสำหรับ Role และ Quota เพื่อสาธิตการควบคุมสิทธิ์
+    let userRole = 'Normal'; // สามารถเปลี่ยนเป็น 'Master' หรือ 'Agent' เพื่อทดสอบ
+    let userQuota = 1000; // จำนวนโควตาที่เหลือ
+
+    document.addEventListener('DOMContentLoaded', function() {
+        updateRoleAndQuotaDisplay();
+        checkMintingPermissions();
+        updateHashPreview(); // เริ่มต้นการแสดงพรีวิวสำหรับ Audit Chain
+    });
+
+    function updateRoleAndQuotaDisplay() {
+        document.getElementById('role-display').textContent = userRole;
+        document.getElementById('quota-display').textContent = userQuota;
+        // อัปเดตสถานะ ถ้า Quota เป็น 0 ให้แสดง 'ไม่พร้อมใช้งาน'
+        document.getElementById('status-display').textContent = userQuota > 0 ? 'พร้อมใช้งาน' : 'ไม่พร้อมใช้งาน';
     }
 
-    function copyAllHash() {
-        const timestamp = document.getElementById('timestamp-value')?.innerText || '';
-        const nonce = document.getElementById('nonce-value')?.innerText || '';
-        const slotId = document.getElementById('slot-id-value')?.innerText || '';
-        const prevHash = document.getElementById('prev-hash-value')?.innerText || '';
+    function checkMintingPermissions() {
+        const quantityOptionsDiv = document.querySelector('.quantity-options');
+        const generateButton = document.getElementById('generateQrBatchBtn');
+        const qrQuantityInput = document.getElementById('qrQuantityInput');
 
-        const combinedHash = `Timestamp: ${timestamp}\nNonce: ${nonce}\nSlot ID: ${slotId}\nPrev Hash: ${prevHash}`;
-
-        navigator.clipboard.writeText(combinedHash)
-            .then(() => alert('All hash data copied to clipboard!'))
-            .catch(err => console.error('Failed to copy all hash data: ', err));
+        if (userRole === 'Normal' && userQuota <= 0) {
+            // ถ้าเป็น Normal และโควตาหมด
+            qrQuantityInput.disabled = true;
+            quantityOptionsDiv.style.display = 'none'; // ซ่อนปุ่มเลือกจำนวน
+            generateButton.disabled = true;
+            alert('คุณไม่มีโควตาเหลือสำหรับการ Mint QR Hash');
+        } else if (userRole === 'Agent' && userQuota <= 0) {
+             // ตัวอย่าง: Agent อาจจะมีสิทธิ์ต่างจาก Normal
+            qrQuantityInput.disabled = true;
+            quantityOptionsDiv.style.display = 'none';
+            generateButton.disabled = true;
+            alert('โควตาของ Agent หมดแล้ว');
+        } else {
+            // ถ้ามีสิทธิ์ (มีโควตาหรือเป็น Master)
+            qrQuantityInput.disabled = false;
+            quantityOptionsDiv.style.display = 'flex'; // แสดงปุ่มเลือกจำนวน
+            generateButton.disabled = false;
+        }
+        // สามารถเพิ่มเงื่อนไขสำหรับ 'Master' ได้ที่นี่
+        // if (userRole === 'Master') { /* Master อาจมีสิทธิ์ไม่จำกัด */ }
     }
 
+
+    function selectQuantity(qty) {
+      document.getElementById('qrQuantityInput').value = qty;
+      // ไฮไลต์ปุ่มที่ถูกเลือก
+      const buttons = document.querySelectorAll('.quantity-options button');
+      buttons.forEach(btn => {
+        if (parseInt(btn.textContent) === qty) {
+          btn.classList.add('selected');
+        } else {
+          btn.classList.remove('selected');
+        }
+      });
+    }
+
+    function updateQuantityButtons() {
+        const inputQty = parseInt(document.getElementById('qrQuantityInput').value);
+        const buttons = document.querySelectorAll('.quantity-options button');
+        buttons.forEach(btn => {
+            if (parseInt(btn.textContent) === inputQty) {
+                btn.classList.add('selected');
+            } else {
+                btn.classList.remove('selected');
+            }
+        });
+    }
+
+    // ฟังก์ชันสำหรับส่วน Audit Chain (เหมือนเดิม)
     function updateHashPreview() {
       const input = document.getElementById('qrCommitmentHashInput');
       const preview = document.getElementById('hashPreview');
@@ -297,27 +368,57 @@
     }
 
     function handleExit() {
-      // Logic for "Exit" button
-      // This might clear the input, redirect, or close a modal
       document.getElementById('qrCommitmentHashInput').value = '';
-      updateHashPreview(); // Clear the preview
-      alert('Exit action triggered!');
+      updateHashPreview();
+      alert('ดำเนินการ "ออก" แล้ว!');
     }
 
     function handleCommit() {
       const hashValue = document.getElementById('qrCommitmentHashInput').value;
       if (hashValue.trim() === '') {
-        alert('Please enter a hash to commit.');
+        alert('โปรดป้อนแฮชเพื่อยืนยัน');
         return;
       }
-      // Logic for "Commit" button
-      // This would typically submit the hash for auditing
-      alert('Committing hash: ' + hashValue);
-      // You would then proceed with your audit chain logic here
+      alert('กำลังยืนยันแฮช: ' + hashValue);
     }
 
-    // Initialize the preview on page load in case there's pre-filled data (unlikely for an input)
-    document.addEventListener('DOMContentLoaded', updateHashPreview);
+    // ฟังก์ชันสำหรับปุ่ม Generate QR Batch
+    function generateQRBatch() {
+      const secret = document.getElementById('secretInput').value;
+      const confirmSecret = document.getElementById('confirmSecretInput').value;
+      const quantity = parseInt(document.getElementById('qrQuantityInput').value);
+
+      if (secret === '' || confirmSecret === '') {
+        alert('โปรดป้อน Secret และยืนยัน Secret');
+        return;
+      }
+      if (secret !== confirmSecret) {
+        alert('Secret ไม่ตรงกัน โปรดลองอีกครั้ง');
+        return;
+      }
+      if (!/^[a-z]{4}$/.test(secret)) {
+        alert('Secret ต้องเป็นตัวอักษรพิมพ์เล็ก a-z จำนวน 4 ตัว');
+        return;
+      }
+      if (isNaN(quantity) || quantity <= 0) {
+        alert('โปรดระบุจำนวน QR ที่ถูกต้อง');
+        return;
+      }
+      if (quantity > userQuota && userRole !== 'Master') { // ถ้าไม่ใช่ Master ให้เช็คโควตา
+          alert(`คุณมีโควตาเหลือ ${userQuota} ไม่เพียงพอสำหรับการสร้าง ${quantity} QR`);
+          return;
+      }
+
+      alert(`กำลังสร้าง QR Hash ${quantity} ชุด ด้วย Secret: ${secret}`);
+      // ที่นี่คือส่วนที่คุณจะเรียก API หรือฟังก์ชันเพื่อสร้าง QR Hash จริงๆ
+      // หากสำเร็จ คุณสามารถเปลี่ยนเส้นทางไปหน้า "QR Batch Generated"
+      // window.location.href = 'qr_batch_generated.html'; // ต้องสร้างหน้านี้ขึ้นมา
+    }
+
+    function handleNext() {
+      alert('ไปหน้าถัดไป!');
+      // window.location.href = 'next_page.html';
+    }
   </script>
 </body>
 </html>
