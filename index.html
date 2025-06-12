@@ -38,7 +38,7 @@
     .block-blue  { background: #e3f2fd; border-left: 6px solid #2196f3; }
     .block-yellow { background: #fff9e5; border-left: 6px solid #ffd600; }
     .block-purple { background: #f3eafe; border-left: 6px solid #9575cd; }
-    
+
     /* Button styling within each section */
     .menu-block a {
       display: block;
@@ -59,16 +59,124 @@
     .menu-block.block-blue a { background: #2196f3; }
     .menu-block.block-yellow a { background: #ffd600; color: #222; } /* Dark text on yellow for contrast */
     .menu-block.block-purple a { background: #9575cd; }
-    
+
     .menu-block a:hover {
       filter: brightness(0.93); /* Slightly darken button on hover */
     }
-    
+
+    /* Styles for the new "ส่วนประกอบสำคัญสำหรับ Hash" section */
+    .hash-details {
+      background: #eafaf0; /* Light green background */
+      border: 1px solid #d4edda;
+      border-radius: 8px;
+      padding: 1em;
+      margin-bottom: 1em;
+    }
+    .hash-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5em;
+    }
+    .hash-item span {
+      flex-grow: 1;
+    }
+    .hash-item .copy-btn {
+      background: #4CAF50; /* Green for copy buttons */
+      color: white;
+      border: none;
+      padding: 0.3em 0.7em;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.85em;
+      margin-left: 0.5em;
+      transition: background 0.2s;
+    }
+    .hash-item .copy-btn:hover {
+      background: #45a049;
+    }
+
+    .copy-all-hash-btn {
+      display: block;
+      width: 100%;
+      padding: 0.7em 0;
+      background: #007bff; /* Blue for overall copy hash */
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      text-align: center;
+      text-decoration: none;
+      margin-top: 1em;
+      transition: background 0.2s;
+    }
+    .copy-all-hash-btn:hover {
+      background: #0056b3;
+    }
+
+    /* Styles for the improved Audit Chain */
+    .audit-chain-input {
+      margin-bottom: 1em;
+    }
+    .audit-chain-input input[type="text"] {
+      width: calc(100% - 2em); /* Adjust for padding */
+      padding: 0.8em;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 1em;
+    }
+    .hash-preview {
+      background: #e0f2f7; /* Light blue for preview */
+      border: 1px solid #cce5ed;
+      border-radius: 5px;
+      padding: 0.8em;
+      margin-top: 0.8em;
+      margin-bottom: 1em;
+      font-size: 0.9em;
+      color: #333;
+      word-break: break-all; /* Ensures long hashes wrap */
+      min-height: 1.5em; /* Placeholder height */
+      display: flex;
+      align-items: center;
+    }
+    .hash-preview.empty::before {
+        content: "No hash entered";
+        color: #999;
+    }
+
+    .audit-action-buttons {
+      display: flex;
+      gap: 1em; /* Space between buttons */
+    }
+    .audit-action-buttons button {
+      flex: 1; /* Makes buttons take equal width */
+      padding: 0.8em 0.5em;
+      border: none;
+      border-radius: 8px;
+      font-size: 1.09em;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.13s, filter 0.13s;
+      color: #fff;
+    }
+    .audit-action-buttons .exit-btn {
+      background: #dc3545; /* Red for Exit */
+    }
+    .audit-action-buttons .exit-btn:hover {
+      filter: brightness(0.9);
+    }
+    .audit-action-buttons .commit-btn {
+      background: #28a745; /* Green for Commit */
+    }
+    .audit-action-buttons .commit-btn:hover {
+      filter: brightness(0.9);
+    }
+
     /* Responsive adjustments for mobile devices */
     @media (max-width: 600px) {
       body { margin: 0.4em; padding: 0.07em;}
       .menu-block { padding: 0.7em 0.2em;}
       .menu-block a { font-size: 1em; padding: 0.6em 0.2em; }
+      .audit-action-buttons { flex-direction: column; gap: 0.5em; } /* Stack buttons on small screens */
     }
 
     .footer-note {
@@ -82,7 +190,34 @@
 <body>
   <h1>DTC: Magic Chain System</h1>
 
-  <!-- Step 1: User Key & QR - Green Theme -->
+  <div class="menu-block block-green">
+    <div class="block-title">Hash Details (Ticket Data)</div>
+    <div class="hash-details">
+      <div class="hash-item">
+        <span>Timestamp: <span id="timestamp-value">2025-06-12T01:33:57.142Z</span></span>
+        <button class="copy-btn" onclick="copyToClipboard('timestamp-value')">copy</button>
+      </div>
+      <div class="hash-item">
+        <span>Nonce: <span id="nonce-value">x73vvku</span></span>
+        <button class="copy-btn" onclick="copyToClipboard('nonce-value')">copy</button>
+      </div>
+      <div class="hash-item">
+        <span>Slot ID (example): <span id="slot-id-value">QR_100_1749692037142_001</span></span>
+        <button class="copy-btn" onclick="copyToClipboard('slot-id-value')">copy</button>
+      </div>
+      <div class="hash-item">
+        <span>Prev Hash (first 6 chars): <span id="prev-hash-value">0x0000</span></span>
+        <button class="copy-btn" onclick="copyToClipboard('prev-hash-value')">copy</button>
+      </div>
+      <button class="copy-all-hash-btn" onclick="copyAllHash()">Copy All Hash Data</button>
+    </div>
+
+    <a href="#" class="btn-yellow">Export Ticket (TXT/JSON)</a>
+    <a href="#" class="btn-blue">Export QR (PNG/ZIP)</a>
+    <a href="#" class="btn-green">Export Commitment Log (CSV/JSON)</a>
+  </div>
+
+
   <div class="menu-block block-green">
     <div class="block-title">Step 1: User Key & QR</div>
     <a href="generate_key.html">Generate Public Key</a>
@@ -90,20 +225,29 @@
     <a href="regenerate_qr_hash.html">Regenerate QR Hash</a>
   </div>
 
-  <!-- Step 2: Register & Transfer - Blue Theme -->
   <div class="menu-block block-blue">
     <div class="block-title">Step 2: Register & Transfer</div>
     <a href="register_qr.html">Register QR</a>
     <a href="transfer.html">Transfer QR</a>
   </div>
 
-  <!-- Step 3: Audit & Status - Yellow Theme -->
   <div class="menu-block block-yellow">
     <div class="block-title">Step 3: Audit & Status</div>
     <a href="verify_log.html">Check QR Status</a>
   </div>
 
-  <!-- Step 4: Authority Tools - Purple Theme -->
+  <div class="menu-block block-yellow">
+    <div class="block-title">Audit Chain</div>
+    <div class="audit-chain-input">
+      <input type="text" id="qrCommitmentHashInput" placeholder="Paste QR or Commitment hash (hash2)" onkeyup="updateHashPreview()">
+      <div id="hashPreview" class="hash-preview empty"></div>
+    </div>
+    <div class="audit-action-buttons">
+      <button class="exit-btn" onclick="handleExit()">Exit</button>
+      <button class="commit-btn" onclick="handleCommit()">Commit</button>
+    </div>
+  </div>
+
   <div class="menu-block block-purple">
     <div class="block-title">Step 4: Authority Tools</div>
     <a href="register_master.html">Register Master</a>
@@ -114,6 +258,66 @@
   <p class="footer-note">
     Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
   </p>
+
+  <script>
+    // JavaScript functions for copying and previewing
+    function copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      if (element) {
+        const textToCopy = element.innerText;
+        navigator.clipboard.writeText(textToCopy)
+          .then(() => alert('Copied: ' + textToCopy))
+          .catch(err => console.error('Failed to copy: ', err));
+      }
+    }
+
+    function copyAllHash() {
+        const timestamp = document.getElementById('timestamp-value')?.innerText || '';
+        const nonce = document.getElementById('nonce-value')?.innerText || '';
+        const slotId = document.getElementById('slot-id-value')?.innerText || '';
+        const prevHash = document.getElementById('prev-hash-value')?.innerText || '';
+
+        const combinedHash = `Timestamp: ${timestamp}\nNonce: ${nonce}\nSlot ID: ${slotId}\nPrev Hash: ${prevHash}`;
+
+        navigator.clipboard.writeText(combinedHash)
+            .then(() => alert('All hash data copied to clipboard!'))
+            .catch(err => console.error('Failed to copy all hash data: ', err));
+    }
+
+    function updateHashPreview() {
+      const input = document.getElementById('qrCommitmentHashInput');
+      const preview = document.getElementById('hashPreview');
+      if (input.value.trim() === '') {
+        preview.textContent = '';
+        preview.classList.add('empty');
+      } else {
+        preview.textContent = input.value;
+        preview.classList.remove('empty');
+      }
+    }
+
+    function handleExit() {
+      // Logic for "Exit" button
+      // This might clear the input, redirect, or close a modal
+      document.getElementById('qrCommitmentHashInput').value = '';
+      updateHashPreview(); // Clear the preview
+      alert('Exit action triggered!');
+    }
+
+    function handleCommit() {
+      const hashValue = document.getElementById('qrCommitmentHashInput').value;
+      if (hashValue.trim() === '') {
+        alert('Please enter a hash to commit.');
+        return;
+      }
+      // Logic for "Commit" button
+      // This would typically submit the hash for auditing
+      alert('Committing hash: ' + hashValue);
+      // You would then proceed with your audit chain logic here
+    }
+
+    // Initialize the preview on page load in case there's pre-filled data (unlikely for an input)
+    document.addEventListener('DOMContentLoaded', updateHashPreview);
+  </script>
 </body>
 </html>
-
