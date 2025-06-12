@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Generate QR Hash - DTC: Magic Chain System</title>
+  <title>DTC: Magic Chain System</title>
   <style>
-    /* Base Styles */
+    /* Base Styles - Keep consistent with your existing design */
     body {
       font-family: Arial, sans-serif;
       max-width: 700px;
@@ -16,446 +16,104 @@
     }
     h1 {
       text-align: center;
-      color: #219150;
+      color: #219150; /* Dark green for the main title */
       margin-bottom: 1.2em;
       letter-spacing: 0.02em;
     }
-    .section-block {
+    .menu-block {
       margin: 1.1em 0;
       padding: 1em;
       border-radius: 12px;
-      box-shadow: 0 2px 9px #edf1f6;
-      background: #fff;
+      box-shadow: 0 2px 9px #edf1f6; /* Consistent shadow for sections */
     }
     .block-title {
       font-size: 1.07em;
       font-weight: bold;
       margin-bottom: 0.68em;
-      padding-bottom: 0.5em;
+      padding-bottom: 0.5em; /* Separator for title */
       border-bottom: 1px solid rgba(0,0,0,0.1);
     }
-    label {
-      display: block;
-      margin-bottom: 0.5em;
-      font-weight: bold;
-      color: #555;
-    }
-    input[type="text"],
-    input[type="password"],
-    input[type="number"] {
-      width: calc(100% - 1.6em); /* Account for padding */
-      padding: 0.8em;
-      margin-bottom: 1em;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1em;
-    }
-    input:disabled { /* Style for disabled inputs */
-      background-color: #e9ecef;
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .hint {
-      font-size: 0.9em;
-      color: #777;
-      margin-top: -0.8em;
-      margin-bottom: 1em;
-      display: block;
-    }
-
-    /* Styles for Role, Quota, Status info */
-    .info-bar {
-      text-align: center;
-      margin-bottom: 1.5em;
-      font-size: 1em;
-      color: #555;
-    }
-    .info-bar span {
-      font-weight: bold;
-      color: #219150;
-      margin: 0 0.5em;
-    }
-
-    /* Styles for QR quantity selection */
-    .quantity-options {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.8em;
-      justify-content: center;
-      margin-top: 1em;
-      margin-bottom: 1em;
-    }
-    .quantity-options button {
-      padding: 0.8em 1.2em;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background: #f0f0f0;
-      cursor: pointer;
-      font-size: 0.95em;
-      transition: background 0.2s, border-color 0.2s, opacity 0.2s;
-    }
-    .quantity-options button:hover:not(:disabled) {
-      background: #e0e0e0;
-      border-color: #aaa;
-    }
-    .quantity-options button.selected {
-      background: #2196f3;
-      color: #fff;
-      border-color: #2196f3;
-    }
-    .quantity-options button:disabled { /* Style for disabled buttons */
-      opacity: 0.4;
-      cursor: not-allowed;
-      background: #f0f0f0;
-      border-color: #ccc;
-      color: #777;
-    }
-    .quantity-options button.selected:disabled { /* Selected button when disabled */
-      background: #89c5f8;
-      color: #eee;
-    }
-
-    .quantity-input-container {
-      margin-bottom: 1em;
-    }
-    .quantity-input-container input {
-      margin-bottom: 0.5em;
-    }
-
-    /* Main Button */
-    .main-button {
+    /* Section specific background and left border colors */
+    .block-green { background: #eafaf0; border-left: 6px solid #219150; }
+    .block-blue  { background: #e3f2fd; border-left: 6px solid #2196f3; }
+    .block-yellow { background: #fff9e5; border-left: 6px solid #ffd600; }
+    .block-purple { background: #f3eafe; border-left: 6px solid #9575cd; }
+    
+    /* Button styling within each section */
+    .menu-block a {
       display: block;
       width: 100%;
-      padding: 1em 0.5em;
-      margin-top: 1.5em;
-      margin-bottom: 1.5em;
-      color: #fff;
+      padding: 0.77em 0.4em;
+      margin-bottom: 0.53em;
+      color: #fff; /* Default text color for buttons */
       font-weight: bold;
-      border: none;
-      border-radius: 8px;
-      font-size: 1.15em;
-      text-align: center;
-      text-decoration: none;
-      background: #2196f3;
-      box-shadow: 0 2px 7px rgba(33,150,243,0.3);
-      cursor: pointer;
-      transition: background 0.13s, filter 0.13s, opacity 0.13s;
-    }
-    .main-button:hover:not(:disabled) {
-      filter: brightness(0.93);
-    }
-    .main-button:disabled {
-      background: #b0d8f7;
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-
-    /* Audit Chain Section - Functionality changed, styling mostly same */
-    .audit-chain-input {
-      margin-bottom: 1em;
-    }
-    .audit-chain-input input[type="text"] {
-      width: calc(100% - 1.6em);
-      padding: 0.8em;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      font-size: 1em;
-    }
-    .hash-preview {
-      background: #e0f2f7;
-      border: 1px solid #cce5ed;
-      border-radius: 5px;
-      padding: 0.8em;
-      margin-top: 0.8em;
-      margin-bottom: 1em;
-      font-size: 0.9em;
-      color: #333;
-      word-break: break-all;
-      min-height: 1.5em;
-      display: flex;
-      align-items: center;
-    }
-    .hash-preview.empty::before {
-        content: "No hash entered";
-        color: #999;
-    }
-
-    .audit-action-buttons {
-      display: flex;
-      gap: 1em;
-    }
-    .audit-action-buttons button {
-      flex: 1;
-      padding: 0.8em 0.5em;
-      border: none;
       border-radius: 8px;
       font-size: 1.09em;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.13s, filter 0.13s;
-      color: #fff;
+      text-align: center;
+      text-decoration: none;
+      box-shadow: 0 2px 7px rgba(39,174,96,0.07); /* Shadow for buttons */
+      transition: background 0.13s, filter 0.13s; /* Smooth transition on hover */
     }
-    .audit-action-buttons .exit-btn {
-      background: #dc3545;
+    /* Specific button background colors */
+    .menu-block.block-green a { background: #219150; }
+    .menu-block.block-blue a { background: #2196f3; }
+    .menu-block.block-yellow a { background: #ffd600; color: #222; } /* Dark text on yellow for contrast */
+    .menu-block.block-purple a { background: #9575cd; }
+    
+    .menu-block a:hover {
+      filter: brightness(0.93); /* Slightly darken button on hover */
     }
-    .audit-action-buttons .exit-btn:hover {
-      filter: brightness(0.9);
-    }
-    .audit-action-buttons .commit-btn {
-      background: #28a745;
-    }
-    .audit-action-buttons .commit-btn:hover {
-      filter: brightness(0.9);
-    }
-
-    /* Bottom Navigation Buttons */
-    .navigation-buttons {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 2em;
-    }
-    .navigation-buttons button {
-      padding: 0.8em 1.5em;
-      border: none;
-      border-radius: 8px;
-      font-size: 1em;
-      font-weight: bold;
-      cursor: pointer;
-      background: #e0e0e0;
-      color: #333;
-      transition: background 0.13s;
-    }
-    .navigation-buttons button:hover {
-      background: #d0d0d0;
-    }
-
+    
     /* Responsive adjustments for mobile devices */
     @media (max-width: 600px) {
       body { margin: 0.4em; padding: 0.07em;}
-      .section-block { padding: 0.7em 0.2em;}
-      input[type="text"], input[type="password"], input[type="number"] {
-        width: calc(100% - 1.2em);
-        padding: 0.6em;
-      }
-      .main-button { font-size: 1.05em; padding: 0.8em 0.4em; }
-      .quantity-options { flex-direction: row; justify-content: space-between; }
-      .quantity-options button { flex-basis: calc(33% - 0.8em); padding: 0.6em 0.8em; font-size: 0.9em; }
-      .audit-action-buttons { flex-direction: column; gap: 0.5em; }
+      .menu-block { padding: 0.7em 0.2em;}
+      .menu-block a { font-size: 1em; padding: 0.6em 0.2em; }
     }
 
+    .footer-note {
+      text-align:center;
+      margin-top:2.4em;
+      color:#b0bec5;
+      font-size:0.95em;
+    }
   </style>
 </head>
 <body>
-  <h1>Generate QR Hash (Double Hash Function)</h1>
+  <h1>DTC: Magic Chain System</h1>
 
-  <div class="info-bar">
-    Role: <span id="role-display">Normal</span> | Quota: <span id="quota-display">1000</span> | Status: <span id="status-display">Available</span>
+  <!-- Step 1: User Key & QR - Green Theme -->
+  <div class="menu-block block-green">
+    <div class="block-title">Step 1: User Key & QR</div>
+    <a href="generate_key.html">Generate Public Key</a>
+    <a href="generate_qr_hash.html">Generate QR Hash</a>
+    <a href="regenerate_qr_hash.html">Regenerate QR Hash</a>
   </div>
 
-  <div class="section-block">
-    <div class="block-title">Public Key</div>
-    <input type="text" id="publicKeyInput" value="000000004a8d87ffd4c6e7a29f1221b13e81" readonly>
-    <span class="hint">Paste the public key generated from the "Generate Key" page.</span>
+  <!-- Step 2: Register & Transfer - Blue Theme -->
+  <div class="menu-block block-blue">
+    <div class="block-title">Step 2: Register & Transfer</div>
+    <a href="register_qr.html">Register QR</a>
+    <a href="transfer.html">Transfer QR</a>
   </div>
 
-  <div class="section-block">
-    <div class="block-title">Mint QR Hash / Quantity (QTY)</div>
-    <div class="quantity-input-container">
-      <input type="number" id="qrQuantityInput" value="1" min="1" onchange="updateQuantityButtons()">
-      <span class="hint">Select from popular options or enter a custom quantity.</span>
-    </div>
-    <div class="quantity-options">
-      <button onclick="selectQuantity(100)">100</button>
-      <button onclick="selectQuantity(500)">500</button>
-      <button onclick="selectQuantity(1000)">1000</button>
-      <button onclick="selectQuantity(3000)">3000</button>
-      <button onclick="selectQuantity(5000)">5000</button>
-    </div>
+  <!-- Step 3: Audit & Status - Yellow Theme -->
+  <div class="menu-block block-yellow">
+    <div class="block-title">Step 3: Audit & Status</div>
+    <a href="verify_log.html">Check QR Status</a>
   </div>
 
-  <div class="section-block">
-    <div class="block-title">Secret</div>
-    <label for="secretInput">For secure minting (keep private)</label>
-    <input type="password" id="secretInput" placeholder="4 lowercase a-z characters">
-    <label for="confirmSecretInput">Confirm Secret</label>
-    <input type="password" id="confirmSecretInput" placeholder="Enter secret again">
-    <span class="hint">Secret should be 4 lowercase a-z characters.</span>
+  <!-- Step 4: Authority Tools - Purple Theme -->
+  <div class="menu-block block-purple">
+    <div class="block-title">Step 4: Authority Tools</div>
+    <a href="register_master.html">Register Master</a>
+    <a href="master_dashboard.html">Master Dashboard</a>
+    <a href="agent_register.html">Register Agent</a>
   </div>
 
-  <button class="main-button" id="generateQrBatchBtn" onclick="generateQRBatch()">Generate QR Batch</button>
-
-  <div class="section-block">
-    <div class="block-title">Audit Chain</div>
-    <div class="audit-chain-input">
-      <input type="text" id="qrCommitmentHashInput" placeholder="Paste QR or Commitment hash (hash2)" onkeyup="updateHashPreview()">
-      <div id="hashPreview" class="hash-preview empty"></div>
-    </div>
-    <div class="audit-action-buttons">
-      <button class="exit-btn" onclick="handleExit()">Exit</button>
-      <button class="commit-btn" onclick="handleCommit()">Commit</button>
-    </div>
-  </div>
-
-  <div class="navigation-buttons">
-    <button onclick="window.history.back()">Back</button>
-    <button onclick="window.location.href='index.html'">Home</button>
-    <button onclick="handleNext()">Next</button>
-  </div>
-
-  <script>
-    // Mock data for Role and Quota for demonstration purposes
-    let userRole = 'Normal'; // 'Normal', 'Agent', 'Master'
-    let userQuota = 1000; // Remaining quota
-
-    document.addEventListener('DOMContentLoaded', function() {
-        updateRoleAndQuotaDisplay();
-        applyMintingPermissions();
-        updateHashPreview(); // Initialize the preview for Audit Chain
-        updateQuantityButtons(); // Highlight the selected quantity button on load
-    });
-
-    // Updates the displayed role, quota, and status
-    function updateRoleAndQuotaDisplay() {
-        document.getElementById('role-display').textContent = userRole;
-        document.getElementById('quota-display').textContent = userQuota;
-        document.getElementById('status-display').textContent = userQuota > 0 ? 'Available' : 'Not Available';
-    }
-
-    // Applies disabled/enabled state to minting-related elements based on permissions
-    function applyMintingPermissions() {
-        const qrQuantityInput = document.getElementById('qrQuantityInput');
-        const quantityButtons = document.querySelectorAll('.quantity-options button');
-        const generateButton = document.getElementById('generateQrBatchBtn');
-        const secretInput = document.getElementById('secretInput');
-        const confirmSecretInput = document.getElementById('confirmSecretInput');
-
-        let canMintOverall = true; // Overall flag if minting is allowed
-
-        // Determine if minting is allowed based on role and quota
-        if ((userRole === 'Normal' || userRole === 'Agent') && userQuota <= 0) {
-            canMintOverall = false;
-        }
-        // Master role can always mint (if no quota limit for Master)
-        if (userRole === 'Master') {
-            canMintOverall = true;
-        }
-
-        // Apply disabled state to input fields and main button
-        qrQuantityInput.disabled = !canMintOverall;
-        secretInput.disabled = !canMintOverall;
-        confirmSecretInput.disabled = !canMintOverall;
-        generateButton.disabled = !canMintOverall;
-
-        // Apply disabled state to quantity selection buttons
-        quantityButtons.forEach(button => {
-            const qty = parseInt(button.textContent);
-            // Disable button if overall minting is not allowed, or if quantity exceeds user's quota (for non-Master roles)
-            if (!canMintOverall || (userRole !== 'Master' && qty > userQuota)) {
-                button.disabled = true;
-            } else {
-                button.disabled = false;
-            }
-        });
-
-        // Optional: Provide feedback to the user if minting is not allowed
-        if (!canMintOverall) {
-            console.warn('User cannot mint QR Hash due to insufficient quota or role restrictions.');
-            // You might display a message on the UI here instead of just console.warn
-        }
-    }
-
-    // Sets the quantity input and updates button selection
-    function selectQuantity(qty) {
-      document.getElementById('qrQuantityInput').value = qty;
-      updateQuantityButtons(); // Update button highlighting and permissions
-    }
-
-    // Highlights the selected quantity button and re-applies permissions
-    function updateQuantityButtons() {
-        const inputQty = parseInt(document.getElementById('qrQuantityInput').value);
-        const buttons = document.querySelectorAll('.quantity-options button');
-        buttons.forEach(btn => {
-            if (parseInt(btn.textContent) === inputQty) {
-                btn.classList.add('selected');
-            } else {
-                btn.classList.remove('selected');
-            }
-        });
-        applyMintingPermissions(); // Re-apply permissions based on potentially new quantity
-    }
-
-    // Updates the hash preview in the Audit Chain section
-    function updateHashPreview() {
-      const input = document.getElementById('qrCommitmentHashInput');
-      const preview = document.getElementById('hashPreview');
-      if (input.value.trim() === '') {
-        preview.textContent = '';
-        preview.classList.add('empty');
-      } else {
-        preview.textContent = input.value;
-        preview.classList.remove('empty');
-      }
-    }
-
-    // Handles the "Exit" action in the Audit Chain section
-    function handleExit() {
-      document.getElementById('qrCommitmentHashInput').value = '';
-      updateHashPreview();
-      alert('Exit action triggered!');
-      // You might redirect or close a modal here
-    }
-
-    // Handles the "Commit" action in the Audit Chain section
-    function handleCommit() {
-      const hashValue = document.getElementById('qrCommitmentHashInput').value;
-      if (hashValue.trim() === '') {
-        alert('Please enter a hash to commit.');
-        return;
-      }
-      alert('Committing hash: ' + hashValue);
-      // Your actual audit chain processing logic goes here
-    }
-
-    // Handles the "Generate QR Batch" button click
-    function generateQRBatch() {
-      const secret = document.getElementById('secretInput').value;
-      const confirmSecret = document.getElementById('confirmSecretInput').value;
-      const quantity = parseInt(document.getElementById('qrQuantityInput').value);
-
-      if (secret === '' || confirmSecret === '') {
-        alert('Please enter Secret and confirm Secret.');
-        return;
-      }
-      if (secret !== confirmSecret) {
-        alert('Secrets do not match. Please try again.');
-        return;
-      }
-      if (!/^[a-z]{4}$/.test(secret)) {
-        alert('Secret must be 4 lowercase a-z characters.');
-        return;
-      }
-      if (isNaN(quantity) || quantity <= 0) {
-        alert('Please enter a valid QR quantity.');
-        return;
-      }
-
-      // Re-check quota before initiating batch generation
-      if (userRole !== 'Master' && quantity > userQuota) {
-          alert(`You have ${userQuota} quota remaining, which is insufficient for generating ${quantity} QR(s).`);
-          return;
-      }
-
-      alert(`Generating ${quantity} QR Hash(es) with Secret: ${secret}`);
-      // This is where you would call your API or function to generate QR Hashes
-      // On success, you might redirect to a "QR Batch Generated" page
-      // window.location.href = 'qr_batch_generated.html'; // This page needs to be created
-    }
-
-    // Handles the "Next" navigation button click
-    function handleNext() {
-      alert('Proceeding to next page!');
-      // window.location.href = 'next_page.html';
-    }
-  </script>
+  <p class="footer-note">
+    Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
+  </p>
 </body>
 </html>
+
