@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="th">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>สร้าง QR Hash - DTC: ระบบ Magic Chain</title>
+  <title>Generate QR Hash - DTC: Magic Chain System</title>
   <style>
-    /* สไตล์พื้นฐาน */
+    /* Base Styles */
     body {
       font-family: Arial, sans-serif;
       max-width: 700px;
@@ -41,13 +41,19 @@
       color: #555;
     }
     input[type="text"],
-    input[type="password"] {
-      width: calc(100% - 1.6em); /* หัก padding */
+    input[type="password"],
+    input[type="number"] {
+      width: calc(100% - 1.6em); /* Account for padding */
       padding: 0.8em;
       margin-bottom: 1em;
       border: 1px solid #ccc;
       border-radius: 5px;
       font-size: 1em;
+    }
+    input:disabled { /* Style for disabled inputs */
+      background-color: #e9ecef;
+      opacity: 0.6;
+      cursor: not-allowed;
     }
     .hint {
       font-size: 0.9em;
@@ -57,7 +63,7 @@
       display: block;
     }
 
-    /* สไตล์สำหรับข้อมูล Role, Quota, Status */
+    /* Styles for Role, Quota, Status info */
     .info-bar {
       text-align: center;
       margin-bottom: 1.5em;
@@ -70,12 +76,12 @@
       margin: 0 0.5em;
     }
 
-    /* สไตล์สำหรับส่วนเลือกจำนวน QR */
+    /* Styles for QR quantity selection */
     .quantity-options {
       display: flex;
-      flex-wrap: wrap; /* ให้ขึ้นบรรทัดใหม่ได้ถ้าหน้าจอเล็ก */
-      gap: 0.8em; /* ช่องว่างระหว่างปุ่ม */
-      justify-content: center; /* จัดให้อยู่ตรงกลาง */
+      flex-wrap: wrap;
+      gap: 0.8em;
+      justify-content: center;
       margin-top: 1em;
       margin-bottom: 1em;
     }
@@ -86,9 +92,9 @@
       background: #f0f0f0;
       cursor: pointer;
       font-size: 0.95em;
-      transition: background 0.2s, border-color 0.2s;
+      transition: background 0.2s, border-color 0.2s, opacity 0.2s;
     }
-    .quantity-options button:hover {
+    .quantity-options button:hover:not(:disabled) {
       background: #e0e0e0;
       border-color: #aaa;
     }
@@ -97,14 +103,26 @@
       color: #fff;
       border-color: #2196f3;
     }
+    .quantity-options button:disabled { /* Style for disabled buttons */
+      opacity: 0.4;
+      cursor: not-allowed;
+      background: #f0f0f0;
+      border-color: #ccc;
+      color: #777;
+    }
+    .quantity-options button.selected:disabled { /* Selected button when disabled */
+      background: #89c5f8;
+      color: #eee;
+    }
+
     .quantity-input-container {
       margin-bottom: 1em;
     }
     .quantity-input-container input {
-      margin-bottom: 0.5em; /* ลด margin ล่าง */
+      margin-bottom: 0.5em;
     }
 
-    /* ปุ่มหลัก */
+    /* Main Button */
     .main-button {
       display: block;
       width: 100%;
@@ -118,20 +136,21 @@
       font-size: 1.15em;
       text-align: center;
       text-decoration: none;
-      background: #2196f3; /* สีน้ำเงินสำหรับปุ่มหลัก */
+      background: #2196f3;
       box-shadow: 0 2px 7px rgba(33,150,243,0.3);
       cursor: pointer;
-      transition: background 0.13s, filter 0.13s;
+      transition: background 0.13s, filter 0.13s, opacity 0.13s;
     }
-    .main-button:hover {
+    .main-button:hover:not(:disabled) {
       filter: brightness(0.93);
     }
     .main-button:disabled {
-      background: #b0d8f7; /* สีอ่อนลงเมื่อถูกปิดใช้งาน */
+      background: #b0d8f7;
+      opacity: 0.6;
       cursor: not-allowed;
     }
 
-    /* ส่วน Audit Chain - สไตล์เหมือนเดิมแต่ฟังก์ชันเปลี่ยน */
+    /* Audit Chain Section - Functionality changed, styling mostly same */
     .audit-chain-input {
       margin-bottom: 1em;
     }
@@ -157,7 +176,7 @@
       align-items: center;
     }
     .hash-preview.empty::before {
-        content: "ยังไม่มีแฮช";
+        content: "No hash entered";
         color: #999;
     }
 
@@ -189,7 +208,7 @@
       filter: brightness(0.9);
     }
 
-    /* ปุ่มนำทางด้านล่าง */
+    /* Bottom Navigation Buttons */
     .navigation-buttons {
       display: flex;
       justify-content: space-around;
@@ -214,36 +233,36 @@
     @media (max-width: 600px) {
       body { margin: 0.4em; padding: 0.07em;}
       .section-block { padding: 0.7em 0.2em;}
-      input[type="text"], input[type="password"] {
+      input[type="text"], input[type="password"], input[type="number"] {
         width: calc(100% - 1.2em);
         padding: 0.6em;
       }
       .main-button { font-size: 1.05em; padding: 0.8em 0.4em; }
-      .quantity-options { flex-direction: row; justify-content: space-between; } /* จัดให้ชิดขอบจอเล็ก */
-      .quantity-options button { flex-basis: calc(33% - 0.8em); padding: 0.6em 0.8em; font-size: 0.9em; } /* 3 ปุ่มต่อแถว */
+      .quantity-options { flex-direction: row; justify-content: space-between; }
+      .quantity-options button { flex-basis: calc(33% - 0.8em); padding: 0.6em 0.8em; font-size: 0.9em; }
       .audit-action-buttons { flex-direction: column; gap: 0.5em; }
     }
 
   </style>
 </head>
 <body>
-  <h1>สร้าง QR Hash (Double Hash Function)</h1>
+  <h1>Generate QR Hash (Double Hash Function)</h1>
 
   <div class="info-bar">
-    บทบาท: <span id="role-display">Normal</span> | โควตา: <span id="quota-display">1</span> | สถานะ: <span id="status-display">พร้อมใช้งาน</span>
+    Role: <span id="role-display">Normal</span> | Quota: <span id="quota-display">1000</span> | Status: <span id="status-display">Available</span>
   </div>
 
   <div class="section-block">
     <div class="block-title">Public Key</div>
     <input type="text" id="publicKeyInput" value="000000004a8d87ffd4c6e7a29f1221b13e81" readonly>
-    <span class="hint">วาง public key ที่สร้างจากหน้า Generate Key</span>
+    <span class="hint">Paste the public key generated from the "Generate Key" page.</span>
   </div>
 
   <div class="section-block">
     <div class="block-title">Mint QR Hash / Quantity (QTY)</div>
     <div class="quantity-input-container">
       <input type="number" id="qrQuantityInput" value="1" min="1" onchange="updateQuantityButtons()">
-      <span class="hint">เลือกจากตัวเลือกยอดนิยมหรือป้อนจำนวนที่กำหนดเอง</span>
+      <span class="hint">Select from popular options or enter a custom quantity.</span>
     </div>
     <div class="quantity-options">
       <button onclick="selectQuantity(100)">100</button>
@@ -256,92 +275,102 @@
 
   <div class="section-block">
     <div class="block-title">Secret</div>
-    <label for="secretInput">สำหรับ Minting ที่ปลอดภัย (เก็บเป็นส่วนตัว)</label>
-    <input type="password" id="secretInput" placeholder="4 ตัวอักษร a-z (ตัวพิมพ์เล็ก)">
-    <label for="confirmSecretInput">ยืนยัน Secret</label>
-    <input type="password" id="confirmSecretInput" placeholder="ป้อน secret อีกครั้ง">
-    <span class="hint">Secret ควรเป็นตัวอักษรพิมพ์เล็ก 4 ตัว</span>
+    <label for="secretInput">For secure minting (keep private)</label>
+    <input type="password" id="secretInput" placeholder="4 lowercase a-z characters">
+    <label for="confirmSecretInput">Confirm Secret</label>
+    <input type="password" id="confirmSecretInput" placeholder="Enter secret again">
+    <span class="hint">Secret should be 4 lowercase a-z characters.</span>
   </div>
 
-  <button class="main-button" id="generateQrBatchBtn" onclick="generateQRBatch()">สร้าง QR Batch</button>
+  <button class="main-button" id="generateQrBatchBtn" onclick="generateQRBatch()">Generate QR Batch</button>
 
   <div class="section-block">
-    <div class="block-title">ตรวจสอบห่วงโซ่ (Audit Chain)</div>
+    <div class="block-title">Audit Chain</div>
     <div class="audit-chain-input">
-      <input type="text" id="qrCommitmentHashInput" placeholder="วาง QR หรือ Commitment hash (hash2)" onkeyup="updateHashPreview()">
+      <input type="text" id="qrCommitmentHashInput" placeholder="Paste QR or Commitment hash (hash2)" onkeyup="updateHashPreview()">
       <div id="hashPreview" class="hash-preview empty"></div>
     </div>
     <div class="audit-action-buttons">
-      <button class="exit-btn" onclick="handleExit()">ออก</button>
-      <button class="commit-btn" onclick="handleCommit()">ยืนยัน</button>
+      <button class="exit-btn" onclick="handleExit()">Exit</button>
+      <button class="commit-btn" onclick="handleCommit()">Commit</button>
     </div>
   </div>
 
   <div class="navigation-buttons">
-    <button onclick="window.history.back()">ย้อนกลับ</button>
-    <button onclick="window.location.href='index.html'">หน้าแรก</button>
-    <button onclick="handleNext()">ถัดไป</button>
+    <button onclick="window.history.back()">Back</button>
+    <button onclick="window.location.href='index.html'">Home</button>
+    <button onclick="handleNext()">Next</button>
   </div>
 
   <script>
-    // ข้อมูลจำลองสำหรับ Role และ Quota เพื่อสาธิตการควบคุมสิทธิ์
-    let userRole = 'Normal'; // สามารถเปลี่ยนเป็น 'Master' หรือ 'Agent' เพื่อทดสอบ
-    let userQuota = 1000; // จำนวนโควตาที่เหลือ
+    // Mock data for Role and Quota for demonstration purposes
+    let userRole = 'Normal'; // 'Normal', 'Agent', 'Master'
+    let userQuota = 1000; // Remaining quota
 
     document.addEventListener('DOMContentLoaded', function() {
         updateRoleAndQuotaDisplay();
-        checkMintingPermissions();
-        updateHashPreview(); // เริ่มต้นการแสดงพรีวิวสำหรับ Audit Chain
+        applyMintingPermissions();
+        updateHashPreview(); // Initialize the preview for Audit Chain
+        updateQuantityButtons(); // Highlight the selected quantity button on load
     });
 
+    // Updates the displayed role, quota, and status
     function updateRoleAndQuotaDisplay() {
         document.getElementById('role-display').textContent = userRole;
         document.getElementById('quota-display').textContent = userQuota;
-        // อัปเดตสถานะ ถ้า Quota เป็น 0 ให้แสดง 'ไม่พร้อมใช้งาน'
-        document.getElementById('status-display').textContent = userQuota > 0 ? 'พร้อมใช้งาน' : 'ไม่พร้อมใช้งาน';
+        document.getElementById('status-display').textContent = userQuota > 0 ? 'Available' : 'Not Available';
     }
 
-    function checkMintingPermissions() {
-        const quantityOptionsDiv = document.querySelector('.quantity-options');
-        const generateButton = document.getElementById('generateQrBatchBtn');
+    // Applies disabled/enabled state to minting-related elements based on permissions
+    function applyMintingPermissions() {
         const qrQuantityInput = document.getElementById('qrQuantityInput');
+        const quantityButtons = document.querySelectorAll('.quantity-options button');
+        const generateButton = document.getElementById('generateQrBatchBtn');
+        const secretInput = document.getElementById('secretInput');
+        const confirmSecretInput = document.getElementById('confirmSecretInput');
 
-        if (userRole === 'Normal' && userQuota <= 0) {
-            // ถ้าเป็น Normal และโควตาหมด
-            qrQuantityInput.disabled = true;
-            quantityOptionsDiv.style.display = 'none'; // ซ่อนปุ่มเลือกจำนวน
-            generateButton.disabled = true;
-            alert('คุณไม่มีโควตาเหลือสำหรับการ Mint QR Hash');
-        } else if (userRole === 'Agent' && userQuota <= 0) {
-             // ตัวอย่าง: Agent อาจจะมีสิทธิ์ต่างจาก Normal
-            qrQuantityInput.disabled = true;
-            quantityOptionsDiv.style.display = 'none';
-            generateButton.disabled = true;
-            alert('โควตาของ Agent หมดแล้ว');
-        } else {
-            // ถ้ามีสิทธิ์ (มีโควตาหรือเป็น Master)
-            qrQuantityInput.disabled = false;
-            quantityOptionsDiv.style.display = 'flex'; // แสดงปุ่มเลือกจำนวน
-            generateButton.disabled = false;
+        let canMintOverall = true; // Overall flag if minting is allowed
+
+        // Determine if minting is allowed based on role and quota
+        if ((userRole === 'Normal' || userRole === 'Agent') && userQuota <= 0) {
+            canMintOverall = false;
         }
-        // สามารถเพิ่มเงื่อนไขสำหรับ 'Master' ได้ที่นี่
-        // if (userRole === 'Master') { /* Master อาจมีสิทธิ์ไม่จำกัด */ }
+        // Master role can always mint (if no quota limit for Master)
+        if (userRole === 'Master') {
+            canMintOverall = true;
+        }
+
+        // Apply disabled state to input fields and main button
+        qrQuantityInput.disabled = !canMintOverall;
+        secretInput.disabled = !canMintOverall;
+        confirmSecretInput.disabled = !canMintOverall;
+        generateButton.disabled = !canMintOverall;
+
+        // Apply disabled state to quantity selection buttons
+        quantityButtons.forEach(button => {
+            const qty = parseInt(button.textContent);
+            // Disable button if overall minting is not allowed, or if quantity exceeds user's quota (for non-Master roles)
+            if (!canMintOverall || (userRole !== 'Master' && qty > userQuota)) {
+                button.disabled = true;
+            } else {
+                button.disabled = false;
+            }
+        });
+
+        // Optional: Provide feedback to the user if minting is not allowed
+        if (!canMintOverall) {
+            console.warn('User cannot mint QR Hash due to insufficient quota or role restrictions.');
+            // You might display a message on the UI here instead of just console.warn
+        }
     }
 
-
+    // Sets the quantity input and updates button selection
     function selectQuantity(qty) {
       document.getElementById('qrQuantityInput').value = qty;
-      // ไฮไลต์ปุ่มที่ถูกเลือก
-      const buttons = document.querySelectorAll('.quantity-options button');
-      buttons.forEach(btn => {
-        if (parseInt(btn.textContent) === qty) {
-          btn.classList.add('selected');
-        } else {
-          btn.classList.remove('selected');
-        }
-      });
+      updateQuantityButtons(); // Update button highlighting and permissions
     }
 
+    // Highlights the selected quantity button and re-applies permissions
     function updateQuantityButtons() {
         const inputQty = parseInt(document.getElementById('qrQuantityInput').value);
         const buttons = document.querySelectorAll('.quantity-options button');
@@ -352,9 +381,10 @@
                 btn.classList.remove('selected');
             }
         });
+        applyMintingPermissions(); // Re-apply permissions based on potentially new quantity
     }
 
-    // ฟังก์ชันสำหรับส่วน Audit Chain (เหมือนเดิม)
+    // Updates the hash preview in the Audit Chain section
     function updateHashPreview() {
       const input = document.getElementById('qrCommitmentHashInput');
       const preview = document.getElementById('hashPreview');
@@ -367,56 +397,63 @@
       }
     }
 
+    // Handles the "Exit" action in the Audit Chain section
     function handleExit() {
       document.getElementById('qrCommitmentHashInput').value = '';
       updateHashPreview();
-      alert('ดำเนินการ "ออก" แล้ว!');
+      alert('Exit action triggered!');
+      // You might redirect or close a modal here
     }
 
+    // Handles the "Commit" action in the Audit Chain section
     function handleCommit() {
       const hashValue = document.getElementById('qrCommitmentHashInput').value;
       if (hashValue.trim() === '') {
-        alert('โปรดป้อนแฮชเพื่อยืนยัน');
+        alert('Please enter a hash to commit.');
         return;
       }
-      alert('กำลังยืนยันแฮช: ' + hashValue);
+      alert('Committing hash: ' + hashValue);
+      // Your actual audit chain processing logic goes here
     }
 
-    // ฟังก์ชันสำหรับปุ่ม Generate QR Batch
+    // Handles the "Generate QR Batch" button click
     function generateQRBatch() {
       const secret = document.getElementById('secretInput').value;
       const confirmSecret = document.getElementById('confirmSecretInput').value;
       const quantity = parseInt(document.getElementById('qrQuantityInput').value);
 
       if (secret === '' || confirmSecret === '') {
-        alert('โปรดป้อน Secret และยืนยัน Secret');
+        alert('Please enter Secret and confirm Secret.');
         return;
       }
       if (secret !== confirmSecret) {
-        alert('Secret ไม่ตรงกัน โปรดลองอีกครั้ง');
+        alert('Secrets do not match. Please try again.');
         return;
       }
       if (!/^[a-z]{4}$/.test(secret)) {
-        alert('Secret ต้องเป็นตัวอักษรพิมพ์เล็ก a-z จำนวน 4 ตัว');
+        alert('Secret must be 4 lowercase a-z characters.');
         return;
       }
       if (isNaN(quantity) || quantity <= 0) {
-        alert('โปรดระบุจำนวน QR ที่ถูกต้อง');
+        alert('Please enter a valid QR quantity.');
         return;
       }
-      if (quantity > userQuota && userRole !== 'Master') { // ถ้าไม่ใช่ Master ให้เช็คโควตา
-          alert(`คุณมีโควตาเหลือ ${userQuota} ไม่เพียงพอสำหรับการสร้าง ${quantity} QR`);
+
+      // Re-check quota before initiating batch generation
+      if (userRole !== 'Master' && quantity > userQuota) {
+          alert(`You have ${userQuota} quota remaining, which is insufficient for generating ${quantity} QR(s).`);
           return;
       }
 
-      alert(`กำลังสร้าง QR Hash ${quantity} ชุด ด้วย Secret: ${secret}`);
-      // ที่นี่คือส่วนที่คุณจะเรียก API หรือฟังก์ชันเพื่อสร้าง QR Hash จริงๆ
-      // หากสำเร็จ คุณสามารถเปลี่ยนเส้นทางไปหน้า "QR Batch Generated"
-      // window.location.href = 'qr_batch_generated.html'; // ต้องสร้างหน้านี้ขึ้นมา
+      alert(`Generating ${quantity} QR Hash(es) with Secret: ${secret}`);
+      // This is where you would call your API or function to generate QR Hashes
+      // On success, you might redirect to a "QR Batch Generated" page
+      // window.location.href = 'qr_batch_generated.html'; // This page needs to be created
     }
 
+    // Handles the "Next" navigation button click
     function handleNext() {
-      alert('ไปหน้าถัดไป!');
+      alert('Proceeding to next page!');
       // window.location.href = 'next_page.html';
     }
   </script>
