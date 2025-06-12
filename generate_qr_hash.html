@@ -327,15 +327,10 @@
             <span class="hint">Paste the public key generated from the "Generate Key" page.</span>
         </div>
 
-        <div class="section-block" id="qrBatchNameSection" style="display:none;">
-            <div class="block-title">QR Batch Name</div>
-            <input type="text" id="qrBatchNameInput" placeholder="">
-            <span class="hint" id="qrBatchNameHint"></span>
-        </div>
+        <div class="section-block" id="qrGroupNameSection" style="display:none;"> <div class="block-title">QR Group Name</div> <input type="text" id="qrGroupNameInput" placeholder=""> <span class="hint" id="qrGroupNameHint"></span> </div>
 
         <div class="section-block">
-            <div class="block-title">Mint QR Hash / Quantity (QTY)</div>
-            <div class="quantity-input-container">
+            <div class="block-title">Quantity (QTY)</div> <div class="quantity-input-container">
                 <input type="number" id="qrQuantityInput" value="1" min="1" onchange="updateQuantityButtons()">
                 <span class="hint" id="quantityHint"></span>
             </div>
@@ -358,8 +353,7 @@
             <span class="hint">Secret should be 4 lowercase a-z characters.</span>
         </div>
 
-        <button class="main-button" id="generateQrBatchBtn" onclick="generateQRBatch()">Generate QR Batch</button>
-    </div>
+        <button class="main-button" id="generateQrHashesBtn" onclick="generateQRBatch()">Generate QR Hashes</button> </div>
 
     <div id="qr-preview-section" class="section-block qr-preview-section">
         <div class="block-title">Generated Hashes</div>
@@ -398,7 +392,7 @@
         // --- CONFIG & MOCK DATA (for demonstration purposes) ---
         let userRole = 'Normal'; // 'Normal', 'Agent', 'Master'
         // For Normal user: Start with 1 quota for first mint, then expand to 1000
-        let userQuota = 1;         
+        let userQuota = 1;          
         let userMintedCount = 0; // Number of QR minted by the current user session
         let userFirstMint = true; // Flag to simulate a new user who can only mint 1 QR initially
 
@@ -417,15 +411,15 @@
         const qrPreviewSection = document.getElementById('qr-preview-section');
         const qrQuantityInput = document.getElementById('qrQuantityInput');
         const quantityButtons = document.querySelectorAll('.quantity-options button');
-        const generateQrBatchBtn = document.getElementById('generateQrBatchBtn');
+        const generateQrHashesBtn = document.getElementById('generateQrHashesBtn'); // Changed ID
         const secretInput = document.getElementById('secretInput');
         const confirmSecretInput = document.getElementById('confirmSecretInput');
         const quantityHint = document.getElementById('quantityHint');
         const hash1Display = document.getElementById('hash1Display');
         const hash2Display = document.getElementById('hash2Display');
-        const qrBatchNameSection = document.getElementById('qrBatchNameSection');
-        const qrBatchNameInput = document.getElementById('qrBatchNameInput');
-        const qrBatchNameHint = document.getElementById('qrBatchNameHint');
+        const qrGroupNameSection = document.getElementById('qrGroupNameSection'); // Changed ID
+        const qrGroupNameInput = document.getElementById('qrGroupNameInput');     // Changed ID
+        const qrGroupNameHint = document.getElementById('qrGroupNameHint');       // Changed ID
 
 
         // --- Helper Functions for Hashing and Data Generation ---
@@ -502,16 +496,16 @@
             let canMintOverall = true;
             let currentMaxQty = Infinity;
 
-            // Handle QR Batch Name Section Visibility and Properties
+            // Handle QR Group Name Section Visibility and Properties
             if (userRole === 'Master' || userRole === 'Agent') {
-                qrBatchNameSection.style.display = 'block';
-                qrBatchNameInput.disabled = false;
-                qrBatchNameInput.placeholder = (userRole === 'Master' ? 'Optional: Enter batch name (e.g., Q1_2025_Master)' : 'Required: Enter batch name (e.g., Agent_Project_X)');
-                qrBatchNameHint.textContent = (userRole === 'Master' ? 'Optional batch name for Master role.' : 'Required batch name for Agent role.');
+                qrGroupNameSection.style.display = 'block'; // Changed ID
+                qrGroupNameInput.disabled = false;           // Changed ID
+                qrGroupNameInput.placeholder = (userRole === 'Master' ? 'Optional: Enter group name (e.g., Q1_2025_Master)' : 'Required: Enter group name (e.g., Agent_Project_X)'); // Updated hint
+                qrGroupNameHint.textContent = (userRole === 'Master' ? 'Optional group name for Master role.' : 'Required group name for Agent role.'); // Updated hint
             } else {
-                qrBatchNameSection.style.display = 'none';
-                qrBatchNameInput.value = ''; // Clear value if hidden
-                qrBatchNameInput.disabled = true;
+                qrGroupNameSection.style.display = 'none'; // Changed ID
+                qrGroupNameInput.value = '';             // Changed ID
+                qrGroupNameInput.disabled = true;        // Changed ID
             }
 
             // Determine if overall minting is possible based on role and quota
@@ -540,7 +534,7 @@
                 currentMaxQty = currentAgentQuota;
             } else { // Master
                 const currentMasterQuota = masterMaxQuota - userMintedCount;
-                 if (currentMasterQuota <= 0) {
+                   if (currentMasterQuota <= 0) {
                     canMintOverall = false;
                 }
                 qrQuantityInput.disabled = false;
@@ -551,7 +545,7 @@
 
             secretInput.disabled = !canMintOverall;
             confirmSecretInput.disabled = !canMintOverall;
-            generateQrBatchBtn.disabled = !canMintOverall;
+            generateQrHashesBtn.disabled = !canMintOverall; // Changed ID
 
             quantityButtons.forEach(button => {
                 const qty = parseInt(button.textContent);
@@ -581,7 +575,7 @@
             if (userRole === 'Normal') {
                 currentRemainingQuota = userQuota - userMintedCount;
                 if (userFirstMint && qty !== 1) {
-                    alert('As a new user, you can only mint 1 QR Batch. Please set QTY to 1.');
+                    alert('As a new user, you can only mint 1 QR Hash. Please set QTY to 1.'); // Updated alert message
                     qrQuantityInput.value = 1;
                     updateQuantityButtons();
                     return;
@@ -650,11 +644,12 @@
                 }
             }
             
-            if (userRole === 'Agent' && qrBatchNameInput.value.trim() === '') {
+            // Validation for QR Group Name (formerly Batch Name)
+            if (userRole === 'Agent' && qrGroupNameInput.value.trim() === '') { // Changed ID
                 isValid = false;
             }
 
-            generateQrBatchBtn.disabled = !isValid || secretInput.disabled || confirmSecretInput.disabled || qrBatchNameInput.disabled;
+            generateQrHashesBtn.disabled = !isValid || secretInput.disabled || confirmSecretInput.disabled || qrGroupNameInput.disabled; // Changed ID
             updateQuantityHint();
         }
 
@@ -664,7 +659,7 @@
             if (userRole === 'Normal') {
                 currentRemainingQuota = userQuota - userMintedCount;
                 if (userFirstMint) {
-                    quantityHint.textContent = "You can mint only 1 QR Batch as a new user.";
+                    quantityHint.textContent = "You can mint only 1 QR Hash as a new user."; // Updated hint
                 } else if (currentRemainingQuota > 0) {
                     quantityHint.textContent = `Select from popular options or enter a custom quantity (Max: ${currentRemainingQuota}).`;
                 } else {
@@ -682,7 +677,7 @@
             if (isNaN(qty) || qty < 1) {
                 quantityHint.textContent = "Please enter a valid quantity (1 or more).";
             } else if (userRole === 'Normal' && userFirstMint && qty !== 1) {
-                quantityHint.textContent = "As a new user, you can only mint 1 QR Batch. Please set QTY to 1.";
+                quantityHint.textContent = "As a new user, you can only mint 1 QR Hash. Please set QTY to 1."; // Updated hint
             } else if (qty > currentRemainingQuota) {
                 quantityHint.textContent = `Selected QTY (${qty}) exceeds your available quota (${currentRemainingQuota}). Please reduce quantity.`;
             }
@@ -693,13 +688,19 @@
             return /^[a-f0-9]{64}$/i.test(key.trim());
         }
 
-        // Handles the "Generate QR Batch" button click
-        function generateQRBatch() {
+        // Handles the "Generate QR Hashes" button click
+        function generateQRBatch() { // Function name remains generateQRBatch for consistency with onclick, but conceptually it generates hashes
             const public_key = document.getElementById('publicKeyInput').value.trim();
             const qty = parseInt(qrQuantityInput.value);
             const secret = secretInput.value;
             const confirmSecret = confirmSecretInput.value;
-            const batch_name = qrBatchNameInput.value.trim(); // master_name for Master, agent_name for Agent
+            const group_name = qrGroupNameInput.value.trim(); // Changed variable name and ID reference
+
+            // CAPTCHA VALIDATION POINT:
+            // if (!validateCaptcha()) { // Assuming you have a validateCaptcha function
+            //     alert('Please complete the security check.');
+            //     return;
+            // }
 
             // Basic form validation
             if (!isValidPubKey(public_key)) {
@@ -719,7 +720,7 @@
             if (userRole === 'Normal') {
                 currentAvailableQuota = userQuota - userMintedCount;
                 if (userFirstMint && qty !== 1) {
-                    alert('As a new user, you can only mint 1 QR Batch.');
+                    alert('As a new user, you can only mint 1 QR Hash.');
                     return;
                 }
                 if (!userFirstMint && qty > currentAvailableQuota) {
@@ -732,8 +733,8 @@
                     alert(`Selected QTY (${qty}) exceeds Agent's available quota (${currentAvailableQuota}).`);
                     return;
                 }
-                if (batch_name === '') {
-                    alert('QR Batch Name is required for Agent role.');
+                if (group_name === '') { // Changed variable name
+                    alert('QR Group Name is required for Agent role.'); // Updated alert
                     return;
                 }
             } else if (userRole === 'Master') {
@@ -759,186 +760,151 @@
                 prev_hash_for_qr = MOCK_MASTER_HASH;
             } else if (userRole === 'Agent') {
                 // For Agent, need to generate agent_hash first, then prev_hash_for_qr can be agent_hash
-                // Or if it's the very first QR minted by this agent, it could be master_hash
-                // For this simulation, we'll assume agent_hash is the direct parent.
-                // Generate agent_hash (for Agent layer)
-                agent_hash = generateSHA256Hash(MOCK_MASTER_HASH + batch_name + nonce + timestamp);
-                prev_hash_for_qr = agent_hash; // Agent's QR points to its agent_hash
+                // Generate agent_hash based on current master hash, agent's public key, group name, timestamp, and nonce
+                const agent_input_string = `${MOCK_MASTER_HASH}${public_key}${group_name}${timestamp}${nonce}`; // Use group_name
+                agent_hash = generateSHA256Hash(agent_input_string);
+                prev_hash_for_qr = agent_hash;
             }
 
-            // Construct the input string for qr_hash (hash1)
-            let hash1_input_string = '';
-            let meta_data_for_commitment = {}; // To store meta-data for hash2
-
-            if (userRole === 'Normal') {
-                hash1_input_string = MOCK_MASTER_HASH + public_key + secret + timestamp + nonce + prev_hash_for_qr;
-                qr_hash = generateSHA256Hash(hash1_input_string);
-                meta_data_for_commitment = {
-                    public_key: public_key,
-                    master_hash: MOCK_MASTER_HASH,
-                    secret: secret,
-                    timestamp: timestamp,
-                    nonce: nonce,
-                    prev_hash: prev_hash_for_qr,
-                    qty: qty, // For Normal, this will always be 1
-                    role: userRole
-                };
-            } else if (userRole === 'Master') {
-                // For Master, the QR's parent is its own master_hash (MOCK_MASTER_HASH)
-                hash1_input_string = MOCK_MASTER_HASH + public_key + secret + timestamp + nonce + prev_hash_for_qr;
-                qr_hash = generateSHA256Hash(hash1_input_string);
-                meta_data_for_commitment = {
-                    public_key: public_key,
-                    master_hash: MOCK_MASTER_HASH,
-                    secret: secret,
-                    timestamp: timestamp,
-                    nonce: nonce,
-                    prev_hash: prev_hash_for_qr,
-                    qty: qty,
-                    batch_name: batch_name, // Optional for Master, but include if present
-                    role: userRole
-                };
-            } else if (userRole === 'Agent') {
-                hash1_input_string = agent_hash + public_key + secret + timestamp + nonce + prev_hash_for_qr;
-                qr_hash = generateSHA256Hash(hash1_input_string);
-                 meta_data_for_commitment = {
-                    public_key: public_key,
-                    master_hash: MOCK_MASTER_HASH, // Agent still links to original Master
-                    agent_hash: agent_hash,
-                    agent_name: batch_name, // agent_name is qrBatchNameInput
-                    secret: secret,
-                    timestamp: timestamp,
-                    nonce: nonce,
-                    prev_hash: prev_hash_for_qr,
-                    qty: qty,
-                    role: userRole
-                };
-            }
+            // Generate QR Hash (hash1)
+            const qr_input_string = `${prev_hash_for_qr}${public_key}${qty}${secret}${timestamp}${nonce}`;
+            qr_hash = generateSHA256Hash(qr_input_string);
 
             // Generate Commitment Hash (hash2)
-            // hash2 = SHA256(qr_hash + meta_data_as_stringified_json)
-            commitment_hash = generateSHA256Hash(qr_hash + JSON.stringify(meta_data_for_commitment));
+            // This commitment hash includes metadata from the entire batch/group generation process
+            const meta_data_for_commitment = {
+                role: userRole,
+                public_key: public_key,
+                quantity: qty,
+                timestamp: timestamp,
+                nonce: nonce,
+                previous_qr_hash: prev_hash_for_qr, // The parent hash for the QR
+                generated_qr_hash: qr_hash // The first generated QR hash
+            };
 
-            // Display generated hashes
+            // Conditionally add agent_hash and group_name to metadata
+            if (userRole === 'Agent') {
+                meta_data_for_commitment.agent_hash = agent_hash;
+                meta_data_for_commitment.group_name = group_name; // Changed key
+            } else if (userRole === 'Master') {
+                if (group_name) { // Master's group_name is optional
+                    meta_data_for_commitment.group_name = group_name; // Changed key
+                }
+            }
+            
+            const commitment_input_string = JSON.stringify(meta_data_for_commitment);
+            commitment_hash = generateSHA256Hash(commitment_input_string);
+
             hash1Display.textContent = qr_hash;
             hash2Display.textContent = commitment_hash;
 
-            // Show preview section, hide mint section
+            // Update minted count and quota
+            userMintedCount += qty;
+            if (userRole === 'Normal' && userFirstMint) {
+                userQuota = 1000; // After first mint, normal user gets 1000 quota
+                userFirstMint = false;
+            }
+
+            updateRoleAndQuotaDisplay(); // Re-render role/quota/status
+
+            // Show QR preview section
             mintSection.style.display = 'none';
             qrPreviewSection.style.display = 'block';
 
-            alert(`Generating ${qty} QR Hash(es) for ${userRole} role. Preview shown. Details for audit:\n\nHash1 Input: ${hash1_input_string}\nHash1: ${qr_hash}\n\nMeta for Hash2: ${JSON.stringify(meta_data_for_commitment, null, 2)}\nHash2: ${commitment_hash}`);
+            // Clear secret fields for security
+            secretInput.value = '';
+            confirmSecretInput.value = '';
         }
 
-        // Copies a hash to the clipboard
+        // Function to copy a hash to clipboard
         function copyHash(elementId) {
             const element = document.getElementById(elementId);
-            const textToCopy = element.textContent;
-            navigator.clipboard.writeText(textToCopy)
-                .then(() => {
-                    alert(`Copied "${textToCopy}" to clipboard!`);
-                })
-                .catch(err => {
-                    console.error('Failed to copy text: ', err);
-                    alert('Failed to copy hash. Please copy manually.');
-                });
+            if (element && element.textContent) {
+                navigator.clipboard.writeText(element.textContent)
+                    .then(() => {
+                        alert('Hash copied to clipboard!');
+                    })
+                    .catch(err => {
+                        console.error('Failed to copy hash: ', err);
+                        alert('Failed to copy hash.');
+                    });
+            }
         }
 
-        // Copies both hashes to the clipboard
+        // Function to copy all hashes to clipboard
         function copyAllHashes() {
             const hash1 = hash1Display.textContent;
             const hash2 = hash2Display.textContent;
             const allHashes = `QR Hash (hash1): ${hash1}\nCommitment Hash (hash2): ${hash2}`;
             navigator.clipboard.writeText(allHashes)
                 .then(() => {
-                    alert('Copied both hashes to clipboard!');
+                    alert('All hashes copied to clipboard!');
                 })
                 .catch(err => {
                     console.error('Failed to copy all hashes: ', err);
-                    alert('Failed to copy all hashes. Please copy manually.');
+                    alert('Failed to copy all hashes.');
                 });
         }
 
-        // Handles the "Commit" action from the preview section
-        function handleCommit() {
-            const hash1 = hash1Display.textContent;
-            const hash2 = hash2Display.textContent;
-            const qtyMinted = parseInt(qrQuantityInput.value);
-
-            alert(`Committing QR Hash: ${hash1} and Commitment Hash: ${hash2} for ${qtyMinted} QR(s).\n\n(In a real system, this would securely record the hashes and meta-data to the immutable ledger for 100% auditability.)`);
-            
-            userMintedCount += qtyMinted;
-
-            // Special logic for Normal user's first mint
-            if (userRole === 'Normal' && userFirstMint) {
-                userFirstMint = false; // Mark that first mint is done
-                userQuota = 1000; // Normal user receives full quota after first successful mint
-                alert('Congratulations! Your first QR Batch has been committed. Your quota has been expanded to 1000 QRs.');
-            }
-            updateRoleAndQuotaDisplay();
-            resetToMintSection();
-        }
-
-        // Resets the view back to the mint section
+        // Resets the view back to the minting section
         function resetToMintSection() {
-            qrQuantityInput.value = 1;
-            secretInput.value = '';
-            confirmSecretInput.value = '';
-            qrBatchNameInput.value = '';
-
+            mintSection.style.display = 'block';
+            qrPreviewSection.style.display = 'none';
             hash1Display.textContent = '';
             hash2Display.textContent = '';
-
-            qrPreviewSection.style.display = 'none';
-            mintSection.style.display = 'block';
-
-            updateRoleAndQuotaDisplay();
-            updateQuantityButtons();
-            // alert('Returned to Mint section.'); // Removed this alert for smoother UX
+            // Don't reset public key or quantity input unless explicitly needed
+            // qrQuantityInput.value = 1; // You might want to keep the last selected quantity
+            updateQuantityButtons(); // Ensure buttons reflect current quantity
+            updateRoleAndQuotaDisplay(); // Update roles/quotas again
         }
 
-        // Handles the "Back" navigation button click
-        function handleBack() {
-            window.history.back();
+        // Placeholder for handling commit action (e.g., send data to backend)
+        function handleCommit() {
+            alert('Committing hashes... (This would typically send data to a backend system)');
+            // In a real system, you would send hash1, hash2, public_key, qty, timestamp, nonce, etc. to your backend.
+            // After successful commitment, you might reset the form or redirect.
+            resetToMintSection(); // For demonstration, just reset
         }
 
-        // Handles the "Next" navigation button click
+        // Placeholder for handling "Next" navigation
         function handleNext() {
-            alert('Proceeding to next page!');
-            // window.location.href = 'next_page.html';
+            alert('Navigating to the next page... (e.g., Scan/Verify QR)');
+            // window.location.href = 'scan_verify_qr.html'; // Example redirection
         }
 
-        // --- Initial Setup ---
-        document.addEventListener('DOMContentLoaded', function() {
+        // --- Initializations ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Add event listeners for secret fields to enable/disable generate button
+            secretInput.addEventListener('input', validateQuantityInput);
+            confirmSecretInput.addEventListener('input', validateQuantityInput);
+            qrQuantityInput.addEventListener('input', validateQuantityInput);
+            qrGroupNameInput.addEventListener('input', validateQuantityInput); // Listen to group name input
+
+            // Initial display update
             updateRoleAndQuotaDisplay();
-            qrQuantityInput.addEventListener('input', updateQuantityButtons);
-            updateQuantityButtons();
+            updateQuantityButtons(); // Set initial selected button
         });
 
-        // Example: To change user role for testing purposes (can be called from console)
+        // --- Mock Role/Quota Switching (for testing purposes) ---
+        // You can use these functions in your browser's console to test different roles.
+        // e.g., setUserRole('Agent');
         function setUserRole(role) {
-            const validRoles = ['Normal', 'Agent', 'Master'];
-            if (!validRoles.includes(role)) {
-                alert('Invalid role. Please use Normal, Agent, or Master.');
-                return;
-            }
-            userRole = role;
-            userMintedCount = 0; // Reset minted count when changing role
-            userFirstMint = (role === 'Normal'); // Reset first mint for Normal role
-            userQuota = (role === 'Normal' ? 1 : (role === 'Master' ? masterMaxQuota : agentMaxQuota)); // Reset quota based on role
-            alert(`User role set to: ${userRole}. Minted count reset. Please try minting.`);
-            updateRoleAndQuotaDisplay();
-            resetToMintSection(); // Reset UI state after role change
-        }
-
-        // Example: To grant more quota to a Normal user (for testing after first mint)
-        function grantNormalUserQuota(amount) {
-            if (userRole === 'Normal' && !userFirstMint) {
-                userQuota += amount;
-                alert(`Added ${amount} to Normal user's quota. New total quota: ${userQuota}`);
+            if (['Normal', 'Agent', 'Master'].includes(role)) {
+                userRole = role;
+                userMintedCount = 0; // Reset minted count when changing role for testing
+                userFirstMint = true; // Reset first mint status for Normal role
+                if (role === 'Normal') {
+                    userQuota = 1; // Reset normal quota to initial 1 for new normal user simulation
+                } else if (role === 'Agent') {
+                    userQuota = agentMaxQuota; // Set to max for agent test
+                } else if (role === 'Master') {
+                    userQuota = masterMaxQuota; // Set to max for master test
+                }
                 updateRoleAndQuotaDisplay();
+                resetToMintSection(); // Reset form state
+                alert(`Switched to role: ${userRole}`);
             } else {
-                alert('This function is only for Normal users who have completed their first mint.');
+                alert('Invalid role. Please use "Normal", "Agent", or "Master".');
             }
         }
     </script>
