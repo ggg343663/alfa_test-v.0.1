@@ -83,9 +83,10 @@
   </div>
 
   <script>
-    // --- CONFIG ---
+    // CONFIG
     let userRole = 'Normal'; // 'Normal', 'Agent', 'Master'
     let userQuota = 1000;
+    let userFirstMint = true; // Set to false after first commit (sync with backend in real system)
 
     function updateQuotaDisplay() {
       document.getElementById('role-display').textContent = userRole;
@@ -96,7 +97,38 @@
         document.getElementById('quota-display').textContent = userQuota;
         document.getElementById('status-display').textContent = (userQuota > 0 ? 'Available' : 'Not Available');
       }
-      validateQty();
+      applyMintingPermissions();
+    }
+
+    function applyMintingPermissions() {
+      let qtyInput = document.getElementById('qrQuantityInput');
+      let generateBtn = document.getElementById('generateBtn');
+      let quantityButtons = document.querySelectorAll('.quantity-options button');
+
+      if (userRole === 'Normal') {
+        if (userFirstMint) {
+          qtyInput.value = 1;
+          qtyInput.disabled = true;
+          quantityButtons.forEach(btn => btn.disabled = (parseInt(btn.textContent) !== 1));
+          generateBtn.disabled = false;
+        } else {
+          // สมมติให้ mint รอบต่อไปได้ตาม quota (เพิ่ม logic ดึง quota ใหม่ตรงนี้)
+          qtyInput.disabled = false;
+          quantityButtons.forEach(btn => btn.disabled = (parseInt(btn.textContent) > userQuota));
+          generateBtn.disabled = false;
+        }
+      } else if (userRole === 'Master') {
+        qtyInput.disabled = false;
+        quantityButtons.forEach(btn => btn.disabled = false);
+        generateBtn.disabled = false;
+      } else if (userRole === 'Agent') {
+        // ตัวอย่าง agentQuota = 5000;
+        let agentQuota = 5000;
+        qtyInput.max = agentQuota;
+        qtyInput.disabled = false;
+        quantityButtons.forEach(btn => btn.disabled = (parseInt(btn.textContent) > agentQuota));
+        generateBtn.disabled = false;
+      }
     }
 
     function selectQuantity(qty) {
@@ -126,7 +158,6 @@
       }
     }
 
-    // Validate public key format: 64 hex
     function isValidPubKey(key) {
       return /^[a-f0-9]{64}$/i.test(key.trim());
     }
@@ -134,7 +165,6 @@
     document.getElementById('qrQuantityInput').addEventListener('input', validateQty);
 
     function generatePreview() {
-      // Validate inputs
       let pubkey = document.getElementById('publicKeyInput').value.trim();
       let qty = parseInt(document.getElementById('qrQuantityInput').value);
       let secret = document.getElementById('secretInput').value;
@@ -148,12 +178,15 @@
         alert('Secret must be 4 lowercase a-z and match both fields.');
         return;
       }
+      if (userRole === 'Normal' && userFirstMint && qty !== 1) {
+        alert('First mint must be 1 QR.');
+        return;
+      }
       if (isNaN(qty) || qty < 1 || ((userRole !== 'Master' && userRole !== 'Agent') && qty > userQuota)) {
         alert('Invalid or excessive QTY.');
         return;
       }
 
-      // Mock: hash1 = sha256(pubkey+qty+secret), hash2 = sha256(hash1+meta)
       let hash1 = sha256(pubkey + qty + secret);
       let meta = (new Date().toISOString());
       let hash2 = sha256(hash1 + meta);
@@ -174,6 +207,13 @@
 
     function commitBatch() {
       alert('Committed QR Batch!\nhash1 and hash2 saved to ledger/log.');
+      // ถ้า userRole == 'Normal' และ mint แรก ให้เปลี่ยน firstMint เป็น false และลด quota
+      if (userRole === 'Normal' && userFirstMint) {
+        userFirstMint = false;
+        userQuota -= 1; // กรณี quota ลดลงตาม mint
+        if (userQuota < 0) userQuota = 0;
+      }
+      updateQuotaDisplay();
       resetForm();
     }
 
@@ -185,7 +225,6 @@
         .catch(err => { alert('Failed to copy.'); });
     }
 
-    // --- sha256 mock for demo ---
     function sha256(str) {
       let h = 0, l = str.length;
       for(let i = 0; i < l; i++) { h = Math.imul(31, h) + str.charCodeAt(i) | 0; }
