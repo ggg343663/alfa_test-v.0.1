@@ -325,6 +325,12 @@
       <span class="hint">Paste the public key generated from the "Generate Key" page.</span>
     </div>
 
+    <div class="section-block" id="qrBatchNameSection" style="display:none;">
+        <div class="block-title">QR Batch Name</div>
+        <input type="text" id="qrBatchNameInput" placeholder="">
+        <span class="hint" id="qrBatchNameHint"></span>
+    </div>
+
     <div class="section-block">
       <div class="block-title">Mint QR Hash / Quantity (QTY)</div>
       <div class="quantity-input-container">
@@ -389,8 +395,12 @@
   <script>
     // CONFIG
     let userRole = 'Normal'; // 'Normal', 'Agent', 'Master'
-    let userQuota = 1;       // Start with 1 to simulate first registration
-    let userFirstMint = true; // Set to true to simulate a new user
+    let userQuota = 1;       // Total quota for Normal user (initially 1 for first mint)
+    let userMintedCount = 0; // Number of QR minted by the current user session
+    let userFirstMint = true; // Set to true to simulate a new user who can only mint 1 QR initially
+
+    const masterMaxQuota = 100; // Max quota for Master role
+    const agentMaxQuota = 5000; // Max quota for Agent role
 
     // DOM Elements (re-selected for clarity)
     const roleDisplay = document.getElementById('role-display');
@@ -406,6 +416,10 @@
     const quantityHint = document.getElementById('quantityHint');
     const hash1Display = document.getElementById('hash1Display');
     const hash2Display = document.getElementById('hash2Display');
+    const qrBatchNameSection = document.getElementById('qrBatchNameSection'); // New
+    const qrBatchNameInput = document.getElementById('qrBatchNameInput');     // New
+    const qrBatchNameHint = document.getElementById('qrBatchNameHint');       // New
+
 
     // --- Initial Setup ---
     document.addEventListener('DOMContentLoaded', function() {
@@ -419,7 +433,7 @@
     // Generates a mock hash for demonstration
     function generateMockHash() {
       const chars = '0123456789abcdef';
-      let hash = '0x';
+      let hash = '';
       for (let i = 0; i < 64; i++) { // Typical hash length
         hash += chars[Math.floor(Math.random() * chars.length)];
       }
@@ -433,26 +447,40 @@
         roleDisplay.className = 'info-value'; // Reset class
         roleDisplay.classList.add('role-' + userRole.toLowerCase());
 
-        if (userRole === 'Master' || userRole === 'Agent') {
-            quotaDisplay.textContent = 'Unlimited';
-            statusDisplay.textContent = 'Available';
-            quotaDisplay.className = 'info-value quota-available'; // Unlimited is always available
-            statusDisplay.className = 'info-value status-available';
+        let currentQuotaRemaining = 0;
+        let totalQuotaForRole = 0;
+
+        if (userRole === 'Master') {
+            totalQuotaForRole = masterMaxQuota;
+            currentQuotaRemaining = masterMaxQuota - userMintedCount;
+            quotaDisplay.textContent = `${userMintedCount}/${totalQuotaForRole}`;
+        } else if (userRole === 'Agent') {
+            totalQuotaForRole = agentMaxQuota;
+            currentQuotaRemaining = agentMaxQuota - userMintedCount;
+            quotaDisplay.textContent = `${userMintedCount}/${totalQuotaForRole}`;
         } else { // Normal role
-            quotaDisplay.textContent = userQuota;
-            if (userQuota > 0) {
-                statusDisplay.textContent = 'Available';
-                quotaDisplay.className = 'info-value quota-available';
-                statusDisplay.className = 'info-value status-available';
-                if (userQuota <= 10 && userQuota > 0) { // Example: low quota warning
-                    quotaDisplay.classList.add('quota-low');
-                }
-            } else {
-                statusDisplay.textContent = 'Not Available';
-                quotaDisplay.className = 'info-value quota-unavailable';
-                statusDisplay.className = 'info-value status-not-available';
-            }
+            totalQuotaForRole = userQuota; // This could be 1 or 1000
+            currentQuotaRemaining = userQuota - userMintedCount;
+            quotaDisplay.textContent = `${userMintedCount}/${totalQuotaForRole}`;
         }
+
+        // Set quota display color
+        if (currentQuotaRemaining > 0) {
+            statusDisplay.textContent = 'Available';
+            quotaDisplay.className = 'info-value quota-available';
+            statusDisplay.className = 'info-value status-available';
+            // Specific low quota warnings for Normal and Agent
+            if (userRole === 'Normal' && currentQuotaRemaining <= 10 && currentQuotaRemaining > 0) {
+                quotaDisplay.classList.add('quota-low');
+            } else if (userRole === 'Agent' && currentQuotaRemaining <= totalQuotaForRole * 0.1 && currentQuotaRemaining > 0) {
+                quotaDisplay.classList.add('quota-low');
+            }
+        } else {
+            statusDisplay.textContent = 'Not Available';
+            quotaDisplay.className = 'info-value quota-unavailable';
+            statusDisplay.className = 'info-value status-not-available';
+        }
+        
         applyMintingPermissions(); // Re-apply permissions based on updated quota/role
         updateQuantityHint(); // Update hint message
     }
@@ -460,27 +488,52 @@
     // Applies disabled/enabled state to minting-related elements based on permissions and quota
     function applyMintingPermissions() {
         let canMintOverall = true; // Overall flag if minting is allowed
+        let currentMaxQty = Infinity; // For qty input's max attribute
+
+        // Handle QR Batch Name Section Visibility and Properties
+        if (userRole === 'Master' || userRole === 'Agent') {
+            qrBatchNameSection.style.display = 'block';
+            qrBatchNameInput.disabled = false;
+            qrBatchNameInput.placeholder = (userRole === 'Master' ? 'Optional: Enter batch name (e.g., Q1_2025_Master)' : 'Required: Enter batch name (e.g., Agent_Project_X)');
+            qrBatchNameHint.textContent = (userRole === 'Master' ? 'Optional batch name for Master role.' : 'Required batch name for Agent role.');
+        } else {
+            qrBatchNameSection.style.display = 'none';
+            qrBatchNameInput.value = ''; // Clear value if hidden
+            qrBatchNameInput.disabled = true;
+        }
+
 
         // Determine if overall minting is possible based on role and quota
         if (userRole === 'Normal') {
-            if (userQuota <= 0) {
+            const currentNormalQuota = userQuota - userMintedCount;
+            if (currentNormalQuota <= 0) {
                 canMintOverall = false;
             }
             if (userFirstMint) {
                 qrQuantityInput.value = 1; // Force value to 1
                 qrQuantityInput.disabled = true; // Disable input field
                 qrQuantityInput.min = 1;
-                qrQuantityInput.max = 1; // Max is 1 for first mint
+                currentMaxQty = 1; // Max is 1 for first mint
             } else {
                 qrQuantityInput.disabled = false;
                 qrQuantityInput.min = 1;
-                qrQuantityInput.max = userQuota; // Max is current quota for subsequent normal mints
+                currentMaxQty = currentNormalQuota; // Max is current remaining quota for subsequent normal mints
             }
-        } else { // Master or Agent
+        } else if (userRole === 'Agent') {
+            const currentAgentQuota = agentMaxQuota - userMintedCount;
+            if (currentAgentQuota <= 0) {
+                canMintOverall = false;
+            }
             qrQuantityInput.disabled = false;
             qrQuantityInput.min = 1;
-            qrQuantityInput.max = (userRole === 'Agent' ? 5000 : ''); // Agent example max, Master unlimited
+            currentMaxQty = currentAgentQuota; // Agent's remaining quota
+        } else { // Master
+            qrQuantityInput.disabled = false;
+            qrQuantityInput.min = 1;
+            currentMaxQty = Infinity; // Master is unlimited, no max attribute
         }
+        qrQuantityInput.max = (currentMaxQty === Infinity ? '' : currentMaxQty);
+
 
         // Apply disabled state to secret inputs and generate button based on overall minting ability
         secretInput.disabled = !canMintOverall;
@@ -492,18 +545,21 @@
         quantityButtons.forEach(button => {
             const qty = parseInt(button.textContent);
             if (userRole === 'Normal') {
+                const currentNormalQuota = userQuota - userMintedCount;
                 if (userFirstMint) {
                     // Only enable '1' button for first mint
                     button.disabled = (qty !== 1);
                 } else {
-                    // Disable if quantity exceeds normal user's quota
-                    button.disabled = (qty > userQuota);
+                    // Disable if quantity exceeds normal user's remaining quota
+                    button.disabled = (qty > currentNormalQuota);
                 }
             } else if (userRole === 'Agent') {
-                // Disable if quantity exceeds Agent's specific max (e.g., 5000)
-                button.disabled = (qty > 5000);
+                const currentAgentQuota = agentMaxQuota - userMintedCount;
+                // Disable if quantity exceeds Agent's specific max or remaining quota
+                button.disabled = (qty > currentAgentQuota);
             } else { // Master
-                button.disabled = false; // Master can always select any quantity
+                // Disable if quantity exceeds Master's maximum (if set, else always enabled)
+                button.disabled = (qty > masterMaxQuota && masterMaxQuota !== Infinity);
             }
         });
 
@@ -515,20 +571,29 @@
     function selectQuantity(qty) {
         // Prevent selection if user is Normal and qty > current quota or if first mint and qty is not 1
         if (userRole === 'Normal') {
+            const currentNormalQuota = userQuota - userMintedCount;
             if (userFirstMint && qty !== 1) {
                 alert('As a new user, you can only mint 1 QR Batch. Please set QTY to 1.');
                 qrQuantityInput.value = 1; // Force value back to 1
                 highlightSelectedQty(1);
                 return;
             }
-            if (!userFirstMint && qty > userQuota) {
-                alert(`Selected QTY (${qty}) exceeds your available quota (${userQuota}).`);
+            if (!userFirstMint && qty > currentNormalQuota) {
+                alert(`Selected QTY (${qty}) exceeds your available quota (${currentNormalQuota}).`);
                 return;
             }
-        }
-        if (userRole === 'Agent' && qty > 5000) { // Example agent max
-            alert(`Selected QTY (${qty}) exceeds Agent's maximum limit (5000).`);
-            return;
+        } else if (userRole === 'Agent') {
+            const currentAgentQuota = agentMaxQuota - userMintedCount;
+            if (qty > currentAgentQuota) {
+                alert(`Selected QTY (${qty}) exceeds Agent's available quota (${currentAgentQuota}).`);
+                return;
+            }
+        } else if (userRole === 'Master') {
+            const currentMasterQuota = masterMaxQuota - userMintedCount;
+            if (qty > currentMasterQuota) {
+                 alert(`Selected QTY (${qty}) exceeds Master's available quota (${currentMasterQuota}).`);
+                return;
+            }
         }
 
         qrQuantityInput.value = qty;
@@ -556,33 +621,56 @@
         if (isNaN(qty) || qty < 1) {
             isValid = false;
         } else if (userRole === 'Normal') {
+            const currentNormalQuota = userQuota - userMintedCount;
             if (userFirstMint && qty !== 1) {
                 isValid = false;
-            } else if (!userFirstMint && qty > userQuota) {
+            } else if (!userFirstMint && qty > currentNormalQuota) {
                 isValid = false;
             }
-        } else if (userRole === 'Agent' && qty > 5000) { // Example Agent max
+        } else if (userRole === 'Agent') {
+            const currentAgentQuota = agentMaxQuota - userMintedCount;
+            if (qty > currentAgentQuota) {
+                isValid = false;
+            }
+        } else if (userRole === 'Master') {
+            const currentMasterQuota = masterMaxQuota - userMintedCount;
+             if (qty > currentMasterQuota) {
+                isValid = false;
+            }
+        }
+        
+        // Also check batch name for Agent (required)
+        if (userRole === 'Agent' && qrBatchNameInput.value.trim() === '') {
             isValid = false;
         }
 
         // Disable generate button if quantity is not valid or other fields are disabled
-        generateQrBatchBtn.disabled = !isValid || secretInput.disabled || confirmSecretInput.disabled;
+        generateQrBatchBtn.disabled = !isValid || secretInput.disabled || confirmSecretInput.disabled || qrBatchNameInput.disabled;
         updateQuantityHint(); // Always update hint after validation
     }
 
     function updateQuantityHint() {
+      let currentRemainingQuota = 0;
+      let totalQuota = 0;
+
       if (userRole === 'Normal') {
+        currentRemainingQuota = userQuota - userMintedCount;
+        totalQuota = userQuota;
         if (userFirstMint) {
           quantityHint.textContent = "You can mint only 1 QR Batch as a new user.";
-        } else if (userQuota > 0) {
-          quantityHint.textContent = `Select from popular options or enter a custom quantity (Max: ${userQuota}).`;
+        } else if (currentRemainingQuota > 0) {
+          quantityHint.textContent = `Select from popular options or enter a custom quantity (Max: ${currentRemainingQuota}).`;
         } else {
           quantityHint.textContent = "You have no quota remaining.";
         }
       } else if (userRole === 'Agent') {
-        quantityHint.textContent = "Select from popular options or enter a custom quantity (Max: 5000 for Agent).";
+        currentRemainingQuota = agentMaxQuota - userMintedCount;
+        totalQuota = agentMaxQuota;
+        quantityHint.textContent = `Select from popular options or enter a custom quantity (Max: ${currentRemainingQuota}).`;
       } else { // Master
-        quantityHint.textContent = "Select from popular options or enter a custom quantity (Unlimited).";
+        currentRemainingQuota = masterMaxQuota - userMintedCount;
+        totalQuota = masterMaxQuota;
+        quantityHint.textContent = `Select from popular options or enter a custom quantity (Max: ${currentRemainingQuota}).`;
       }
 
       // Add warning if current input exceeds allowed max or is invalid
@@ -591,10 +679,8 @@
           quantityHint.textContent = "Please enter a valid quantity (1 or more).";
       } else if (userRole === 'Normal' && userFirstMint && qty !== 1) {
           quantityHint.textContent = "As a new user, you can only mint 1 QR Batch. Please set QTY to 1.";
-      } else if (userRole === 'Normal' && !userFirstMint && qty > userQuota) {
-          quantityHint.textContent = `Selected QTY (${qty}) exceeds your available quota (${userQuota}). Please reduce quantity.`;
-      } else if (userRole === 'Agent' && qty > 5000) {
-         quantityHint.textContent = `Selected QTY (${qty}) exceeds Agent's maximum limit (5000). Please reduce quantity.`;
+      } else if (qty > currentRemainingQuota) {
+          quantityHint.textContent = `Selected QTY (${qty}) exceeds your available quota (${currentRemainingQuota}). Please reduce quantity.`;
       }
     }
 
@@ -609,6 +695,7 @@
       const qty = parseInt(qrQuantityInput.value);
       const secret = secretInput.value;
       const confirmSecret = confirmSecretInput.value;
+      const batchName = qrBatchNameInput.value.trim();
 
       // Basic form validation
       if (!isValidPubKey(pubkey)) {
@@ -624,22 +711,38 @@
         return;
       }
 
-      // Role-specific quantity validation (redundant with validateQuantityInput but good for final check)
+      // Role-specific quantity and batch name validation
+      let currentAvailableQuota = 0;
       if (userRole === 'Normal') {
+        currentAvailableQuota = userQuota - userMintedCount;
         if (userFirstMint && qty !== 1) {
           alert('As a new user, you can only mint 1 QR Batch.');
           return;
         }
-        if (!userFirstMint && qty > userQuota) {
-          alert(`You have ${userQuota} quota remaining, which is insufficient for generating ${qty} QR(s).`);
+        if (!userFirstMint && qty > currentAvailableQuota) {
+          alert(`You have ${currentAvailableQuota} quota remaining, which is insufficient for generating ${qty} QR(s).`);
           return;
         }
-      } else if (userRole === 'Agent' && qty > 5000) {
-        alert(`Selected QTY (${qty}) exceeds Agent's maximum limit (5000).`);
-        return;
+      } else if (userRole === 'Agent') {
+        currentAvailableQuota = agentMaxQuota - userMintedCount;
+        if (qty > currentAvailableQuota) {
+          alert(`Selected QTY (${qty}) exceeds Agent's available quota (${currentAvailableQuota}).`);
+          return;
+        }
+        if (batchName === '') {
+            alert('QR Batch Name is required for Agent role.');
+            return;
+        }
+      } else if (userRole === 'Master') {
+        currentAvailableQuota = masterMaxQuota - userMintedCount;
+        if (qty > currentAvailableQuota) {
+          alert(`Selected QTY (${qty}) exceeds Master's available quota (${currentAvailableQuota}).`);
+          return;
+        }
       }
 
-      // Simulate Hash Generation
+      // Simulate Hash Generation (include batchName if present)
+      let hashInput = pubkey + qty + secret + (userRole !== 'Normal' ? batchName : '') + Math.random();
       let hash1 = generateMockHash();
       let hash2 = generateMockHash();
 
@@ -650,7 +753,7 @@
       mintSection.style.display = 'none';
       qrPreviewSection.style.display = 'block';
 
-      alert(`Generating ${qty} QR Hash(es) with Secret: ${secret}. Showing preview.`);
+      alert(`Generating ${qty} QR Hash(es) with Secret: ${secret}. ${userRole !== 'Normal' ? `Batch Name: ${batchName}.` : ''} Showing preview.`);
     }
 
     // Copies a hash to the clipboard
@@ -688,11 +791,13 @@
       const hash2 = hash2Display.textContent;
       alert(`Committing QR Hash: ${hash1} and Commitment Hash: ${hash2}. \n(This is where audit chain log/proof would be shown.)`);
       
-      // Deduct quota and update first mint status if Normal role
-      if (userRole === 'Normal') {
-          userQuota -= parseInt(qrQuantityInput.value); // Deduct the quantity minted
-          if (userQuota < 0) userQuota = 0; // Ensure quota doesn't go negative
+      // Update minted count
+      userMintedCount += parseInt(qrQuantityInput.value);
+
+      // Special logic for Normal user's first mint
+      if (userRole === 'Normal' && userFirstMint) {
           userFirstMint = false; // Mark that first mint is done
+          userQuota = 1000; // Normal user receives full quota after first successful mint
       }
       updateRoleAndQuotaDisplay(); // Update display and re-apply permissions
       resetToMintSection(); // Reset form to mint section
@@ -705,6 +810,7 @@
         qrQuantityInput.value = 1;
         secretInput.value = '';
         confirmSecretInput.value = '';
+        qrBatchNameInput.value = ''; // Clear batch name input
 
         // Reset hash displays
         hash1Display.textContent = '';
