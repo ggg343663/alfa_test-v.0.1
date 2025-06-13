@@ -7,30 +7,34 @@
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; padding: 1.3em; max-width: 480px; margin: 0 auto;}
     h1 { color: #219150; text-align: center; margin-bottom: 1.1em; font-size: 1.13em;}
-    .form-group { margin-bottom: 1.05em; }
+    .form-group { margin-bottom: 1.12em; }
     label { font-weight: bold; color: #2d3c35;}
     .input-box { position: relative; display: flex; align-items: center; }
     input[type="password"], .pubkey-box {
-      width: 100%; padding: 9px 11px 9px 40px; font-size: 1em; border: 2px solid #cfd8dc;
+      width: 100%; padding: 10px 11px 10px 38px; font-size: 1em; border: 2px solid #cfd8dc;
       border-radius: 9px; box-sizing: border-box; background: #fff;
-      margin-top: 0.3em; transition: border 0.15s;
+      margin-top: 0.21em; transition: border 0.15s;
     }
     input:focus { border-color: #ffd600; background: #ffffed; }
     .input-svg {
-      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
-      width: 22px; height: 22px; pointer-events: none;
+      position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+      width: 20px; height: 22px; pointer-events: none;
     }
     .status-svg {
-      position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
       width: 20px; height: 20px; pointer-events: none;
       opacity: 0; transition: opacity 0.16s;
     }
     input.valid { border-color: #43a047;}
     input.invalid { border-color: #e53935;}
     .status-svg.visible { opacity: 1;}
+    .hint {
+      color: #b0bec5; font-size: 0.93em; margin-top: 2px; margin-bottom: 0.4em;
+      display: block;
+    }
     .pubkey-box {
       background: #eafaf0; color: #222; margin-top: 1.1em;
-      font-family: 'Courier New', monospace; min-height: 38px; font-size: 0.97em;
+      font-family: 'Courier New', monospace; min-height: 39px; font-size: 0.98em;
       border-color: #219150; display: flex; align-items: center; justify-content: space-between;
       transition: border 0.18s;
     }
@@ -42,12 +46,12 @@
     .copy-btn:active { filter: brightness(0.95);}
     .copy-status { color: #43a047; font-size: 0.97em; margin-left: 8px; opacity: 0; transition: opacity 0.18s;}
     .copy-status.visible { opacity: 1;}
-    .note { color: #9e9e9e; font-size: 0.95em; margin: 1em 0;}
+    .note { color: #9e9e9e; font-size: 0.96em; margin: 1em 0;}
     @media (max-width: 600px) {
       body { padding: 1em 0.08em;}
       h1 { font-size: 1em;}
       .copy-btn { padding: 5px 9px;}
-      .pubkey-box { font-size: 0.91em;}
+      .pubkey-box { font-size: 0.93em;}
     }
   </style>
 </head>
@@ -59,9 +63,10 @@
       <span class="input-svg">
         <svg width="20" height="22"><text x="2" y="16" font-size="13" font-family="monospace" fill="#90a4ae">abc</text></svg>
       </span>
-      <input type="password" id="password" maxlength="24" autocomplete="new-password" placeholder="Password"/>
+      <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="Password (a-z, 0-9, 6-12 chars)"/>
       <span class="status-svg" id="pw-status"></span>
     </div>
+    <span class="hint">Password: 6-12 characters (a-z, 0-9)</span>
   </div>
   <div class="form-group">
     <label>Confirm Password</label>
@@ -69,19 +74,20 @@
       <span class="input-svg">
         <svg width="20" height="22"><text x="2" y="16" font-size="13" font-family="monospace" fill="#90a4ae">abc</text></svg>
       </span>
-      <input type="password" id="confirmPassword" maxlength="24" autocomplete="new-password" placeholder="Confirm Password"/>
+      <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="Confirm Password"/>
       <span class="status-svg" id="cpw-status"></span>
     </div>
   </div>
   <div class="form-group">
-    <label>PIN (4 digits)</label>
+    <label>PIN</label>
     <div class="input-box">
       <span class="input-svg">
         <svg width="23" height="22"><text x="1" y="16" font-size="13" font-family="monospace" fill="#90a4ae">1234</text></svg>
       </span>
-      <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="1234"/>
+      <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="PIN (4 digits, 0-9)"/>
       <span class="status-svg" id="pin-status"></span>
     </div>
+    <span class="hint">PIN: 4 digits (0-9)</span>
   </div>
   <div class="form-group">
     <label>Confirm PIN</label>
@@ -102,15 +108,21 @@
   </div>
   <div class="note">
     *Your public key is generated deterministically from password + PIN.<br>
-    (We never store or know your private key)
+    No salt. <b>We never store or know your private key.</b>
   </div>
   <script>
-    function validPw(pw) { return pw.length>=6 && pw.length<=16; }
-    function validPin(pin) { return /^\d{4}$/.test(pin); }
+    function validPw(pw) {
+      return /^[a-zA-Z0-9]{6,12}$/.test(pw);
+    }
+    function validPin(pin) {
+      return /^\d{4}$/.test(pin);
+    }
     function genKey(password, pin) {
-      let str = password + pin + "DTC_Key_Salt";
+      // ไม่มี salt!
+      let str = password + pin;
       let hash = 0;
-      for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i), hash |= 0;
+      for (let i = 0; i < str.length; i++)
+        hash = ((hash << 5) - hash) + str.charCodeAt(i), hash |= 0;
       let pub = Math.abs(hash).toString(16).padStart(16,'0') + 'DTC';
       return pub.slice(0, 48);
     }
