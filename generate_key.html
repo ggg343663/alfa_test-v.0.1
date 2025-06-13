@@ -1,242 +1,282 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Generate Public Key - DTC: Magic Chain System</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 1em 0.1em 4em 0.1em;
-      background: #f5f7fa;
-      color: #333;
-    }
-    h1 {
-      text-align: center;
-      color: #219150;
-      margin-bottom: 0.6em;
-      font-size: 1.15em;
-      letter-spacing: 0.01em;
-    }
-    h1 small {
-      display: block;
-      font-size: 0.7em;
-      color: #555;
-      margin-top: 0.3em;
-    }
-    .intro-section {
-      background-color: #e0f2f7;
-      border-left: 4px solid #00acc1;
-      padding: 0.6em 1em;
-      margin-bottom: 1.1em;
-      border-radius: 8px;
-      box-shadow: 0 1.5px 5px rgba(0,0,0,0.04);
-      color: #444;
-      font-size: 0.93em;
-    }
-    .section-block {
-      margin: 0.7em 0;
-      padding: 0.7em 0.8em;
-      border-radius: 10px;
-      box-shadow: 0 1.5px 6px #edf1f6;
-    }
-    .block-title {
-      font-size: 1em;
-      font-weight: bold;
-      margin-bottom: 0.6em;
-      padding-bottom: 0.25em;
-      border-bottom: 1px solid rgba(0,0,0,0.07);
-      color: #444;
-    }
-    .key-input-block {
-      background: #fffde7;
-      border-left: 5px solid #ffd600;
-    }
-    .key-output-block {
-      background: #eafaf0;
-      border-left: 5px solid #219150;
-    }
-    .input-group {
-      margin-bottom: 12px;
-      position: relative;
-    }
-    .input-group label {
-      display: block;
-      margin-bottom: 3px;
-      font-weight: bold;
-      color: #666;
-      font-size: 0.96em;
-    }
-    .input-group input[type="password"],
-    .input-group input[type="text"] {
-      width: 100%;
-      padding: 9px;
-      border: 1px solid #ddd;
-      border-radius: 7px;
-      font-size: 1em;
-      background: #fff;
-      box-sizing: border-box;
-      transition: border-color 0.12s;
-    }
-    .input-group input:focus {
-      border-color: #90a4ae;
-      outline: none;
-      background: #fcffeb;
-    }
-    .label-hint {
-      display: block;
-      font-size: 0.82em;
-      color: #90a4ae;
-      margin-top: 3px;
-    }
-    .toggle-password {
-      position: absolute;
-      right: 9px;
-      top: 58%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #90a4ae;
-      font-size: 0.85em;
-      user-select: none;
-    }
-    .pin-dots {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 24px;
-      margin-top: 7px;
-    }
-    .pin-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background-color: #e0e0e0;
-      margin: 0 3px;
-      transition: background-color 0.1s;
-    }
-    .pin-dot.active {
-      background-color: #ffd600;
-    }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 0.6em 1em;
-      margin-top: 12px;
-      color: #fff;
-      font-weight: bold;
-      border-radius: 8px;
-      font-size: 1.05em;
-      text-align: center;
-      text-decoration: none;
-      cursor: pointer;
-      border: none;
-      transition: background 0.13s, filter 0.13s;
-      box-shadow: 0 1.5px 6px rgba(0,0,0,0.07);
-      background: #2196f3;
-    }
-    .btn:hover { filter: brightness(0.94); }
-    .output-box {
-      background: #f0f4c3;
-      border: 1px solid #cddc39;
-      border-radius: 7px;
-      padding: 9px;
-      margin-top: 13px;
-      word-wrap: break-word;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.95em;
-      color: #444;
-      position: relative;
-    }
-    .output-box label {
-      margin-bottom: 5px;
-      font-weight: bold;
-      color: #333;
-    }
-    .public-key-value {
-      background: #e6e6a1;
-      padding: 6px;
-      border-radius: 5px;
-      user-select: all;
-      display: block;
-      margin-top: 4px;
-      overflow-x: auto;
-      font-size: 0.96em;
-    }
-    .timestamp-note {
-      text-align: right;
-      color: #607d8b;
-      font-size: 0.83em;
-      margin-top: 5px;
-    }
-    .footer-note {
-      text-align: center;
-      margin-top: 2em;
-      color: #b0bec5;
-      font-size: 0.91em;
-    }
-    .message-warning {
-      color: #d84315;
-      background: #fff3e0;
-      border-radius: 7px;
-      padding: 7px 12px;
-      margin-top: 9px;
-      font-size: 0.96em;
-      text-align: center;
-      display: none;
-    }
-    /* Sticky Navigation Bar */
-    .navbar {
-      display: flex;
-      justify-content: space-around;
-      padding: 7px 0;
-      background: #ede7f6;
-      border-radius: 9px 9px 0 0;
-      box-shadow: 0 1.5px 7px rgba(0,0,0,0.05);
-      position: fixed;
-      left: 0; right: 0; bottom: 0;
-      max-width: 700px;
-      margin: 0 auto;
-      z-index: 99;
-    }
-    .navbar a {
-      flex: 1;
-      text-align: center;
-      padding: 10px 4px;
-      text-decoration: none;
-      color: #6a1b9a;
-      font-weight: bold;
-      border-radius: 5px;
-      transition: background 0.18s, color 0.18s;
-      margin: 0 2.5px;
-      font-size: 0.97em;
-    }
-    .navbar a:hover {
-      background: #d1c4e9;
-      color: #4a148c;
-    }
-    .navbar a.active {
-      background: #9575cd;
-      color: white;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.18);
-    }
-    @media (max-width: 600px) {
-      body { margin: 0.2em; padding: 0.1em 0.01em 4em 0.01em;}
-      h1 { font-size: 1em; margin-bottom: 0.6em; }
-      .intro-section { font-size: 0.88em; padding: 0.36em 0.7em; }
-      .section-block { padding: 0.33em 0.2em; }
-      .btn { font-size: 0.95em; padding: 0.42em 0.7em; }
-      .input-group input { padding: 6px; font-size: 0.98em; }
-      .block-title { font-size: 0.95em; }
-      .footer-note { font-size: 0.81em; }
-      .navbar { padding: 4px 0; }
-      .navbar a { font-size: 0.91em; padding: 7px 2px;}
-      .output-box { font-size: 0.93em; }
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Generate Public Key - DTC: Magic Chain System</title>
+    <style>
+        /* Base Styles (Copied from index.html for consistency) */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 700px;
+            margin: 2em auto;
+            padding: 1em;
+            background: #f5f7fa;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #219150; /* Dark green for the main title */
+            margin-bottom: 1.2em;
+            letter-spacing: 0.02em;
+        }
+        h1 small {
+            display: block;
+            font-size: 0.5em; /* Smaller size for tagline */
+            color: #555;
+            margin-top: 0.5em;
+        }
+        .intro-section {
+            background-color: #e0f2f7; /* Light blue background */
+            border-left: 5px solid #00acc1; /* Teal border */
+            padding: 1.2em;
+            margin-bottom: 2em;
+            border-radius: 8px;
+            box-shadow: 0 2px 7px rgba(0,0,0,0.05);
+            color: #444;
+            line-height: 1.5;
+            text-align: center;
+            font-size: 0.95em;
+        }
+        .intro-section p {
+            margin: 0.5em 0;
+        }
+        
+        /* Section Block Styling */
+        .section-block {
+            margin: 1.1em 0;
+            padding: 1.5em; /* Increased padding for better spacing */
+            border-radius: 12px;
+            box-shadow: 0 2px 9px #edf1f6;
+        }
+        .block-title {
+            font-size: 1.07em;
+            font-weight: bold;
+            margin-bottom: 0.9em; /* Increased margin-bottom */
+            padding-bottom: 0.5em;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            color: #555;
+        }
+
+        /* Specific Section Styles for Key Generation (Yellow Group) */
+        .key-input-block {
+            background: #fffde7; /* Light yellow for input fields, as per readme.md */
+            border-left: 6px solid #ffd600; /* Matching yellow border */
+        }
+        .key-output-block {
+            background: #eafaf0; /* Light green for output (Public Key) */
+            border-left: 6px solid #219150; /* Matching green border */
+            transition: border-color 0.3s ease-in-out; /* Add transition for success feedback */
+        }
+        .key-output-block.success-flash {
+            border-left-color: #4CAF50; /* Brighter green on success */
+        }
+
+
+        /* Input Group Styling */
+        .input-group {
+            margin-bottom: 15px;
+            position: relative;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #666;
+            font-size: 0.95em;
+        }
+        .input-group input[type="password"],
+        .input-group input[type="text"] {
+            width: calc(100% - 24px); /* Full width minus padding */
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: #ffffff; /* Default white background for inputs */
+            box-sizing: border-box; /* Include padding in width calculation */
+            transition: border-color 0.2s;
+        }
+        /* Sensitive input specific background for input fields */
+        #password, #confirmPassword, #pin, #confirmPin {
+            background-color: #fffde7; [span_0](start_span)/* Light yellow background for sensitive inputs[span_0](end_span) */
+        }
+        .input-group input.error {
+            border-color: #e57373; [span_1](start_span)/* Red border for errors[span_1](end_span) */
+        }
+        .error-message {
+            display: none;
+            color: #e57373; [span_2](start_span)/* Red text for error messages[span_2](end_span) */
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+        .label-hint {
+            display: block;
+            font-size: 0.8em;
+            color: #90a4ae; /* Grey hint text */
+            margin-top: 5px;
+        }
+
+        /* Toggle Password Visibility */
+        .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 62%; /* Adjust based on input padding */
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: #90a4ae;
+            font-size: 0.9em;
+        }
+
+        /* PIN Dots */
+        .pin-dots {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 36px;
+            margin-top: 10px;
+        }
+        .pin-dot {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background-color: #e0e0e0; /* Inactive dot */
+            margin: 0 5px;
+            transition: background-color 0.1s;
+        }
+        .pin-dot.active {
+            background-color: #ffd600; /* Active dot (yellow) */
+        }
+
+        /* Button Styling */
+        .btn {
+            display: block; /* Make button full width */
+            width: 100%;
+            padding: 0.8em 1.2em;
+            margin-top: 25px; /* Spacing above button */
+            color: #fff;
+            font-weight: bold;
+            border-radius: 8px;
+            font-size: 1.1em;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: background 0.13s, filter 0.13s;
+            box-shadow: 0 2px 7px rgba(0,0,0,0.07);
+            background: #2196f3; /* Blue button */
+        }
+        .btn:hover {
+            filter: brightness(0.93);
+        }
+
+        /* Output Box Styling */
+        .output-box {
+            background-color: #f0f4c3; /* Lighter green/yellow for readability */
+            border: 1px solid #cddc39; /* Lime green border */
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 25px;
+            word-wrap: break-word; /* Ensure long text wraps */
+            font-family: 'Courier New', Courier, monospace; /* Monospace for hashes/keys */
+            font-size: 0.9em;
+            color: #444;
+            position: relative; /* For timestamp positioning */
+        }
+        .output-box label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #333;
+        }
+        .public-key-value {
+            background-color: #e6e6a1; /* Even lighter background for the key itself */
+            padding: 8px;
+            border-radius: 5px;
+            user-select: all; /* Allow easy selection */
+            display: block;
+            margin-top: 5px;
+            overflow-x: auto; /* Allow horizontal scrolling for long keys */
+        }
+
+        /* Timestamp Styling */
+        .timestamp-note {
+            text-align: right;
+            color: #607d8b; /* Dark grey-blue */
+            font-size: 0.85em;
+            margin-top: 10px;
+        }
+        
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            margin-top: 2.4em;
+            color: #b0bec5;
+            font-size: 0.95em;
+        }
+
+        /* Responsive adjustments for mobile devices */
+        @media (max-width: 600px) {
+            body { margin: 0.4em; padding: 0.07em;}
+            .section-block { padding: 0.7em 0.2em;}
+            .btn { font-size: 1em; padding: 0.6em 0.8em; }
+            .input-group input { width: calc(100% - 14px); padding: 7px; }
+            .toggle-password { right: 7px; top: 58%; } /* Adjust toggle pos */
+        }
+
+        /* Navigation Bar Styles */
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            background-color: #ede7f6; /* Light purple background */
+            border-radius: 8px;
+            margin-bottom: 2em;
+            box-shadow: 0 2px 7px rgba(0,0,0,0.05);
+        }
+
+        .navbar a {
+            flex: 1; /* Distribute space equally */
+            text-align: center;
+            padding: 10px 5px;
+            text-decoration: none;
+            color: #6a1b9a; /* Dark purple text */
+            font-weight: bold;
+            border-radius: 5px;
+            transition: background-color 0.2s, color 0.2s;
+            margin: 0 5px; /* Spacing between buttons */
+            font-size: 0.95em;
+        }
+
+        .navbar a:hover {
+            background-color: #d1c4e9; /* Slightly darker purple on hover */
+            color: #4a148c; /* Even darker purple text on hover */
+        }
+
+        /* Active button style */
+        .navbar a.active {
+            background-color: #9575cd; /* Medium purple for active */
+            color: white;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.2);
+        }
+        @media (max-width: 600px) {
+            .navbar {
+                flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+                padding: 5px 0;
+            }
+            .navbar a {
+                flex-basis: 45%; /* Two buttons per line */
+                margin: 5px;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="navbar">
+        <a href="index.html">Back</a>
+        <a href="index.html">Home</a>
+        <a href="mint_qr.html">Next</a>
+    </div>
+
     <h1>DTC: Magic Chain System <br><small>Decentralized Trust Community</small></h1>
 
     <div class="intro-section">
@@ -251,13 +291,17 @@
             <label for="password">Password:</label>
             <input type="password" id="password" placeholder="Enter your password" />
             <span class="toggle-password" data-target="password">Show</span>
-            <span class="label-hint">Choose a strong, memorable password.</span>
+            <span class="label-hint">Choose a strong, memorable password (min 8 chars).</span>
+            <span class="error-message" id="passwordError"></span>
         </div>
+
         <div class="input-group">
             <label for="confirmPassword">Confirm Password:</label>
             <input type="password" id="confirmPassword" placeholder="Re-enter your password" />
             <span class="toggle-password" data-target="confirmPassword">Show</span>
+            <span class="error-message" id="confirmPasswordError"></span>
         </div>
+
         <div class="input-group">
             <label for="pin">PIN (4 digits):</label>
             <input type="password" id="pin" maxlength="4" placeholder="Enter your 4-digit PIN" />
@@ -268,16 +312,19 @@
                 <div class="pin-dot"></div>
                 <div class="pin-dot"></div>
             </div>
-            <span class="label-hint">A 4-digit PIN for additional security layer.</span>
+            <span class="label-hint">A 4-digit PIN for additional security layer (min 6 chars recommended in White Paper, using 4 for UI).</span>
+            <span class="error-message" id="pinError"></span>
         </div>
+
         <div class="input-group">
             <label for="confirmPin">Confirm PIN (4 digits):</label>
             <input type="password" id="confirmPin" maxlength="4" placeholder="Re-enter your 4-digit PIN" />
             <span class="toggle-password" data-target="confirmPin">Show</span>
             <span class="label-hint">Make sure both PINs match.</span>
+            <span class="error-message" id="confirmPinError"></span>
         </div>
+
         <button class="btn" id="generateKeyBtn">Generate Public Key</button>
-        <div id="msg" class="message-warning"></div>
     </div>
 
     <div class="section-block key-output-block" id="publicKeyOutputSection" style="display:none;">
@@ -293,11 +340,7 @@
     <p class="footer-note">
         Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
     </p>
-    <div class="navbar">
-        <a href="index.html">Back</a>
-        <a href="index.html" class="active">Home</a>
-        <a href="mint_qr.html">Next</a>
-    </div>
+
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const passwordInput = document.getElementById('password');
@@ -309,7 +352,11 @@
             const publicKeyOutputSection = document.getElementById('publicKeyOutputSection');
             const publicKeyDisplay = document.getElementById('publicKey');
             const generatedTimestamp = document.getElementById('generatedTimestamp');
-            const msg = document.getElementById('msg');
+
+            const passwordError = document.getElementById('passwordError');
+            const confirmPasswordError = document.getElementById('confirmPasswordError');
+            const pinError = document.getElementById('pinError');
+            const confirmPinError = document.getElementById('confirmPinError');
 
             // --- Password/PIN Visibility Toggle ---
             document.querySelectorAll('.toggle-password').forEach(toggle => {
@@ -330,6 +377,7 @@
             pinInput.addEventListener('input', updatePinDots);
             pinInput.addEventListener('focus', updatePinDots);
             pinInput.addEventListener('blur', updatePinDots);
+            
             function updatePinDots() {
                 const pinLength = pinInput.value.length;
                 const dots = pinDotsContainer.querySelectorAll('.pin-dot');
@@ -342,60 +390,122 @@
                 });
             }
 
-            // --- Mock Public Key Generation Function ---
-            function generatePublicKey(password, pin) {
-                let str = password + pin + "DTC_Key_Salt_2025";
-                let hash = 0;
-                for (let i = 0; i < str.length; i++) {
-                    const char = str.charCodeAt(i);
-                    hash = ((hash << 5) - hash) + char;
-                    hash |= 0;
+            // --- Input Validation & Error Display ---
+            function validateInput(inputElement, errorMessageElement, validationFn, minLength = 0) {
+                const value = inputElement.value;
+                let isValid = true;
+                let message = '';
+
+                if (validationFn && !validationFn(value)) {
+                    isValid = false;
+                    message = `Invalid input.`; // Generic message, specific ones below
                 }
-                let mockPublicKey = Math.abs(hash).toString(16).padStart(16, '0');
-                mockPublicKey += (Math.random() * 1e15).toString(16).padStart(12, '0');
-                mockPublicKey += 'DTC-PUB';
-                mockPublicKey = mockPublicKey.substring(0, 64);
-                return "0x" + mockPublicKey.toUpperCase();
+
+                if (minLength > 0 && value.length < minLength) {
+                    isValid = false;
+                    message = `Must be at least ${minLength} characters long.`;
+                }
+
+                if (isValid) {
+                    inputElement.classList.remove('error');
+                    errorMessageElement.style.display = 'none';
+                    errorMessageElement.textContent = '';
+                } else {
+                    inputElement.classList.add('error');
+                    errorMessageElement.style.display = 'block';
+                    errorMessageElement.textContent = message;
+                }
+                return isValid;
+            }
+
+            function validatePassword() {
+                return validateInput(passwordInput, passwordError, (val) => val.length >= 8, 8);
+            }
+
+            function validateConfirmPassword() {
+                let isValid = validateInput(confirmPasswordInput, confirmPasswordError, null);
+                if (isValid && passwordInput.value !== confirmPasswordInput.value) {
+                    confirmPasswordInput.classList.add('error');
+                    confirmPasswordError.style.display = 'block';
+                    confirmPasswordError.textContent = 'Passwords do not match.';
+                    isValid = false;
+                }
+                return isValid;
+            }
+
+            function validatePin() {
+                return validateInput(pinInput, pinError, (val) => /^\d{4}$/.test(val), 4);
+            }
+
+            function validateConfirmPin() {
+                let isValid = validateInput(confirmPinInput, confirmPinError, null);
+                if (isValid && pinInput.value !== confirmPinInput.value) {
+                    confirmPinInput.classList.add('error');
+                    confirmPinError.style.display = 'block';
+                    confirmPinError.textContent = 'PINs do not match.';
+                    isValid = false;
+                }
+                return isValid;
+            }
+
+            passwordInput.addEventListener('input', () => { validatePassword(); validateConfirmPassword(); });
+            confirmPasswordInput.addEventListener('input', validateConfirmPassword);
+            pinInput.addEventListener('input', () => { updatePinDots(); validatePin(); validateConfirmPin(); });
+            confirmPinInput.addEventListener('input', validateConfirmPin);
+
+
+            // --- Mock Public Key Generation Function (SHA256-like) ---
+            // IMPORTANT: In a real production system, this should be a robust cryptographic hash function
+            // and key derivation standard using a secure library. This is for UI demonstration ONLY.
+            function generatePublicKey(password, pin) {
+                // A very simple SHA256-like hash for demonstration (NOT secure)
+                const combinedString = password + ':' + pin; [span_3](start_span)// Following white paper logic[span_3](end_span)
+                let hash = 0;
+                for (let i = 0; i < combinedString.length; i++) {
+                    const char = combinedString.charCodeAt(i);
+                    hash = ((hash << 5) - hash) + char; // Simple bitwise hash
+                    hash |= 0; // Convert to 32bit integer
+                }
+                // Convert to a fixed-length hexadecimal string (simulating 64 chars for SHA256)
+                // This is still just a mockup and not a real cryptographic hash.
+                const mockHexHash = (Math.abs(hash) * Math.pow(10, 15)).toString(16).padStart(64, '0').substring(0, 64);
+                return "0x" + mockHexHash.toUpperCase(); // Prepend 0x and uppercase
             }
 
             // --- Generate Public Key Button Click ---
             generateKeyBtn.addEventListener('click', () => {
-                msg.style.display = 'none';
-                msg.textContent = '';
-                const password = passwordInput.value.trim();
-                const confirmPassword = confirmPasswordInput.value.trim();
-                const pin = pinInput.value.trim();
-                const confirmPin = confirmPinInput.value.trim();
+                const isPasswordValid = validatePassword();
+                const isConfirmPasswordValid = validateConfirmPassword();
+                const isPinValid = validatePin();
+                const isConfirmPinValid = validateConfirmPin();
 
-                // Basic validation
-                if (!password || !confirmPassword || !pin || !confirmPin) {
-                    showMsg('Please fill in all fields.');
+                if (!isPasswordValid || !isConfirmPasswordValid || !isPinValid || !isConfirmPinValid) {
+                    // Stop if any validation fails (visual errors are already displayed)
                     return;
                 }
-                if (password !== confirmPassword) {
-                    showMsg('Passwords do not match.');
-                    return;
-                }
-                if (pin !== confirmPin) {
-                    showMsg('PINs do not match.');
-                    return;
-                }
-                if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
-                    showMsg('PIN must be 4 digits.');
-                    return;
-                }
-                // Generate and display Public Key
+
+                const password = passwordInput.value;
+                const pin = pinInput.value;
+
+                // Call mock key generation
                 const newPublicKey = generatePublicKey(password, pin);
+                
+                // Display results
                 publicKeyDisplay.textContent = newPublicKey;
-                generatedTimestamp.textContent = new Date().toLocaleString();
+                generatedTimestamp.textContent = new Date().toISOString() + "Z"; [span_4](start_span)// ISO 8601 format[span_4](end_span)
                 publicKeyOutputSection.style.display = 'block';
-                msg.style.display = 'none';
+
+                [span_5](start_span)// Provide success feedback visually[span_5](end_span)
+                publicKeyOutputSection.classList.add('success-flash');
+                setTimeout(() => {
+                    publicKeyOutputSection.classList.remove('success-flash');
+                }, 1000); // Remove flash after 1 second
+
+                // In a real app, you might clear inputs or store the key safely (e.g., in localStorage if user confirms)
+                // For this demo, inputs are kept filled for easy re-testing.
             });
 
-            function showMsg(txt) {
-                msg.style.display = 'block';
-                msg.textContent = txt;
-            }
+            // Initial update of PIN dots in case of pre-filled input
             updatePinDots();
         });
     </script>
