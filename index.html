@@ -7,156 +7,171 @@
   <style>
     /* Base Styles */
     body {
-      font-family: Arial, sans-serif;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* A more modern font */
       max-width: 700px;
       margin: 2em auto;
       padding: 1em;
-      background: #f5f7fa;
+      background: #f0f2f5; /* Lighter, softer background */
       color: #333;
+      line-height: 1.6;
     }
     h1 {
       text-align: center;
-      color: #219150; /* Dark green for the main title */
-      margin-bottom: 1.2em;
-      letter-spacing: 0.02em;
+      color: #2c7c50; /* Slightly darker green for emphasis */
+      margin-bottom: 1.5em;
+      letter-spacing: 0.03em;
+      font-size: 2em; /* Slightly larger title */
+      text-shadow: 0 1px 1px rgba(0,0,0,0.05);
     }
     .menu-block {
-      margin: 1.1em 0;
-      padding: 1em;
+      margin: 1.5em 0; /* More spacing between blocks */
+      padding: 1.2em;
       border-radius: 12px;
-      box-shadow: 0 2px 9px #edf1f6;
+      background: #ffffff; /* White background for cards */
+      box-shadow: 0 4px 15px rgba(0,0,0,0.07); /* More prominent shadow for card effect */
+      transition: transform 0.2s ease-in-out; /* Smooth hover effect */
+    }
+    .menu-block:hover {
+      transform: translateY(-3px); /* Subtle lift on hover */
     }
     .block-title {
-      font-size: 1.07em;
-      font-weight: bold;
-      margin-bottom: 0.68em;
-      padding-bottom: 0.5em;
+      font-size: 1.2em; /* Larger title for sections */
+      font-weight: 600; /* Medium bold */
+      margin-bottom: 0.8em;
+      padding-bottom: 0.6em;
       border-bottom: 1px solid rgba(0,0,0,0.1);
+      color: #3f51b5; /* A primary blue for section titles */
+    }
+    .block-description {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 1em;
+        line-height: 1.5;
     }
 
-    /* Section specific background and left border colors, adhering to overall color palette if applicable */
-    /* Using lighter shades for background, as per 'Minimal UI/UX Logic' general tone */
-    /* Section A: Key & Batch Information (Implicitly uses colors for sensitive input due to button types) */
+    /* Section specific background and left border colors */
     .block-key-batch { 
-        background: #fffde7; [span_16](start_span)/* Light yellow for sensitive input grouping */[span_16](end_span)
-        border-left: 6px solid #ffd600; [span_17](start_span)/* Yellow border for sensitive input */[span_17](end_span)
+        border-left: 8px solid #ffc107; /* Amber for Key/Sensitive actions */
     }
-    /* Section B & D: Action & Regen QR (Combined for button color consistency - blue) */
     .block-action-regen {
-        background: #e3f2fd; [span_18](start_span)/* Light blue, related to primary blue #2196f3 */[span_18](end_span)
-        border-left: 6px solid #2196f3; [span_19](start_span)/* Primary blue */[span_19](end_span)
+        border-left: 8px solid #2196f3; /* Primary Blue for main actions */
     }
-    /* Section C: Results & Export (Buttons have specific colors, block uses light blue for general consistency) */
     .block-results-export {
-        background: #e3f2fd; [span_20](start_span)/* Light blue */[span_20](end_span)
-        border-left: 6px solid #2196f3; [span_21](start_span)/* Primary blue */[span_21](end_span)
+        border-left: 8px solid #00bcd4; /* Cyan for Export/Results */
     }
-    /* Section E: Audit Chain */
     .block-audit {
-        background: #ede7f6; [span_22](start_span)/* Faded purple for navigation/general subtle elements */[span_22](end_span)
-        border-left: 6px solid #9575cd; /* A shade of purple */
+        border-left: 8px solid #673ab7; /* Deep Purple for Audit/Verification */
     }
     
-    /* Button styling within each section */
+    /* Button styling */
     .menu-block a {
       display: block;
       width: 100%;
-      padding: 0.77em 0.4em; [span_23](start_span)/* Height 36-44px guidelines */[span_23](end_span)
-      margin-bottom: 0.53em;
+      padding: 0.9em 0.4em; /* Slightly larger padding for better touch target */
+      margin-bottom: 0.6em; /* More space between buttons */
       color: #fff;
       font-weight: bold;
-      border-radius: 8px;
-      font-size: 1.09em;
+      border-radius: 8px; /* Slightly more rounded corners */
+      font-size: 1.05em;
       text-align: center;
       text-decoration: none;
-      box-shadow: 0 2px 7px rgba(39,174,96,0.07);
-      transition: background 0.13s, filter 0.13s;
-      min-height: 40px; [span_24](start_span)/* Touch target minimum size */[span_24](end_span)
+      box-shadow: 0 2px 7px rgba(0,0,0,0.1); /* Softer shadow for buttons */
+      transition: background 0.2s ease-in-out, transform 0.1s ease-in-out;
+      min-height: 48px; /* Standard touch target size */
       display: flex;
       align-items: center;
       justify-content: center;
+      border: none; /* Remove default button border */
     }
     
-    /* Specific button background colors based on action type or specified main colors */
-    .btn-green { background: #28a745; [span_25](start_span)} /* Green for generate actions, as per general 'success' color */[span_25](end_span)
-    .btn-blue { background: #2196f3; [span_26](start_span)} /* Blue for generate/main actions */[span_26](end_span)
-    .btn-yellow { background: #ffd600; color: #222; [span_27](start_span)} /* Yellow for export ticket */[span_27](end_span)
-    [span_28](start_span).btn-light-blue { background: #BBDEFB; color: #222;} /* Light blue for export log */[span_28](end_span)
-    [span_29](start_span).btn-faded-purple { background: #ede7f6; color: #333;} /* Faded purple for navigation */[span_29](end_span)
-    .btn-grey { background: #b0bec5; color: #fff;} /* Grey for other general buttons */
-
+    /* Specific button background colors */
+    .btn-green { background: #4CAF50; } /* Material Design Green */
+    .btn-blue { background: #2196F3; } /* Material Design Blue */
+    .btn-yellow { background: #FFC107; color: #333;} /* Material Design Amber, black text for contrast */
+    .btn-cyan { background: #00BCD4; } /* Material Design Cyan for export/results */
+    .btn-purple { background: #673AB7; } /* Material Design Deep Purple for audit */
+    
+    /* Hover and Active states for buttons */
     .menu-block a:hover {
-      filter: brightness(0.93);
+      filter: brightness(1.05); /* Slightly brighter on hover */
+      transform: translateY(-2px); /* Slight lift on hover */
     }
-    
-    /* Navigation Bar styling (placeholder, adjust as needed if full nav bar is implemented) */
+    .menu-block a:active {
+        transform: translateY(0); /* Press down effect */
+        filter: brightness(0.9);
+    }
+
+    /* Disabled button state */
+    .menu-block a.disabled {
+      background: #e0e0e0; /* Lighter grey for disabled state */
+      color: #a0a0a0; /* Greyer text for disabled state */
+      cursor: not-allowed; /* Change cursor */
+      box-shadow: none; /* No shadow for disabled */
+      pointer-events: none; /* Disable click events */
+      transform: none; /* No hover/active effects */
+      filter: none;
+    }
+
+    /* Navigation Bar styling */
     .nav-bar {
         display: flex;
         justify-content: space-around;
-        padding: 0.8em 0; [span_30](start_span)/* Consistent padding */[span_30](end_span)
-        background: #f5f7fa; /* Matches body background for subtle look */
+        padding: 0.8em 0;
+        background: #ffffff; /* White background for nav bar */
         border-top: 1px solid #eee;
-        margin-top: 2em;
-        position: sticky; [span_31](start_span)/* Fixed position */[span_31](end_span)
-        [span_32](start_span)bottom: 0;[span_32](end_span)
+        margin-top: 2.5em;
+        position: sticky;
+        bottom: 0;
         width: 100%;
-        max-width: 700px; /* Match body max-width */
-        box-sizing: border-box; /* Include padding in width */
+        max-width: 700px;
+        box-sizing: border-box;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05); /* Shadow above nav bar */
+        border-radius: 12px 12px 0 0; /* Rounded top corners */
     }
     .nav-bar a {
-        flex: 1; [span_33](start_span)/* Equal size buttons */[span_33](end_span)
-        padding: 0.8em 0.4em;
+        flex: 1;
+        padding: 0.7em 0.4em;
         text-align: center;
         text-decoration: none;
-        color: #333;
-        font-weight: bold;
-        border-radius: 8px;
-        background: #ede7f6; [span_34](start_span)/* Faded purple for navigation buttons */[span_34](end_span)
-        margin: 0 0.3em;
-        transition: background 0.13s;
-        min-height: 40px; [span_35](start_span)/* Touch target minimum size */[span_35](end_span)
+        color: #3f51b5; /* Primary blue for nav links */
+        font-weight: 600;
+        border-radius: 6px;
+        background: none; /* No background for nav links */
+        margin: 0 0.4em;
+        transition: background 0.2s, color 0.2s;
+        min-height: 48px;
         display: flex;
         align-items: center;
         justify-content: center;
     }
     .nav-bar a:hover {
-        background: #e0d9ed;
+        background: #e8eaf6; /* Light blue on hover */
+        color: #303f9f; /* Slightly darker blue */
+    }
+    .nav-bar a.active { /* For current page */
+        color: #2196F3;
+        border-bottom: 3px solid #2196F3;
+        padding-bottom: 0.4em; /* Adjust padding due to border */
     }
 
-    /* Label/Hint Style (for inputs on linked pages) */
-    .label-hint {
-        color: #90a4ae; [span_36](start_span)/* Light grey for labels/hints */[span_36](end_span)
-        font-size: 0.85em; [span_37](start_span)/* Small size */[span_37](end_span)
-        margin-top: 0.3em;
-        display: block;
-    }
-
-    /* Times Box (for results/preview section on linked pages) */
-    .times-box {
-        text-align: right; [span_38](start_span)/* Right align */[span_38](end_span)
-        margin-top: 1em;
-        color: #607d8b; [span_39](start_span)/* Color */[span_39](end_span)
-        font-size: 1em; [span_40](start_span)/* Size */[span_40](end_span)
-        font-weight: bold; [span_41](start_span)/* Label Time (Now): */[span_41](end_span)
-    }
-    .times-box span {
-        font-weight: normal; /* Actual time not bold */
+    /* Footer Note */
+    .footer-note {
+      text-align:center;
+      margin-top:2.8em;
+      color:#90a4ae; /* Softer grey */
+      font-size:0.85em; /* Slightly smaller */
     }
 
     /* Responsive adjustments */
     @media (max-width: 600px) {
-      body { margin: 0.4em; padding: 0.07em;}
-      .menu-block { padding: 0.7em 0.2em;}
-      .menu-block a { font-size: 1em; padding: 0.6em 0.2em; }
-      .nav-bar { padding: 0.8em 0.07em; }
-      .nav-bar a { font-size: 0.9em; padding: 0.6em 0.2em;}
-    }
-
-    .footer-note {
-      text-align:center;
-      margin-top:2.4em;
-      color:#b0bec5;
-      font-size:0.95em;
+      body { margin: 0.5em; padding: 0.5em;}
+      h1 { font-size: 1.8em; margin-bottom: 1em; }
+      .menu-block { padding: 0.8em; margin: 1em 0; }
+      .block-title { font-size: 1.1em; margin-bottom: 0.6em; }
+      .block-description { font-size: 0.85em; margin-bottom: 0.8em; }
+      .menu-block a { font-size: 1em; padding: 0.8em 0.2em; min-height: 44px; }
+      .nav-bar { padding: 0.6em 0; }
+      .nav-bar a { font-size: 0.9em; padding: 0.5em 0.2em; min-height: 44px; }
     }
   </style>
 </head>
@@ -165,32 +180,35 @@
 
   <div class="menu-block block-key-batch">
     <div class="block-title">Key & Batch Information</div>
+    <p class="block-description">เริ่มต้นด้วยการสร้างกุญแจ Public Key และสร้างชุด QR Code สำหรับการจัดการระบบ</p>
     <a href="generate_key.html" class="btn-green">Generate Public Key</a>
     <a href="generate_qr_batch.html" class="btn-green">Generate QR Batch</a>
   </div>
 
   <div class="menu-block block-action-regen">
     <div class="block-title">Regenerate QR</div>
-    <a href="regenerate_qr.html" class="btn-blue">Regenerate QR</a>
-  </div>
+    <p class="block-description">สร้าง QR Code ขึ้นใหม่ในกรณีที่ต้องการอัปเดตหรือมีการเปลี่ยนแปลงข้อมูล</p>
+    <a href="regenerate_qr.html" class="btn-blue disabled">Regenerate QR</a>
+    </div>
 
   <div class="menu-block block-results-export">
     <div class="block-title">Results & Export</div>
-    <a href="qr_preview.html" class="btn-blue">View QR Preview</a>
-    <a href="export_ticket.html" class="btn-yellow">Export Ticket</a>
-    <a href="export_qr.html" class="btn-blue">Export QR</a>
-    <a href="export_log.html" class="btn-light-blue">Export Log</a>
-  </div>
+    <p class="block-description">ดูตัวอย่าง QR Code และส่งออกข้อมูลในรูปแบบต่างๆ เช่น ตั๋ว, รูปภาพ หรือบันทึก</p>
+    <a href="qr_preview.html" class="btn-blue disabled">View QR Preview</a>
+    <a href="export_ticket.html" class="btn-yellow disabled">Export Ticket</a>
+    <a href="export_qr.html" class="btn-blue disabled">Export QR</a>
+    <a href="export_log.html" class="btn-cyan disabled">Export Log</a>
+    </div>
 
   <div class="menu-block block-audit">
     <div class="block-title">Audit Chain</div>
-    <a href="audit_chain.html" class="btn-blue">Audit QR/Commitment Hash</a>
+    <p class="block-description">ตรวจสอบความถูกต้องและประวัติการทำธุรกรรมของ QR Code ทั้งหมด</p>
+    <a href="audit_chain.html" class="btn-purple">Audit QR/Commitment Hash</a>
   </div>
 
   <div class="nav-bar">
-    <a href="#" class="btn-faded-purple">Back</a>
-    <a href="index.html" class="btn-faded-purple">Home</a>
-    <a href="#" class="btn-faded-purple">Next</a>
+    <a href="#" >Back</a>
+    <a href="index.html" class="active">Home</a> <a href="#">Next</a>
   </div>
 
   <p class="footer-note">
