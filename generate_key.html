@@ -1,169 +1,150 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Register QR - DTC: Magic Chain System</title>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Minimal DTC Symbol Logic Demo</title>
   <style>
     body {
+      background: #f5f7fa;
       font-family: 'Segoe UI', Arial, sans-serif;
-      background: #f5f6fa;
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 1.1em 0.4em 4em 0.4em;
+      max-width: 440px; margin: 0 auto; padding: 2em 0.7em 4em 0.7em;
       color: #333;
     }
-    h1 {
-      text-align: center;
-      color: #26314f;
-      margin-bottom: 0.7em;
-      font-size: 1.35em;
-      letter-spacing: 0.03em;
+    h1 { text-align: center; font-size: 1.18em; color: #23754b; margin-bottom: 1.1em;}
+    .form-group { margin-bottom: 1.2em;}
+    label { font-weight: bold; color: #233; font-size: 1em;}
+    .input-box { position: relative; display: flex; align-items: center; }
+    .input-svg {
+      position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
+      width: 28px; height: 20px; pointer-events: none;
     }
-    .form-group {
-      margin-bottom: 1.1em;
+    input, textarea {
+      width: 100%; padding: 9px 36px 9px 44px;
+      font-size: 1em; border: 2px solid #cfd8dc; border-radius: 9px;
+      box-sizing: border-box; background: #fff;
+      transition: border 0.15s;
+      color: #2a3139;
     }
-    label {
-      font-weight: bold;
-      margin-bottom: 0.21em;
-      display: block;
-      color: #222c36;
-      font-size: 1em;
+    input:focus, textarea:focus { border-color: #ffd600; background: #ffffed; }
+    .status-svg {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      width: 22px; height: 22px; pointer-events: none;
+      opacity: 0; transition: opacity 0.16s;
     }
-    textarea,
-    input[type="text"] {
-      width: 100%;
-      padding: 10px 11px;
-      font-size: 1em;
-      border: 2px solid #cfd8dc;
-      border-radius: 9px;
-      box-sizing: border-box;
-      background: #fff;
-      margin-bottom: 0.2em;
-      transition: border 0.12s;
-      resize: none;
-    }
-    textarea:focus,
-    input[type="text"]:focus {
-      border-color: #1976d2;
-      outline: none;
-      background: #fafdff;
-    }
-    textarea[readonly], input[readonly] {
-      background: #f4f5f8;
-      color: #7e8a99;
-      border-style: dashed;
-    }
-    .input-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5em;
-    }
+    input.valid, textarea.valid { border-color: #43a047;}
+    input.invalid, textarea.invalid { border-color: #e53935;}
+    .status-svg.visible { opacity: 1;}
     .copy-btn {
-      background: #1976d2;
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 15px;
-      font-size: 1em;
-      cursor: pointer;
-      font-weight: bold;
-      transition: background 0.13s;
-      margin-left: 2px;
-      min-width: 55px;
+      background: #1976d2; color: #fff;
+      border: none; border-radius: 8px; padding: 8px 17px;
+      font-size: 1em; cursor: pointer; font-weight: bold;
+      transition: background 0.13s; margin-left: 9px;
     }
     .copy-btn:active { filter: brightness(0.95);}
     .copy-status {
-      margin-left: 7px;
-      font-size: 0.95em;
-      color: #43a047;
-      opacity: 0;
-      font-weight: bold;
-      transition: opacity 0.22s;
-      min-width: 52px;
-      display: inline-block;
+      margin-left: 8px; font-size: 0.98em; color: #43a047;
+      opacity: 0; font-weight: bold; transition: opacity 0.22s;
+      min-width: 52px; display: inline-block;
     }
     .copy-status.visible { opacity: 1;}
-    .btn {
-      width: 100%;
-      font-size: 1.09em;
-      padding: 0.78em 0;
-      margin-bottom: 0.66em;
-      border: none;
-      border-radius: 10px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: filter 0.13s;
-      letter-spacing: 0.01em;
-      box-shadow: 0 1px 6px rgba(0,0,0,0.09);
-    }
-    .btn-register { background: #388e3c; color: #fff;}
-    .btn-clear { background: #ffd600; color: #444;}
-    .btn-back { background: #9e9e9e; color: #fff;}
-    .btn:active { filter: brightness(0.94);}
-    .footer-note {
-      text-align: center;
-      color: #90a4ae;
-      font-size: 0.93em;
-      margin-top: 2em;
-    }
     @media (max-width: 600px) {
-      body { padding: 0.5em 0.04em 3em 0.04em; }
-      h1 { font-size: 1.09em; }
-      .btn { font-size: 1em; }
-      textarea, input[type="text"] { font-size: 0.99em; }
-      .copy-btn { padding: 7px 10px; min-width: 43px; }
+      body { padding: 1.2em 0.04em 2.5em 0.04em; }
+      h1 { font-size: 1em; }
+      .copy-btn { padding: 7px 11px; }
     }
   </style>
 </head>
 <body>
-  <h1>Register QR</h1>
+  <h1>Register QR (Minimal Symbol Logic)</h1>
   <form id="registerForm" autocomplete="off">
+    <!-- Public Key -->
     <div class="form-group">
-      <label for="publicKey">Public Key:</label>
-      <div class="input-row">
+      <label for="publicKey">Public Key</label>
+      <div class="input-box">
+        <!-- SVG abc -->
+        <span class="input-svg">
+          <svg width="24" height="22">
+            <text x="2" y="17" font-size="15" font-family="monospace" fill="#90a4ae">abc</text>
+          </svg>
+        </span>
         <textarea
           id="publicKey"
           rows="2"
+          class="symbol-field"
           placeholder="Public Key will be auto-filled"
-          autocomplete="off"
         ></textarea>
-        <button type="button" class="copy-btn" id="copyPubKeyBtn">Copy</button>
+        <!-- Status SVG (ติ๊กถูก/กากบาท) -->
+        <span class="status-svg" id="pk-status"></span>
+        <button type="button" class="copy-btn" id="copyPubKeyBtn" tabindex="-1">Copy</button>
         <span class="copy-status" id="copyPubKeyStatus"></span>
       </div>
     </div>
+    <!-- QR Hash -->
     <div class="form-group">
-      <label for="qrHash">QR Hash:</label>
-      <div class="input-row">
+      <label for="qrHash">QR Hash</label>
+      <div class="input-box">
+        <!-- SVG hash -->
+        <span class="input-svg">
+          <svg width="24" height="22">
+            <text x="2" y="17" font-size="15" font-family="monospace" fill="#90a4ae">#</text>
+          </svg>
+        </span>
         <textarea
           id="qrHash"
           rows="1"
+          class="symbol-field"
           placeholder="QR Hash will be auto-filled"
-          autocomplete="off"
         ></textarea>
-        <button type="button" class="copy-btn" id="copyHashBtn">Copy</button>
+        <span class="status-svg" id="qr-status"></span>
+        <button type="button" class="copy-btn" id="copyHashBtn" tabindex="-1">Copy</button>
         <span class="copy-status" id="copyStatus"></span>
       </div>
     </div>
+    <!-- PIN -->
     <div class="form-group">
-      <label for="ownerName">Owner Name (optional):</label>
-      <input
-        type="text"
-        id="ownerName"
-        placeholder="Enter name (optional)"
-        autocomplete="off"
-      />
+      <label for="pin">PIN</label>
+      <div class="input-box">
+        <!-- SVG 1234 -->
+        <span class="input-svg">
+          <svg width="32" height="22">
+            <text x="2" y="17" font-size="15" font-family="monospace" fill="#90a4ae">1234</text>
+          </svg>
+        </span>
+        <input
+          type="password"
+          id="pin"
+          maxlength="4"
+          class="symbol-field"
+          placeholder="PIN (4 digits)"
+          inputmode="numeric"
+        />
+        <span class="status-svg" id="pin-status"></span>
+      </div>
     </div>
-    <button type="submit" class="btn btn-register">Register</button>
-    <button type="button" class="btn btn-clear" id="clearBtn">Clear</button>
-    <button type="button" class="btn btn-back" onclick="history.back()">Back</button>
+    <!-- Owner Name -->
+    <div class="form-group">
+      <label for="ownerName">Owner Name</label>
+      <div class="input-box">
+        <!-- SVG user -->
+        <span class="input-svg">
+          <svg width="22" height="22" viewBox="0 0 22 22">
+            <circle cx="11" cy="9" r="4" stroke="#b0bec5" stroke-width="2" fill="none"/>
+            <path d="M3,19 Q11,15 19,19" stroke="#b0bec5" stroke-width="2" fill="none"/>
+          </svg>
+        </span>
+        <input
+          type="text"
+          id="ownerName"
+          class="symbol-field"
+          placeholder="Enter name (optional)"
+        />
+      </div>
+    </div>
+    <button type="submit" class="copy-btn" style="width:100%;background:#388e3c;margin-top:1em;">Register</button>
   </form>
-  <p class="footer-note">
-    Public Key and QR Hash will be auto-filled if stored locally.<br>
-    If no backend, data is saved only in this browser (Demo mode).
-  </p>
   <script>
-    // Autofill demo (simulate data)
+    // Autofill demo
     document.getElementById('publicKey').value =
       localStorage.getItem('dtc_pubkey') || '';
     document.getElementById('qrHash').value =
@@ -193,20 +174,44 @@
       }
     };
 
-    // Register button (demo - prevent actual submission)
+    // Input Feedback Logic
+    function feedback(field, isValid) {
+      let input = document.getElementById(field);
+      let statusSvg = document.getElementById(field + '-status');
+      if (isValid === true) {
+        input.classList.add('valid'); input.classList.remove('invalid');
+        statusSvg.innerHTML = `<svg width="22" height="22"><polyline points="5,12 10,17 17,6" fill="none" stroke="#43a047" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        statusSvg.classList.add('visible');
+      } else if (isValid === false) {
+        input.classList.remove('valid'); input.classList.add('invalid');
+        statusSvg.innerHTML = `<svg width="22" height="22"><line x1="6" y1="6" x2="16" y2="16" stroke="#e53935" stroke-width="2.5"/><line x1="16" y1="6" x2="6" y2="16" stroke="#e53935" stroke-width="2.5"/></svg>`;
+        statusSvg.classList.add('visible');
+      } else {
+        input.classList.remove('valid','invalid');
+        statusSvg.innerHTML = ``;
+        statusSvg.classList.remove('visible');
+      }
+    }
+
+    // Minimal validation
+    document.getElementById('publicKey').addEventListener('input', e => {
+      let v = e.target.value.trim();
+      feedback('publicKey', v.length >= 32);
+    });
+    document.getElementById('qrHash').addEventListener('input', e => {
+      let v = e.target.value.trim();
+      feedback('qrHash', v.length >= 10);
+    });
+    document.getElementById('pin').addEventListener('input', e => {
+      let v = e.target.value.trim();
+      feedback('pin', /^\d{4}$/.test(v));
+    });
+
+    // Register feedback (no warning, highlight green)
     document.getElementById('registerForm').onsubmit = function(e) {
       e.preventDefault();
-      // highlight register btn as feedback
-      document.querySelector('.btn-register').style.background = "#228B22";
-      setTimeout(()=>document.querySelector('.btn-register').style.background="#388e3c", 650);
-      // ...handle register logic here...
-    };
-
-    // Clear button
-    document.getElementById('clearBtn').onclick = function() {
-      document.getElementById('publicKey').value = '';
-      document.getElementById('qrHash').value = '';
-      document.getElementById('ownerName').value = '';
+      document.querySelector('button[type="submit"]').style.background = "#228B22";
+      setTimeout(()=>document.querySelector('button[type="submit"]').style.background="#388e3c", 600);
     };
   </script>
 </body>
