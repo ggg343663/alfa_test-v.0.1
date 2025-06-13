@@ -254,6 +254,42 @@
             margin-top: 10px;
         }
         
+        /* Navigation Bar Styling */
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            background-color: #ede7f6; /* Light purple from UI/UX standard */
+            border-top: 1px solid #ccc;
+            margin-top: 2.5em;
+            border-radius: 8px;
+            box-shadow: 0 -2px 7px rgba(0,0,0,0.05);
+        }
+        .nav-btn {
+            flex: 1; /* Make buttons equal width */
+            padding: 0.8em 1em;
+            border: none;
+            border-radius: 8px;
+            background-color: #ede7f6; /* Light purple */
+            color: #555;
+            font-weight: bold;
+            font-size: 1em;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background-color 0.2s, color 0.2s;
+            margin: 0 5px; /* Add some space between buttons */
+        }
+        .nav-btn:hover {
+            background-color: #d1c4e9; /* Slightly darker purple on hover */
+            color: #333;
+        }
+        .nav-btn.active {
+            background-color: #90a4ae; /* Light grey for active/current page */
+            color: #fff;
+        }
+
+
         /* Footer */
         .footer-note {
             text-align: center;
@@ -272,6 +308,8 @@
             .qr-hashes-box, .qr-preview-box { min-width: unset; width: 100%; } /* Full width */
             .qty-input-group input { width: 50px; padding: 5px; } /* Adjust width for small screens */
             .qty-button { padding: 6px 10px; font-size: 1em; }
+            .navbar { flex-direction: column; } /* Stack nav buttons vertically */
+            .nav-btn { margin: 5px 0; } /* Adjust margin for stacked buttons */
         }
     </style>
 </head>
@@ -363,6 +401,12 @@
             <button class="export-btn export-qr-btn" id="exportQrBtn">Export QR Batch (PNG/SVG)</button>
             <button class="export-btn export-log-btn" id="exportLogBtn">Export Log (Batch Details)</button>
         </div>
+    </div>
+
+    <div class="navbar">
+        <a href="generate_key.html" class="nav-btn">Back (Generate Key)</a>
+        <a href="index.html" class="nav-btn">Home</a>
+        <a href="audit_chain.html" class="nav-btn">Next (Audit Chain)</a>
     </div>
 
     <p class="footer-note">
