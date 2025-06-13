@@ -36,21 +36,24 @@
 
     /* Section specific background and left border colors, adhering to overall color palette if applicable */
     /* Using lighter shades for background, as per 'Minimal UI/UX Logic' general tone */
-    .block-ticket-slot-meta { 
-        background: #f6f7fa; [span_0](start_span)/* Light grey for Ticket/Slot/Meta group[span_0](end_span) */
-        border-left: 6px solid #90a4ae; [span_1](start_span)/* Light grey border[span_1](end_span) */
+    /* Section A: Key & Batch Information (Implicitly uses colors for sensitive input due to button types) */
+    .block-key-batch { 
+        background: #fffde7; [span_16](start_span)/* Light yellow for sensitive input grouping */[span_16](end_span)
+        border-left: 6px solid #ffd600; [span_17](start_span)/* Yellow border for sensitive input */[span_17](end_span)
     }
-    .block-password-pin-secret { 
-        background: #fffde7; [span_2](start_span)/* Light yellow for Password, PIN, Secret group[span_2](end_span) */
-        border-left: 6px solid #ffd600; [span_3](start_span)/* Yellow border[span_3](end_span) */
+    /* Section B & D: Action & Regen QR (Combined for button color consistency - blue) */
+    .block-action-regen {
+        background: #e3f2fd; [span_18](start_span)/* Light blue, related to primary blue #2196f3 */[span_18](end_span)
+        border-left: 6px solid #2196f3; [span_19](start_span)/* Primary blue */[span_19](end_span)
     }
-    /* For other conceptual groupings, using the main specified colors or related tones */
-    .block-action {
-        background: #e3f2fd; [span_4](start_span)/* Light blue, related to primary blue #2196f3[span_4](end_span) */
-        border-left: 6px solid #2196f3; [span_5](start_span)/* Primary blue[span_5](end_span) */
+    /* Section C: Results & Export (Buttons have specific colors, block uses light blue for general consistency) */
+    .block-results-export {
+        background: #e3f2fd; [span_20](start_span)/* Light blue */[span_20](end_span)
+        border-left: 6px solid #2196f3; [span_21](start_span)/* Primary blue */[span_21](end_span)
     }
+    /* Section E: Audit Chain */
     .block-audit {
-        background: #ede7f6; [span_6](start_span)/* Faded purple for navigation/general subtle elements[span_6](end_span) */
+        background: #ede7f6; [span_22](start_span)/* Faded purple for navigation/general subtle elements */[span_22](end_span)
         border-left: 6px solid #9575cd; /* A shade of purple */
     }
     
@@ -58,7 +61,7 @@
     .menu-block a {
       display: block;
       width: 100%;
-      padding: 0.77em 0.4em;
+      padding: 0.77em 0.4em; [span_23](start_span)/* Height 36-44px guidelines */[span_23](end_span)
       margin-bottom: 0.53em;
       color: #fff;
       font-weight: bold;
@@ -68,13 +71,18 @@
       text-decoration: none;
       box-shadow: 0 2px 7px rgba(39,174,96,0.07);
       transition: background 0.13s, filter 0.13s;
+      min-height: 40px; [span_24](start_span)/* Touch target minimum size */[span_24](end_span)
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     
     /* Specific button background colors based on action type or specified main colors */
-    .btn-blue { background: #2196f3; [span_7](start_span)[span_8](start_span)} /* Blue for generate/main actions[span_7](end_span)[span_8](end_span) */
-    .btn-yellow { background: #ffd600; color: #222; [span_9](start_span)} /* Yellow for export ticket[span_9](end_span) */
-    [span_10](start_span).btn-light-blue { background: #BBDEFB; color: #222;} /* Light blue for export log[span_10](end_span) - custom light blue */
-    .btn-faded-purple { background: #ede7f6; color: #333; [span_11](start_span)} /* Faded purple for navigation[span_11](end_span) */
+    .btn-green { background: #28a745; [span_25](start_span)} /* Green for generate actions, as per general 'success' color */[span_25](end_span)
+    .btn-blue { background: #2196f3; [span_26](start_span)} /* Blue for generate/main actions */[span_26](end_span)
+    .btn-yellow { background: #ffd600; color: #222; [span_27](start_span)} /* Yellow for export ticket */[span_27](end_span)
+    [span_28](start_span).btn-light-blue { background: #BBDEFB; color: #222;} /* Light blue for export log */[span_28](end_span)
+    [span_29](start_span).btn-faded-purple { background: #ede7f6; color: #333;} /* Faded purple for navigation */[span_29](end_span)
     .btn-grey { background: #b0bec5; color: #fff;} /* Grey for other general buttons */
 
     .menu-block a:hover {
@@ -85,22 +93,31 @@
     .nav-bar {
         display: flex;
         justify-content: space-around;
-        padding: 1em 0;
+        padding: 0.8em 0; [span_30](start_span)/* Consistent padding */[span_30](end_span)
         background: #f5f7fa; /* Matches body background for subtle look */
         border-top: 1px solid #eee;
         margin-top: 2em;
+        position: sticky; [span_31](start_span)/* Fixed position */[span_31](end_span)
+        [span_32](start_span)bottom: 0;[span_32](end_span)
+        width: 100%;
+        max-width: 700px; /* Match body max-width */
+        box-sizing: border-box; /* Include padding in width */
     }
     .nav-bar a {
-        flex: 1; [span_12](start_span)/* Equal size buttons[span_12](end_span) */
+        flex: 1; [span_33](start_span)/* Equal size buttons */[span_33](end_span)
         padding: 0.8em 0.4em;
         text-align: center;
         text-decoration: none;
         color: #333;
         font-weight: bold;
         border-radius: 8px;
-        background: #ede7f6; [span_13](start_span)/* Faded purple for navigation buttons[span_13](end_span) */
+        background: #ede7f6; [span_34](start_span)/* Faded purple for navigation buttons */[span_34](end_span)
         margin: 0 0.3em;
         transition: background 0.13s;
+        min-height: 40px; [span_35](start_span)/* Touch target minimum size */[span_35](end_span)
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .nav-bar a:hover {
         background: #e0d9ed;
@@ -108,19 +125,19 @@
 
     /* Label/Hint Style (for inputs on linked pages) */
     .label-hint {
-        color: #90a4ae; [span_14](start_span)[span_15](start_span)/* Light grey for labels/hints[span_14](end_span)[span_15](end_span) */
-        font-size: 0.85em; [span_16](start_span)[span_17](start_span)/* Small size[span_16](end_span)[span_17](end_span) */
+        color: #90a4ae; [span_36](start_span)/* Light grey for labels/hints */[span_36](end_span)
+        font-size: 0.85em; [span_37](start_span)/* Small size */[span_37](end_span)
         margin-top: 0.3em;
         display: block;
     }
 
     /* Times Box (for results/preview section on linked pages) */
     .times-box {
-        text-align: right; [span_18](start_span)/* Right align[span_18](end_span) */
+        text-align: right; [span_38](start_span)/* Right align */[span_38](end_span)
         margin-top: 1em;
-        color: #607d8b; [span_19](start_span)/* Color[span_19](end_span) */
-        font-size: 1em; [span_20](start_span)/* Size[span_20](end_span) */
-        font-weight: bold; [span_21](start_span)/* Label Time (Now):[span_21](end_span) */
+        color: #607d8b; [span_39](start_span)/* Color */[span_39](end_span)
+        font-size: 1em; [span_40](start_span)/* Size */[span_40](end_span)
+        font-weight: bold; [span_41](start_span)/* Label Time (Now): */[span_41](end_span)
     }
     .times-box span {
         font-weight: normal; /* Actual time not bold */
@@ -131,6 +148,7 @@
       body { margin: 0.4em; padding: 0.07em;}
       .menu-block { padding: 0.7em 0.2em;}
       .menu-block a { font-size: 1em; padding: 0.6em 0.2em; }
+      .nav-bar { padding: 0.8em 0.07em; }
       .nav-bar a { font-size: 0.9em; padding: 0.6em 0.2em;}
     }
 
@@ -145,19 +163,29 @@
 <body>
   <h1>DTC: Magic Chain System</h1>
 
-  <div class="menu-block block-password-pin-secret">
+  <div class="menu-block block-key-batch">
     <div class="block-title">Key & Batch Information</div>
-    <a href="generate_key.html" class="btn-grey">Generate Public Key</a>
-    <a href="generate_qr_batch.html" class="btn-blue">Generate QR Batch</a> <a href="regenerate_qr.html" class="btn-blue">Regenerate QR</a> </div>
+    <a href="generate_key.html" class="btn-green">Generate Public Key</a>
+    <a href="generate_qr_batch.html" class="btn-green">Generate QR Batch</a>
+  </div>
 
-  <div class="menu-block block-action">
+  <div class="menu-block block-action-regen">
+    <div class="block-title">Regenerate QR</div>
+    <a href="regenerate_qr.html" class="btn-blue">Regenerate QR</a>
+  </div>
+
+  <div class="menu-block block-results-export">
     <div class="block-title">Results & Export</div>
     <a href="qr_preview.html" class="btn-blue">View QR Preview</a>
-    <a href="export_ticket.html" class="btn-yellow">Export Ticket</a> <a href="export_qr.html" class="btn-blue">Export QR</a> <a href="export_log.html" class="btn-light-blue">Export Log</a> </div>
+    <a href="export_ticket.html" class="btn-yellow">Export Ticket</a>
+    <a href="export_qr.html" class="btn-blue">Export QR</a>
+    <a href="export_log.html" class="btn-light-blue">Export Log</a>
+  </div>
 
   <div class="menu-block block-audit">
     <div class="block-title">Audit Chain</div>
-    <a href="audit_chain.html" class="btn-blue">Audit QR/Commitment Hash</a> </div>
+    <a href="audit_chain.html" class="btn-blue">Audit QR/Commitment Hash</a>
+  </div>
 
   <div class="nav-bar">
     <a href="#" class="btn-faded-purple">Back</a>
