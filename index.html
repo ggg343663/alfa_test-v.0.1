@@ -168,12 +168,53 @@
             font-size: 0.95em;
         }
 
+        /* Navigation Bar Styling */
+        .main-nav {
+            display: flex;
+            justify-content: center;
+            gap: 15px; /* Space between buttons */
+            margin-top: 3em; /* Space from content above */
+            margin-bottom: 2em; /* Space from footer below */
+            padding: 15px;
+            background-color: #e0e0e0; /* Slightly darker grey for nav bar background */
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+        }
+        .nav-btn {
+            flex: 1; /* Make buttons take equal width */
+            max-width: 120px; /* Max width for each button */
+            padding: 1em 1.5em;
+            border-radius: 8px;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            cursor: pointer;
+            border: none;
+            transition: background 0.13s, filter 0.13s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            font-size: 1em;
+            color: #444; /* Darker text for readability */
+            background-color: #b0bec5; /* Light grey for buttons, as per UIUX */
+        }
+        .nav-btn:hover {
+            filter: brightness(0.9);
+            background-color: #9ea7aa; /* Slightly darker on hover */
+        }
+
         /* Responsive adjustments for mobile devices */
         @media (max-width: 600px) {
             body { margin: 0.4em; padding: 0.07em;}
             .section-block { padding: 0.7em 0.2em;}
             .btn { font-size: 1em; padding: 0.6em 0.8em; margin-right: 5px; }
             textarea, input[type="text"] { width: calc(100% - 14px); padding: 7px; } /* Adjust padding for smaller screens */
+            .main-nav {
+                flex-direction: column; /* Stack buttons vertically on small screens */
+                gap: 10px;
+                padding: 10px;
+            }
+            .nav-btn {
+                max-width: 100%; /* Full width for buttons on small screens */
+            }
         }
     </style>
 </head>
@@ -199,6 +240,12 @@
         <ul id="chainIndexList">
             </ul>
     </div>
+
+    <nav class="main-nav">
+        <a href="index.html" class="nav-btn nav-back">Back</a>
+        <a href="index.html" class="nav-btn nav-home">Home</a>
+        <a href="generate_key.html" class="nav-btn nav-next">Next</a>
+    </nav>
 
     <p class="footer-note">
         Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
@@ -266,4 +313,3 @@
     </script>
 </body>
 </html>
-ตรวจสอบ
