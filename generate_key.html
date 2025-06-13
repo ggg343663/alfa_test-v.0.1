@@ -3,371 +3,211 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Generate Public Key - DTC: Magic Chain System</title>
+  <title>Register QR - DTC: Magic Chain System</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f5f6fa;
       max-width: 700px;
       margin: 0 auto;
-      padding: 1em 0.1em 4em 0.1em;
-      background: #f5f6fa;
+      padding: 1.1em 0.4em 4em 0.4em;
       color: #333;
     }
     h1 {
       text-align: center;
-      color: #219150;
-      margin-bottom: 0.8em;
-      font-size: 1.2em;
-      letter-spacing: 0.01em;
+      color: #26314f;
+      margin-bottom: 0.7em;
+      font-size: 1.35em;
+      letter-spacing: 0.03em;
     }
-    h1 small {
-      display: block;
-      font-size: 0.7em;
-      color: #555;
-      margin-top: 0.2em;
+    .form-group {
+      margin-bottom: 1.1em;
     }
-    .section-block {
-      margin: 0.7em 0;
-      padding: 0.7em 0.8em;
-      border-radius: 10px;
-      box-shadow: 0 1.5px 6px #edf1f6;
-    }
-    .block-title {
-      font-size: 1em;
+    label {
       font-weight: bold;
-      margin-bottom: 0.5em;
-      color: #444;
-      padding-bottom: 0.13em;
-      border-bottom: 1px solid rgba(0,0,0,0.07);
-    }
-    .key-input-block { background: #fffde7; border-left: 5px solid #ffd600;}
-    .key-output-block { background: #eafaf0; border-left: 5px solid #219150;}
-    .input-group { margin-bottom: 10px; position: relative;}
-    .input-symbol { font-size: 1.18em; vertical-align: middle; margin-left: 3px;}
-    .status-icon {
-      position: absolute; right: 38px; top: 50%;
-      transform: translateY(-50%);
-      font-size: 1.15em;
-      transition: color 0.18s;
-      min-width: 1.3em; text-align: center;
-    }
-    .input-group input {
-      width: 100%;
-      padding: 8px 34px 8px 8px;
-      border-radius: 7px;
+      margin-bottom: 0.21em;
+      display: block;
+      color: #222c36;
       font-size: 1em;
-      border: 1.6px solid #ccc;
-      transition: border 0.14s;
-      background: #fff;
+    }
+    textarea,
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 11px;
+      font-size: 1em;
+      border: 2px solid #cfd8dc;
+      border-radius: 9px;
       box-sizing: border-box;
+      background: #fff;
+      margin-bottom: 0.2em;
+      transition: border 0.12s;
+      resize: none;
     }
-    .input-group input:focus { border-color: #ffd600; background: #ffffed;}
-    .input-group input.valid { border-color: #43a047; }
-    .input-group input.invalid { border-color: #e53935; background: #fff4f4;}
-    .status-icon.valid { color: #43a047; }
-    .status-icon.invalid { color: #e53935; }
-    .status-icon.pending { color: #ffd600;}
-    .toggle-password {
-      position: absolute;
-      right: 10px; top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #bbb;
-      font-size: 1.12em;
-      user-select: none;
-      z-index: 2;
+    textarea:focus,
+    input[type="text"]:focus {
+      border-color: #1976d2;
+      outline: none;
+      background: #fafdff;
     }
-    .pin-dots {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 21px;
-      margin-top: 6px;
-      margin-bottom: 2px;
+    textarea[readonly], input[readonly] {
+      background: #f4f5f8;
+      color: #7e8a99;
+      border-style: dashed;
     }
-    .pin-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      background: #e0e0e0;
-      margin: 0 2.5px;
-      transition: background 0.1s;
-    }
-    .pin-dot.active { background: #ffd600; }
-    .pin-dot.error { background: #e53935; }
-    .pin-dot.success { background: #43a047; }
-    .btn {
-      display: block;
-      width: 100%;
-      padding: 0.6em 1em;
-      margin-top: 12px;
-      color: #fff;
-      font-weight: bold;
-      border-radius: 8px;
-      font-size: 1.07em;
-      text-align: center;
-      text-decoration: none;
-      cursor: pointer;
-      border: none;
-      transition: background 0.13s, filter 0.13s;
-      background: #2196f3;
-      box-shadow: 0 1.5px 6px rgba(0,0,0,0.07);
-    }
-    .btn:active { filter: brightness(0.97);}
-    .output-box {
-      background: #f0f4c3;
-      border: 1px solid #cddc39;
-      border-radius: 7px;
-      padding: 9px 8px 9px 12px;
-      margin-top: 10px;
-      word-wrap: break-word;
-      font-family: 'Courier New', Courier, monospace;
-      font-size: 0.98em;
-      color: #444;
-      position: relative;
+    .input-row {
       display: flex;
       align-items: center;
-    }
-    .pubkey-label { font-weight: bold; margin-right: 0.6em;}
-    .public-key-value {
-      background: #e6e6a1;
-      padding: 6px 9px;
-      border-radius: 5px;
-      user-select: all;
-      margin-right: 10px;
-      display: inline-block;
-      font-size: 0.96em;
-      overflow-x: auto;
-      max-width: 60vw;
+      gap: 0.5em;
     }
     .copy-btn {
-      background: none; border: none; font-size: 1.18em;
-      margin-left: 2px; margin-right: 4px; cursor:pointer;
-      color: #2196f3;
-      transition: color 0.15s;
+      background: #1976d2;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 15px;
+      font-size: 1em;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background 0.13s;
+      margin-left: 2px;
+      min-width: 55px;
     }
-    .copy-btn.copied { color: #43a047;}
+    .copy-btn:active { filter: brightness(0.95);}
     .copy-status {
-      font-size: 1em; color: #43a047; font-weight: bold;
-      margin-left: 7px; opacity: 0; transition: opacity 0.3s;
-      min-width: 58px; display: inline-block;
+      margin-left: 7px;
+      font-size: 0.95em;
+      color: #43a047;
+      opacity: 0;
+      font-weight: bold;
+      transition: opacity 0.22s;
+      min-width: 52px;
+      display: inline-block;
     }
     .copy-status.visible { opacity: 1;}
-    .navbar {
-      display: flex; justify-content: space-around;
-      padding: 7px 0;
-      background: #ede7f6;
-      border-radius: 9px 9px 0 0;
-      box-shadow: 0 1.5px 7px rgba(0,0,0,0.05);
-      position: fixed;
-      left: 0; right: 0; bottom: 0;
-      max-width: 700px;
-      margin: 0 auto; z-index: 99;
-    }
-    .navbar a {
-      flex: 1; text-align: center;
-      padding: 10px 4px;
-      text-decoration: none;
-      color: #6a1b9a;
+    .btn {
+      width: 100%;
+      font-size: 1.09em;
+      padding: 0.78em 0;
+      margin-bottom: 0.66em;
+      border: none;
+      border-radius: 10px;
       font-weight: bold;
-      border-radius: 5px;
-      transition: background 0.18s, color 0.18s;
-      margin: 0 2.5px;
-      font-size: 0.97em;
+      cursor: pointer;
+      transition: filter 0.13s;
+      letter-spacing: 0.01em;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.09);
     }
-    .navbar a:hover { background: #d1c4e9; color: #4a148c;}
-    .navbar a.active {
-      background: #9575cd;
-      color: white;
-      box-shadow: inset 0 2px 5px rgba(0,0,0,0.18);
+    .btn-register { background: #388e3c; color: #fff;}
+    .btn-clear { background: #ffd600; color: #444;}
+    .btn-back { background: #9e9e9e; color: #fff;}
+    .btn:active { filter: brightness(0.94);}
+    .footer-note {
+      text-align: center;
+      color: #90a4ae;
+      font-size: 0.93em;
+      margin-top: 2em;
     }
     @media (max-width: 600px) {
-      body { margin: 0.18em; padding: 0.05em 0.01em 4em 0.01em;}
-      h1 { font-size: 1em; margin-bottom: 0.6em; }
-      .section-block { padding: 0.33em 0.1em;}
-      .btn { font-size: 0.94em; padding: 0.39em 0.7em; }
-      .block-title { font-size: 0.95em; }
-      .navbar { padding: 4px 0; }
-      .navbar a { font-size: 0.89em; padding: 7px 2px;}
-      .output-box { font-size: 0.93em;}
-      .public-key-value { max-width: 40vw;}
+      body { padding: 0.5em 0.04em 3em 0.04em; }
+      h1 { font-size: 1.09em; }
+      .btn { font-size: 1em; }
+      textarea, input[type="text"] { font-size: 0.99em; }
+      .copy-btn { padding: 7px 10px; min-width: 43px; }
     }
   </style>
 </head>
 <body>
-  <h1>DTC: Magic Chain System<br>
-    <small>Decentralized Trust Community</small>
-  </h1>
-
-  <div class="section-block key-input-block">
-    <div class="block-title">Generate Your Public Key</div>
-    <div class="input-group">
-      <label for="password">Password: <span class="input-symbol">🔤</span></label>
-      <input type="password" id="password" autocomplete="new-password" />
-      <span class="toggle-password" data-target="password">👁️</span>
-      <span class="status-icon" id="pw-status"></span>
-    </div>
-    <div class="input-group">
-      <label for="confirmPassword">Confirm: <span class="input-symbol">🔤</span></label>
-      <input type="password" id="confirmPassword" autocomplete="new-password" />
-      <span class="toggle-password" data-target="confirmPassword">👁️</span>
-      <span class="status-icon" id="cpw-status"></span>
-    </div>
-    <div class="input-group">
-      <label for="pin">PIN: <span class="input-symbol">🔢</span></label>
-      <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" />
-      <span class="toggle-password" data-target="pin">👁️</span>
-      <span class="status-icon" id="pin-status"></span>
-      <div class="pin-dots" id="pinDots">
-        <div class="pin-dot"></div><div class="pin-dot"></div>
-        <div class="pin-dot"></div><div class="pin-dot"></div>
+  <h1>Register QR</h1>
+  <form id="registerForm" autocomplete="off">
+    <div class="form-group">
+      <label for="publicKey">Public Key:</label>
+      <div class="input-row">
+        <textarea
+          id="publicKey"
+          rows="2"
+          placeholder="Public Key will be auto-filled"
+          autocomplete="off"
+        ></textarea>
+        <button type="button" class="copy-btn" id="copyPubKeyBtn">Copy</button>
+        <span class="copy-status" id="copyPubKeyStatus"></span>
       </div>
     </div>
-    <div class="input-group">
-      <label for="confirmPin">Confirm PIN: <span class="input-symbol">🔢</span></label>
-      <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" />
-      <span class="toggle-password" data-target="confirmPin">👁️</span>
-      <span class="status-icon" id="cpin-status"></span>
+    <div class="form-group">
+      <label for="qrHash">QR Hash:</label>
+      <div class="input-row">
+        <textarea
+          id="qrHash"
+          rows="1"
+          placeholder="QR Hash will be auto-filled"
+          autocomplete="off"
+        ></textarea>
+        <button type="button" class="copy-btn" id="copyHashBtn">Copy</button>
+        <span class="copy-status" id="copyStatus"></span>
+      </div>
     </div>
-    <button class="btn" id="generateKeyBtn">Generate Public Key</button>
-  </div>
-
-  <div class="section-block key-output-block" id="publicKeyOutputSection" style="display:none;">
-    <div class="block-title">Your Public Key</div>
-    <div class="output-box">
-      <span class="pubkey-label">Public Key:</span>
-      <span class="public-key-value" id="publicKey"></span>
-      <button id="copyBtn" class="copy-btn" title="Copy">📋</button>
-      <span id="copyStatus" class="copy-status"></span>
+    <div class="form-group">
+      <label for="ownerName">Owner Name (optional):</label>
+      <input
+        type="text"
+        id="ownerName"
+        placeholder="Enter name (optional)"
+        autocomplete="off"
+      />
     </div>
-  </div>
-
-  <div class="navbar">
-    <a href="index.html">Back</a>
-    <a href="index.html" class="active">Home</a>
-    <a href="mint_qr.html">Next</a>
-  </div>
+    <button type="submit" class="btn btn-register">Register</button>
+    <button type="button" class="btn btn-clear" id="clearBtn">Clear</button>
+    <button type="button" class="btn btn-back" onclick="history.back()">Back</button>
+  </form>
+  <p class="footer-note">
+    Public Key and QR Hash will be auto-filled if stored locally.<br>
+    If no backend, data is saved only in this browser (Demo mode).
+  </p>
   <script>
-    // Status update for input fields (✓, ❗, …)
-    function updateStatusIcon(field, valid) {
-      let icon = document.getElementById(field + '-status');
-      let input = document.getElementById(field);
-      if (valid === 'valid') { icon.textContent = '✓'; icon.className = 'status-icon valid'; input.classList.add('valid'); input.classList.remove('invalid'); }
-      else if (valid === 'pending') { icon.textContent = '…'; icon.className = 'status-icon pending'; input.classList.remove('valid','invalid'); }
-      else if (valid === 'invalid') { icon.textContent = '❗'; icon.className = 'status-icon invalid'; input.classList.add('invalid'); input.classList.remove('valid'); }
-      else { icon.textContent = ''; icon.className = 'status-icon'; input.classList.remove('valid','invalid'); }
-    }
-    // Password, PIN visual logic
-    function checkAllStatus() {
-      const pw = passwordInput.value;
-      const cpw = confirmPasswordInput.value;
-      const pin = pinInput.value;
-      const cpin = confirmPinInput.value;
-      updateStatusIcon('password', pw ? 'pending' : '');
-      updateStatusIcon('confirmPassword', cpw ? (cpw === pw && pw ? 'valid' : 'invalid') : '');
-      updateStatusIcon('pin', pin.length === 4 && /^\d{4}$/.test(pin) ? 'valid' : (pin.length > 0 ? 'pending' : ''));
-      updateStatusIcon('confirmPin', cpin ? (cpin === pin && pin.length === 4 ? 'valid' : 'invalid') : '');
-      // pin dots visual
-      updatePinDots(pin, cpin);
-    }
-    function updatePinDots(pin, cpin) {
-      const dots = document.querySelectorAll('#pinDots .pin-dot');
-      dots.forEach((dot, idx) => {
-        dot.className = 'pin-dot' + (idx < pin.length ? ' active' : '');
-        if(pin.length === 4 && cpin.length === 4 && pin !== cpin) dot.className += ' error';
-        else if(pin.length === 4 && pin === cpin && pin.length) dot.className += ' success';
-      });
-    }
-    // Copy public key
-    function copyKey() {
-      const pk = publicKeyDisplay.textContent;
-      navigator.clipboard.writeText(pk);
-      copyBtn.classList.add('copied');
-      copyStatus.textContent = '✓ Copied!';
-      copyStatus.classList.add('visible');
-      setTimeout(()=>{
-        copyStatus.classList.remove('visible');
-        copyBtn.classList.remove('copied');
-      }, 1300);
-    }
-    // Inputs
-    const passwordInput = document.getElementById('password');
-    const confirmPasswordInput = document.getElementById('confirmPassword');
-    const pinInput = document.getElementById('pin');
-    const confirmPinInput = document.getElementById('confirmPin');
-    const generateKeyBtn = document.getElementById('generateKeyBtn');
-    const publicKeyOutputSection = document.getElementById('publicKeyOutputSection');
-    const publicKeyDisplay = document.getElementById('publicKey');
-    const copyBtn = document.getElementById('copyBtn');
-    const copyStatus = document.getElementById('copyStatus');
+    // Autofill demo (simulate data)
+    document.getElementById('publicKey').value =
+      localStorage.getItem('dtc_pubkey') || '';
+    document.getElementById('qrHash').value =
+      localStorage.getItem('dtc_qrhash') || '';
 
-    // Toggle password show/hide
-    document.querySelectorAll('.toggle-password').forEach(toggle => {
-      toggle.addEventListener('click', () => {
-        const targetId = toggle.dataset.target;
-        const targetInput = document.getElementById(targetId);
-        if (targetInput.type === 'password') {
-          targetInput.type = 'text'; toggle.textContent = '🙈';
-        } else { targetInput.type = 'password'; toggle.textContent = '👁️'; }
-      });
-    });
-
-    // Real-time input feedback
-    [passwordInput, confirmPasswordInput, pinInput, confirmPinInput].forEach(input => {
-      input.addEventListener('input', checkAllStatus);
-      input.addEventListener('blur', checkAllStatus);
-    });
-
-    // PIN dots
-    function initPinDots() {
-      updatePinDots(pinInput.value, confirmPinInput.value);
-    }
-    pinInput.addEventListener('input', initPinDots);
-    confirmPinInput.addEventListener('input', initPinDots);
-
-    // Generate Key
-    generateKeyBtn.addEventListener('click', () => {
-      const password = passwordInput.value.trim();
-      const confirmPassword = confirmPasswordInput.value.trim();
-      const pin = pinInput.value.trim();
-      const confirmPin = confirmPinInput.value.trim();
-
-      // Minimal: Only allow if all valid (no alert!)
-      if (
-        !password || !confirmPassword ||
-        !pin || !confirmPin ||
-        confirmPassword !== password ||
-        pin.length !== 4 || !/^\d{4}$/.test(pin) ||
-        confirmPin !== pin
-      ) {
-        // shake effect?
-        generateKeyBtn.style.background = "#e53935";
-        setTimeout(()=>{generateKeyBtn.style.background = "#2196f3";},600);
-        checkAllStatus();
-        return;
+    // Copy Public Key
+    document.getElementById('copyPubKeyBtn').onclick = function() {
+      let pub = document.getElementById('publicKey').value;
+      let st = document.getElementById('copyPubKeyStatus');
+      if(pub){
+        navigator.clipboard.writeText(pub);
+        st.textContent = '✓ Copied!';
+        st.classList.add('visible');
+        setTimeout(()=>st.classList.remove('visible'), 1300);
       }
-      // Generate Public Key (demo)
-      let str = password + pin + "DTC_Key_Salt_2025";
-      let hash = 0;
-      for (let i = 0; i < str.length; i++) {
-        const char = str.charCodeAt(i);
-        hash = ((hash << 5) - hash) + char;
-        hash |= 0;
-      }
-      let mockPublicKey = Math.abs(hash).toString(16).padStart(16, '0');
-      mockPublicKey += (Math.random() * 1e15).toString(16).padStart(12, '0');
-      mockPublicKey += 'DTC-PUB';
-      mockPublicKey = mockPublicKey.substring(0, 64);
-      publicKeyDisplay.textContent = "0x" + mockPublicKey.toUpperCase();
-      publicKeyOutputSection.style.display = 'block';
-      copyStatus.textContent = '';
-      checkAllStatus();
-    });
-    copyBtn.addEventListener('click', copyKey);
+    };
 
-    // init
-    checkAllStatus();
-    initPinDots();
+    // Copy QR Hash
+    document.getElementById('copyHashBtn').onclick = function() {
+      let qr = document.getElementById('qrHash').value;
+      let st = document.getElementById('copyStatus');
+      if(qr){
+        navigator.clipboard.writeText(qr);
+        st.textContent = '✓ Copied!';
+        st.classList.add('visible');
+        setTimeout(()=>st.classList.remove('visible'), 1300);
+      }
+    };
+
+    // Register button (demo - prevent actual submission)
+    document.getElementById('registerForm').onsubmit = function(e) {
+      e.preventDefault();
+      // highlight register btn as feedback
+      document.querySelector('.btn-register').style.background = "#228B22";
+      setTimeout(()=>document.querySelector('.btn-register').style.background="#388e3c", 650);
+      // ...handle register logic here...
+    };
+
+    // Clear button
+    document.getElementById('clearBtn').onclick = function() {
+      document.getElementById('publicKey').value = '';
+      document.getElementById('qrHash').value = '';
+      document.getElementById('ownerName').value = '';
+    };
   </script>
 </body>
 </html>
