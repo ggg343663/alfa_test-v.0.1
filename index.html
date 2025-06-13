@@ -35,86 +35,71 @@
       box-shadow: 0 8px 28px 0 rgba(60,70,120,0.09);
       transform: translateY(-2px) scale(1.01);
     }
-    /* Updated block colors based on the new design sections */
-    .block-account-key { border-left-color: #4CAF50;} /* Green for Account & Key Management */
-    .block-issuance-management { border-left-color: #FF9800;} /* Orange for Issuance & Management */
-    .block-transfer-status { border-left-color: #2196F3;} /* Blue for Transfer & Status */
-    .block-audit-proof { border-left-color: #9C27B0;} /* Purple for Audit & Proof */
-    .block-export-options { border-left-color: #00BCD4;} /* Cyan for Export Options */
-
-
+    .block-general { border-left-color: #43a047; }
+    .block-register { border-left-color: #1976d2; }
+    .block-audit { border-left-color: #ffc107; }
     .block-title {
-      font-size: 1.17em;
+      font-size: 1.12em;
       font-weight: 600;
       margin-bottom: 0.6em;
-      color: #3f51b5;
-      letter-spacing: 0.02em;
-      padding-bottom: 0.2em;
+      color: #333;
+      letter-spacing: 0.01em;
+      padding-bottom: 0.18em;
       border-bottom: 1.5px solid #eef1f5;
     }
     .block-description {
-      font-size: 0.95em;
-      color: #767676;
+      font-size: 0.96em;
+      color: #757575;
       margin-bottom: 1em;
       line-height: 1.55;
     }
-    /* Button */
     .menu-block a {
       display: flex;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
       width: 100%;
-      padding: 1em 0.4em;
-      margin-bottom: 0.68em;
+      padding: 0.93em 0.8em;
+      margin-bottom: 0.6em;
       color: #fff;
       font-weight: 600;
       border-radius: 10px;
-      font-size: 1.06em;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.10);
-      transition: background 0.18s, transform 0.13s;
+      font-size: 1em;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+      transition: background 0.17s, transform 0.13s;
       border: none;
-      min-height: 46px;
+      min-height: 44px;
       outline: none;
-      text-align: center;
+      text-align: left;
       text-decoration: none;
       letter-spacing: 0.01em;
       cursor: pointer;
+      gap: 0.8em;
     }
-    /* Specific button colors based on actions */
-    .btn-create { background: #4CAF50; } /* Green for creation actions */
-    .btn-register { background: #FF9800; } /* Orange for registration actions */
-    .btn-transfer { background: #2196F3; } /* Blue for transfer actions */
-    .btn-regen { background: #607d8b; } /* Grey-blue for regenerate actions */
-    .btn-audit { background: #9C27B0; } /* Purple for audit actions */
-    .btn-export-ticket { background: #FFC107; color: #313131;} /* Yellow for export ticket */
-    .btn-export-qr { background: #00BCD4; } /* Cyan for export QR */
-    .btn-export-log { background: #4DD0E1; } /* Lighter cyan for export log */
-
-
+    .block-general a { background: #43a047; }
+    .block-register a { background: #1976d2; }
+    .block-audit a { background: #ffc107; color: #212121;}
     .menu-block a:hover:not(.disabled) {
-      filter: brightness(1.06) contrast(1.08);
+      filter: brightness(1.07) contrast(1.08);
       transform: translateY(-1.5px) scale(1.01);
     }
-    /* Disabled state */
-    .menu-block a.disabled {
-      background: #e0e0e0 !important;
-      color: #bbb !important;
-      box-shadow: none;
-      cursor: not-allowed;
-      filter: grayscale(0.6) brightness(1.1);
-      position: relative;
+    .filename {
+      font-size: 0.98em;
+      font-weight: 600;
+      letter-spacing: 0.01em;
     }
-    .menu-block a.disabled:before {
-      content: "🔒";
-      margin-right: 0.5em;
-      font-size: 1.1em;
-      opacity: 0.7;
+    .label {
+      font-size: 0.93em;
+      font-weight: 400;
+      margin-left: 0.5em;
+      color: #e8f5e9;
+      opacity: 0.92;
+      font-style: italic;
     }
-    /* Navigation Bar */
+    .block-audit .label { color: #888; }
     .nav-bar {
       display: flex;
       justify-content: space-around;
-      padding: 0.82em 0.2em;
+      padding: 0.8em 0.2em;
       background: #ffffff;
       border-top: 1.5px solid #eee;
       position: fixed;
@@ -161,12 +146,12 @@
     }
     @media (max-width: 600px) {
       body { margin: 0; padding: 0.3em 0.1em 5em 0.1em;}
-      h1 { font-size: 1.19em; margin-bottom: 0.88em; }
+      h1 { font-size: 1.18em; margin-bottom: 0.88em; }
       .menu-block { padding: 0.7em 0.7em 0.9em 0.8em; margin: 0.7em 0;}
-      .block-title { font-size: 1em; }
-      .block-description { font-size: 0.89em; }
-      .menu-block a, .nav-bar a { font-size: 0.96em; min-height: 40px; }
-      .footer-note { font-size: 0.82em; }
+      .block-title { font-size: 0.99em; }
+      .block-description { font-size: 0.91em; }
+      .menu-block a, .nav-bar a { font-size: 0.95em; min-height: 40px; }
+      .footer-note { font-size: 0.81em; }
       .nav-bar { padding: 0.5em 0.08em;}
     }
   </style>
@@ -174,47 +159,31 @@
 <body>
   <h1>DTC: Magic Chain System</h1>
 
-  <div class="menu-block block-account-key">
-    <div class="block-title">1. Account & Key Management</div>
-    <p class="block-description">เริ่มต้นจัดการบัญชีของคุณด้วยการสร้างหรือจัดการคีย์ Public Key</p>
-    <a href="generate_key.html" class="btn-create">Generate/Manage Public Key</a>
+  <div class="menu-block block-general">
+    <div class="block-title">1. General</div>
+    <a href="generate_key.html"><span class="filename">generate_key.html</span> <span class="label">Generate Public Key</span></a>
+    <a href="generate_qr_hash.html"><span class="filename">generate_qr_hash.html</span> <span class="label">Generate QR Hash</span></a>
+    <a href="regenerate_qr_hash.html"><span class="filename">regenerate_qr_hash.html</span> <span class="label">Regenerate QR Hash</span></a>
+    <a href="transfer.html"><span class="filename">transfer.html</span> <span class="label">Transfer QR</span></a>
   </div>
 
-  <div class="menu-block block-issuance-management">
-    <div class="block-title">2. Asset Issuance & Management</div>
-    <p class="block-description">ลงทะเบียน Master/Agent และออก QR Code เพื่อเริ่มต้นการใช้งานสินทรัพย์ดิจิทัล</p>
-    <a href="register_master.html" class="btn-register">Register Master Node</a>
-    <a href="agent_register.html" class="btn-register">Register Agent Node</a>
-    <a href="register_qr.html" class="btn-register">Register QR Code (Initial Ownership)</a>
-    <a href="generate_qr_batch.html" class="btn-create">Generate QR Batch (Master/Agent)</a>
+  <div class="menu-block block-register">
+    <div class="block-title">2. Register</div>
+    <a href="register_qr.html"><span class="filename">register_qr.html</span> <span class="label">Register QR</span></a>
+    <a href="register_master.html"><span class="filename">register_master.html</span> <span class="label">Register Master</span></a>
+    <a href="master_dashboard.html"><span class="filename">master_dashboard.html</span> <span class="label">Master Dashboard</span></a>
+    <a href="agent_register.html"><span class="filename">agent_register.html</span> <span class="label">Register Agent</span></a>
   </div>
 
-  <div class="menu-block block-transfer-status">
-    <div class="block-title">3. Transfer & Status</div>
-    <p class="block-description">โอนกรรมสิทธิ์ QR Code หรือตรวจสอบสถานะความเป็นเจ้าของปัจจุบัน</p>
-    <a href="transfer.html" class="btn-transfer">Transfer QR Code Ownership</a>
-    <a href="verify_qr.html" class="btn-blue">Check QR Status (Current Owner)</a>
-  </div>
-
-  <div class="menu-block block-audit-proof">
-    <div class="block-title">4. Audit & Proof</div>
-    <p class="block-description">ตรวจสอบความถูกต้องของ QR Code และประวัติธุรกรรมทั้งหมด</p>
-    <a href="regenerate_qr_hash.html" class="btn-regen disabled">Regenerate QR Hash (Verify Content)</a>
-    <a href="audit_chain.html" class="btn-audit">Audit Chain (Trace Lineage)</a>
-    <a href="verify_log.html" class="btn-audit">Audit Full Log (Transaction History)</a>
-  </div>
-
-  <div class="menu-block block-export-options">
-    <div class="block-title">5. Export Options</div>
-    <p class="block-description">ส่งออกข้อมูลสำคัญ เช่น Ticket, รูปภาพ QR หรือ Log เพื่อการตรวจสอบออฟไลน์</p>
-    <a href="qr_preview.html" class="btn-export-qr disabled">View QR Preview</a>
-    <a href="export_ticket.html" class="btn-export-ticket disabled">Export Ticket (Full Metadata)</a>
-    <a href="export_qr.html" class="btn-export-qr disabled">Export QR Image</a>
-    <a href="export_log.html" class="btn-export-log disabled">Export System Logs</a>
+  <div class="menu-block block-audit">
+    <div class="block-title">3. Audit & Status</div>
+    <a href="verify_qr.html"><span class="filename">verify_qr.html</span> <span class="label">Check QR Status</span></a>
+    <a href="verify_log.html"><span class="filename">verify_log.html</span> <span class="label">Audit Log</span></a>
+    <a href="audit_chain.html"><span class="filename">audit_chain.html</span> <span class="label">Audit Chain</span></a>
   </div>
 
   <div class="nav-bar">
-    <a href="#" >Back</a>
+    <a href="#">Back</a>
     <a href="index.html" class="active">Home</a>
     <a href="#">Next</a>
   </div>
