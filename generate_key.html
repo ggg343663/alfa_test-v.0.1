@@ -3,216 +3,172 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Minimal DTC Symbol Logic Demo</title>
+  <title>Generate Public Key - DTC</title>
   <style>
-    body {
-      background: #f5f7fa;
-      font-family: 'Segoe UI', Arial, sans-serif;
-      max-width: 440px; margin: 0 auto; padding: 2em 0.7em 4em 0.7em;
-      color: #333;
-    }
-    h1 { text-align: center; font-size: 1.18em; color: #23754b; margin-bottom: 1.1em;}
-    .form-group { margin-bottom: 1.2em;}
-    label { font-weight: bold; color: #233; font-size: 1em;}
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; padding: 1.3em; max-width: 480px; margin: 0 auto;}
+    h1 { color: #219150; text-align: center; margin-bottom: 1.1em; font-size: 1.13em;}
+    .form-group { margin-bottom: 1.05em; }
+    label { font-weight: bold; color: #2d3c35;}
     .input-box { position: relative; display: flex; align-items: center; }
+    input[type="password"], .pubkey-box {
+      width: 100%; padding: 9px 11px 9px 40px; font-size: 1em; border: 2px solid #cfd8dc;
+      border-radius: 9px; box-sizing: border-box; background: #fff;
+      margin-top: 0.3em; transition: border 0.15s;
+    }
+    input:focus { border-color: #ffd600; background: #ffffed; }
     .input-svg {
       position: absolute; left: 9px; top: 50%; transform: translateY(-50%);
-      width: 28px; height: 20px; pointer-events: none;
-    }
-    input, textarea {
-      width: 100%; padding: 9px 36px 9px 44px;
-      font-size: 1em; border: 2px solid #cfd8dc; border-radius: 9px;
-      box-sizing: border-box; background: #fff;
-      transition: border 0.15s;
-      color: #2a3139;
-    }
-    input:focus, textarea:focus { border-color: #ffd600; background: #ffffed; }
-    .status-svg {
-      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
       width: 22px; height: 22px; pointer-events: none;
+    }
+    .status-svg {
+      position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+      width: 20px; height: 20px; pointer-events: none;
       opacity: 0; transition: opacity 0.16s;
     }
-    input.valid, textarea.valid { border-color: #43a047;}
-    input.invalid, textarea.invalid { border-color: #e53935;}
+    input.valid { border-color: #43a047;}
+    input.invalid { border-color: #e53935;}
     .status-svg.visible { opacity: 1;}
+    .pubkey-box {
+      background: #eafaf0; color: #222; margin-top: 1.1em;
+      font-family: 'Courier New', monospace; min-height: 38px; font-size: 0.97em;
+      border-color: #219150; display: flex; align-items: center; justify-content: space-between;
+      transition: border 0.18s;
+    }
+    .pubkey-box.copied { border-color: #43a047; background: #f0fff0;}
     .copy-btn {
-      background: #1976d2; color: #fff;
-      border: none; border-radius: 8px; padding: 8px 17px;
-      font-size: 1em; cursor: pointer; font-weight: bold;
-      transition: background 0.13s; margin-left: 9px;
+      background: #2196f3; color: #fff; border: none; border-radius: 8px;
+      padding: 6px 14px; font-size: 0.95em; cursor: pointer; font-weight: bold; margin-left: 10px;
     }
     .copy-btn:active { filter: brightness(0.95);}
-    .copy-status {
-      margin-left: 8px; font-size: 0.98em; color: #43a047;
-      opacity: 0; font-weight: bold; transition: opacity 0.22s;
-      min-width: 52px; display: inline-block;
-    }
+    .copy-status { color: #43a047; font-size: 0.97em; margin-left: 8px; opacity: 0; transition: opacity 0.18s;}
     .copy-status.visible { opacity: 1;}
+    .note { color: #9e9e9e; font-size: 0.95em; margin: 1em 0;}
     @media (max-width: 600px) {
-      body { padding: 1.2em 0.04em 2.5em 0.04em; }
-      h1 { font-size: 1em; }
-      .copy-btn { padding: 7px 11px; }
+      body { padding: 1em 0.08em;}
+      h1 { font-size: 1em;}
+      .copy-btn { padding: 5px 9px;}
+      .pubkey-box { font-size: 0.91em;}
     }
   </style>
 </head>
 <body>
-  <h1>Register QR (Minimal Symbol Logic)</h1>
-  <form id="registerForm" autocomplete="off">
-    <!-- Public Key -->
-    <div class="form-group">
-      <label for="publicKey">Public Key</label>
-      <div class="input-box">
-        <!-- SVG abc -->
-        <span class="input-svg">
-          <svg width="24" height="22">
-            <text x="2" y="17" font-size="15" font-family="monospace" fill="#90a4ae">abc</text>
-          </svg>
-        </span>
-        <textarea
-          id="publicKey"
-          rows="2"
-          class="symbol-field"
-          placeholder="Public Key will be auto-filled"
-        ></textarea>
-        <!-- Status SVG (ติ๊กถูก/กากบาท) -->
-        <span class="status-svg" id="pk-status"></span>
-        <button type="button" class="copy-btn" id="copyPubKeyBtn" tabindex="-1">Copy</button>
-        <span class="copy-status" id="copyPubKeyStatus"></span>
-      </div>
+  <h1>Generate Public Key (DTC)</h1>
+  <div class="form-group">
+    <label>Password</label>
+    <div class="input-box">
+      <span class="input-svg">
+        <svg width="20" height="22"><text x="2" y="16" font-size="13" font-family="monospace" fill="#90a4ae">abc</text></svg>
+      </span>
+      <input type="password" id="password" maxlength="24" autocomplete="new-password" placeholder="Password"/>
+      <span class="status-svg" id="pw-status"></span>
     </div>
-    <!-- QR Hash -->
-    <div class="form-group">
-      <label for="qrHash">QR Hash</label>
-      <div class="input-box">
-        <!-- SVG hash -->
-        <span class="input-svg">
-          <svg width="24" height="22">
-            <text x="2" y="17" font-size="15" font-family="monospace" fill="#90a4ae">#</text>
-          </svg>
-        </span>
-        <textarea
-          id="qrHash"
-          rows="1"
-          class="symbol-field"
-          placeholder="QR Hash will be auto-filled"
-        ></textarea>
-        <span class="status-svg" id="qr-status"></span>
-        <button type="button" class="copy-btn" id="copyHashBtn" tabindex="-1">Copy</button>
-        <span class="copy-status" id="copyStatus"></span>
-      </div>
+  </div>
+  <div class="form-group">
+    <label>Confirm Password</label>
+    <div class="input-box">
+      <span class="input-svg">
+        <svg width="20" height="22"><text x="2" y="16" font-size="13" font-family="monospace" fill="#90a4ae">abc</text></svg>
+      </span>
+      <input type="password" id="confirmPassword" maxlength="24" autocomplete="new-password" placeholder="Confirm Password"/>
+      <span class="status-svg" id="cpw-status"></span>
     </div>
-    <!-- PIN -->
-    <div class="form-group">
-      <label for="pin">PIN</label>
-      <div class="input-box">
-        <!-- SVG 1234 -->
-        <span class="input-svg">
-          <svg width="32" height="22">
-            <text x="2" y="17" font-size="15" font-family="monospace" fill="#90a4ae">1234</text>
-          </svg>
-        </span>
-        <input
-          type="password"
-          id="pin"
-          maxlength="4"
-          class="symbol-field"
-          placeholder="PIN (4 digits)"
-          inputmode="numeric"
-        />
-        <span class="status-svg" id="pin-status"></span>
-      </div>
+  </div>
+  <div class="form-group">
+    <label>PIN (4 digits)</label>
+    <div class="input-box">
+      <span class="input-svg">
+        <svg width="23" height="22"><text x="1" y="16" font-size="13" font-family="monospace" fill="#90a4ae">1234</text></svg>
+      </span>
+      <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="1234"/>
+      <span class="status-svg" id="pin-status"></span>
     </div>
-    <!-- Owner Name -->
-    <div class="form-group">
-      <label for="ownerName">Owner Name</label>
-      <div class="input-box">
-        <!-- SVG user -->
-        <span class="input-svg">
-          <svg width="22" height="22" viewBox="0 0 22 22">
-            <circle cx="11" cy="9" r="4" stroke="#b0bec5" stroke-width="2" fill="none"/>
-            <path d="M3,19 Q11,15 19,19" stroke="#b0bec5" stroke-width="2" fill="none"/>
-          </svg>
-        </span>
-        <input
-          type="text"
-          id="ownerName"
-          class="symbol-field"
-          placeholder="Enter name (optional)"
-        />
-      </div>
+  </div>
+  <div class="form-group">
+    <label>Confirm PIN</label>
+    <div class="input-box">
+      <span class="input-svg">
+        <svg width="23" height="22"><text x="1" y="16" font-size="13" font-family="monospace" fill="#90a4ae">1234</text></svg>
+      </span>
+      <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="Confirm PIN"/>
+      <span class="status-svg" id="cpin-status"></span>
     </div>
-    <button type="submit" class="copy-btn" style="width:100%;background:#388e3c;margin-top:1em;">Register</button>
-  </form>
+  </div>
+  <div class="form-group">
+    <div class="pubkey-box" id="pubkeyBox">
+      <span id="publicKeyPlaceholder" style="color:#90a4ae;">Public Key will appear here</span>
+      <button class="copy-btn" id="copyBtn" style="display:none;">Copy</button>
+      <span id="copyStatus" class="copy-status"></span>
+    </div>
+  </div>
+  <div class="note">
+    *Your public key is generated deterministically from password + PIN.<br>
+    (We never store or know your private key)
+  </div>
   <script>
-    // Autofill demo
-    document.getElementById('publicKey').value =
-      localStorage.getItem('dtc_pubkey') || '';
-    document.getElementById('qrHash').value =
-      localStorage.getItem('dtc_qrhash') || '';
-
-    // Copy Public Key
-    document.getElementById('copyPubKeyBtn').onclick = function() {
-      let pub = document.getElementById('publicKey').value;
-      let st = document.getElementById('copyPubKeyStatus');
-      if(pub){
-        navigator.clipboard.writeText(pub);
-        st.textContent = '✓ Copied!';
-        st.classList.add('visible');
-        setTimeout(()=>st.classList.remove('visible'), 1300);
-      }
-    };
-
-    // Copy QR Hash
-    document.getElementById('copyHashBtn').onclick = function() {
-      let qr = document.getElementById('qrHash').value;
-      let st = document.getElementById('copyStatus');
-      if(qr){
-        navigator.clipboard.writeText(qr);
-        st.textContent = '✓ Copied!';
-        st.classList.add('visible');
-        setTimeout(()=>st.classList.remove('visible'), 1300);
-      }
-    };
-
-    // Input Feedback Logic
-    function feedback(field, isValid) {
-      let input = document.getElementById(field);
-      let statusSvg = document.getElementById(field + '-status');
-      if (isValid === true) {
+    function validPw(pw) { return pw.length>=6 && pw.length<=16; }
+    function validPin(pin) { return /^\d{4}$/.test(pin); }
+    function genKey(password, pin) {
+      let str = password + pin + "DTC_Key_Salt";
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i), hash |= 0;
+      let pub = Math.abs(hash).toString(16).padStart(16,'0') + 'DTC';
+      return pub.slice(0, 48);
+    }
+    // Validate + feedback
+    function feedback(id, isValid) {
+      const input = document.getElementById(id);
+      const svg = document.getElementById(id+'-status');
+      if(isValid === true) {
         input.classList.add('valid'); input.classList.remove('invalid');
-        statusSvg.innerHTML = `<svg width="22" height="22"><polyline points="5,12 10,17 17,6" fill="none" stroke="#43a047" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        statusSvg.classList.add('visible');
-      } else if (isValid === false) {
+        svg.innerHTML = `<svg width="20" height="20"><polyline points="5,12 10,17 17,6" fill="none" stroke="#43a047" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        svg.classList.add('visible');
+      } else if(isValid === false) {
         input.classList.remove('valid'); input.classList.add('invalid');
-        statusSvg.innerHTML = `<svg width="22" height="22"><line x1="6" y1="6" x2="16" y2="16" stroke="#e53935" stroke-width="2.5"/><line x1="16" y1="6" x2="6" y2="16" stroke="#e53935" stroke-width="2.5"/></svg>`;
-        statusSvg.classList.add('visible');
+        svg.innerHTML = `<svg width="20" height="20"><line x1="6" y1="6" x2="16" y2="16" stroke="#e53935" stroke-width="2.2"/><line x1="16" y1="6" x2="6" y2="16" stroke="#e53935" stroke-width="2.2"/></svg>`;
+        svg.classList.add('visible');
       } else {
         input.classList.remove('valid','invalid');
-        statusSvg.innerHTML = ``;
-        statusSvg.classList.remove('visible');
+        svg.innerHTML = ``; svg.classList.remove('visible');
       }
     }
-
-    // Minimal validation
-    document.getElementById('publicKey').addEventListener('input', e => {
-      let v = e.target.value.trim();
-      feedback('publicKey', v.length >= 32);
+    // Update all fields + pubkey
+    function updateAll() {
+      const pw = document.getElementById('password').value.trim();
+      const cpw = document.getElementById('confirmPassword').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      const cpin = document.getElementById('confirmPin').value.trim();
+      feedback('password', validPw(pw));
+      feedback('confirmPassword', (cpw.length > 0 && cpw === pw && validPw(cpw)));
+      feedback('pin', validPin(pin));
+      feedback('confirmPin', (cpin.length > 0 && cpin === pin && validPin(cpin)));
+      const pubkeyBox = document.getElementById('pubkeyBox');
+      const publicKeyPlaceholder = document.getElementById('publicKeyPlaceholder');
+      const copyBtn = document.getElementById('copyBtn');
+      // เงื่อนไขต้องตรงกันหมด
+      if (validPw(pw) && cpw === pw && validPin(pin) && cpin === pin) {
+        let pubkey = genKey(pw, pin);
+        publicKeyPlaceholder.textContent = pubkey;
+        copyBtn.style.display = '';
+        pubkeyBox.classList.remove('copied');
+      } else {
+        publicKeyPlaceholder.textContent = 'Public Key will appear here';
+        copyBtn.style.display = 'none';
+      }
+    }
+    ['password','confirmPassword','pin','confirmPin'].forEach(id => {
+      document.getElementById(id).addEventListener('input', updateAll);
     });
-    document.getElementById('qrHash').addEventListener('input', e => {
-      let v = e.target.value.trim();
-      feedback('qrHash', v.length >= 10);
-    });
-    document.getElementById('pin').addEventListener('input', e => {
-      let v = e.target.value.trim();
-      feedback('pin', /^\d{4}$/.test(v));
-    });
-
-    // Register feedback (no warning, highlight green)
-    document.getElementById('registerForm').onsubmit = function(e) {
-      e.preventDefault();
-      document.querySelector('button[type="submit"]').style.background = "#228B22";
-      setTimeout(()=>document.querySelector('button[type="submit"]').style.background="#388e3c", 600);
+    // Copy logic
+    document.getElementById('copyBtn').onclick = function() {
+      navigator.clipboard.writeText(document.getElementById('publicKeyPlaceholder').textContent);
+      const pubkeyBox = document.getElementById('pubkeyBox');
+      const copyStatus = document.getElementById('copyStatus');
+      copyStatus.textContent = '✓ Copied!';
+      copyStatus.classList.add('visible');
+      pubkeyBox.classList.add('copied');
+      setTimeout(()=>{copyStatus.classList.remove('visible'); pubkeyBox.classList.remove('copied');}, 1100);
     };
+    updateAll();
   </script>
 </body>
 </html>
