@@ -9,7 +9,7 @@
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       max-width: 700px;
       margin: 0 auto;
-      padding: 1.2em 0.3em 5em 0.3em;
+      padding: 1em 0.2em 4em 0.2em;
       background: #f5f6fa;
       color: #333;
       line-height: 1.6;
@@ -17,113 +17,107 @@
     h1 {
       text-align: center;
       color: #23754b;
-      margin-bottom: 1.2em;
-      font-size: 2.1em;
-      letter-spacing: 0.03em;
+      margin-bottom: 0.7em;
+      font-size: 1.3em;
+      letter-spacing: 0.02em;
     }
     .menu-block {
-      margin: 1.3em 0;
-      padding: 1.05em 1em 1em 1em;
-      border-radius: 16px;
+      margin: 0.6em 0;
+      padding: 0.4em 0.7em 0.6em 0.7em;
+      border-radius: 12px;
       background: #fff;
-      box-shadow: 0 4px 18px 0 rgba(60,70,120,0.06);
-      border-left: 8px solid #e0e4e9;
-      transition: box-shadow 0.18s, transform 0.17s;
+      box-shadow: 0 2px 8px 0 rgba(60,70,120,0.08);
+      border-left: 6px solid #e0e4e9;
       min-width: 0;
+      transition: box-shadow 0.18s, transform 0.17s;
     }
     .menu-block:hover {
-      box-shadow: 0 8px 28px 0 rgba(60,70,120,0.09);
-      transform: translateY(-2px) scale(1.01);
+      box-shadow: 0 6px 18px 0 rgba(60,70,120,0.13);
+      transform: translateY(-1.5px) scale(1.01);
     }
     .block-general { border-left-color: #43a047; }
     .block-register { border-left-color: #1976d2; }
     .block-audit { border-left-color: #ffc107; }
     .block-title {
-      font-size: 1.12em;
+      font-size: 1em;
       font-weight: 600;
-      margin-bottom: 0.6em;
+      margin-bottom: 0.32em;
       color: #333;
       letter-spacing: 0.01em;
-      padding-bottom: 0.18em;
-      border-bottom: 1.5px solid #eef1f5;
-    }
-    .block-description {
-      font-size: 0.96em;
-      color: #757575;
-      margin-bottom: 1em;
-      line-height: 1.55;
+      padding-bottom: 0.13em;
+      border-bottom: 1.2px solid #eef1f5;
     }
     .menu-block a {
       display: flex;
       align-items: center;
       justify-content: flex-start;
       width: 100%;
-      padding: 0.93em 0.8em;
-      margin-bottom: 0.6em;
+      padding: 0.48em 0.5em;
+      margin-bottom: 0.33em;
       color: #fff;
       font-weight: 600;
-      border-radius: 10px;
-      font-size: 1em;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-      transition: background 0.17s, transform 0.13s;
+      border-radius: 7px;
+      font-size: 0.98em;
+      box-shadow: 0 1px 5px rgba(0,0,0,0.06);
+      transition: background 0.13s, transform 0.11s;
       border: none;
-      min-height: 44px;
+      min-height: 34px;
       outline: none;
       text-align: left;
       text-decoration: none;
       letter-spacing: 0.01em;
       cursor: pointer;
-      gap: 0.8em;
+      gap: 0.6em;
     }
     .block-general a { background: #43a047; }
     .block-register a { background: #1976d2; }
     .block-audit a { background: #ffc107; color: #212121;}
     .menu-block a:hover:not(.disabled) {
-      filter: brightness(1.07) contrast(1.08);
-      transform: translateY(-1.5px) scale(1.01);
+      filter: brightness(1.09) contrast(1.09);
+      transform: translateY(-1px) scale(1.01);
     }
     .filename {
-      font-size: 0.98em;
+      font-size: 0.96em;
       font-weight: 600;
       letter-spacing: 0.01em;
     }
     .label {
-      font-size: 0.93em;
+      font-size: 0.91em;
       font-weight: 400;
-      margin-left: 0.5em;
+      margin-left: 0.4em;
       color: #e8f5e9;
-      opacity: 0.92;
+      opacity: 0.89;
       font-style: italic;
     }
     .block-audit .label { color: #888; }
     .nav-bar {
       display: flex;
       justify-content: space-around;
-      padding: 0.8em 0.2em;
+      padding: 0.5em 0.06em;
       background: #ffffff;
-      border-top: 1.5px solid #eee;
+      border-top: 1.2px solid #eee;
       position: fixed;
       left: 0; right: 0;
       bottom: 0;
       z-index: 9;
       max-width: 700px;
       margin: 0 auto;
-      box-shadow: 0 -2px 10px rgba(0,0,0,0.04);
-      border-radius: 14px 14px 0 0;
+      box-shadow: 0 -1.5px 8px rgba(0,0,0,0.04);
+      border-radius: 12px 12px 0 0;
     }
     .nav-bar a {
       flex: 1;
-      padding: 0.7em 0.2em;
+      padding: 0.6em 0.1em;
       text-align: center;
       color: #3f51b5;
       background: none;
       font-weight: 600;
-      border-radius: 8px;
-      margin: 0 0.3em;
-      font-size: 1.04em;
-      min-height: 42px;
+      border-radius: 7px;
+      margin: 0 0.17em;
+      font-size: 0.96em;
+      min-height: 36px;
       text-decoration: none;
-      transition: background 0.15s, color 0.18s;
+      transition: background 0.13s, color 0.13s;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -134,25 +128,24 @@
     }
     .nav-bar a.active {
       color: #2196f3;
-      border-bottom: 2.5px solid #2196f3;
-      padding-bottom: 0.3em;
+      border-bottom: 2px solid #2196f3;
+      padding-bottom: 0.2em;
     }
     .footer-note {
       text-align: center;
-      margin-top: 3em;
-      margin-bottom: 1.3em;
+      margin-top: 2.2em;
+      margin-bottom: 0.8em;
       color: #90a4ae;
-      font-size: 0.89em;
+      font-size: 0.83em;
     }
     @media (max-width: 600px) {
-      body { margin: 0; padding: 0.3em 0.1em 5em 0.1em;}
-      h1 { font-size: 1.18em; margin-bottom: 0.88em; }
-      .menu-block { padding: 0.7em 0.7em 0.9em 0.8em; margin: 0.7em 0;}
-      .block-title { font-size: 0.99em; }
-      .block-description { font-size: 0.91em; }
-      .menu-block a, .nav-bar a { font-size: 0.95em; min-height: 40px; }
-      .footer-note { font-size: 0.81em; }
-      .nav-bar { padding: 0.5em 0.08em;}
+      body { margin: 0; padding: 0.15em 0.06em 4em 0.06em;}
+      h1 { font-size: 1em; margin-bottom: 0.7em; }
+      .menu-block { padding: 0.25em 0.25em 0.5em 0.38em; margin: 0.36em 0;}
+      .block-title { font-size: 0.92em; }
+      .menu-block a, .nav-bar a { font-size: 0.87em; min-height: 28px; }
+      .footer-note { font-size: 0.77em; }
+      .nav-bar { padding: 0.36em 0.03em;}
     }
   </style>
 </head>
