@@ -35,10 +35,14 @@
       box-shadow: 0 8px 28px 0 rgba(60,70,120,0.09);
       transform: translateY(-2px) scale(1.01);
     }
-    .block-key-batch { border-left-color: #ffc107;}
-    .block-action-regen { border-left-color: #2196f3;}
-    .block-results-export { border-left-color: #00bcd4;}
-    .block-audit { border-left-color: #673ab7;}
+    /* Updated block colors based on the new design sections */
+    .block-account-key { border-left-color: #4CAF50;} /* Green for Account & Key Management */
+    .block-issuance-management { border-left-color: #FF9800;} /* Orange for Issuance & Management */
+    .block-transfer-status { border-left-color: #2196F3;} /* Blue for Transfer & Status */
+    .block-audit-proof { border-left-color: #9C27B0;} /* Purple for Audit & Proof */
+    .block-export-options { border-left-color: #00BCD4;} /* Cyan for Export Options */
+
+
     .block-title {
       font-size: 1.17em;
       font-weight: 600;
@@ -76,11 +80,17 @@
       letter-spacing: 0.01em;
       cursor: pointer;
     }
-    .btn-green { background: #3ec87e; }
-    .btn-blue { background: #2196F3; }
-    .btn-yellow { background: #ffc107; color: #313131;}
-    .btn-cyan { background: #00bcd4; }
-    .btn-purple { background: #673ab7; }
+    /* Specific button colors based on actions */
+    .btn-create { background: #4CAF50; } /* Green for creation actions */
+    .btn-register { background: #FF9800; } /* Orange for registration actions */
+    .btn-transfer { background: #2196F3; } /* Blue for transfer actions */
+    .btn-regen { background: #607d8b; } /* Grey-blue for regenerate actions */
+    .btn-audit { background: #9C27B0; } /* Purple for audit actions */
+    .btn-export-ticket { background: #FFC107; color: #313131;} /* Yellow for export ticket */
+    .btn-export-qr { background: #00BCD4; } /* Cyan for export QR */
+    .btn-export-log { background: #4DD0E1; } /* Lighter cyan for export log */
+
+
     .menu-block a:hover:not(.disabled) {
       filter: brightness(1.06) contrast(1.08);
       transform: translateY(-1.5px) scale(1.01);
@@ -164,32 +174,43 @@
 <body>
   <h1>DTC: Magic Chain System</h1>
 
-  <div class="menu-block block-key-batch">
-    <div class="block-title">Key & Batch Information</div>
-    <p class="block-description">เริ่มต้นด้วยการสร้างกุญแจ Public Key และชุด QR Code สำหรับการใช้งานระบบ</p>
-    <a href="generate_key.html" class="btn-green">Generate Public Key</a>
-    <a href="generate_qr_batch.html" class="btn-green">Generate QR Batch</a>
+  <div class="menu-block block-account-key">
+    <div class="block-title">1. Account & Key Management</div>
+    <p class="block-description">เริ่มต้นจัดการบัญชีของคุณด้วยการสร้างหรือจัดการคีย์ Public Key</p>
+    <a href="generate_key.html" class="btn-create">Generate/Manage Public Key</a>
   </div>
 
-  <div class="menu-block block-action-regen">
-    <div class="block-title">Regenerate QR</div>
-    <p class="block-description">สร้าง QR Code ใหม่เมื่อจำเป็นต้องอัปเดตหรือเปลี่ยนแปลงข้อมูล</p>
-    <a href="regenerate_qr.html" class="btn-blue disabled">Regenerate QR</a>
+  <div class="menu-block block-issuance-management">
+    <div class="block-title">2. Asset Issuance & Management</div>
+    <p class="block-description">ลงทะเบียน Master/Agent และออก QR Code เพื่อเริ่มต้นการใช้งานสินทรัพย์ดิจิทัล</p>
+    <a href="register_master.html" class="btn-register">Register Master Node</a>
+    <a href="agent_register.html" class="btn-register">Register Agent Node</a>
+    <a href="register_qr.html" class="btn-register">Register QR Code (Initial Ownership)</a>
+    <a href="generate_qr_batch.html" class="btn-create">Generate QR Batch (Master/Agent)</a>
   </div>
 
-  <div class="menu-block block-results-export">
-    <div class="block-title">Results & Export</div>
-    <p class="block-description">ดูตัวอย่าง QR และส่งออกข้อมูล (ตั๋ว, รูปภาพ, Log ฯลฯ) เมื่อสร้าง QR สำเร็จ</p>
-    <a href="qr_preview.html" class="btn-blue disabled">View QR Preview</a>
-    <a href="export_ticket.html" class="btn-yellow disabled">Export Ticket</a>
-    <a href="export_qr.html" class="btn-blue disabled">Export QR</a>
-    <a href="export_log.html" class="btn-cyan disabled">Export Log</a>
+  <div class="menu-block block-transfer-status">
+    <div class="block-title">3. Transfer & Status</div>
+    <p class="block-description">โอนกรรมสิทธิ์ QR Code หรือตรวจสอบสถานะความเป็นเจ้าของปัจจุบัน</p>
+    <a href="transfer.html" class="btn-transfer">Transfer QR Code Ownership</a>
+    <a href="verify_qr.html" class="btn-blue">Check QR Status (Current Owner)</a>
   </div>
 
-  <div class="menu-block block-audit">
-    <div class="block-title">Audit Chain</div>
-    <p class="block-description">ตรวจสอบความถูกต้องและประวัติธุรกรรมของ QR/Commitment Hash</p>
-    <a href="audit_chain.html" class="btn-purple">Audit QR/Commitment Hash</a>
+  <div class="menu-block block-audit-proof">
+    <div class="block-title">4. Audit & Proof</div>
+    <p class="block-description">ตรวจสอบความถูกต้องของ QR Code และประวัติธุรกรรมทั้งหมด</p>
+    <a href="regenerate_qr_hash.html" class="btn-regen disabled">Regenerate QR Hash (Verify Content)</a>
+    <a href="audit_chain.html" class="btn-audit">Audit Chain (Trace Lineage)</a>
+    <a href="verify_log.html" class="btn-audit">Audit Full Log (Transaction History)</a>
+  </div>
+
+  <div class="menu-block block-export-options">
+    <div class="block-title">5. Export Options</div>
+    <p class="block-description">ส่งออกข้อมูลสำคัญ เช่น Ticket, รูปภาพ QR หรือ Log เพื่อการตรวจสอบออฟไลน์</p>
+    <a href="qr_preview.html" class="btn-export-qr disabled">View QR Preview</a>
+    <a href="export_ticket.html" class="btn-export-ticket disabled">Export Ticket (Full Metadata)</a>
+    <a href="export_qr.html" class="btn-export-qr disabled">Export QR Image</a>
+    <a href="export_log.html" class="btn-export-log disabled">Export System Logs</a>
   </div>
 
   <div class="nav-bar">
