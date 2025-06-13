@@ -1,8 +1,10 @@
 <!DOCTYPE html>
-<html lang="en"> <head>
+<html lang="en">
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>DTC: Magic Chain System - Decentralized Trust Community</title> <style>
+    <title>DTC: Audit Chain - Decentralized Trust Community</title>
+    <style>
         /* Base Styles - Keep consistent with your existing design */
         body {
             font-family: Arial, sans-serif;
@@ -39,63 +41,139 @@
         .intro-section p {
             margin: 0.5em 0;
         }
-        .menu-block {
+
+        /* General Section Block Styling */
+        .section-block {
             margin: 1.1em 0;
             padding: 1em;
             border-radius: 12px;
-            box-shadow: 0 2px 9px #edf1f6; /* Consistent shadow for sections */
+            box-shadow: 0 2px 9px #edf1f6;
         }
         .block-title {
             font-size: 1.07em;
             font-weight: bold;
             margin-bottom: 0.68em;
-            padding-bottom: 0.5em; /* Separator for title */
+            padding-bottom: 0.5em;
             border-bottom: 1px solid rgba(0,0,0,0.1);
-            color: #555; /* Slightly softer color for block titles */
+            color: #555;
         }
-        /* Section specific background and left border colors */
-        .block-green { background: #eafaf0; border-left: 6px solid #219150; }
-        .block-blue  { background: #e3f2fd; border-left: 6px solid #2196f3; }
-        .block-yellow { background: #fff9e5; border-left: 6px solid #ffd600; }
-        .block-purple { background: #f3eafe; border-left: 6px solid #9575cd; }
-        
-        /* Button styling within each section */
-        .menu-block a {
-            display: block;
-            width: 100%;
-            padding: 0.77em 0.4em;
-            margin-bottom: 0.53em;
-            color: #fff; /* Default text color for buttons */
+
+        /* Specific Section Styles (Colors based on UIUX_DTC.txt) */
+        .qr-input-block {
+            background: #f6f7fa; /* Light grey for QR input */
+            border-left: 6px solid #90a4ae; /* Matching grey border */
+        }
+        .chain-index-block {
+            background: #fffde7; /* Light yellow for index, as it holds core info */
+            border-left: 6px solid #ffd600; /* Matching yellow border */
+        }
+        .result-preview-block {
+            background: #e3f2fd; /* Light blue for results */
+            border-left: 6px solid #2196f3; /* Matching blue border */
+        }
+        .audit-chain-block {
+            background: #eafaf0; /* Light green for audit details */
+            border-left: 6px solid #219150; /* Matching green border */
+        }
+
+        /* Input and Button Styling */
+        textarea, input[type="text"] {
+            width: calc(100% - 24px); /* Full width minus padding */
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background-color: #ffffff; /* White background for inputs */
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.77em 1.2em;
+            margin-right: 10px; /* Space between buttons */
+            margin-bottom: 10px;
+            color: #fff;
             font-weight: bold;
             border-radius: 8px;
             font-size: 1.09em;
             text-align: center;
             text-decoration: none;
-            box-shadow: 0 2px 7px rgba(39,174,96,0.07); /* Shadow for buttons */
-            transition: background 0.13s, filter 0.13s; /* Smooth transition on hover */
+            cursor: pointer;
+            border: none;
+            transition: background 0.13s, filter 0.13s;
+            box-shadow: 0 2px 7px rgba(0,0,0,0.07);
         }
-        /* Specific button background colors */
-        .menu-block.block-green a { background: #219150; }
-        .menu-block.block-blue a { background: #2196f3; }
-        .menu-block.block-yellow a { background: #ffd600; color: #222; } /* Dark text on yellow for contrast */
-        .menu-block.block-purple a { background: #9575cd; }
-        
-        .menu-block a:hover {
-            filter: brightness(0.93); /* Slightly darken button on hover */
+        .btn-primary {
+            background: #2196f3; /* Blue */
         }
-        
+        .btn-secondary {
+            background: #90a4ae; /* Grey for upload/scan */
+        }
+        .btn-primary:hover, .btn-secondary:hover {
+            filter: brightness(0.93);
+        }
+
+        /* Chain Index Specific Styles */
+        .chain-index ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .chain-index li {
+            background-color: #fff;
+            border: 1px solid #eee;
+            border-radius: 6px;
+            padding: 10px 15px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.95em;
+            color: #444;
+        }
+        .chain-index li span {
+            flex-grow: 1;
+        }
+        .expand-btn {
+            background: #ede7f6; /* Light purple for expand button */
+            color: #5e35b1;
+            border: none;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1em;
+            line-height: 1;
+            text-align: center;
+            transition: background 0.13s;
+        }
+        .expand-btn:hover {
+            background: #d1c4e9;
+        }
+        .chain-detail {
+            background-color: #fafafa;
+            border-top: 1px dashed #eee;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-size: 0.85em;
+            color: #666;
+            line-height: 1.4;
+        }
+
+        /* Footer */
+        .footer-note {
+            text-align: center;
+            margin-top: 2.4em;
+            color: #b0bec5;
+            font-size: 0.95em;
+        }
+
         /* Responsive adjustments for mobile devices */
         @media (max-width: 600px) {
             body { margin: 0.4em; padding: 0.07em;}
-            .menu-block { padding: 0.7em 0.2em;}
-            .menu-block a { font-size: 1em; padding: 0.6em 0.2em; }
-        }
-
-        .footer-note {
-            text-align:center;
-            margin-top:2.4em;
-            color:#b0bec5;
-            font-size:0.95em;
+            .section-block { padding: 0.7em 0.2em;}
+            .btn { font-size: 1em; padding: 0.6em 0.8em; margin-right: 5px; }
+            textarea, input[type="text"] { width: calc(100% - 14px); padding: 7px; } /* Adjust padding for smaller screens */
         }
     </style>
 </head>
@@ -104,36 +182,88 @@
 
     <div class="intro-section">
         <p>Welcome to <strong>DTC: Magic Chain System</strong> – the <strong>Decentralized Trust Community</strong>.</p>
-        <p>The "Magic Chain System" is our nickname, representing a magical rope that seamlessly connects the physical and digital worlds, enabling self-custody and 100% auditable traceability.</p>
+        <p>The "Magic Chain System" enables <strong>self-custody</strong> and <strong>100% auditable traceability</strong>. Begin your audit by entering QR content or a Commitment Hash below.</p>
     </div>
 
-    <div class="menu-block block-green">
-        <div class="block-title">Step 1: User Key & QR</div>
-        <a href="generate_key.html">Generate My Public Key</a>
-        <a href="generate_qr_hash.html">Generate New QR Hash</a>
-        <a href="regenerate_qr_hash.html">Regenerate/Verify QR Hash</a>
+    <div class="section-block qr-input-block">
+        <div class="block-title">Enter or Scan QR Content / Commitment Hash</div>
+        <textarea id="qrInput" placeholder="Paste QR Content (JSON String) or Commitment Hash (Hash2) here..." rows="6"></textarea>
+        <button class="btn btn-primary" id="expandChainBtn">Expand Chain</button>
+        <button class="btn btn-secondary" id="uploadQrBtn">Upload QR Image</button>
+        <button class="btn btn-secondary" id="scanQrBtn">Scan QR (Camera)</button>
+        <label class="label-hint">Paste content from a QR code or Hash2 directly. Use buttons to upload an image or scan with camera.</label>
     </div>
 
-    <div class="menu-block block-blue">
-        <div class="block-title">Step 2: Register & Transfer</div>
-        <a href="register_qr.html">Register QR Code</a>
-        <a href="transfer.html">Transfer QR Code</a>
-    </div>
-
-    <div class="menu-block block-yellow">
-        <div class="block-title">Step 3: Audit & Status</div>
-        <a href="verify_log.html">Audit QR & History</a>
-    </div>
-
-    <div class="menu-block block-purple">
-        <div class="block-title">Step 4: Authority Tools</div>
-        <a href="register_master.html">Register Master Node</a>
-        <a href="master_dashboard.html">Master Dashboard</a>
-        <a href="agent_register.html">Register Agent Node</a>
+    <div class="section-block chain-index-block" id="chainIndexSection" style="display:none;">
+        <div class="block-title">Index of Chain</div>
+        <ul id="chainIndexList">
+            </ul>
     </div>
 
     <p class="footer-note">
         Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
     </p>
+
+    <script src="chain-index.js"></script>
+    <script src="audit-chain.js"></script>
+    <script src="export.js"></script>
+    <script>
+        // Basic UI interaction for the index.html page
+        document.addEventListener('DOMContentLoaded', () => {
+            const expandChainBtn = document.getElementById('expandChainBtn');
+            const qrInput = document.getElementById('qrInput');
+            const chainIndexSection = document.getElementById('chainIndexSection');
+            const chainIndexList = document.getElementById('chainIndexList');
+
+            expandChainBtn.addEventListener('click', () => {
+                const inputContent = qrInput.value.trim();
+                if (inputContent) {
+                    // In a real implementation, this would call a function from chain-index.js
+                    // For now, we'll just show the section and add a dummy item
+                    chainIndexSection.style.display = 'block';
+                    chainIndexList.innerHTML = `
+                        <li>
+                            <span>Processing "${inputContent.substring(0, 30)}..."</span>
+                            <button class="expand-btn">[+]</button>
+                            <div class="chain-detail" style="display:none;">
+                                <div>Simulated details based on input.</div>
+                                <div>This section will be populated by 'chain-index.js'</div>
+                                <button class="btn btn-primary btn-small" onclick="alert('Regen functionality will be here!')">Regen This QR</button>
+                                <button class="btn btn-primary btn-small" onclick="alert('Transfer functionality will be here!')">Transfer This QR</button>
+                                <button class="btn btn-primary btn-small" onclick="alert('Audit functionality will be here!')">Audit This QR</button>
+                            </div>
+                        </li>
+                    `;
+                } else {
+                    alert('Please enter QR Content or a Commitment Hash to expand the chain.');
+                    chainIndexSection.style.display = 'none';
+                    chainIndexList.innerHTML = '';
+                }
+            });
+
+            // Event listener for expanding/collapsing list items
+            chainIndexList.addEventListener('click', (event) => {
+                if (event.target.classList.contains('expand-btn')) {
+                    const detailDiv = event.target.nextElementSibling;
+                    if (detailDiv && detailDiv.classList.contains('chain-detail')) {
+                        const isHidden = detailDiv.style.display === 'none';
+                        detailDiv.style.display = isHidden ? 'block' : 'none';
+                        event.target.textContent = isHidden ? '[-]' : '[+]';
+                    }
+                }
+            });
+
+            // Placeholder for Upload QR and Scan QR functionalities
+            document.getElementById('uploadQrBtn').addEventListener('click', () => {
+                alert('Upload QR Image functionality is coming soon!');
+                // This would typically open a file input dialog
+            });
+            document.getElementById('scanQrBtn').addEventListener('click', () => {
+                alert('Scan QR (Camera) functionality is coming soon!');
+                // This would typically access the user's camera
+            });
+        });
+    </script>
 </body>
 </html>
+ตรวจสอบ
