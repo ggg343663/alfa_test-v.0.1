@@ -1,43 +1,13 @@
 <!--
 DTC Minimal UI/UX Logic
 
-- ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
 - กลุ่ม Ticket/Slot/Meta: สีเทาอ่อน #f6f7fa
 - กลุ่ม Password, PIN, Secret: สีเหลืองอ่อน #fffde7
-- กลุ่มปุ่ม Action (Generate/Export/Regen): ฟ้า, เหลือง, ฟ้าอ่อน ตามลำดับ
-- Navigation Bar: ปุ่มม่วงจาง/เทาอ่อน (Back/Home/Next) ขนาดเท่ากันทั้ง site
-
-[Section A] Key & Batch Info  
-    - Password, PIN, Secret, Batch Name, จำนวน QR (ปุ่ม +/– หรือ custom)
-    - label/hint สีเทาอ่อน #90a4ae, ขนาดเล็กใต้ input
+- กลุ่มปุ่ม Action (Generate/Export/Regen/Confirm): ฟ้า→เขียว (gradient)
+- Navigation Bar: ปุ่มม่วงจาง/เทาอ่อน (Back/Home/Next) ขนาดเท่ากัน
 
 [Section B] Action  
-    - ปุ่มฟ้าใหญ่ "Generate QR Batch"
-
-[Section C] ผลลัพธ์/Preview  
-    - QR Preview Box (PNG/SVG), hash1, Commitment Box (hash2 สีฟ้าหรือเทาอ่อน)
-    - ปุ่มเหลือง Export Ticket / ฟ้า Export QR / ฟ้าอ่อน Export Log
-
-[Section D] Regen QR  
-    - ช่อง Ticket (สีเทาอ่อน), ปุ่ม Upload/QR
-    - ช่อง Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
-    - Password, PIN, Secret (เหลืองอ่อน)
-    - ปุ่ม Regen (ฟ้า)
-
-[Section E] Audit Chain  
-    - Input QR/Commitment Hash (hash2) + ปุ่ม Audit (ฟ้าเล็ก)
-    - กล่อง audit chain (เจ้าของ/ลำดับ chain), expand/collapse ได้
-
-[Section F] Navigation Bar  
-    - Back | Home | Next (ปุ่มขนาดเท่ากัน)
-
-Style  
-    - input/box สูง 36–44px, margin/padding 12–20px
-    - label/hint #90a4ae, ขนาดเล็ก
-    - ผลลัพธ์/preview/log ไม่กินพื้นที่หลัก
-    - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
-    - รองรับ mobile (responsive)
-    - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
+    - ปุ่มฟ้าใหญ่ "Register" (แต่เปิด modal preview ให้คอนเฟิร์มสีเขียว)
 -->
 <!DOCTYPE html>
 <html lang="en">
@@ -56,7 +26,7 @@ Style
     }
     h2 {
       text-align: center;
-      color: #2c3e50;
+      color: #219150;
       margin-bottom: 1em;
     }
     label {
@@ -74,9 +44,7 @@ Style
       box-sizing: border-box;
       margin-bottom: 1em;
     }
-    textarea {
-      min-height: 3em;
-    }
+    textarea { min-height: 3em; }
     .btn {
       display: inline-block;
       padding: 0.6em 1.2em;
@@ -90,37 +58,33 @@ Style
       text-align: center;
     }
     #reg-btn {
-      background: #219150;
+      background: linear-gradient(90deg,#2196f3 70%,#219150 100%);
       color: #fff;
+      box-shadow: 0 2px 7px rgba(36, 145, 80, 0.12);
     }
     #reg-btn[disabled] {
       background: #b4dcc3;
       cursor: not-allowed;
-    }
-    #reg-btn:hover:not([disabled]) {
-      background: #176d38;
-    }
-    #clear-btn {
-      background: #facc15;
-      color: #885e00;
-    }
-    #clear-btn:hover {
-      background: #eab308;
-    }
-    #back-btn {
-      background: #aaa;
       color: #fff;
     }
-    #back-btn:hover {
-      background: #888;
+    #reg-btn:hover:not([disabled]) {
+      filter: brightness(0.95);
     }
+    #clear-btn {
+      background: #ffd600;
+      color: #222;
+    }
+    #clear-btn:hover { background: #ffb300; }
+    #back-btn {
+      background: #ede7f6;
+      color: #246bfd;
+    }
+    #back-btn:hover { background: #d1c4e9; }
     #export-btn {
       background: #2563eb;
       color: #fff;
     }
-    #export-btn:hover {
-      background: #1d4ed8;
-    }
+    #export-btn:hover { background: #1d4ed8; }
     #copy-qr-btn {
       background: #2563eb;
       color: #fff;
@@ -128,9 +92,7 @@ Style
       padding: 0.35em 1em;
       font-size: 1em;
     }
-    #copy-qr-btn:active {
-      background: #1747a1;
-    }
+    #copy-qr-btn:active { background: #1747a1; }
     .status {
       margin-top: 1em;
       font-size: 1em;
@@ -154,19 +116,75 @@ Style
       gap: 0.6em;
       flex-wrap: wrap;
     }
+    /* Modal Preview */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      left: 0; top: 0; width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.20);
+      z-index: 99;
+      justify-content: center; align-items: center;
+    }
+    .modal-content {
+      background: #fff;
+      border-radius: 13px;
+      padding: 2em 1.4em 1.3em 1.4em;
+      max-width: 420px;
+      margin: 0 auto;
+      box-shadow: 0 8px 32px #21915023, 0 2px 8px #36d86d0c;
+      text-align: center;
+      position: relative;
+    }
+    .modal-content h3 {
+      margin: 0 0 1em 0;
+      color: #219150;
+      font-size: 1.25em;
+    }
+    .modal-preview-list {
+      text-align: left;
+      margin: 0 0 1.5em 0;
+      font-size: 1.03em;
+      color: #234;
+      background: #f6f7fa;
+      border-radius: 7px;
+      padding: 1em;
+      border-left: 5px solid #219150;
+    }
+    .btn-confirm {
+      display: block;
+      width: 100%;
+      margin: 1em 0 0 0;
+      background: linear-gradient(90deg,#219150 75%,#44cc77 100%);
+      color: #fff;
+      font-size: 1.13em;
+      font-weight: bold;
+      border: none;
+      border-radius: 8px;
+      padding: 1em 0;
+      cursor: pointer;
+      transition: background .13s, filter .13s;
+      box-shadow: 0 4px 10px rgba(36,145,80,0.08);
+    }
+    .btn-confirm:hover { filter: brightness(0.96);}
+    .btn-cancel {
+      display: block;
+      width: 100%;
+      margin: 0.7em 0 0 0;
+      background: #b0bec5;
+      color: #fff;
+      font-size: 1em;
+      border: none;
+      border-radius: 8px;
+      padding: 0.7em 0;
+      cursor: pointer;
+      transition: background .13s;
+    }
+    .btn-cancel:hover { background: #90a4ae;}
     @media (max-width: 480px) {
-      body {
-        margin: 1em;
-        padding: 0.5em;
-      }
-      .btn {
-        width: 100%;
-        margin: 0.3em 0;
-      }
-      .action-row {
-        flex-direction: column;
-        gap: 0.3em;
-      }
+      body { margin: 1em; padding: 0.5em; }
+      .btn { width: 100%; margin: 0.3em 0;}
+      .action-row { flex-direction: column; gap: 0.3em; }
+      .modal-content { padding: 1em 0.3em 1em 0.3em; }
     }
   </style>
 </head>
@@ -203,6 +221,16 @@ Style
     If no backend, data is saved only in this browser (Demo mode).
   </p>
 
+  <!-- Modal Preview -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal-content">
+      <h3>Preview Registration</h3>
+      <div class="modal-preview-list" id="previewList"></div>
+      <button class="btn-confirm" id="confirmBtn">Confirm & Register</button>
+      <button class="btn-cancel" id="cancelBtn">Cancel</button>
+    </div>
+  </div>
+
   <script>
     const pubInput = document.getElementById('pub-key-input');
     const qrInput = document.getElementById('qr-hash-input');
@@ -216,6 +244,12 @@ Style
     const tsRow = document.getElementById('ts-row');
     const tsEl = document.getElementById('ts');
     let lastLogObj = null;
+
+    // Modal
+    const modal = document.getElementById('modalOverlay');
+    const previewList = document.getElementById('previewList');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
 
     // Auto-fill public key and QR hash from localStorage
     window.addEventListener('DOMContentLoaded', () => {
@@ -240,7 +274,6 @@ Style
     });
 
     // Clear form
-    // Clear form
     clearBtn.addEventListener('click', () => {
       pubInput.value = '';
       qrInput.value = '';
@@ -253,7 +286,7 @@ Style
       localStorage.removeItem('dtc_qrHash');
     });
 
-    // Register QR
+    // Show Preview Modal
     regBtn.addEventListener('click', () => {
       const pub       = pubInput.value.trim();
       const qr        = qrInput.value.trim();
@@ -265,8 +298,22 @@ Style
         tsRow.style.display = 'none';
         return;
       }
+      // Build preview info
+      previewList.innerHTML = `
+        <b>Public Key:</b> <code>${pub}</code><br>
+        <b>QR Hash:</b> <code>${qr}</code><br>
+        <b>Owner Name:</b> ${ownerName ? ownerName : '<span style="color:#b0bec5;">-</span>'}
+      `;
+      modal.style.display = "flex";
+    });
 
+    // Confirm from modal
+    confirmBtn.addEventListener('click', () => {
+      const pub       = pubInput.value.trim();
+      const qr        = qrInput.value.trim();
+      const ownerName = ownerInput.value.trim();
       regBtn.disabled = true;
+      modal.style.display = "none";
       statusMsg.style.color = '#26733e';
       statusMsg.textContent = '⏳ Registering...';
 
@@ -298,6 +345,9 @@ Style
       lastLogObj = logObj;
     });
 
+    // Cancel Modal
+    cancelBtn.addEventListener('click', ()=>{ modal.style.display = "none"; });
+
     // Export log as .txt
     exportBtn.addEventListener('click', () => {
       if (!lastLogObj) return;
@@ -312,6 +362,17 @@ Registered At: ${lastLogObj.registeredAt}`;
       link.download = `qr_reg_log_${Date.now()}.txt`;
       link.click();
       URL.revokeObjectURL(url);
+    });
+
+    // ESC ปิด modal
+    document.addEventListener('keydown', (e) => {
+      if (modal.style.display === "flex" && (e.key === "Escape" || e.key === "Esc")) {
+        modal.style.display = "none";
+      }
+    });
+    // click นอกกล่อง modal เพื่อปิด
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) modal.style.display = "none";
     });
   </script>
 </body>
