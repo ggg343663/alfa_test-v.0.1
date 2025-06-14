@@ -7,194 +7,55 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: 'Inter', Arial, sans-serif; /* Changed to Inter for consistency */
-            background-color: #f0f4f8; /* Light gray background */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            padding: 1.5rem; /* Responsive padding */
+            font-family: 'Inter', Arial, sans-serif;
+            background-color: #f0f4f8;
+            display: flex; justify-content: center; align-items: center;
+            min-height: 100vh; margin: 0; padding: 1.5rem;
         }
-        .main {
-            background-color: #ffffff;
-            border-radius: 1rem; /* Rounded corners */
-            box-shadow: 0 8px 40px rgba(36, 107, 253, 0.07); /* Soft blue shadow */
-            padding: 2.5rem;
-            width: 100%;
-            max-width: 28rem; /* Max width for mobile responsiveness */
-            text-align: center;
-            box-sizing: border-box; /* Include padding in width */
-        }
-        .nav-row {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 1.5rem;
-        }
-        .nav-btn {
-            background-color: #ede7f6; /* Light purple/grey */
-            color: #246bfd; /* Blue */
-            border: none;
-            border-radius: 0.5rem; /* Rounded corners */
-            padding: 0.53em 1.4em; /* Adjust padding */
-            font-size: 1.03em;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.18s ease;
-            height: 44px; /* Fixed height for buttons */
-            min-width: 80px; /* Ensure buttons are roughly same size */
-        }
-        .nav-btn:hover { background-color: #d1c4e9; } /* Darker purple on hover */
-
-        h2 {
-            text-align: center;
-            color: #26733e; /* Green for titles */
-            margin-bottom: 1.2rem;
-            font-size: 1.875rem; /* Equivalent to text-3xl */
-            font-weight: bold;
-        }
-        .section-title {
-            color: #26733e; /* Green for section titles */
-            font-size: 1.25rem; /* text-xl */
-            font-weight: 600;
-            margin-top: 1.5rem;
-            margin-bottom: 1rem;
-            text-align: left;
-        }
-
-        .input-group {
-            margin-bottom: 1.13rem;
-            background-color: #fffde7; /* Light yellow background for input groups */
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            border: 1px solid #ffe0b2; /* Light orange border */
-        }
-        label {
-            font-weight: bold;
-            color: #26733e; /* Green */
-            display: block;
-            margin-bottom: 0.21em;
-            font-size: 0.95em; /* Adjusted font size */
-            text-align: left;
-        }
-        input[type="text"] {
-            width: 100%;
-            padding: 0.7em;
-            border-radius: 0.5rem; /* Rounded corners */
-            border: 1.5px solid #dde6ee;
-            font-size: 1.08em;
-            margin-bottom: 0.19em;
-            background-color: #f7fbff; /* Light blue background for inputs */
-            height: 44px; /* Fixed height for inputs */
-            box-sizing: border-box; /* Include padding in width */
-            color: #222; /* Default text color */
-        }
-        /* Specific input text color for Public Key */
-        #masterPublicKey {
-            color: #26733e; /* Green text color */
-        }
-        /* Specific input background and text color for Identity QR Hash */
-        #identityQrHash {
-            background-color: #f6f7fa; /* Light gray background */
-            color: #246bfd; /* Blue text color */
-        }
-
-        .counter { font-size: 0.85em; color: #90a4ae; float: right; } /* Smaller, lighter gray */
-
-        .btn-action {
-            display: block;
-            width: 100%;
-            padding: 0.9em 0;
-            border-radius: 0.625rem; /* Adjusted border-radius */
-            border: none;
-            background: linear-gradient(90deg, #2196f3 70%, #26733e 100%); /* Blue to Green gradient */
-            color: #fff;
-            font-size: 1.11em;
-            font-weight: 600;
-            margin: 1.2em 0 0.7em 0;
-            cursor: pointer;
-            box-shadow: 0 2px 8px rgba(36, 107, 253, 0.1); /* Soft blue shadow */
-            transition: background 0.18s ease, transform 0.1s ease;
-            height: 48px; /* Slightly taller for action button */
-        }
-        .btn-action:hover {
-            background: linear-gradient(90deg, #1976D2 70%, #1c5e2d 100%); /* Darker on hover */
-            transform: translateY(-1px);
-        }
-        .btn-action:active { background-color: #176d38; transform: translateY(0); }
+        .main { background-color: #fff; border-radius: 1rem; box-shadow: 0 8px 40px rgba(36,107,253,0.07); padding: 2.5rem; width: 100%; max-width: 28rem; text-align: center; box-sizing: border-box;}
+        .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
+        .nav-btn { background-color: #ede7f6; color: #246bfd; border: none; border-radius: 0.5rem; padding: 0.53em 1.4em; font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background-color 0.18s ease; height: 44px; min-width: 80px; }
+        .nav-btn:hover { background-color: #d1c4e9; }
+        h2 { text-align: center; color: #26733e; margin-bottom: 1.2rem; font-size: 1.875rem; font-weight: bold; }
+        .input-group { margin-bottom: 1.13rem; background-color: #fffde7; border-radius: 0.75rem; padding: 1.25rem; border: 1px solid #ffe0b2; }
+        label { font-weight: bold; color: #26733e; display: block; margin-bottom: 0.21em; font-size: 0.95em; text-align: left; }
+        input[type="text"] { width: 100%; padding: 0.7em; border-radius: 0.5rem; border: 1.5px solid #dde6ee; font-size: 1.08em; margin-bottom: 0.19em; background-color: #f7fbff; height: 44px; box-sizing: border-box; color: #222; }
+        #masterPublicKey { color: #26733e; }
+        #identityQrHash { background-color: #f6f7fa; color: #246bfd; }
+        .counter { font-size: 0.85em; color: #90a4ae; float: right; }
+        .btn-action { display: block; width: 100%; padding: 0.9em 0; border-radius: 0.625rem; border: none;
+            background: linear-gradient(90deg,#2196f3 70%,#219150 100%);
+            color: #fff; font-size: 1.11em; font-weight: 600; margin: 1.2em 0 0.7em 0; cursor: pointer;
+            box-shadow: 0 2px 8px rgba(36,107,253,0.1); transition: background 0.18s, transform 0.1s; height: 48px; }
+        .btn-action:hover { background: linear-gradient(90deg,#1976D2 70%,#1c5e2d 100%); transform: translateY(-1px);}
         .btn-action[disabled] { opacity: 0.54; cursor: not-allowed; }
-
-        .btn-scan-paste {
-            background-color: #ffd600; /* Yellow */
-            color: #222;
-            padding: 0.4em 1em; /* Adjusted padding */
-            border-radius: 0.5rem;
-            border: none;
-            cursor: pointer;
-            font-size: 0.95em;
-            font-weight: 500;
-            margin-top: 0.5em; /* Spacing */
-            transition: background-color 0.18s ease;
-            display: flex; /* For icon alignment */
-            align-items: center;
-            justify-content: center;
-        }
-        .btn-scan-paste:hover { background-color: #e0b300; } /* Darker yellow */
+        .btn-scan-paste { background-color: #ffd600; color: #222; padding: 0.4em 1em; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.95em; font-weight: 500; margin-top: 0.5em; transition: background-color 0.18s ease; display: flex; align-items: center; justify-content: center;}
+        .btn-scan-paste:hover { background-color: #e0b300; }
         .btn-scan-paste svg { margin-right: 0.3em; }
-
-        .msg-box {
-            text-align: center;
-            margin: 1.1em 0 0.6em 0;
-            font-size: 1.02em;
-            padding: 0.5em;
-            border-radius: 0.5em;
-        }
+        .msg-box { text-align: center; margin: 1.1em 0 0.6em 0; font-size: 1.02em; padding: 0.5em; border-radius: 0.5em; }
         .msg-error { color: #c41e1e; background: #fff2f2; border-left: 5px solid #c41e1e; }
         .msg-success { color: #16774a; background: #eafff1; border-left: 5px solid #31e57a; }
         .warn-msg { color:#b91c1c; background:#fbe7e7; padding:0.5em 0.8em; border-radius:7px; margin:0.36em 0 0.8em 0; font-size:0.9em;}
         .note-text { font-size: 0.9em; color: #90a4ae; text-align: left; margin-top: 1.15em;}
-
-        .preview-box {
-            background-color: #f6fafd; /* Light blue/gray */
-            border: 1.5px solid #dde6ee;
-            border-radius: 0.625rem;
-            padding: 1.2em 1em; /* Adjusted padding */
-            margin: 1em 0 0.4em 0;
-            font-size: 0.97em;
-            color: #246bfd; /* Blue text */
-            word-break: break-all;
-            max-height: 180px; /* Increased height for preview */
-            overflow: auto; /* Changed to auto for combined scroll */
-            display: none;
-            text-align: left;
-        }
+        .preview-box { background-color: #f6fafd; border: 1.5px solid #dde6ee; border-radius: 0.625rem; padding: 1.2em 1em; margin: 1em 0 0.4em 0; font-size: 0.97em; color: #246bfd; word-break: break-all; max-height: 180px; overflow: auto; display: none; text-align: left;}
         .preview-title { color: #26733e; font-size: 1.04em; margin-bottom:0.2em;}
-        .preview-box pre {
-            background: none;
-            padding: 0;
-            font-size: 0.95em;
-            color: #246bfd;
-            white-space: pre-wrap; /* Wrap long lines */
-        }
-        .copy-json-btn {
-            background-color: #2196f3; /* Blue */
-            color: #fff;
-            padding: 0.3em 0.8em;
-            border-radius: 0.5rem;
-            border: none;
-            cursor: pointer;
-            font-size: 0.9em;
-            margin-top: 0.5em;
-            transition: background-color 0.18s ease;
-        }
+        .preview-box pre { background: none; padding: 0; font-size: 0.95em; color: #246bfd; white-space: pre-wrap; }
+        .copy-json-btn { background-color: #2196f3; color: #fff; padding: 0.3em 0.8em; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.9em; margin-top: 0.5em; transition: background-color 0.18s ease;}
         .copy-json-btn:hover { background-color: #1976D2; }
-
-        /* Responsive adjustments */
-        @media (max-width: 640px) {
-            .main { padding: 1.5rem 1rem; max-width: 100%; }
+        /* Modal Confirm */
+        .modal-overlay { display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.20); z-index: 99; justify-content: center; align-items: center;}
+        .modal-content { background: #fff; border-radius: 13px; padding: 2em 1.4em 1.3em 1.4em; max-width: 420px; margin: 0 auto; box-shadow: 0 8px 32px #21915023, 0 2px 8px #36d86d0c; text-align: center; position: relative;}
+        .modal-content h3 { margin: 0 0 1em 0; color: #219150; font-size: 1.25em; }
+        .modal-preview-list { text-align: left; margin: 0 0 1.5em 0; font-size: 1.03em; color: #234; background: #f6f7fa; border-radius: 7px; padding: 1em; border-left: 5px solid #219150;}
+        .btn-confirm { display: block; width: 100%; margin: 1em 0 0 0; background: linear-gradient(90deg,#219150 75%,#44cc77 100%); color: #fff; font-size: 1.13em; font-weight: bold; border: none; border-radius: 8px; padding: 1em 0; cursor: pointer; transition: background .13s, filter .13s; box-shadow: 0 4px 10px rgba(36,145,80,0.08);}
+        .btn-confirm:hover { filter: brightness(0.96);}
+        .btn-cancel { display: block; width: 100%; margin: 0.7em 0 0 0; background: #b0bec5; color: #fff; font-size: 1em; border: none; border-radius: 8px; padding: 0.7em 0; cursor: pointer; transition: background .13s;}
+        .btn-cancel:hover { background: #90a4ae;}
+        @media (max-width: 640px) { .main { padding: 1.5rem 1rem; max-width: 100%; }
             .input-group { padding: 1rem; }
             .nav-btn { font-size: 0.9em; padding: 0.5em 1em; min-width: unset; }
             .btn-action { font-size: 1em; padding: 0.8em 0; }
+            .modal-content { padding: 1em 0.3em 1em 0.3em; }
         }
     </style>
 </head>
@@ -204,17 +65,14 @@
             <button class="nav-btn" onclick="window.history.back()">Back</button>
             <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
         </div>
-
         <h2>Register Master</h2>
         <p class="text-gray-600 text-sm mb-6">Step 2: Register your Master role. You must have an Identity QR Hash from Step 1.</p>
-
         <form id="masterForm" autocomplete="off">
             <div class="input-group">
                 <label for="masterName">Master Name <span class="counter" id="nameCounter">0/8</span></label>
                 <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" placeholder="A-Z only (up to 8 chars)" required autocomplete="off" />
                 <div id="badwordWarn" class="warn-msg" style="display:none;"></div>
             </div>
-
             <div class="input-group">
                 <label for="masterPublicKey">Your Public Key <span class="counter" id="pubkeyCounter">0/64</span></label>
                 <input type="text" id="masterPublicKey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your public key here" required autocomplete="off" />
@@ -223,8 +81,6 @@
                     Paste / Scan QR
                 </button>
             </div>
-
-            <!-- Identity QR Hash Field -->
             <div class="input-group">
                 <label for="identityQrHash">Identity QR Hash <span class="counter" id="identityQrHashCounter">0/64</span></label>
                 <input type="text" id="identityQrHash" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your Identity QR Hash here (from Step 1)" required autocomplete="off" />
@@ -233,17 +89,14 @@
                     Paste / Scan QR
                 </button>
             </div>
-            
-            <button class="btn-action" type="submit" id="reqBtn" disabled>Register Master</button>
+            <button class="btn-action" type="button" id="previewBtn" disabled>Register Master</button>
             <div id="msgBox" class="msg-box"></div>
         </form>
-
         <div id="previewBox" class="preview-box">
             <div class="preview-title">Preview Master Node (Audit Structure):</div>
             <pre id="previewJson"></pre>
             <button class="copy-json-btn" onclick="copyPreviewJson()">Copy JSON</button>
         </div>
-
         <div class="note-text">
             *Master Name = 1-8 chars, A-Z only.<br>
             *Your Public Key = 64 HEX chars (from Generate Key page).<br>
@@ -251,15 +104,23 @@
         </div>
     </div>
 
+    <!-- Modal Preview -->
+    <div class="modal-overlay" id="modalOverlay">
+      <div class="modal-content">
+        <h3>Preview Master Registration</h3>
+        <div class="modal-preview-list" id="previewList"></div>
+        <button class="btn-confirm" id="confirmBtn">Confirm & Register</button>
+        <button class="btn-cancel" id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+
     <script>
         // --- Global Constants and State ---
-        const GENESIS_HASH = "86b1c0989f61b7f03222d861f67f259740120199e69c7662c1404e132c3f8f11"; // Example Genesis Hash (from simulation)
+        const GENESIS_HASH = "86b1c0989f61b7f03222d861f67f259740120199e69c7662c1404e132c3f8f11";
         let badwords = {};
         let flatBadwords = [];
         let badwordsReady = false;
         let badwordsError = false;
-
-        // --- UI Element References ---
         const masterNameInput = document.getElementById('masterName');
         const masterPublicKeyInput = document.getElementById('masterPublicKey');
         const identityQrHashInput = document.getElementById('identityQrHash');
@@ -267,19 +128,23 @@
         const pubkeyCounter = document.getElementById('pubkeyCounter');
         const identityQrHashCounter = document.getElementById('identityQrHashCounter');
         const badwordWarn = document.getElementById('badwordWarn');
-        const registerButton = document.getElementById('reqBtn');
+        const previewBtn = document.getElementById('previewBtn');
+        const registerButton = previewBtn; // (keep for code logic below)
         const msgBox = document.getElementById('msgBox');
         const previewBox = document.getElementById('previewBox');
         const previewJson = document.getElementById('previewJson');
         const masterForm = document.getElementById('masterForm');
 
-
-        // --- Utility Functions ---
+        // Modal
+        const modal = document.getElementById('modalOverlay');
+        const previewList = document.getElementById('previewList');
+        const confirmBtn = document.getElementById('confirmBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
 
         function showMsg(msg, type) {
             msgBox.textContent = msg;
             msgBox.className = "msg-box " + (type === "error" ? "msg-error" : "msg-success");
-            setTimeout(() => { msgBox.textContent = ""; msgBox.className = "msg-box"; }, 5000); // Display for 5 seconds
+            setTimeout(() => { msgBox.textContent = ""; msgBox.className = "msg-box"; }, 5000);
         }
 
         async function sha256Hex(str) {
@@ -287,40 +152,29 @@
             const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
             return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
         }
-
         function genNonce() {
             let arr = new Uint8Array(8);
             window.crypto.getRandomValues(arr);
             return Array.from(arr).map(x=>x.toString(16).padStart(2,'0')).join('');
         }
-
-        // --- Badwords Logic ---
-
         function findBadwords(str) {
             if (!badwordsReady || !str) return [];
             const s = str.toLowerCase();
             return flatBadwords.filter(w => w && s.includes(w));
         }
-
-        // --- Input Validation & UI Updates ---
-
         function updateCounters() {
             nameCounter.textContent = masterNameInput.value.length + "/8";
             pubkeyCounter.textContent = masterPublicKeyInput.value.length + "/64";
             identityQrHashCounter.textContent = identityQrHashInput.value.length + "/64";
         }
-
         function validateInputs() {
             const name = masterNameInput.value.trim();
             const pk = masterPublicKeyInput.value.trim();
             const idQrHash = identityQrHashInput.value.trim();
-
-            // Master Name: at least 1 char, up to 8 chars, A-Z only
             const isNameValid = name.length >= 1 && name.length <= 8 && /^[A-Z]+$/.test(name);
             const isPkValid = pk.length === 64 && /^[a-fA-F0-9]{64}$/.test(pk);
             const isIdQrHashValid = idQrHash.length === 64 && /^[a-fA-F0-9]{64}$/.test(idQrHash);
             const isNoBadwords = !findBadwords(name).length;
-
             if (badwordsError) {
                 badwordWarn.style.display = "";
                 badwordWarn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
@@ -331,44 +185,28 @@
             } else {
                 badwordWarn.style.display = "none";
             }
-
-            registerButton.disabled = !(isNameValid && isPkValid && isIdQrHashValid && isNoBadwords && !badwordsError);
+            previewBtn.disabled = !(isNameValid && isPkValid && isIdQrHashValid && isNoBadwords && !badwordsError);
         }
-
-        // --- Live Preview ---
-
         async function buildMasterNodePreview() {
             const masterName = masterNameInput.value.trim().toUpperCase();
             const publicKey = masterPublicKeyInput.value.trim();
             const identityQrHash = identityQrHashInput.value.trim();
-
-            if(masterName.length < 1 || masterName.length > 8 || publicKey.length !== 64 || identityQrHash.length !== 64) { // Changed min length to 1
-                return null;
-            }
-
-            // In a real system, this timestamp might be generated on the backend
-            // or derived from a network-synced clock.
+            if(masterName.length < 1 || masterName.length > 8 || publicKey.length !== 64 || identityQrHash.length !== 64) return null;
             const timestamp = Math.floor(Date.now() / 1000).toString(); 
             const nonce = genNonce();
-
-            // The hash calculation reflects the structure for the Master registration record
-            // prev_hash here is the Identity QR Record Hash
-            // parent_chain_hash is the Genesis Hash for hierarchical linking
             const rawHashInput = identityQrHash + "master_registration" + masterName + publicKey + "" + GENESIS_HASH + timestamp + nonce;
             const recordHash = await sha256Hex(rawHashInput);
-
             return {
                 object_type: "master_registration",
                 object_id: masterName,
                 public_key: publicKey,
-                prev_hash: identityQrHash, // Identity QR Record Hash (assuming this is the record hash from identity_qr_log)
-                parent_chain_hash: GENESIS_HASH, // Hierarchical link
+                prev_hash: identityQrHash,
+                parent_chain_hash: GENESIS_HASH,
                 timestamp: timestamp,
                 nonce: nonce,
-                hash: recordHash // Hash of this Master registration record
+                hash: recordHash
             };
         }
-
         async function livePreview() {
             const node = await buildMasterNodePreview();
             if(node) {
@@ -378,36 +216,24 @@
                 previewBox.style.display = "none";
             }
         }
-
-        // --- Button Actions ---
-
         async function handleScanPaste(targetId) {
             const inputElement = document.getElementById(targetId);
             try {
-                // Attempt to read from clipboard
                 const clipboardText = await navigator.clipboard.readText();
                 if (clipboardText) {
                     inputElement.value = clipboardText.trim();
                     showMsg("Pasted from clipboard!", "success");
                 } else {
-                    // Fallback for environments where clipboard read is restricted or empty
                     const pastedValue = prompt("Please paste your QR Hash or Public Key here:");
-                    if (pastedValue) {
-                        inputElement.value = pastedValue.trim();
-                    }
+                    if (pastedValue) inputElement.value = pastedValue.trim();
                 }
             } catch (err) {
-                // If clipboard API fails (e.g., due to iframe restrictions), use prompt
                 const pastedValue = prompt("Please paste your QR Hash or Public Key here:");
-                if (pastedValue) {
-                    inputElement.value = pastedValue.trim();
-                }
+                if (pastedValue) inputElement.value = pastedValue.trim();
                 showMsg("Clipboard access denied. Please paste manually.", "error");
             }
-            // Trigger input event to update validation and counters
             inputElement.dispatchEvent(new Event('input', { bubbles: true }));
         }
-
         function copyPreviewJson() {
             const txt = previewJson.textContent;
             navigator.clipboard.writeText(txt)
@@ -415,101 +241,56 @@
                 .catch(() => showMsg("Failed to copy JSON. Please copy manually.", "error"));
         }
 
-        // --- Form Submission ---
-
-        masterForm.onsubmit = async function(e){
+        // Show Preview Modal
+        previewBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-
-            // Re-validate everything before submission
-            validateInputs();
-            if (registerButton.disabled) {
-                showMsg("Please ensure all fields are valid before registering.", "error");
-                return false;
-            }
-
-            const name = masterNameInput.value.trim().toUpperCase();
-            if (name === "GENESIS") {
-                showMsg("Cannot use reserved name 'GENESIS' for Master.", "error");
-                return false;
-            }
-
-            // If badwords found and user doesn't confirm (if a real confirm dialog was used)
-            if (badwordWarn.style.display !== "none") {
-                showMsg("Warning: Master name contains inappropriate words. Proceeding with registration.", "warn");
-            }
-            if (badwordsError) {
-                 showMsg("Cannot verify inappropriate words. Please check badwords.json or contact admin.", "error");
-                 return false;
-            }
-
-            // Build the node for submission
+            const masterName = masterNameInput.value.trim();
+            const masterPublicKey = masterPublicKeyInput.value.trim();
+            const identityQrHash = identityQrHashInput.value.trim();
             const node = await buildMasterNodePreview();
-            if (!node) {
-                showMsg("Failed to build Master Node data. Please check inputs.", "error");
-                return false;
-            }
-
-            showMsg("Registering Master...", "success"); // Indicate loading
-
-            try {
-                // --- Simulate Backend API Call (replace with actual fetch to your backend) ---
-                // In a real scenario, you would send 'node' object to your backend API,
-                // which then calls your Python register_master function.
-                
-                await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate network delay
-
-                // Simulate a successful response from backend
-                const simulatedResult = {
-                    success: true,
-                    master_hash: node.hash, // Use the generated hash from preview
-                    message: `Master '${node.object_id}' registered successfully!`
-                };
-                
-                if (simulatedResult.success) {
-                    showMsg(`Master '${node.object_id}' registered. Hash: ${simulatedResult.master_hash}.`, "success");
-                    previewJson.textContent = JSON.stringify(node, null, 2); // Ensure preview shows final data
-                    previewBox.style.display = "block"; // Show preview after success
-
-                    // Clear form after successful registration
-                    masterForm.reset();
-                    updateCounters();
-                    validateInputs(); // Re-validate to update button state
-                } else {
-                    throw new Error(simulatedResult.message || "Master registration failed.");
-                }
-
-            } catch (error) {
-                showMsg(`Error registering Master: ${error.message}`, "error");
-                console.error("Master registration error:", error);
-            }
-        };
+            if (!node) return;
+            previewList.innerHTML = `
+              <b>Master Name:</b> <code>${masterName}</code><br>
+              <b>Public Key:</b> <code>${masterPublicKey}</code><br>
+              <b>Identity QR Hash:</b> <code>${identityQrHash}</code><br>
+              <b>Timestamp:</b> ${node.timestamp}<br>
+              <b>Nonce:</b> ${node.nonce}<br>
+              <b>Preview Hash:</b> <code>${node.hash}</code>
+            `;
+            modal.style.display = "flex";
+            // Store node preview for confirm
+            window._dtc_masterPreviewNode = node;
+        });
+        // Confirm Modal
+        confirmBtn.addEventListener('click', async () => {
+            const node = window._dtc_masterPreviewNode;
+            modal.style.display = "none";
+            showMsg("Registering Master...", "success");
+            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network
+            showMsg(`Master '${node.object_id}' registered. Hash: ${node.hash}.`, "success");
+            previewJson.textContent = JSON.stringify(node, null, 2);
+            previewBox.style.display = "block";
+            masterForm.reset();
+            updateCounters();
+            validateInputs();
+        });
+        // Cancel Modal
+        cancelBtn.addEventListener('click', ()=>{ modal.style.display = "none"; });
 
         // --- Event Listeners and Initial Setup ---
-
         masterNameInput.addEventListener('input', () => {
             masterNameInput.value = masterNameInput.value.replace(/[^A-Z]/g,'').toUpperCase();
-            updateCounters();
-            validateInputs();
-            livePreview();
+            updateCounters(); validateInputs(); livePreview();
         });
-
         masterPublicKeyInput.addEventListener('input', () => {
             masterPublicKeyInput.value = masterPublicKeyInput.value.replace(/[^a-fA-F0-9]/g,'');
-            updateCounters();
-            validateInputs();
-            livePreview();
+            updateCounters(); validateInputs(); livePreview();
         });
-
         identityQrHashInput.addEventListener('input', () => {
             identityQrHashInput.value = identityQrHashInput.value.replace(/[^a-fA-F0-9]/g,'');
-            updateCounters();
-            validateInputs();
-            livePreview();
+            updateCounters(); validateInputs(); livePreview();
         });
-
-        // Load badwords list (simulated)
         window.addEventListener('DOMContentLoaded', function() {
-            // Simulate fetching badwords.json
             setTimeout(() => {
                 badwords = {
                     "common": ["fuck", "shit", "ass", "damn"],
@@ -517,20 +298,21 @@
                 };
                 flatBadwords = Object.values(badwords).flat().map(x=>x.toLowerCase());
                 badwordsReady = true;
-                validateInputs(); // Re-validate once badwords are loaded
-            }, 500); // Simulate network delay
-
-            // Autofill public key if saved locally (from previous steps like key generation)
+                validateInputs();
+            }, 500);
             const localPub = localStorage.getItem('dtc_publicKey');
             if (localPub && localPub.length === 64 && /^[a-fA-F0-9]+$/.test(localPub)) {
                 masterPublicKeyInput.value = localPub;
             }
-            
-            updateCounters();
-            validateInputs();
-            livePreview(); // Initial preview
+            updateCounters(); validateInputs(); livePreview();
         });
-
+        // ESC ปิด modal
+        document.addEventListener('keydown', (e) => {
+          if (modal.style.display === "flex" && (e.key === "Escape" || e.key === "Esc")) modal.style.display = "none";
+        });
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) modal.style.display = "none";
+        });
     </script>
 </body>
 </html>
