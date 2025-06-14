@@ -6,34 +6,23 @@
   <title>Generate Public Key - DTC</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; padding: 1.3em; max-width: 480px; margin: 0 auto;}
-    h1 { color: #219150; text-align: center; margin-bottom: 1.1em; font-size: 1.13em;}
-    .form-group { margin-bottom: 1.08em; }
-    label { font-weight: bold; color: #2d3c35; }
-    .input-box { position: relative; display: flex; align-items: center; }
-    .input-svg {
-      position: absolute; left: 9px; top: 51%; transform: translateY(-50%);
-      width: 20px; height: 20px; pointer-events: none;
-    }
+    h1 { color: #219150; text-align: center; margin-bottom: 1.2em; font-size: 1.15em;}
+    .form-group { margin-bottom: 1em; }
+    label { font-weight: bold; color: #2d3c35; margin-bottom: 0.35em; display:block;}
     input[type="password"], .pubkey-box {
-      width: 100%; padding: 10px 11px 10px 38px; font-size: 1em; border: 2px solid #cfd8dc;
+      width: 100%; padding: 11px 12px; font-size: 1em; border: 2px solid #cfd8dc;
       border-radius: 9px; box-sizing: border-box; background: #fff;
-      margin-top: 0.21em; transition: border 0.15s;
+      margin-top: 0.13em; transition: border 0.15s;
     }
     input:focus { border-color: #ffd600; background: #ffffed; }
-    input.valid { border-color: #43a047; }
-    input.invalid { border-color: #e53935; }
-    .status-svg {
-      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
-      width: 20px; height: 20px; pointer-events: none;
-      opacity: 0; transition: opacity 0.16s;
-    }
-    .status-svg.visible { opacity: 1;}
-    .hint { color: #b0bec5; font-size: 0.93em; margin-top: 2px; margin-bottom: 0.4em; display: block; }
+    input.valid { border-color: #43a047;}
+    input.invalid { border-color: #e53935;}
     .pubkey-box {
-      background: #eafaf0; color: #222; margin-top: 1.1em;
+      background: #eafaf0; color: #222; margin-top: 1.05em;
       font-family: 'Courier New', monospace; min-height: 39px; font-size: 0.98em;
       border-color: #219150; display: flex; align-items: center; justify-content: space-between;
       transition: border 0.18s;
+      padding: 10px 12px;
     }
     .pubkey-box.copied { border-color: #43a047; background: #f0fff0;}
     .copy-btn {
@@ -43,23 +32,21 @@
     .copy-btn:active { filter: brightness(0.95);}
     .copy-status { color: #43a047; font-size: 0.97em; margin-left: 8px; opacity: 0; transition: opacity 0.18s;}
     .copy-status.visible { opacity: 1;}
-    .note {
-      color: #888; font-size: 0.99em; margin: 1em 0 0.4em 0;
-      background: #f8fafc; padding: 0.8em 1em; border-radius: 7px;
-      font-family: 'Fira Mono', 'Courier New', monospace;
+    .strength-bar { height: 7px; width: 100%; margin-top: 4px; border-radius: 5px; background: #f5f5f5; overflow: hidden;}
+    .strength-inner { height: 100%; width: 0; border-radius: 5px; transition: width 0.22s;}
+    .btn-gen {
+      width: 100%; background: #2196f3; color: #fff; border: none; border-radius: 8px;
+      padding: 11px 0; font-size: 1.08em; font-weight: bold; margin-top: 0.7em; cursor: pointer;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.09); transition: background 0.13s;
     }
-    .strength-bar {
-      height: 7px; width: 100%; margin-top: 4px; border-radius: 5px;
-      background: #f5f5f5; overflow: hidden;
-    }
-    .strength-inner {
-      height: 100%; width: 0; border-radius: 5px; transition: width 0.22s;
-    }
+    .btn-gen:active { background: #1976d2;}
+    .btn-gen:disabled { opacity: 0.6; cursor: not-allowed;}
     @media (max-width: 600px) {
       body { padding: 1em 0.08em;}
       h1 { font-size: 1em;}
       .copy-btn { padding: 5px 9px;}
       .pubkey-box { font-size: 0.93em;}
+      .btn-gen { padding: 10px 0;}
     }
   </style>
 </head>
@@ -67,56 +54,28 @@
   <h1>Generate Public Key (DTC)</h1>
   <div class="form-group">
     <label>Password</label>
-    <div class="input-box">
-      <span class="input-svg">
-        <svg width="20" height="20"><text x="2" y="16" font-size="13" font-family="monospace" fill="#90a4ae">abc</text></svg>
-      </span>
-      <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="6-12 chars (a-z,0-9)"/>
-      <span class="status-svg" id="pw-status"></span>
-    </div>
+    <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="6-12 chars (a-z,0-9)"/>
     <div class="strength-bar"><div id="pw-strength" class="strength-inner"></div></div>
   </div>
   <div class="form-group">
     <label>Confirm Password</label>
-    <div class="input-box">
-      <span class="input-svg">
-        <svg width="20" height="20"><text x="2" y="16" font-size="13" font-family="monospace" fill="#90a4ae">abc</text></svg>
-      </span>
-      <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="Confirm"/>
-      <span class="status-svg" id="cpw-status"></span>
-    </div>
+    <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="Confirm"/>
   </div>
   <div class="form-group">
     <label>PIN</label>
-    <div class="input-box">
-      <span class="input-svg">
-        <svg width="23" height="20"><text x="1" y="16" font-size="13" font-family="monospace" fill="#90a4ae">1234</text></svg>
-      </span>
-      <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="4 digits (0-9)"/>
-      <span class="status-svg" id="pin-status"></span>
-    </div>
+    <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="4 digits (0-9)"/>
   </div>
   <div class="form-group">
     <label>Confirm PIN</label>
-    <div class="input-box">
-      <span class="input-svg">
-        <svg width="23" height="20"><text x="1" y="16" font-size="13" font-family="monospace" fill="#90a4ae">1234</text></svg>
-      </span>
-      <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="Confirm"/>
-      <span class="status-svg" id="cpin-status"></span>
-    </div>
+    <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="Confirm"/>
   </div>
-  <div class="form-group">
+  <button class="btn-gen" id="generateBtn">Generate Public Key</button>
+  <div class="form-group" id="pubkeyArea" style="display:none;">
     <div class="pubkey-box" id="pubkeyBox">
-      <span id="publicKeyPlaceholder" style="color:#90a4ae;">Public Key will appear here</span>
-      <button class="copy-btn" id="copyBtn" style="display:none;">Copy</button>
+      <span id="publicKeyPlaceholder">Public Key will appear here</span>
+      <button class="copy-btn" id="copyBtn">Copy</button>
       <span id="copyStatus" class="copy-status"></span>
     </div>
-  </div>
-  <div class="note" id="noteBox">
-    <b>Formula:</b> <br>
-    <span style="color:#222">PublicKey = hash(password + pin)</span><br>
-    <span style="color:#888">No salt. We never store or know your private key.</span>
   </div>
   <script>
     function validPw(pw) {
@@ -126,7 +85,7 @@
       return /^\d{4}$/.test(pin);
     }
     function genKey(password, pin) {
-      // ไม่มี salt
+      // ไม่มี salt!
       let str = password + pin;
       let hash = 0;
       for (let i = 0; i < str.length; i++)
@@ -134,7 +93,6 @@
       let pub = Math.abs(hash).toString(16).padStart(16,'0') + 'DTC';
       return pub.slice(0, 48);
     }
-    // แถบวัดความแข็งแรง (strength bar)
     function pwStrength(pw) {
       if(!pw) return 0;
       let s = 0;
@@ -154,21 +112,15 @@
     }
     function feedback(id, isValid) {
       const input = document.getElementById(id);
-      const svg = document.getElementById(id+'-status');
       if(isValid === true) {
         input.classList.add('valid'); input.classList.remove('invalid');
-        svg.innerHTML = `<svg width="20" height="20"><polyline points="5,12 10,17 17,6" fill="none" stroke="#43a047" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
-        svg.classList.add('visible');
       } else if(isValid === false) {
         input.classList.remove('valid'); input.classList.add('invalid');
-        svg.innerHTML = `<svg width="20" height="20"><line x1="6" y1="6" x2="16" y2="16" stroke="#e53935" stroke-width="2.2"/><line x1="16" y1="6" x2="6" y2="16" stroke="#e53935" stroke-width="2.2"/></svg>`;
-        svg.classList.add('visible');
       } else {
         input.classList.remove('valid','invalid');
-        svg.innerHTML = ``; svg.classList.remove('visible');
       }
     }
-    function updateAll() {
+    function validateInputs() {
       const pw = document.getElementById('password').value.trim();
       const cpw = document.getElementById('confirmPassword').value.trim();
       const pin = document.getElementById('pin').value.trim();
@@ -178,24 +130,19 @@
       feedback('pin', validPin(pin));
       feedback('confirmPin', (cpin.length > 0 && cpin === pin && validPin(cpin)));
       updateStrength();
-      const pubkeyBox = document.getElementById('pubkeyBox');
-      const publicKeyPlaceholder = document.getElementById('publicKeyPlaceholder');
-      const copyBtn = document.getElementById('copyBtn');
-      // เงื่อนไขต้องตรงกันหมด
-      if (validPw(pw) && cpw === pw && validPin(pin) && cpin === pin) {
-        let pubkey = genKey(pw, pin);
-        publicKeyPlaceholder.textContent = pubkey;
-        copyBtn.style.display = '';
-        pubkeyBox.classList.remove('copied');
-      } else {
-        publicKeyPlaceholder.textContent = 'Public Key will appear here';
-        copyBtn.style.display = 'none';
-      }
+      return (validPw(pw) && cpw === pw && validPin(pin) && cpin === pin);
     }
     ['password','confirmPassword','pin','confirmPin'].forEach(id => {
-      document.getElementById(id).addEventListener('input', updateAll);
+      document.getElementById(id).addEventListener('input', validateInputs);
     });
-    // Copy logic
+    document.getElementById('generateBtn').onclick = function() {
+      if (!validateInputs()) return;
+      const pw = document.getElementById('password').value.trim();
+      const pin = document.getElementById('pin').value.trim();
+      let pubkey = genKey(pw, pin);
+      document.getElementById('publicKeyPlaceholder').textContent = pubkey;
+      document.getElementById('pubkeyArea').style.display = '';
+    };
     document.getElementById('copyBtn').onclick = function() {
       navigator.clipboard.writeText(document.getElementById('publicKeyPlaceholder').textContent);
       const pubkeyBox = document.getElementById('pubkeyBox');
@@ -205,7 +152,7 @@
       pubkeyBox.classList.add('copied');
       setTimeout(()=>{copyStatus.classList.remove('visible'); pubkeyBox.classList.remove('copied');}, 1100);
     };
-    updateAll();
+    validateInputs();
   </script>
 </body>
 </html>
