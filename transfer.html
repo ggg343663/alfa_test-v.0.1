@@ -1,44 +1,3 @@
-<!--
-DTC Minimal UI/UX Logic
-
-- ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
-- กลุ่ม Ticket/Slot/Meta: สีเทาอ่อน #f6f7fa
-- กลุ่ม Password, PIN, Secret: สีเหลืองอ่อน #fffde7
-- กลุ่มปุ่ม Action (Generate/Export/Regen): ฟ้า, เหลือง, ฟ้าอ่อน ตามลำดับ
-- Navigation Bar: ปุ่มม่วงจาง/เทาอ่อน (Back/Home/Next) ขนาดเท่ากันทั้ง site
-
-[Section A] Key & Batch Info  
-    - Password, PIN, Secret, Batch Name, จำนวน QR (ปุ่ม +/– หรือ custom)
-    - label/hint สีเทาอ่อน #90a4ae, ขนาดเล็กใต้ input
-
-[Section B] Action  
-    - ปุ่มฟ้าใหญ่ "Generate QR Batch"
-
-[Section C] ผลลัพธ์/Preview  
-    - QR Preview Box (PNG/SVG), hash1, Commitment Box (hash2 สีฟ้าหรือเทาอ่อน)
-    - ปุ่มเหลือง Export Ticket / ฟ้า Export QR / ฟ้าอ่อน Export Log
-
-[Section D] Regen QR  
-    - ช่อง Ticket (สีเทาอ่อน), ปุ่ม Upload/QR
-    - ช่อง Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
-    - Password, PIN, Secret (เหลืองอ่อน)
-    - ปุ่ม Regen (ฟ้า)
-
-[Section E] Audit Chain  
-    - Input QR/Commitment Hash (hash2) + ปุ่ม Audit (ฟ้าเล็ก)
-    - กล่อง audit chain (เจ้าของ/ลำดับ chain), expand/collapse ได้
-
-[Section F] Navigation Bar  
-    - Back | Home | Next (ปุ่มขนาดเท่ากัน)
-
-Style  
-    - input/box สูง 36–44px, margin/padding 12–20px
-    - label/hint #90a4ae, ขนาดเล็ก
-    - ผลลัพธ์/preview/log ไม่กินพื้นที่หลัก
-    - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
-    - รองรับ mobile (responsive)
-    - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -50,10 +9,7 @@ Style
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f6faff; margin: 0; padding: 0; }
     .container { max-width: 440px; margin: 2.5em auto; background: #fff; border-radius: 18px; box-shadow: 0 8px 40px #1376b114, 0 1.5px 7px #36d86d1c; padding: 2.3em 1.3em 2em 1.3em;}
     .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.5em; }
-    .nav-btn {
-      background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.4em;
-      font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background 0.18s;
-    }
+    .nav-btn { background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.4em; font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background 0.18s;}
     .nav-btn:hover { background: #d1c4e9; }
     h2 { text-align: center; color: #219150; margin-bottom: 1.2em; }
     .row { display: flex; align-items: center; gap: 0.35em; margin-bottom: 1.1em; flex-wrap: wrap; }
@@ -102,7 +58,7 @@ Style
     </div>
 
     <div class="receiver-group">
-      <label for="recipientpk">Receiver Public Key (42 chars, 0x...):</label>
+      <label for="recipientpk">Receiver Public Key (0x...):</label>
       <div style="display:flex;align-items:center;gap:0.2em;">
         <input type="text" id="recipientpk" maxlength="42" autocomplete="off" placeholder="Enter recipient's public key" />
         <button class="copy-btn" onclick="copyField('recipientpk')">Copy</button>
@@ -115,8 +71,8 @@ Style
       <label for="password">Your Password (6-12 chars, letters and numbers):</label>
       <input class="pw-input" type="password" id="password" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your password" />
 
-      <label for="pin">Your PIN (6 digits, ATM-style):</label>
-      <input class="pw-input" type="password" id="pin" maxlength="6" minlength="6" pattern="\d{6}" autocomplete="off" placeholder="Enter your 6-digit PIN" />
+      <label for="pin">Your PIN (4 digits):</label>
+      <input class="pw-input" type="password" id="pin" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off" placeholder="Enter your 4-digit PIN" />
     </div>
 
     <button class="mini-btn" onclick="preview()" type="button" id="previewBtn">Preview Transfer</button>
@@ -204,13 +160,34 @@ Style
         valid = false;
         document.getElementById('password').classList.add('input-error');
       }
-      if (!/^\d{6}$/.test(pin)) {
+      if (!/^\d{4}$/.test(pin)) {
         valid = false;
         document.getElementById('pin').classList.add('input-error');
       }
       return valid;
     }
-    function preview() {
+    // SHA256 derive address (เหมือนหน้า generate_key.html)
+    async function deriveAddress(password, pin) {
+      const passphrase = password + pin;
+      const encoder = new TextEncoder();
+      const keyMaterial = await window.crypto.subtle.importKey(
+        "raw", encoder.encode(passphrase), {name: "PBKDF2"}, false, ["deriveBits"]
+      );
+      const derivedBits = await window.crypto.subtle.deriveBits(
+        {
+          "name": "PBKDF2",
+          salt: new Uint8Array([]),
+          iterations: 250000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        256
+      );
+      // Address (แบบ mock, ตัด hex 40 ตัวหลัง + 0x)
+      let hex = Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return '0x'+hex.slice(-40);
+    }
+    async function preview() {
       const isValid = validateInputs();
       const previewBox = document.getElementById('previewBox');
       const confirmBtn = document.getElementById('confirmBtn');
@@ -223,35 +200,32 @@ Style
       }
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
+      const pw = document.getElementById('password').value.trim();
+      const pin = document.getElementById('pin').value.trim();
       const timestamp = new Date().toISOString();
+      const signed_by = await deriveAddress(pw, pin);
+      const msg = {
+        qr_hash: hash,
+        to_pubkey: pub,
+        signed_by: signed_by,
+        sig: "(private_sign)",
+        timestamp: timestamp
+      };
       previewBox.innerHTML =
         `<b>Preview Transfer</b><br>
         <b>QR Hash:</b> <code>${hash}</code><br>
         <b>Receiver Public Key:</b> <code>${pub}</code><br>
-        <b>Sign Message:</b><br>
-        <pre style="background:#e7fbe8;color:#246bfd;border-radius:6px;border-left:4px solid #219150;padding:0.8em 0.7em 0.8em 1em;font-size:1em;">{
-  "qr_hash": "${hash}",
-  "to_pubkey": "${pub}",
-  "signed_by": "(your_address)",
-  "sig": "(private_sign)",
-  "timestamp": "${timestamp}"
-}</pre>
+        <b>Sign Message:</b>
+        <pre style="background:#e7fbe8;color:#246bfd;border-radius:6px;border-left:4px solid #219150;padding:0.8em 0.7em 0.8em 1em;font-size:1em;">${JSON.stringify(msg, null, 2)}</pre>
         <small style="color:#666;">(Sign this payload with your private key derived from password+PIN.)</small>`;
       confirmBtn.style.display = "block";
       exportBtn.style.display = "none";
+      // Save for confirm step
+      window._pendingMsg = msg;
     }
-    function confirmTransfer() {
+    async function confirmTransfer() {
       document.getElementById('confirmBtn').disabled = true;
-      const hash = document.getElementById('qrhash').value.trim();
-      const pub = document.getElementById('recipientpk').value.trim();
-      const timestamp = new Date().toISOString();
-      lastTransferLog = {
-        qr_hash: hash,
-        to_pubkey: pub,
-        signed_by: "(your_address)",
-        sig: "(private_sign)",
-        timestamp
-      };
+      lastTransferLog = window._pendingMsg;
       document.getElementById('previewBox').innerHTML = `<b>✅ Transfer submitted!</b><br>
         <span style="color:#15803d">You can now export this log as JSON for your records.</span>`;
       document.getElementById('confirmBtn').style.display = "none";
