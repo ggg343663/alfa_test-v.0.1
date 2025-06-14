@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Generate QR Hash (Mint) - DTC: Magic Chain System</title>
     <style>
-        /* Base Styles (Copied from previous files for consistency) */
         body {
             font-family: Arial, sans-serif;
             max-width: 700px;
@@ -16,7 +15,7 @@
         }
         h1 {
             text-align: center;
-            color: #219150; /* Dark green for the main title */
+            color: #219150;
             margin-bottom: 1.2em;
             letter-spacing: 0.02em;
         }
@@ -38,11 +37,7 @@
             text-align: center;
             font-size: 0.95em;
         }
-        .intro-section p {
-            margin: 0.5em 0;
-        }
-        
-        /* Section Block Styling */
+        .intro-section p { margin: 0.5em 0; }
         .section-block {
             margin: 1.1em 0;
             padding: 1.5em;
@@ -57,32 +52,30 @@
             border-bottom: 1px solid rgba(0,0,0,0.1);
             color: #555;
         }
-
-        /* Specific Section Styles for QR Generation */
         .qr-input-block {
-            background: #fffde7; /* Light yellow for input fields (Password, PIN, Secret) */
-            border-left: 6px solid #ffd600; /* Matching yellow border */
+            background: #fffde7;
+            border-left: 6px solid #ffd600;
         }
         .qr-meta-block {
-            background: #f6f7fa; /* Light grey for Meta Info (Batch Name, Qty) */
-            border-left: 6px solid #90a4ae; /* Matching grey border */
+            background: #f6f7fa;
+            border-left: 6px solid #90a4ae;
         }
         .qr-output-block {
-            background: #eafaf0; /* Light green for output (QR Preview, Hashes) */
-            border-left: 6px solid #219150; /* Matching green border */
-            display: flex; /* Use flexbox for layout of QR and hashes */
+            background: #eafaf0;
+            border-left: 6px solid #219150;
+            display: flex;
             flex-direction: column;
-            gap: 15px; /* Space between elements */
+            gap: 15px;
         }
         .qr-output-content {
             display: flex;
             flex-direction: row;
             gap: 15px;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            flex-wrap: wrap;
         }
         .qr-preview-box {
-            flex: 1; /* Take remaining space */
-            min-width: 150px; /* Minimum width for the QR box */
+            flex: 1;
+            min-width: 150px;
             background-color: #ffffff;
             border: 1px dashed #ccc;
             border-radius: 8px;
@@ -99,15 +92,15 @@
             border: 1px solid #eee;
         }
         .qr-hashes-box {
-            flex: 1; /* Take remaining space */
-            min-width: 250px; /* Minimum width for hashes box */
+            flex: 1;
+            min-width: 250px;
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
         .hash-display {
-            background-color: #e3f2fd; /* Light blue for hash boxes */
-            border: 1px solid #2196f3; /* Blue border */
+            background-color: #e3f2fd;
+            border: 1px solid #2196f3;
             border-radius: 8px;
             padding: 10px;
             word-wrap: break-word;
@@ -122,16 +115,8 @@
             color: #222;
             font-size: 0.9em;
         }
-        .hash-value {
-            user-select: all;
-            overflow-x: auto;
-        }
-
-        /* Input Group Styling */
-        .input-group {
-            margin-bottom: 15px;
-            position: relative;
-        }
+        .hash-value { user-select: all; overflow-x: auto; }
+        .input-group { margin-bottom: 15px; position: relative; }
         .input-group label {
             display: block;
             margin-bottom: 5px;
@@ -156,8 +141,6 @@
             color: #90a4ae;
             margin-top: 5px;
         }
-
-        /* Toggle Password/PIN Visibility (from generate_key.html) */
         .toggle-password {
             position: absolute;
             right: 12px;
@@ -167,8 +150,6 @@
             color: #90a4ae;
             font-size: 0.9em;
         }
-
-        /* Quantity Input with +/- Buttons */
         .qty-input-group {
             display: flex;
             align-items: center;
@@ -176,8 +157,8 @@
         }
         .qty-input-group input {
             text-align: center;
-            width: 70px; /* Fixed width for quantity input */
-            margin-bottom: 0 !important; /* Override default margin */
+            width: 70px;
+            margin-bottom: 0 !important;
         }
         .qty-button {
             background-color: #f0f0f0;
@@ -190,11 +171,7 @@
             color: #555;
             transition: background-color 0.1s;
         }
-        .qty-button:hover {
-            background-color: #e0e0e0;
-        }
-
-        /* Main Action Button (Generate) */
+        .qty-button:hover { background-color: #e0e0e0; }
         .btn-generate {
             display: block;
             width: 100%;
@@ -203,26 +180,22 @@
             color: #fff;
             font-weight: bold;
             border-radius: 8px;
-            font-size: 1.2em; /* Larger button */
+            font-size: 1.2em;
             text-align: center;
             text-decoration: none;
             cursor: pointer;
             border: none;
             transition: background 0.13s, filter 0.13s;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); /* Stronger shadow for main action */
-            background: #2196f3; /* Blue */
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            background: #2196f3;
         }
-        .btn-generate:hover {
-            filter: brightness(0.9);
-        }
-
-        /* Export Buttons */
+        .btn-generate:hover { filter: brightness(0.9); }
         .export-buttons {
             display: flex;
             justify-content: space-around;
             gap: 10px;
             margin-top: 20px;
-            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            flex-wrap: wrap;
         }
         .export-btn {
             flex: 1;
@@ -238,39 +211,32 @@
             box-shadow: 0 2px 7px rgba(0,0,0,0.07);
             font-size: 0.95em;
         }
-        .export-ticket-btn { background: #ffd600; color: #222; } /* Yellow */
-        .export-qr-btn { background: #2196f3; color: #fff; } /* Blue */
-        .export-log-btn { background: #90a4ae; color: #fff; } /* Grey */
-
-        .export-btn:hover {
-            filter: brightness(0.93);
-        }
-
-        /* Timestamp Styling (from previous files) */
+        .export-ticket-btn { background: #ffd600; color: #222; }
+        .export-qr-btn { background: #2196f3; color: #fff; }
+        .export-log-btn { background: #90a4ae; color: #fff; }
+        .export-btn:hover { filter: brightness(0.93); }
         .timestamp-note {
             text-align: right;
             color: #607d8b;
             font-size: 0.85em;
             margin-top: 10px;
         }
-        
-        /* Navigation Bar Styling */
         .navbar {
             display: flex;
             justify-content: space-around;
             padding: 15px 0;
-            background-color: #ede7f6; /* Light purple from UI/UX standard */
+            background-color: #ede7f6;
             border-top: 1px solid #ccc;
             margin-top: 2.5em;
             border-radius: 8px;
             box-shadow: 0 -2px 7px rgba(0,0,0,0.05);
         }
         .nav-btn {
-            flex: 1; /* Make buttons equal width */
+            flex: 1;
             padding: 0.8em 1em;
             border: none;
             border-radius: 8px;
-            background-color: #ede7f6; /* Light purple */
+            background-color: #ede7f6;
             color: #555;
             font-weight: bold;
             font-size: 1em;
@@ -278,88 +244,68 @@
             text-align: center;
             text-decoration: none;
             transition: background-color 0.2s, color 0.2s;
-            margin: 0 5px; /* Add some space between buttons */
+            margin: 0 5px;
         }
-        .nav-btn:hover {
-            background-color: #d1c4e9; /* Slightly darker purple on hover */
-            color: #333;
-        }
-        .nav-btn.active {
-            background-color: #90a4ae; /* Light grey for active/current page */
-            color: #fff;
-        }
-
-
-        /* Footer */
+        .nav-btn:hover { background-color: #d1c4e9; color: #333; }
+        .nav-btn.active { background-color: #90a4ae; color: #fff; }
         .footer-note {
             text-align: center;
             margin-top: 2.4em;
             color: #b0bec5;
             font-size: 0.95em;
         }
-
-        /* Responsive adjustments */
         @media (max-width: 600px) {
             body { margin: 0.4em; padding: 0.07em;}
             .section-block { padding: 0.7em 0.2em;}
             .input-group input, .input-group textarea { width: calc(100% - 14px); padding: 7px; }
             .toggle-password { right: 7px; top: 58%; }
-            .qr-output-content { flex-direction: column; } /* Stack elements vertically */
-            .qr-hashes-box, .qr-preview-box { min-width: unset; width: 100%; } /* Full width */
-            .qty-input-group input { width: 50px; padding: 5px; } /* Adjust width for small screens */
+            .qr-output-content { flex-direction: column; }
+            .qr-hashes-box, .qr-preview-box { min-width: unset; width: 100%; }
+            .qty-input-group input { width: 50px; padding: 5px; }
             .qty-button { padding: 6px 10px; font-size: 1em; }
-            .navbar { flex-direction: column; } /* Stack nav buttons vertically */
-            .nav-btn { margin: 5px 0; } /* Adjust margin for stacked buttons */
+            .navbar { flex-direction: column; }
+            .nav-btn { margin: 5px 0; }
         }
     </style>
 </head>
 <body>
     <h1>DTC: Magic Chain System <br><small>Decentralized Trust Community</small></h1>
-
     <div class="intro-section">
-        <p>This is where you **Mint** new QR codes and generate their unique hashes (Hash1 & Hash2). Your **Public Key** acts as the issuer's identity.</p>
-        <p>Each QR batch is a new record on the **Decentralized Traceability Chain**.</p>
+        <p>This is where you <b>Mint</b> new QR codes and generate their unique hashes (Hash1 & Hash2). Your <b>Public Key</b> acts as the issuer's identity.</p>
+        <p>Each QR batch is a new record on the <b>Decentralized Traceability Chain</b>.</p>
     </div>
-
     <div class="section-block qr-input-block">
         <div class="block-title">Key & Core QR Data</div>
-
         <div class="input-group">
             <label for="issuerPublicKey">Your Public Key (Issuer):</label>
             <textarea id="issuerPublicKey" rows="3" placeholder="Paste your Public Key obtained from 'Generate Public Key' page"></textarea>
             <span class="label-hint">This key identifies you as the issuer of this QR batch.</span>
         </div>
-
         <div class="input-group">
             <label for="password">Password:</label>
             <input type="password" id="password" placeholder="Enter your password (used for signing)" />
             <span class="toggle-password" data-target="password">Show</span>
             <span class="label-hint">The password linked to your Public Key for signing.</span>
         </div>
-
         <div class="input-group">
             <label for="pin">PIN (4 digits):</label>
             <input type="password" id="pin" maxlength="4" placeholder="Enter your 4-digit PIN (used for signing)" />
             <span class="toggle-password" data-target="pin">Show</span>
             <span class="label-hint">The PIN linked to your Public Key for signing.</span>
         </div>
-
         <div class="input-group">
             <label for="secretData">QR Content / Secret Data:</label>
             <textarea id="secretData" rows="4" placeholder="Enter the main content or 'secret' data for this QR code (e.g., product ID, unique serial)"></textarea>
             <span class="label-hint">This forms the core data of your QR, which will be hashed into Hash1.</span>
         </div>
     </div>
-
     <div class="section-block qr-meta-block">
         <div class="block-title">Batch Information</div>
-
         <div class="input-group">
             <label for="batchName">Batch Name:</label>
             <input type="text" id="batchName" placeholder="e.g., 'Product A - Spring 2025'" />
             <span class="label-hint">A descriptive name for this batch of QR codes.</span>
         </div>
-
         <div class="input-group">
             <label for="quantity">Quantity of QRs to Generate:</label>
             <div class="qty-input-group">
@@ -369,10 +315,8 @@
             </div>
             <span class="label-hint">Number of identical QR codes (content-wise) to generate in this batch.</span>
         </div>
-
         <button class="btn-generate" id="generateQrBatchBtn">Generate QR Batch</button>
     </div>
-
     <div class="section-block qr-output-block" id="qrOutputSection" style="display:none;">
         <div class="block-title">Generated QR Preview & Hashes</div>
         <div class="qr-output-content">
@@ -395,229 +339,164 @@
             </div>
         </div>
         <p class="timestamp-note">Generated at: <span id="generatedTimestamp"></span></p>
-
         <div class="export-buttons">
             <button class="export-btn export-ticket-btn" id="exportTicketBtn">Export Ticket (JSON)</button>
             <button class="export-btn export-qr-btn" id="exportQrBtn">Export QR Batch (PNG/SVG)</button>
             <button class="export-btn export-log-btn" id="exportLogBtn">Export Log (Batch Details)</button>
         </div>
     </div>
-
     <div class="navbar">
         <a href="generate_key.html" class="nav-btn">Back (Generate Key)</a>
         <a href="index.html" class="nav-btn">Home</a>
         <a href="audit_chain.html" class="nav-btn">Next (Audit Chain)</a>
     </div>
-
     <p class="footer-note">
         Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
     </p>
-
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const issuerPublicKeyInput = document.getElementById('issuerPublicKey');
-            const passwordInput = document.getElementById('password');
-            const pinInput = document.getElementById('pin');
-            const secretDataInput = document.getElementById('secretData');
-            const batchNameInput = document.getElementById('batchName');
-            const quantityInput = document.getElementById('quantity');
-            const decreaseQtyBtn = document.getElementById('decreaseQty');
-            const increaseQtyBtn = document.getElementById('increaseQty');
-            const generateQrBatchBtn = document.getElementById('generateQrBatchBtn');
-            const qrOutputSection = document.getElementById('qrOutputSection');
-            const qrCodeImage = document.getElementById('qrCodeImage');
-            const qrContentDisplay = document.getElementById('qrContentDisplay');
-            const hash1Display = document.getElementById('hash1');
-            const hash2Display = document.getElementById('hash2');
-            const generatedTimestamp = document.getElementById('generatedTimestamp');
+    document.addEventListener('DOMContentLoaded', () => {
+        const issuerPublicKeyInput = document.getElementById('issuerPublicKey');
+        const passwordInput = document.getElementById('password');
+        const pinInput = document.getElementById('pin');
+        const secretDataInput = document.getElementById('secretData');
+        const batchNameInput = document.getElementById('batchName');
+        const quantityInput = document.getElementById('quantity');
+        const decreaseQtyBtn = document.getElementById('decreaseQty');
+        const increaseQtyBtn = document.getElementById('increaseQty');
+        const generateQrBatchBtn = document.getElementById('generateQrBatchBtn');
+        const qrOutputSection = document.getElementById('qrOutputSection');
+        const qrCodeImage = document.getElementById('qrCodeImage');
+        const qrContentDisplay = document.getElementById('qrContentDisplay');
+        const hash1Display = document.getElementById('hash1');
+        const hash2Display = document.getElementById('hash2');
+        const generatedTimestamp = document.getElementById('generatedTimestamp');
 
-            // --- Toggle Password/PIN Visibility (reused from generate_key.html) ---
-            document.querySelectorAll('.toggle-password').forEach(toggle => {
-                toggle.addEventListener('click', () => {
-                    const targetId = toggle.dataset.target;
-                    const targetInput = document.getElementById(targetId);
-                    if (targetInput.type === 'password') {
-                        targetInput.type = 'text';
-                        toggle.textContent = 'Hide';
-                    } else {
-                        targetInput.type = 'password';
-                        toggle.textContent = 'Show';
-                    }
-                });
-            });
-
-            // --- Quantity +/- Buttons ---
-            decreaseQtyBtn.addEventListener('click', () => {
-                let currentQty = parseInt(quantityInput.value);
-                if (currentQty > parseInt(quantityInput.min)) {
-                    quantityInput.value = currentQty - 1;
-                }
-            });
-            increaseQtyBtn.addEventListener('click', () => {
-                let currentQty = parseInt(quantityInput.value);
-                if (currentQty < parseInt(quantityInput.max)) {
-                    quantityInput.value = currentQty + 1;
-                }
-            });
-
-            // --- Mock QR Code Generation Function ---
-            // IMPORTANT: This is a simplified mockup. In a real system:
-            // 1. QR code generation library (e.g., qrcode.js) would be used.
-            // 2. Hash1 would be a cryptographic hash (SHA256) of structured QR content (Data + Meta).
-            // 3. Hash2 would be a cryptographic hash (SHA256) of Hash1 + a unique nonce/timestamp.
-            // 4. Digital Signature would be applied using the Private Key derived from Password + PIN.
-            function generateMockQrData(publicKey, password, pin, secretData, batchName, quantity) {
-                const now = new Date();
-                const timestamp = now.toISOString(); // ISO 8601 format
-                const slotId = `DTC_SLOT_${Math.random().toString(36).substring(2, 8).toUpperCase()}`; // Mock Slot ID
-                const nonce = Math.random().toString(36).substring(2, 10); // Mock Nonce
-
-                // Mock Hashing Logic (simplified)
-                const mockContentForHash1 = `${publicKey}|${secretData}|${batchName}|${quantity}|${timestamp}|${slotId}|${nonce}`;
-                let hash1 = 0;
-                for (let i = 0; i < mockContentForHash1.length; i++) {
-                    const char = mockContentForHash1.charCodeAt(i);
-                    hash1 = ((hash1 << 5) - hash1) + char;
-                    hash1 |= 0; // Convert to 32bit integer
-                }
-                const mockHash1 = `0xQR${Math.abs(hash1).toString(16).padStart(12, '0').toUpperCase()}`;
-
-                const mockContentForHash2 = `${mockHash1}|${timestamp}|${nonce}`; // Hash2 depends on Hash1 and unique factors
-                let hash2 = 0;
-                for (let i = 0; i < mockContentForHash2.length; i++) {
-                    const char = mockContentForHash2.charCodeAt(i);
-                    hash2 = ((hash2 << 5) - hash2) + char;
-                    hash2 |= 0;
-                }
-                const mockHash2 = `0xCOMMITMENT${Math.abs(hash2).toString(16).padStart(12, '0').toUpperCase()}`;
-
-                // Mock QR Content (JSON structure for actual QR)
-                const qrContentJson = {
-                    version: "DTC_0.7.5.3",
-                    type: "QR_Batch_Mint",
-                    issuerPublicKey: publicKey,
-                    data: secretData,
-                    meta: {
-                        batchName: batchName,
-                        quantity: quantity,
-                        timestamp: timestamp,
-                        slotId: slotId,
-                        nonce: nonce
-                    },
-                    hash1: mockHash1,
-                    hash2: mockHash2,
-                    signature: "0xMOCKSIGNATURE_XYZABCDEF" // Placeholder for actual digital signature
-                };
-
-                return {
-                    qrContent: JSON.stringify(qrContentJson, null, 2), // Prettify JSON for display
-                    hash1: mockHash1,
-                    hash2: mockHash2,
-                    timestamp: timestamp
-                };
-            }
-
-            // --- Generate QR Batch Button Click ---
-            generateQrBatchBtn.addEventListener('click', () => {
-                const issuerPublicKey = issuerPublicKeyInput.value.trim();
-                const password = passwordInput.value.trim();
-                const pin = pinInput.value.trim();
-                const secretData = secretDataInput.value.trim();
-                const batchName = batchNameInput.value.trim();
-                const quantity = parseInt(quantityInput.value);
-
-                // Basic Validation
-                if (!issuerPublicKey || !password || !pin || !secretData || !batchName || isNaN(quantity) || quantity < 1) {
-                    alert('Please fill in all required fields and ensure quantity is valid.');
-                    return;
-                }
-                if (pin.length !== 4) {
-                    alert('PIN must be 4 digits.');
-                    return;
-                }
-                // (In a real system, you'd add more complex validation, e.g., for Public Key format)
-
-                const generatedData = generateMockQrData(issuerPublicKey, password, pin, secretData, batchName, quantity);
-
-                // Display results
-                qrOutputSection.style.display = 'flex'; // Use flex to correctly show inner flex items
-                qrCodeImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(generatedData.qrContent)}`; // External QR API for mockup
-                qrContentDisplay.textContent = generatedData.qrContent;
-                hash1Display.textContent = generatedData.hash1;
-                hash2Display.textContent = generatedData.hash2;
-                generatedTimestamp.textContent = new Date(generatedData.timestamp).toLocaleString();
-            });
-
-            // --- Export Buttons (Mockup) ---
-            document.getElementById('exportTicketBtn').addEventListener('click', () => {
-                const qrContent = qrContentDisplay.textContent;
-                if (!qrContent) {
-                    alert('Please generate QR content first.');
-                    return;
-                }
-                // In real implementation, call a function from export.js
-                // This would download a JSON file.
-                const filename = `DTC_Ticket_${new Date().getTime()}.json`;
-                const blob = new Blob([qrContent], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                alert(`Exported Ticket (JSON) for your QR batch! (Mock: ${filename})`);
-            });
-
-            document.getElementById('exportQrBtn').addEventListener('click', () => {
-                const qrContent = qrContentDisplay.textContent;
-                if (!qrContent) {
-                    alert('Please generate QR content first.');
-                    return;
-                }
-                // In real implementation, this would download the generated QR image.
-                // For mockup, we can use the src of our mock image.
-                const filename = `DTC_QR_Batch_${new Date().getTime()}.png`;
-                const imgUrl = qrCodeImage.src;
-                if (imgUrl && imgUrl.startsWith('data:image/') || imgUrl.includes('api.qrserver.com')) {
-                    const a = document.createElement('a');
-                    a.href = imgUrl;
-                    a.download = filename;
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
+        // --- Toggle Password/PIN Visibility ---
+        document.querySelectorAll('.toggle-password').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                const targetId = toggle.dataset.target;
+                const targetInput = document.getElementById(targetId);
+                if (targetInput.type === 'password') {
+                    targetInput.type = 'text'; toggle.textContent = 'Hide';
                 } else {
-                    alert('QR image not ready for export.');
+                    targetInput.type = 'password'; toggle.textContent = 'Show';
                 }
-                alert(`Exported QR Batch (PNG/SVG)! (Mock: ${filename})`);
-            });
-
-            document.getElementById('exportLogBtn').addEventListener('click', () => {
-                const logData = {
-                    issuerPublicKey: issuerPublicKeyInput.value,
-                    secretData: secretDataInput.value,
-                    batchName: batchNameInput.value,
-                    quantity: quantityInput.value,
-                    hash1: hash1Display.textContent,
-                    hash2: hash2Display.textContent,
-                    generatedAt: generatedTimestamp.textContent
-                };
-                // In real implementation, call a function from export.js
-                // This would download a log file.
-                const filename = `DTC_Log_Batch_${new Date().getTime()}.json`;
-                const blob = new Blob([JSON.stringify(logData, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                URL.revokeObjectURL(url);
-                alert(`Exported Log (Batch Details)! (Mock: ${filename})`);
             });
         });
+
+        // --- Quantity +/- Buttons ---
+        decreaseQtyBtn.addEventListener('click', () => {
+            let currentQty = parseInt(quantityInput.value);
+            if (currentQty > 1) quantityInput.value = currentQty - 1;
+        });
+        increaseQtyBtn.addEventListener('click', () => {
+            let currentQty = parseInt(quantityInput.value);
+            if (currentQty < 1000) quantityInput.value = currentQty + 1;
+        });
+
+        // --- SHA256 Helper ---
+        async function sha256Hex(str) {
+            const buf = new TextEncoder().encode(str);
+            const hashBuf = await crypto.subtle.digest('SHA-256', buf);
+            return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // --- Generate QR Batch (DTC Logic) ---
+        generateQrBatchBtn.addEventListener('click', async () => {
+            const issuerPublicKey = issuerPublicKeyInput.value.trim();
+            const password = passwordInput.value.trim();
+            const pin = pinInput.value.trim();
+            const secretData = secretDataInput.value.trim();
+            const batchName = batchNameInput.value.trim();
+            const quantity = parseInt(quantityInput.value);
+
+            if (!issuerPublicKey || !password || !pin || !secretData || !batchName || isNaN(quantity) || quantity < 1) {
+                alert('Please fill in all required fields and ensure quantity is valid.');
+                return;
+            }
+            if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
+                alert('PIN must be 4 digits.');
+                return;
+            }
+
+            // DTC chain meta
+            const now = new Date();
+            const timestamp = now.toISOString();
+            const slotId = `DTC_SLOT_${Math.random().toString(36).substring(2, 8).toUpperCase()}`;
+            const nonce = Math.random().toString(36).substring(2, 10);
+
+            // 1. Hash1: SHA256(issuerPublicKey + secretData + batchName + quantity + timestamp + slotId + nonce)
+            const hash1_input = issuerPublicKey + '|' + secretData + '|' + batchName + '|' + quantity + '|' + timestamp + '|' + slotId + '|' + nonce;
+            const hash1 = await sha256Hex(hash1_input);
+
+            // 2. Hash2: SHA256(hash1 + timestamp + nonce)
+            const hash2 = await sha256Hex(hash1 + '|' + timestamp + '|' + nonce);
+
+            // 3. QR Content structure
+            const qrContentJson = {
+                version: "DTC_0.7.6.1",
+                type: "QR_Batch_Mint",
+                issuerPublicKey: issuerPublicKey,
+                data: secretData,
+                meta: {
+                    batchName: batchName,
+                    quantity: quantity,
+                    timestamp: timestamp,
+                    slotId: slotId,
+                    nonce: nonce
+                },
+                hash1: hash1,
+                hash2: hash2,
+                signature: "0xMOCKSIGNATURE"
+            };
+
+            qrOutputSection.style.display = 'flex';
+            qrCodeImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(JSON.stringify(qrContentJson))}`;
+            qrContentDisplay.textContent = JSON.stringify(qrContentJson, null, 2);
+            hash1Display.textContent = hash1;
+            hash2Display.textContent = hash2;
+            generatedTimestamp.textContent = new Date(timestamp).toLocaleString();
+        });
+
+        // --- Export Buttons ---
+        document.getElementById('exportTicketBtn').addEventListener('click', () => {
+            const qrContent = qrContentDisplay.textContent;
+            if (!qrContent) return;
+            const filename = `DTC_Ticket_${new Date().getTime()}.json`;
+            const blob = new Blob([qrContent], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('exportQrBtn').addEventListener('click', () => {
+            const qrContent = qrContentDisplay.textContent;
+            if (!qrContent) return;
+            const filename = `DTC_QR_Batch_${new Date().getTime()}.png`;
+            const imgUrl = qrCodeImage.src;
+            if (imgUrl && (imgUrl.startsWith('data:image/') || imgUrl.includes('api.qrserver.com'))) {
+                const a = document.createElement('a'); a.href = imgUrl; a.download = filename;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            }
+        });
+
+        document.getElementById('exportLogBtn').addEventListener('click', () => {
+            const logData = {
+                issuerPublicKey: issuerPublicKeyInput.value,
+                secretData: secretDataInput.value,
+                batchName: batchNameInput.value,
+                quantity: quantityInput.value,
+                hash1: hash1Display.textContent,
+                hash2: hash2Display.textContent,
+                generatedAt: generatedTimestamp.textContent
+            };
+            const filename = `DTC_Log_Batch_${new Date().getTime()}.json`;
+            const blob = new Blob([JSON.stringify(logData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = filename;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+        });
+    });
     </script>
 </body>
 </html>
