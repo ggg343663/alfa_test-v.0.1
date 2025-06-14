@@ -24,7 +24,10 @@
       width:100%; font-size:1.11em; border-radius:8px; border:none; font-weight:bold; min-height:44px;
       margin-top: 0.6em; padding: 0.8em 0; cursor: pointer; transition: background .18s, color .18s;
     }
-    .btn-main { background: #2196f3; color: #fff; }
+    .btn-main {
+      background: linear-gradient(90deg,#219150 75%,#44cc77 100%);
+      color: #fff;
+    }
     .btn-main:active { background: #176d38;}
     .btn-action { background: #b8cafe; color: #173472;}
     .btn-action:active { background: #97b6ed;}
@@ -44,10 +47,20 @@
     .nav-bar { display: flex; gap: 0.7em; margin-top: 2.1em;}
     .btn-nav { flex: 1; background: #ede7f6; color: #512da8;}
     .btn-nav:active { background: #b39ddb;}
+    /* Modal Confirm */
+    .modal-overlay { display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.18); z-index: 99; justify-content: center; align-items: center;}
+    .modal-content { background: #fff; border-radius: 13px; padding: 2em 1.3em 1.3em 1.3em; max-width: 400px; margin: 0 auto; box-shadow: 0 8px 32px #21915019, 0 2px 8px #36d86d0c; text-align: center; position: relative;}
+    .modal-content h3 { margin: 0 0 1em 0; color: #219150; font-size: 1.17em; }
+    .modal-preview-list { text-align: left; margin: 0 0 1.5em 0; font-size: 1.03em; color: #234; background: #f6f7fa; border-radius: 7px; padding: 1em; border-left: 5px solid #219150;}
+    .btn-confirm { display: block; width: 100%; margin: 1em 0 0 0; background: linear-gradient(90deg,#219150 75%,#44cc77 100%); color: #fff; font-size: 1.13em; font-weight: bold; border: none; border-radius: 8px; padding: 1em 0; cursor: pointer; transition: background .13s, filter .13s; box-shadow: 0 4px 10px rgba(36,145,80,0.08);}
+    .btn-confirm:hover { filter: brightness(0.96);}
+    .btn-cancel { display: block; width: 100%; margin: 0.7em 0 0 0; background: #b0bec5; color: #fff; font-size: 1em; border: none; border-radius: 8px; padding: 0.7em 0; cursor: pointer; transition: background .13s;}
+    .btn-cancel:hover { background: #90a4ae;}
     @media (max-width:600px) {
       .container { padding:1.1em 0.22em 1em 0.22em;}
       .nav-bar { flex-direction: column; gap:0.4em;}
       h2 { font-size:1.13em;}
+      .modal-content { padding: 1em 0.3em 1em 0.3em; }
     }
   </style>
 </head>
@@ -68,7 +81,7 @@
       <input type="text" id="nonce" maxlength="20" autocomplete="off" style="flex:1;" />
       <button type="button" onclick="randomNonce()" class="btn-action" style="flex:0.7;">Random</button>
     </div>
-    <button class="btn-main" onclick="createAgentSlot()">Create Agent Slot</button>
+    <button class="btn-main" type="button" id="previewBtn">Create Agent Slot</button>
   </div>
   <!-- Section B: Agent Signs -->
   <div class="section" id="section-sign" style="display:none;">
@@ -92,8 +105,16 @@
     <button class="btn-nav" onclick="location.href='register.html'">Next</button>
   </div>
 </div>
+<!-- Modal Preview -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal-content">
+    <h3>Preview Agent Registration</h3>
+    <div class="modal-preview-list" id="previewList"></div>
+    <button class="btn-confirm" id="confirmBtn">Confirm & Register</button>
+    <button class="btn-cancel" id="cancelBtn">Cancel</button>
+  </div>
+</div>
 <script>
-  // --- Timestamp & Nonce
   let lastTimestamp = "";
   function randomNonce() {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
@@ -136,17 +157,24 @@
     }
   });
 
-  // --- Step 1: Master Create
-  function createAgentSlot() {
+  // --- Step 1: Master Create with Modal Preview
+  const previewBtn = document.getElementById('previewBtn');
+  const modal = document.getElementById('modalOverlay');
+  const previewList = document.getElementById('previewList');
+  const confirmBtn = document.getElementById('confirmBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  previewBtn.addEventListener('click', () => {
+    // Validate
     const name = document.getElementById('agentName').value.trim();
+    const pubkey = document.getElementById('agentPubKey').value.trim();
+    const nonce = document.getElementById('nonce').value.trim();
     if (badwordsReady && findBadwords(name).length) {
-      if (!confirm("Warning: The agent name contains inappropriate words. Are you sure you want to continue?")) return;
+      alert("Warning: The agent name contains inappropriate words. Please reconsider.");
+      return;
     }
     if (badwordsError) {
       alert("Cannot verify inappropriate words. Please check badwords.json or contact admin."); return;
     }
-    const pubkey = document.getElementById('agentPubKey').value.trim();
-    const nonce = document.getElementById('nonce').value.trim();
     if (!name || !/^[a-z0-9]{1,16}$/.test(name)) { alert("Invalid agent name"); return; }
     if (!pubkey || pubkey.length<30) { alert("Invalid agent public key"); return; }
     if (!nonce) { alert("Enter nonce"); return; }
@@ -155,16 +183,34 @@
     const agent_hash_str = `${master_hash}:${pubkey}:${name}:${nonce}:${lastTimestamp}`;
     window.agent_hash_data = { master_hash, agent_pubkey:pubkey, agent_name:name, nonce, timestamp:lastTimestamp };
     window.agent_hash_to_sign = agent_hash_str;
+    // Show preview modal
+    previewList.innerHTML = `
+      <b>Agent Name:</b> <code>${name}</code><br>
+      <b>Agent Public Key:</b> <code>${pubkey}</code><br>
+      <b>Nonce:</b> <code>${nonce}</code><br>
+      <b>Timestamp:</b> ${lastTimestamp}<br>
+      <b>Master Hash:</b> <code>${master_hash}</code>
+    `;
+    modal.style.display = "flex";
+  });
+  confirmBtn.addEventListener('click', () => {
+    modal.style.display = "none";
     document.getElementById('section-sign').style.display = "block";
-    document.getElementById('agentPayload').value = agent_hash_str;
+    document.getElementById('agentPayload').value = window.agent_hash_to_sign;
     document.getElementById('sigResult').style.display = "none";
     document.getElementById('exportSuccess').textContent = "";
-  }
+  });
+  cancelBtn.addEventListener('click', ()=>{ modal.style.display = "none"; });
+  document.addEventListener('keydown', (e) => {
+    if (modal.style.display === "flex" && (e.key === "Escape" || e.key === "Esc")) modal.style.display = "none";
+  });
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) modal.style.display = "none";
+  });
 
   // --- PBKDF2 derive (browser)
   async function pbkdf2_sha256(password, pin) {
     const enc = new TextEncoder();
-    // ใช้ | คั่น เหมือน mint/transfer (consistency)
     const key = await window.crypto.subtle.importKey("raw", enc.encode(password+"|"+pin), "PBKDF2", false, ["deriveBits"]);
     const bits = await window.crypto.subtle.deriveBits(
       {name:"PBKDF2",salt:enc.encode("DTC-KEY-SALT"),iterations:100000,hash:"SHA-256"}, key, 256);
