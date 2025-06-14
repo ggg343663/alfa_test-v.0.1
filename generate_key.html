@@ -11,55 +11,35 @@
       padding: 1.3em; 
       max-width: 480px; 
       margin: 0 auto;
-      box-sizing: border-box; /* สำคัญ: เพื่อให้ padding ไม่ดัน layout เกิน max-width */
-      padding-bottom: 70px; /* เว้นที่ว่างด้านล่างสำหรับ Navigation Bar */
+      box-sizing: border-box;
+      padding-bottom: 70px;
     }
     h1 { color: #219150; text-align: center; margin-bottom: 1.2em; font-size: 1.15em;}
     .form-group { margin-bottom: 1em; }
     label { font-weight: bold; color: #2d3c35; margin-bottom: 0.35em; display:block;}
-    
-    /* Container for input and toggle icon */
-    .input-with-toggle {
-      position: relative;
-      width: 100%;
-    }
-
-    input[type="password"], 
-    input[type="text"], /* Added type="text" for toggle functionality */
-    .pubkey-box {
+    .input-with-toggle { position: relative; width: 100%; }
+    input[type="password"], input[type="text"], .pubkey-box {
       width: 100%; padding: 11px 12px; font-size: 1em; border: 2px solid #cfd8dc;
       border-radius: 9px; box-sizing: border-box; background: #fff;
       margin-top: 0.13em; transition: border 0.15s;
-      padding-right: 40px; /* Make space for the eye icon */
+      padding-right: 40px;
     }
     input:focus { border-color: #ffd600; background: #ffffed; }
-    input.valid { border-color: #43a047;} /* Green border for valid input */
-    input.invalid { border-color: #e53935;} /* Red border for invalid input */
-
-    /* Eye icon styling */
+    input.valid { border-color: #43a047;}
+    input.invalid { border-color: #e53935;}
     .eye-icon {
-      position: absolute;
-      right: 12px;
-      top: 50%;
-      transform: translateY(-50%);
-      cursor: pointer;
-      color: #90a4ae;
-      width: 20px;
-      height: 20px;
-      transition: color 0.15s;
-      margin-top: 0.13em; /* Align with input margin-top */
+      position: absolute; right: 12px; top: 50%;
+      transform: translateY(-50%); cursor: pointer; color: #90a4ae;
+      width: 20px; height: 20px; transition: color 0.15s; margin-top: 0.13em;
     }
-    .eye-icon:hover {
-      color: #546e7a;
-    }
-
+    .eye-icon:hover { color: #546e7a; }
     .pubkey-box {
       background: #eafaf0; color: #222; margin-top: 1.05em;
       font-family: 'Courier New', monospace; min-height: 39px; font-size: 0.98em;
       border-color: #219150; display: flex; align-items: center; justify-content: space-between;
       transition: border 0.18s;
       padding: 10px 12px;
-      word-break: break-all; /* Allow long text to break */
+      word-break: break-all;
     }
     .pubkey-box.copied { border-color: #43a047; background: #f0fff0;}
     .copy-btn {
@@ -72,91 +52,39 @@
     .strength-bar { height: 7px; width: 100%; margin-top: 4px; border-radius: 5px; background: #f5f5f5; overflow: hidden;}
     .strength-inner { height: 100%; width: 0; border-radius: 5px; transition: width 0.22s;}
     .btn-gen {
-      width: 100%; 
-      background: #43a047; /* เปลี่ยนเป็นสีเขียว */
+      width: 100%; background: #43a047;
       color: #fff; border: none; border-radius: 8px;
       padding: 11px 0; font-size: 1.08em; font-weight: bold; margin-top: 0.7em; cursor: pointer;
       box-shadow: 0 2px 8px rgba(0,0,0,0.09); transition: background 0.13s;
     }
-    .btn-gen:active { background: #388e3c;} /* สีเขียวเข้มขึ้นเมื่อ active */
+    .btn-gen:active { background: #388e3c;}
     .btn-gen:disabled { opacity: 0.6; cursor: not-allowed;}
-
-    /* Navigation Bar Styles */
     .nav-bar {
-      display: flex;
-      justify-content: space-around;
-      padding: 0.5em 0.06em;
-      background: #ffffff;
-      border-top: 1.2px solid #eee;
-      position: fixed; /* ตรึงตำแหน่ง */
-      left: 0; 
-      right: 0;
-      bottom: 0; /* อยู่ด้านล่างสุด */
-      z-index: 9; /* ให้แสดงทับองค์ประกอบอื่น */
-      max-width: 480px; /* จำกัดความกว้างเท่ากับ body */
-      margin: 0 auto; /* จัดกึ่งกลาง */
-      box-shadow: 0 -1.5px 8px rgba(0,0,0,0.04);
-      border-radius: 12px 12px 0 0; /* โค้งมนด้านบน */
+      display: flex; justify-content: space-around;
+      padding: 0.5em 0.06em; background: #ffffff; border-top: 1.2px solid #eee;
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 9;
+      max-width: 480px; margin: 0 auto; box-shadow: 0 -1.5px 8px rgba(0,0,0,0.04);
+      border-radius: 12px 12px 0 0;
     }
     .nav-bar a {
-      flex: 1;
-      padding: 0.6em 0.1em;
-      text-align: center;
-      color: #3f51b5; /* สีฟ้า/ม่วง */
-      background: none;
-      font-weight: 600;
-      border-radius: 7px;
-      margin: 0 0.17em;
-      font-size: 0.96em;
-      min-height: 36px;
-      text-decoration: none;
-      transition: background 0.13s, color 0.13s;
-      display: flex; /* ใช้ flexbox */
-      flex-direction: column; /* จัดวางไอคอนแนวตั้ง */
-      align-items: center;
-      justify-content: center;
+      flex: 1; padding: 0.6em 0.1em; text-align: center; color: #3f51b5;
+      background: none; font-weight: 600; border-radius: 7px;
+      margin: 0 0.17em; font-size: 0.96em; min-height: 36px; text-decoration: none;
+      transition: background 0.13s, color 0.13s; display: flex; flex-direction: column; align-items: center; justify-content: center;
     }
-    .nav-bar a svg { /* Style for SVG icons within nav links */
-        width: 24px; /* ขนาดไอคอน */
-        height: 24px;
-        fill: currentColor; /* ใช้สี text ของลิงก์ */
-    }
-    .nav-bar a span { /* Style for text label (hidden) */
-        display: none; /* ซ่อนข้อความกำกับ */
-    }
-    .nav-bar a:hover {
-      background: #e8eaf6; /* สีอ่อนลงเมื่อ hover */
-      color: #1976d2; /* สีน้ำเงินเข้มขึ้นเมื่อ hover */
-    }
-    .nav-bar a.active {
-      color: #2196f3;
-      border-bottom: 2px solid #2196f3;
-      padding-bottom: 0.2em;
-    }
-    .nav-bar a.disabled { /* เพิ่ม class สำหรับปุ่มที่ถูกปิดใช้งาน */
-        opacity: 0.6;
-        cursor: not-allowed;
-    }
-
+    .nav-bar a svg { width: 24px; height: 24px; fill: currentColor;}
+    .nav-bar a span { display: none; }
+    .nav-bar a:hover { background: #e8eaf6; color: #1976d2;}
+    .nav-bar a.active { color: #2196f3; border-bottom: 2px solid #2196f3; padding-bottom: 0.2em;}
+    .nav-bar a.disabled { opacity: 0.6; cursor: not-allowed;}
     @media (max-width: 600px) {
-      body { 
-        padding: 1em 0.08em; /* ปรับ padding สำหรับจอเล็ก */
-        padding-bottom: 70px; /* รักษาพื้นที่ด้านล่างสำหรับ nav-bar */
-      }
+      body { padding: 1em 0.08em; padding-bottom: 70px;}
       h1 { font-size: 1em;}
       .copy-btn { padding: 5px 9px;}
       .pubkey-box { font-size: 0.93em;}
       .btn-gen { padding: 10px 0;}
-      /* Responsive for Navigation Bar */
-      .nav-bar {
-        padding: 8px 0;
-        min-height: 50px; /* เพิ่ม min-height สำหรับ touch target */
-      }
-      .nav-bar a {
-        padding: 8px 12px;
-        font-size: 0.9em;
-        min-height: 40px; /* เพิ่ม min-height สำหรับ touch target */
-      }
+      .nav-bar { padding: 8px 0; min-height: 50px;}
+      .nav-bar a { padding: 8px 12px; font-size: 0.9em; min-height: 40px;}
     }
   </style>
 </head>
@@ -164,9 +92,8 @@
   <h1>Generate Public Key (DTC)</h1>
   <div class="form-group">
     <label for="password">Password</label>
-    <div class="input-with-toggle"> <!-- Wrapper for input and eye icon -->
+    <div class="input-with-toggle">
       <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="6-12 chars (a-z,0-9)"/>
-      <!-- Eye icon SVG for toggling password visibility -->
       <svg class="eye-icon" data-target="password" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
       </svg>
@@ -175,9 +102,8 @@
   </div>
   <div class="form-group">
     <label for="confirmPassword">Confirm Password</label>
-    <div class="input-with-toggle"> <!-- Wrapper for input and eye icon -->
+    <div class="input-with-toggle">
       <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="Confirm"/>
-      <!-- Eye icon SVG for toggling confirm password visibility -->
       <svg class="eye-icon" data-target="confirmPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
         <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
       </svg>
@@ -185,21 +111,19 @@
   </div>
   <div class="form-group">
     <label for="pin">PIN</label>
-    <div class="input-with-toggle"> <!-- Wrapper for input and eye icon -->
+    <div class="input-with-toggle">
       <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="4 digits (0-9)"/>
-      <!-- Eye icon SVG for toggling PIN visibility -->
       <svg class="eye-icon" data-target="pin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+        <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15-1.01 0-1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
       </svg>
     </div>
   </div>
   <div class="form-group">
     <label for="confirmPin">Confirm PIN</label>
-    <div class="input-with-toggle"> <!-- Wrapper for input and eye icon -->
+    <div class="input-with-toggle">
       <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="Confirm"/>
-      <!-- Eye icon SVG for toggling confirm PIN visibility -->
       <svg class="eye-icon" data-target="confirmPin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
-        <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+        <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15-1.01 0-1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
       </svg>
     </div>
   </div>
@@ -211,40 +135,26 @@
       <span id="copyStatus" class="copy-status"></span>
     </div>
   </div>
-
-  <!-- Navigation Bar -->
   <div class="nav-bar">
     <a href="index.html" aria-label="Back">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
-          <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/> {/* Simple left arrow */}
-        </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
+        <path d="M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6z"/>
+      </svg>
     </a>
     <a href="index.html" class="active" aria-label="Home">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
-          <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/> {/* Simple house outline */}
-        </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
+        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+      </svg>
     </a>
     <a href="index.html" aria-label="Next">
-        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
-          <path d="M8.59 16.59L13.17 12l-4.58-4.59L10 6l6 6-6 6z"/> {/* Material Design chevron right */}
-        </svg>
+      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="currentColor">
+        <path d="M8.59 16.59L13.17 12l-4.58-4.59L10 6l6 6-6 6z"/>
+      </svg>
     </a>
   </div>
-
   <script>
-    // Function to validate password format
-    function validPw(pw) {
-      return /^[a-zA-Z0-9]{6,12}$/.test(pw);
-    }
-    // Function to validate PIN format
-    function validPin(pin) {
-      return /^\d{4}$/.test(pin);
-    }
-    // Function to generate the key (returns password + pin)
-    function genKey(password, pin) {
-      return password + pin;
-    }
-    // Function to calculate password strength
+    function validPw(pw) { return /^[a-zA-Z0-9]{6,12}$/.test(pw);}
+    function validPin(pin) { return /^\d{4}$/.test(pin);}
     function pwStrength(pw) {
       if(!pw) return 0;
       let s = 0;
@@ -255,20 +165,18 @@
       if(pw.length > 9) s++;
       return Math.min(s, 4);
     }
-    // Function to update the password strength bar visually
     function updateStrength() {
       const pw = document.getElementById('password').value;
       const bar = document.getElementById('pw-strength');
-      if (bar) { // Check if bar element exists
+      if (bar) {
         const lvl = pwStrength(pw);
         bar.style.width = (25*lvl) + '%';
         bar.style.background = lvl >= 4 ? '#43a047' : lvl >= 3 ? '#ffd600' : lvl ? '#ffa726' : '#eee';
       }
     }
-    // Function to apply feedback (valid/invalid) classes to input fields
     function feedback(id, isValid) {
       const input = document.getElementById(id);
-      if(input) { // Check if input element exists
+      if(input) {
         if(isValid === true) {
           input.classList.add('valid'); 
           input.classList.remove('invalid');
@@ -276,11 +184,10 @@
           input.classList.remove('valid'); 
           input.classList.add('invalid');
         } else {
-          input.classList.remove('valid','invalid'); // Reset state
+          input.classList.remove('valid','invalid');
         }
       }
     }
-    // Main validation function for all inputs in the form
     function validateInputs() {
       const pw = document.getElementById('password').value.trim();
       const cpw = document.getElementById('confirmPassword').value.trim();
@@ -288,41 +195,34 @@
       const cpin = document.getElementById('confirmPin').value.trim();
 
       const isPwValid = validPw(pw);
-      // Check if confirm password matches password AND is valid format
       const isCpwMatching = (cpw.length > 0 && cpw === pw && isPwValid);
       const isPinValid = validPin(pin);
-      // Check if confirm PIN matches PIN AND is valid format
       const isCpinMatching = (cpin.length > 0 && cpin === pin && isPinValid);
 
       feedback('password', isPwValid);
       feedback('confirmPassword', isCpwMatching);
       feedback('pin', isPinValid);
       feedback('confirmPin', isCpinMatching);
-      
       updateStrength();
 
-      // Enable/disable generate button based on all validations
       const generateBtn = document.getElementById('generateBtn');
-      if (generateBtn) { // Check if button element exists
+      if (generateBtn) {
         if (isPwValid && isCpwMatching && isPinValid && isCpinMatching) {
           generateBtn.disabled = false;
         } else {
           generateBtn.disabled = true;
         }
       }
-
       return (isPwValid && isCpwMatching && isPinValid && isCpinMatching);
     }
 
-    // Toggle password/PIN visibility
     document.querySelectorAll('.eye-icon').forEach(icon => {
       icon.addEventListener('click', function() {
         const targetId = this.dataset.target;
         const input = document.getElementById(targetId);
-        if (input) { // Check if input element exists
+        if (input) {
           if (input.type === 'password') {
             input.type = 'text';
-            // Optional: change SVG path for an 'eye-slash' icon if desired
           } else {
             input.type = 'password';
           }
@@ -330,40 +230,44 @@
       });
     });
 
-    // Attach input event listeners to all relevant fields
     ['password','confirmPassword','pin','confirmPin'].forEach(id => {
       const element = document.getElementById(id);
-      if (element) { // Check if element exists before adding listener
-        element.addEventListener('input', validateInputs);
-      }
+      if (element) element.addEventListener('input', validateInputs);
     });
 
-    // Event handler for the "Generate Public Key" button click
-    document.getElementById('generateBtn').onclick = function() {
-      if (!validateInputs()) {
-        return;
-      }
+    // ฟังก์ชัน derive public key แบบ deterministic (PBKDF2/SHA-256 ไม่มี salt)
+    async function derivePublicKey(password, pin) {
+      const passphrase = password + pin;
+      const encoder = new TextEncoder();
+      const keyMaterial = await window.crypto.subtle.importKey(
+        "raw", encoder.encode(passphrase), {name: "PBKDF2"}, false, ["deriveBits"]
+      );
+      const derivedBits = await window.crypto.subtle.deriveBits(
+        {
+          "name": "PBKDF2",
+          salt: new Uint8Array([]), // no salt
+          iterations: 250000,
+          hash: "SHA-256"
+        },
+        keyMaterial,
+        256 // 32 bytes
+      );
+      let hex = Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2, '0')).join('');
+      return hex;
+    }
+
+    document.getElementById('generateBtn').onclick = async function() {
+      if (!validateInputs()) return;
       const pw = document.getElementById('password').value.trim();
       const pin = document.getElementById('pin').value.trim();
-      
-      let pubkey = genKey(pw, pin); // Call genKey to get "password + pin"
-      
-      const publicKeyPlaceholder = document.getElementById('publicKeyPlaceholder');
-      if (publicKeyPlaceholder) { // Check if element exists
-        publicKeyPlaceholder.textContent = pubkey;
-      }
-      const pubkeyArea = document.getElementById('pubkeyArea');
-      if (pubkeyArea) { // Check if element exists
-        pubkeyArea.style.display = ''; // Show the public key display area
-      }
+      let pubkey = await derivePublicKey(pw, pin);
+      document.getElementById('publicKeyPlaceholder').textContent = pubkey;
+      document.getElementById('pubkeyArea').style.display = '';
     };
 
-    // Event handler for the "Copy" button click
     document.getElementById('copyBtn').onclick = function() {
       const publicKeyPlaceholder = document.getElementById('publicKeyPlaceholder');
       const textToCopy = publicKeyPlaceholder ? publicKeyPlaceholder.textContent : '';
-      
-      // Using document.execCommand('copy') for better compatibility in iframe environments
       const textarea = document.createElement('textarea');
       textarea.value = textToCopy;
       document.body.appendChild(textarea);
@@ -372,7 +276,7 @@
         document.execCommand('copy');
         const pubkeyBox = document.getElementById('pubkeyBox');
         const copyStatus = document.getElementById('copyStatus');
-        if (copyStatus && pubkeyBox) { // Check if elements exist
+        if (copyStatus && pubkeyBox) {
           copyStatus.textContent = '✓ Copied!';
           copyStatus.classList.add('visible');
           pubkeyBox.classList.add('copied');
@@ -388,7 +292,6 @@
       }
     };
 
-    // Initial validation call to set button state and feedback when page loads
     validateInputs();
   </script>
 </body>
