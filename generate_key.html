@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Generate Public Key - DTC</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; padding: 1.3em; max-width: 480px; margin: 0 auto;}
@@ -23,6 +23,7 @@
       border-color: #219150; display: flex; align-items: center; justify-content: space-between;
       transition: border 0.18s;
       padding: 10px 12px;
+      word-break: break-all; /* อนุญาตให้ข้อความยาวขึ้นบรรทัดใหม่ได้ */
     }
     .pubkey-box.copied { border-color: #43a047; background: #f0fff0;}
     .copy-btn {
@@ -51,29 +52,29 @@
   </style>
 </head>
 <body>
-  <h1>Generate Public Key (DTC)</h1>
+  <h1>สร้าง Public Key (DTC)</h1>
   <div class="form-group">
-    <label>Password</label>
-    <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="6-12 chars (a-z,0-9)"/>
+    <label>รหัสผ่าน</label>
+    <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="6-12 อักขระ (a-z,0-9)"/>
     <div class="strength-bar"><div id="pw-strength" class="strength-inner"></div></div>
   </div>
   <div class="form-group">
-    <label>Confirm Password</label>
-    <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="Confirm"/>
+    <label>ยืนยันรหัสผ่าน</label>
+    <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="ยืนยัน"/>
   </div>
   <div class="form-group">
     <label>PIN</label>
-    <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="4 digits (0-9)"/>
+    <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="4 หลัก (0-9)"/>
   </div>
   <div class="form-group">
-    <label>Confirm PIN</label>
-    <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="Confirm"/>
+    <label>ยืนยัน PIN</label>
+    <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="ยืนยัน"/>
   </div>
-  <button class="btn-gen" id="generateBtn">Generate Public Key</button>
+  <button class="btn-gen" id="generateBtn">สร้าง Public Key</button>
   <div class="form-group" id="pubkeyArea" style="display:none;">
     <div class="pubkey-box" id="pubkeyBox">
-      <span id="publicKeyPlaceholder">Public Key will appear here</span>
-      <button class="copy-btn" id="copyBtn">Copy</button>
+      <span id="publicKeyPlaceholder">Public Key จะปรากฏที่นี่</span>
+      <button class="copy-btn" id="copyBtn">คัดลอก</button>
       <span id="copyStatus" class="copy-status"></span>
     </div>
   </div>
@@ -84,15 +85,21 @@
     function validPin(pin) {
       return /^\d{4}$/.test(pin);
     }
+    
+    // แก้ไขฟังก์ชัน genKey เพื่อคืนค่า "password + pin"
     function genKey(password, pin) {
-      // ไม่มี salt!
-      let str = password + pin;
-      let hash = 0;
-      for (let i = 0; i < str.length; i++)
-        hash = ((hash << 5) - hash) + str.charCodeAt(i), hash |= 0;
-      let pub = Math.abs(hash).toString(16).padStart(16,'0') + 'DTC';
-      return pub.slice(0, 48);
+      // โลจิกการแฮชดั้งเดิม (หากจำเป็นต้องใช้ที่อื่น)
+      // let str = password + pin;
+      // let hash = 0;
+      // for (let i = 0; i < str.length; i++)
+      //   hash = ((hash << 5) - hash) + str.charCodeAt(i), hash |= 0;
+      // let pub = Math.abs(hash).toString(16).padStart(16,'0') + 'DTC';
+      // return pub.slice(0, 48);
+
+      // ตามคำขอ ให้คืนค่า password + pin
+      return password + pin;
     }
+
     function pwStrength(pw) {
       if(!pw) return 0;
       let s = 0;
@@ -103,6 +110,7 @@
       if(pw.length > 9) s++;
       return Math.min(s, 4);
     }
+
     function updateStrength() {
       const pw = document.getElementById('password').value;
       const bar = document.getElementById('pw-strength');
@@ -110,6 +118,7 @@
       bar.style.width = (25*lvl) + '%';
       bar.style.background = lvl >= 4 ? '#43a047' : lvl >= 3 ? '#ffd600' : lvl ? '#ffa726' : '#eee';
     }
+
     function feedback(id, isValid) {
       const input = document.getElementById(id);
       if(isValid === true) {
@@ -120,39 +129,88 @@
         input.classList.remove('valid','invalid');
       }
     }
+
     function validateInputs() {
       const pw = document.getElementById('password').value.trim();
       const cpw = document.getElementById('confirmPassword').value.trim();
       const pin = document.getElementById('pin').value.trim();
       const cpin = document.getElementById('confirmPin').value.trim();
-      feedback('password', validPw(pw));
-      feedback('confirmPassword', (cpw.length > 0 && cpw === pw && validPw(cpw)));
-      feedback('pin', validPin(pin));
-      feedback('confirmPin', (cpin.length > 0 && cpin === pin && validPin(cpin)));
+
+      const isPwValid = validPw(pw);
+      // ตรวจสอบว่ารหัสผ่านที่ยืนยันตรงกับรหัสผ่านหรือไม่
+      const isCpwMatching = (cpw.length > 0 && cpw === pw && isPwValid);
+      const isPinValid = validPin(pin);
+      // ตรวจสอบว่า PIN ที่ยืนยันตรงกับ PIN หรือไม่
+      const isCpinMatching = (cpin.length > 0 && cpin === pin && isPinValid);
+
+      feedback('password', isPwValid);
+      feedback('confirmPassword', isCpwMatching);
+      feedback('pin', isPinValid);
+      feedback('confirmPin', isCpinMatching);
+      
       updateStrength();
-      return (validPw(pw) && cpw === pw && validPin(pin) && cpin === pin);
+
+      // เปิด/ปิดปุ่มสร้างคีย์ตามการตรวจสอบทั้งหมด
+      const generateBtn = document.getElementById('generateBtn');
+      if (isPwValid && isCpwMatching && isPinValid && isCpinMatching) {
+        generateBtn.disabled = false;
+      } else {
+        generateBtn.disabled = true;
+      }
+
+      return (isPwValid && isCpwMatching && isPinValid && isCpinMatching);
     }
+
+    // เพิ่ม event listener ให้กับทุกฟิลด์ที่เกี่ยวข้อง
     ['password','confirmPassword','pin','confirmPin'].forEach(id => {
       document.getElementById(id).addEventListener('input', validateInputs);
     });
+
     document.getElementById('generateBtn').onclick = function() {
-      if (!validateInputs()) return;
+      if (!validateInputs()) {
+        // หากการตรวจสอบล้มเหลว จะไม่ดำเนินการต่อ
+        // ปุ่มควรจะถูกปิดใช้งานอยู่แล้ว แต่อันนี้เป็นมาตรการป้องกัน
+        return;
+      }
       const pw = document.getElementById('password').value.trim();
       const pin = document.getElementById('pin').value.trim();
-      let pubkey = genKey(pw, pin);
-      document.getElementById('publicKeyPlaceholder').textContent = pubkey;
+      
+      // รับค่าที่รวมกันสำหรับแสดงผล
+      let combinedValue = genKey(pw, pin); 
+      
+      document.getElementById('publicKeyPlaceholder').textContent = combinedValue;
       document.getElementById('pubkeyArea').style.display = '';
     };
+
     document.getElementById('copyBtn').onclick = function() {
-      navigator.clipboard.writeText(document.getElementById('publicKeyPlaceholder').textContent);
-      const pubkeyBox = document.getElementById('pubkeyBox');
-      const copyStatus = document.getElementById('copyStatus');
-      copyStatus.textContent = '✓ Copied!';
-      copyStatus.classList.add('visible');
-      pubkeyBox.classList.add('copied');
-      setTimeout(()=>{copyStatus.classList.remove('visible'); pubkeyBox.classList.remove('copied');}, 1100);
+      const textToCopy = document.getElementById('publicKeyPlaceholder').textContent;
+      // ใช้ document.execCommand('copy') เพื่อความเข้ากันได้ที่ดีขึ้นในสภาพแวดล้อม iframe
+      const textarea = document.createElement('textarea');
+      textarea.value = textToCopy;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand('copy');
+        const pubkeyBox = document.getElementById('pubkeyBox');
+        const copyStatus = document.getElementById('copyStatus');
+        copyStatus.textContent = '✓ คัดลอกแล้ว!';
+        copyStatus.classList.add('visible');
+        pubkeyBox.classList.add('copied');
+        setTimeout(()=>{
+          copyStatus.classList.remove('visible'); 
+          pubkeyBox.classList.remove('copied');
+        }, 1100);
+      } catch (err) {
+        console.error('คัดลอกข้อความไม่สำเร็จ: ', err);
+        // ทางเลือก: แจ้งให้ผู้ใช้ทราบว่าการคัดลอกล้มเหลว
+      } finally {
+        document.body.removeChild(textarea);
+      }
     };
+
+    // เรียกใช้การตรวจสอบเริ่มต้นเพื่อตั้งค่าสถานะปุ่มและข้อเสนอแนะ
     validateInputs();
   </script>
 </body>
 </html>
+
