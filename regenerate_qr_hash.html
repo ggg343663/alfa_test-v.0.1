@@ -1,56 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Regenerate QR Hash - DTC: Magic Chain System</title>
-    <style>
-      body { font-family: Arial,sans-serif; background: #f5f7fa; margin:0; padding:0;}
-      h1 { text-align: center; color: #219150; margin-bottom: 1.2em; }
-      .container { max-width: 680px; margin:2em auto; background:#fff; padding:2.3em 1.1em 2em 1.1em; border-radius:15px; box-shadow:0 2px 16px #90caf933;}
-      .section-block { margin: 1.1em 0; padding: 1.3em; border-radius: 12px; box-shadow: 0 2px 9px #edf1f6;}
-      .block-title { font-size: 1.07em; font-weight: bold; margin-bottom: 0.9em; color: #555; }
-      .input-label { font-weight: bold; color: #26733e; margin-bottom: 0.19em; }
-      .input-hint { color: #90a4ae; font-size: 0.95em; margin-top: 0.05em; margin-bottom: 0.14em; }
-      .input-row { display: flex; align-items: center; gap: 0.4em; }
-      input, textarea {
-        width: 100%; min-height: 38px; max-height: 44px; font-size: 1.07em; border-radius: 8px; border: 1.4px solid #b0bec5;
-        padding: 0.7em 1em; background: #f6faf7; transition: border .2s, background .2s; box-sizing: border-box; margin-bottom: 0.58em;
-      }
-      input:focus, textarea:focus { border-color: #2196f3; background: #fff; }
-      textarea { min-height:3.2em; max-height: 6em; resize:vertical;}
-      .input-yellow { background: #fffde7; }
-      .input-gray { background: #f6f7fa; }
-      .btn-main {
-        width:100%; font-size:1.11em; border-radius:8px; border:none; font-weight:bold; min-height:44px;
-        margin-top: 0.6em; padding: 0.8em 0; cursor: pointer;
-        background: linear-gradient(90deg,#219150 75%,#44cc77 100%);
-        color: #fff; box-shadow: 0 2px 8px #21915022; transition: background .18s, color .18s;
-      }
-      .btn-main:active { background: #176d38;}
-      .btn-export { background: #ffd600; color: #222; border:none; border-radius:8px; padding:0.8em 0; font-weight:bold; width:100%; margin-top:0.7em;}
-      .btn-export:active { background: #ffb300;}
-      .hash-row, .output-box {
-        background: #fafdff; border-radius: 8px; border: 1.2px solid #cfd8dc;
-        padding: 0.7em 0.9em; margin-bottom: 0.9em; font-size: 1em; min-height: 38px;
-        word-break: break-all; overflow-x: auto;
-      }
-      .success { color:#16a34a; margin-top:0.28em;}
-      .footer-note { text-align: center; margin-top: 2.4em; color: #b0bec5; font-size: 0.95em;}
-      .qr-output-content { display: flex; flex-direction: row; gap: 18px; flex-wrap: wrap;}
-      .qr-preview-box { flex:1; min-width:160px; background:#fff; border:1px dashed #ccc; border-radius:8px; padding:10px; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;}
-      .qr-preview-box img { max-width:100%; height:auto; border:1px solid #eee;}
-      .qr-hashes-box { flex:1; min-width:240px; display:flex; flex-direction:column; gap:10px;}
-      .hash-display { background-color: #e3f2fd; border: 1px solid #2196f3; border-radius: 8px; padding: 10px; word-wrap: break-word; font-family: 'Courier New', Courier, monospace; font-size: 0.9em; color: #333;}
-      .hash-display label { display: block; margin-bottom: 5px; font-weight: bold; color: #222; font-size: 0.9em;}
-      .hash-value { user-select: all; overflow-x: auto; }
-      .export-buttons { display: flex; gap: 8px; flex-wrap:wrap; margin-top: 1.3em;}
-      @media (max-width: 600px) {
-        .container { padding:1.1em 0.22em 1em 0.22em;}
-        .qr-output-content { flex-direction: column; gap: 8px;}
-        .qr-hashes-box, .qr-preview-box { min-width: unset; width: 100%; }
-      }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Regenerate QR Hash - DTC: Magic Chain System</title>
+  <style>
+    body { font-family: Arial,sans-serif; background: #f5f7fa; margin:0; padding:0;}
+    h1 { text-align: center; color: #219150; margin-bottom: 1.2em; }
+    .container { max-width: 680px; margin:2em auto; background:#fff; padding:2.3em 1.1em 2em 1.1em; border-radius:15px; box-shadow:0 2px 16px #90caf933;}
+    .section-block { margin: 1.1em 0; padding: 1.3em; border-radius: 12px; box-shadow: 0 2px 9px #edf1f6;}
+    .block-title { font-size: 1.07em; font-weight: bold; margin-bottom: 0.9em; color: #555; }
+    .input-label { font-weight: bold; color: #26733e; margin-bottom: 0.19em; }
+    .input-hint { color: #90a4ae; font-size: 0.95em; margin-top: 0.05em; margin-bottom: 0.14em; }
+    .input-row { display: flex; align-items: center; gap: 0.4em; }
+    input, textarea {
+      width: 100%; min-height: 38px; max-height: 44px; font-size: 1.07em; border-radius: 8px; border: 1.4px solid #b0bec5;
+      padding: 0.7em 1em; background: #f6faf7; transition: border .2s, background .2s; box-sizing: border-box; margin-bottom: 0.58em;
+    }
+    input:focus, textarea:focus { border-color: #2196f3; background: #fff; }
+    textarea { min-height:3.2em; max-height: 6em; resize:vertical;}
+    .input-yellow { background: #fffde7; }
+    .input-gray { background: #f6f7fa; }
+    .btn-main {
+      width:100%; font-size:1.11em; border-radius:8px; border:none; font-weight:bold; min-height:44px;
+      margin-top: 0.6em; padding: 0.8em 0; cursor: pointer;
+      background: linear-gradient(90deg,#219150 75%,#44cc77 100%);
+      color: #fff; box-shadow: 0 2px 8px #21915022; transition: background .18s, color .18s;
+    }
+    .btn-main:active { background: #176d38;}
+    .btn-confirm {
+      width: 100%; margin-top: 15px; background: linear-gradient(90deg,#219150 70%,#2196f3 100%);
+      color: #fff; font-weight: bold; font-size: 1.11em; border: none; border-radius: 8px; padding: 1em 0; cursor: pointer;
+    }
+    .btn-confirm:active { background:#176d38; }
+    .btn-cancel {
+      width:100%; background:#f6f7fa; color:#2196f3; border:1.5px solid #2196f3; border-radius:8px; font-weight:bold; font-size:1em; padding:0.9em 0; margin-top:0.7em; cursor:pointer;
+    }
+    .btn-export { background: #ffd600; color: #222; border:none; border-radius:8px; padding:0.8em 0; font-weight:bold; width:100%; margin-top:0.7em;}
+    .btn-export:active { background: #ffb300;}
+    .hash-row, .output-box {
+      background: #fafdff; border-radius: 8px; border: 1.2px solid #cfd8dc;
+      padding: 0.7em 0.9em; margin-bottom: 0.9em; font-size: 1em; min-height: 38px;
+      word-break: break-all; overflow-x: auto;
+    }
+    .success { color:#16a34a; margin-top:0.28em;}
+    .footer-note { text-align: center; margin-top: 2.4em; color: #b0bec5; font-size: 0.95em;}
+    .qr-output-content { display: flex; flex-direction: row; gap: 18px; flex-wrap: wrap;}
+    .qr-preview-box { flex:1; min-width:160px; background:#fff; border:1px dashed #ccc; border-radius:8px; padding:10px; display:flex; align-items:center; justify-content:center; flex-direction:column; text-align:center;}
+    .qr-preview-box img { max-width:100%; height:auto; border:1px solid #eee;}
+    .qr-hashes-box { flex:1; min-width:240px; display:flex; flex-direction:column; gap:10px;}
+    .hash-display { background-color: #e3f2fd; border: 1px solid #2196f3; border-radius: 8px; padding: 10px; word-wrap: break-word; font-family: 'Courier New', Courier, monospace; font-size: 0.9em; color: #333;}
+    .hash-display label { display: block; margin-bottom: 5px; font-weight: bold; color: #222; font-size: 0.9em;}
+    .hash-value { user-select: all; overflow-x: auto; }
+    .export-buttons { display: flex; gap: 8px; flex-wrap:wrap; margin-top: 1.3em;}
+    /* Preview Modal */
+    #previewModal { display: none; position:fixed; left:0; top:0; width:100vw; height:100vh; background:rgba(40,80,50,0.13); z-index:99; align-items:center; justify-content:center; }
+    .preview-box { background: #f6fafd; border-radius: 15px; box-shadow: 0 8px 32px #21915044; max-width: 410px; margin: 0 auto; padding: 1.7em 1.2em; border: 1.5px solid #219150; color: #246bfd; font-size: 1.06em; }
+    .preview-title { color: #219150; font-weight:bold; font-size:1.08em; margin-bottom:0.5em;}
+    .preview-details { word-break:break-all; font-size:0.98em; background:#eafaf0; border-radius:7px; padding:1em 1em; margin:0.8em 0; color:#26733e;}
+    .modal-action { margin-top:0.7em; }
+    @media (max-width: 600px) {
+      .container { padding:1.1em 0.22em 1em 0.22em;}
+      .qr-output-content { flex-direction: column; gap: 8px;}
+      .qr-hashes-box, .qr-preview-box { min-width: unset; width: 100%; }
+      .preview-box { padding: 1.1em 0.5em; }
+    }
+  </style>
 </head>
 <body>
 <div class="container">
@@ -82,10 +97,23 @@
         <input type="password" class="input-yellow" id="pin" maxlength="4" placeholder="PIN" />
       </div>
     </div>
-    <button class="btn-main" id="regenerateQrBtn" type="button">Regenerate QR</button>
+    <button class="btn-main" id="previewBtn" type="button">Preview Regeneration</button>
   </div>
+
+  <!-- Preview Modal -->
+  <div id="previewModal">
+    <div class="preview-box">
+      <div class="preview-title">Preview Regenerated QR (Confirm Before Commit)</div>
+      <div class="preview-details" id="previewDetails"></div>
+      <div class="modal-action">
+        <button class="btn-confirm" id="confirmBtn">Confirm &amp; Regenerate</button>
+        <button class="btn-cancel" id="cancelPreviewBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div class="section-block" id="regenOutputSection" style="display:none;background:#eafaf0;border-left:6px solid #219150;">
-    <div class="block-title">Regenerated QR Preview & Hashes</div>
+    <div class="block-title">Regenerated QR Preview &amp; Hashes</div>
     <div class="qr-output-content">
       <div class="qr-preview-box">
         <label>QR Preview:</label>
@@ -130,13 +158,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const issuerPublicKeyInput = document.getElementById('issuerPublicKey');
     const passwordInput = document.getElementById('password');
     const pinInput = document.getElementById('pin');
-    const regenerateQrBtn = document.getElementById('regenerateQrBtn');
+    const previewBtn = document.getElementById('previewBtn');
+    const previewModal = document.getElementById('previewModal');
+    const previewDetails = document.getElementById('previewDetails');
+    const confirmBtn = document.getElementById('confirmBtn');
+    const cancelPreviewBtn = document.getElementById('cancelPreviewBtn');
     const regenOutputSection = document.getElementById('regenOutputSection');
     const regeneratedQrCodeImage = document.getElementById('regeneratedQrCodeImage');
     const regeneratedQrContentDisplay = document.getElementById('regeneratedQrContentDisplay');
     const newHash1Display = document.getElementById('newHash1');
     const newHash2Display = document.getElementById('newHash2');
     const regeneratedTimestampDisplay = document.getElementById('regeneratedTimestamp');
+
+    let pendingRegen = null; // Store pending for confirm
 
     // Parse Ticket JSON to fill prevHash, slotId, timestamp
     qrTicketContentInput.addEventListener('input', () => {
@@ -180,8 +214,8 @@ document.addEventListener('DOMContentLoaded', () => {
         return Array.from(new Uint8Array(hashBuf)).map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
-    // Regenerate QR Button (DTC Logic)
-    regenerateQrBtn.addEventListener('click', async () => {
+    // PREVIEW: Compose preview and show modal
+    previewBtn.addEventListener('click', async () => {
         const qrTicketContent = qrTicketContentInput.value.trim();
         const newSecretData = newSecretDataInput.value.trim();
         const issuerPublicKey = issuerPublicKeyInput.value.trim();
@@ -189,9 +223,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pin = pinInput.value.trim();
 
         // Validation
-        if (!qrTicketContent) {
-            alert('Please paste the original QR Ticket Content.'); return;
-        }
+        if (!qrTicketContent) { alert('Please paste the original QR Ticket Content.'); return; }
         let originalTicketJson;
         try {
             originalTicketJson = JSON.parse(qrTicketContent);
@@ -199,15 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 alert('Invalid QR Ticket Content: Missing required fields (hash2, issuerPublicKey, data).');
                 return;
             }
-        } catch (e) {
-            alert('Invalid QR Ticket Content: Please provide valid JSON.'); return;
-        }
-        if (!issuerPublicKey || !password || !pin) {
-            alert('Please fill in your Public Key, Password, and PIN for signing.'); return;
-        }
-        if (pin.length !== 4 || !/^\d{4}$/.test(pin)) {
-            alert('PIN must be 4 digits.'); return;
-        }
+        } catch (e) { alert('Invalid QR Ticket Content: Please provide valid JSON.'); return; }
+        if (!issuerPublicKey || !password || !pin) { alert('Please fill in your Public Key, Password, and PIN for signing.'); return; }
+        if (pin.length !== 4 || !/^\d{4}$/.test(pin)) { alert('PIN must be 4 digits.'); return; }
 
         // DTC chain meta for regen
         const now = new Date();
@@ -228,8 +254,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // 2. New Hash2: SHA256(newHash1|timestamp|nonce|prevHash2)
         const newHash2 = await sha256Hex(newHash1 + '|' + timestamp + '|' + newNonce + '|' + prevHash2);
 
-        // 3. Regen QR Content
-        const regeneratedQrContentJson = {
+        // 3. Preview object
+        pendingRegen = {
             version: "DTC_0.7.6.1",
             type: "QR_Regenerate",
             issuerPublicKey: issuerPublicKey,
@@ -247,14 +273,34 @@ document.addEventListener('DOMContentLoaded', () => {
             originalIssuerPublicKey: originalTicketJson.issuerPublicKey,
             signature: "0xMOCK_REGEN_SIGNATURE"
         };
-
-        regenOutputSection.style.display = 'flex';
-        regeneratedQrCodeImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(JSON.stringify(regeneratedQrContentJson))}`;
-        regeneratedQrContentDisplay.textContent = JSON.stringify(regeneratedQrContentJson, null, 2);
-        newHash1Display.textContent = newHash1;
-        newHash2Display.textContent = newHash2;
-        regeneratedTimestampDisplay.textContent = new Date(timestamp).toLocaleString();
+        // Show modal
+        previewDetails.innerHTML = `
+          <b>Issuer Public Key:</b> <span style="color:#246bfd;">${issuerPublicKey}</span><br>
+          <b>Batch Name:</b> ${originalBatchName}<br>
+          <b>Quantity:</b> ${originalQuantity}<br>
+          <b>Prev Hash2:</b> <span style="color:#2196f3">${prevHash2}</span><br>
+          <b>Slot ID:</b> ${originalSlotId}<br>
+          <b>New Content:</b> <span style="color:#26733e;">${finalData}</span><br>
+          <b>Password:</b> <span style="color:#90a4ae;">•••••</span> &nbsp; <b>PIN:</b> <span style="color:#90a4ae;">••••</span>
+          <hr>
+          <b>Preview (JSON):</b>
+          <pre style="color:#246bfd;">${JSON.stringify(pendingRegen, null, 2)}</pre>
+        `;
+        previewModal.style.display = 'flex';
     });
+
+    cancelPreviewBtn.onclick = ()=>{ previewModal.style.display='none'; };
+
+    confirmBtn.onclick = ()=> {
+      previewModal.style.display = 'none';
+      if (!pendingRegen) return;
+      regenOutputSection.style.display = 'flex';
+      regeneratedQrCodeImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(JSON.stringify(pendingRegen))}`;
+      regeneratedQrContentDisplay.textContent = JSON.stringify(pendingRegen, null, 2);
+      newHash1Display.textContent = pendingRegen.hash1;
+      newHash2Display.textContent = pendingRegen.hash2;
+      regeneratedTimestampDisplay.textContent = new Date(pendingRegen.meta.timestamp).toLocaleString();
+    };
 
     // Export Buttons (เหมือนเดิม)
     document.getElementById('exportNewTicketBtn').addEventListener('click', () => {
