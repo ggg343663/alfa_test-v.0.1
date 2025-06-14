@@ -1,44 +1,3 @@
-<!--
-DTC Minimal UI/UX Logic
-
-- ทุก input/ปุ่ม/ผลลัพธ์ จัดวางเป็นกลุ่มและแยกโทนสีตาม logic ใช้งาน
-- กลุ่ม Ticket/Slot/Meta: สีเทาอ่อน #f6f7fa
-- กลุ่ม Password, PIN, Secret: สีเหลืองอ่อน #fffde7
-- กลุ่มปุ่ม Action (Generate/Export/Regen): ฟ้า, เหลือง, ฟ้าอ่อน ตามลำดับ
-- Navigation Bar: ปุ่มม่วงจาง/เทาอ่อน (Back/Home/Next) ขนาดเท่ากันทั้ง site
-
-[Section A] Key & Batch Info  
-    - Password, PIN, Secret, Batch Name, จำนวน QR (ปุ่ม +/– หรือ custom)
-    - label/hint สีเทาอ่อน #90a4ae, ขนาดเล็กใต้ input
-
-[Section B] Action  
-    - ปุ่มฟ้าใหญ่ "Generate QR Batch"
-
-[Section C] ผลลัพธ์/Preview  
-    - QR Preview Box (PNG/SVG), hash1, Commitment Box (hash2 สีฟ้าหรือเทาอ่อน)
-    - ปุ่มเหลือง Export Ticket / ฟ้า Export QR / ฟ้าอ่อน Export Log
-
-[Section D] Regen QR  
-    - ช่อง Ticket (สีเทาอ่อน), ปุ่ม Upload/QR
-    - ช่อง Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
-    - Password, PIN, Secret (เหลืองอ่อน)
-    - ปุ่ม Regen (ฟ้า)
-
-[Section E] Audit Chain  
-    - Input QR/Commitment Hash (hash2) + ปุ่ม Audit (ฟ้าเล็ก)
-    - กล่อง audit chain (เจ้าของ/ลำดับ chain), expand/collapse ได้
-
-[Section F] Navigation Bar  
-    - Back | Home | Next (ปุ่มขนาดเท่ากัน)
-
-Style  
-    - input/box สูง 36–44px, margin/padding 12–20px
-    - label/hint #90a4ae, ขนาดเล็ก
-    - ผลลัพธ์/preview/log ไม่กินพื้นที่หลัก
-    - ปุ่ม Action เด่น, ฟอร์มอ่านง่าย กรอกง่าย
-    - รองรับ mobile (responsive)
-    - สีหลัก #2196f3 (ฟ้า), #90a4ae (เทาอ่อน), #ffd600 (เหลือง), #ede7f6 (ม่วงจาง)
--->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -120,8 +79,8 @@ Style
     <span id="copyAgentPayloadSuccess" class="copy-success"></span>
     <div class="input-label" style="margin-top:0.6em;">Agent Password</div>
     <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" />
-    <div class="input-label">Agent PIN</div>
-    <input type="password" id="agentPin" maxlength="6" autocomplete="new-password" />
+    <div class="input-label">Agent PIN (4 digits)</div>
+    <input type="password" id="agentPin" maxlength="4" pattern="\d{4}" autocomplete="new-password" />
     <button class="btn-main" type="button" onclick="signAgent()">Agent Sign</button>
     <div class="output-box" id="sigResult" style="display:none;"></div>
     <button class="btn-export" type="button" onclick="exportLog()">Export Log (JSON)</button>
@@ -205,6 +164,7 @@ Style
   // --- PBKDF2 derive (browser)
   async function pbkdf2_sha256(password, pin) {
     const enc = new TextEncoder();
+    // ใช้ | คั่น เหมือน mint/transfer (consistency)
     const key = await window.crypto.subtle.importKey("raw", enc.encode(password+"|"+pin), "PBKDF2", false, ["deriveBits"]);
     const bits = await window.crypto.subtle.deriveBits(
       {name:"PBKDF2",salt:enc.encode("DTC-KEY-SALT"),iterations:100000,hash:"SHA-256"}, key, 256);
@@ -223,6 +183,7 @@ Style
     const pw = document.getElementById('agentPw').value.trim();
     const pin = document.getElementById('agentPin').value.trim();
     if (!pw || !pin) { alert("Please enter agent password & pin"); return; }
+    if (!/^\d{4}$/.test(pin)) { alert("PIN must be 4 digits."); return; }
     const priv = await pbkdf2_sha256(pw, pin);
     const sig = await hmac_sha256(priv, window.agent_hash_to_sign);
     window.agent_hash = sig;
