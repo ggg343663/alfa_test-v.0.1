@@ -9,21 +9,47 @@
     h1 { color: #219150; text-align: center; margin-bottom: 1.2em; font-size: 1.15em;}
     .form-group { margin-bottom: 1em; }
     label { font-weight: bold; color: #2d3c35; margin-bottom: 0.35em; display:block;}
-    input[type="password"], .pubkey-box {
+
+    /* Container for input and toggle icon */
+    .input-with-toggle {
+      position: relative;
+      width: 100%;
+    }
+
+    input[type="password"], input[type="text"], .pubkey-box {
       width: 100%; padding: 11px 12px; font-size: 1em; border: 2px solid #cfd8dc;
       border-radius: 9px; box-sizing: border-box; background: #fff;
       margin-top: 0.13em; transition: border 0.15s;
+      padding-right: 40px; /* Make space for the eye icon */
     }
     input:focus { border-color: #ffd600; background: #ffffed; }
     input.valid { border-color: #43a047;}
     input.invalid { border-color: #e53935;}
+    
+    /* Eye icon styling */
+    .eye-icon {
+      position: absolute;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+      color: #90a4ae;
+      width: 20px;
+      height: 20px;
+      transition: color 0.15s;
+      margin-top: 0.13em; /* Align with input margin-top */
+    }
+    .eye-icon:hover {
+      color: #546e7a;
+    }
+
     .pubkey-box {
       background: #eafaf0; color: #222; margin-top: 1.05em;
       font-family: 'Courier New', monospace; min-height: 39px; font-size: 0.98em;
       border-color: #219150; display: flex; align-items: center; justify-content: space-between;
       transition: border 0.18s;
       padding: 10px 12px;
-      word-break: break-all; /* อนุญาตให้ข้อความยาวขึ้นบรรทัดใหม่ได้ */
+      word-break: break-all; /* Allow long text to break */
     }
     .pubkey-box.copied { border-color: #43a047; background: #f0fff0;}
     .copy-btn {
@@ -52,54 +78,69 @@
   </style>
 </head>
 <body>
-  <h1>สร้าง Public Key (DTC)</h1>
+  <h1>Generate Public Key (DTC)</h1>
   <div class="form-group">
-    <label>รหัสผ่าน</label>
-    <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="6-12 อักขระ (a-z,0-9)"/>
+    <label for="password">Password</label>
+    <div class="input-with-toggle">
+      <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="6-12 chars (a-z,0-9)"/>
+      <svg class="eye-icon" data-target="password" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+      </svg>
+    </div>
     <div class="strength-bar"><div id="pw-strength" class="strength-inner"></div></div>
   </div>
   <div class="form-group">
-    <label>ยืนยันรหัสผ่าน</label>
-    <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="ยืนยัน"/>
+    <label for="confirmPassword">Confirm Password</label>
+    <div class="input-with-toggle">
+      <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="Confirm"/>
+      <svg class="eye-icon" data-target="confirmPassword" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+      </svg>
+    </div>
   </div>
   <div class="form-group">
-    <label>PIN</label>
-    <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="4 หลัก (0-9)"/>
+    <label for="pin">PIN</label>
+    <div class="input-with-toggle">
+      <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="4 digits (0-9)"/>
+      <svg class="eye-icon" data-target="pin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+      </svg>
+    </div>
   </div>
   <div class="form-group">
-    <label>ยืนยัน PIN</label>
-    <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="ยืนยัน"/>
+    <label for="confirmPin">Confirm PIN</label>
+    <div class="input-with-toggle">
+      <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="Confirm"/>
+      <svg class="eye-icon" data-target="confirmPin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+        <path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+      </svg>
+    </div>
   </div>
-  <button class="btn-gen" id="generateBtn">สร้าง Public Key</button>
+  <button class="btn-gen" id="generateBtn">Generate Public Key</button>
   <div class="form-group" id="pubkeyArea" style="display:none;">
     <div class="pubkey-box" id="pubkeyBox">
-      <span id="publicKeyPlaceholder">Public Key จะปรากฏที่นี่</span>
-      <button class="copy-btn" id="copyBtn">คัดลอก</button>
+      <span id="publicKeyPlaceholder">Public Key will appear here</span>
+      <button class="copy-btn" id="copyBtn">Copy</button>
       <span id="copyStatus" class="copy-status"></span>
     </div>
   </div>
   <script>
+    // Function to validate password format
     function validPw(pw) {
       return /^[a-zA-Z0-9]{6,12}$/.test(pw);
     }
+
+    // Function to validate PIN format
     function validPin(pin) {
       return /^\d{4}$/.test(pin);
     }
     
-    // แก้ไขฟังก์ชัน genKey เพื่อคืนค่า "password + pin"
+    // Function to generate the key (now returns password + pin)
     function genKey(password, pin) {
-      // โลจิกการแฮชดั้งเดิม (หากจำเป็นต้องใช้ที่อื่น)
-      // let str = password + pin;
-      // let hash = 0;
-      // for (let i = 0; i < str.length; i++)
-      //   hash = ((hash << 5) - hash) + str.charCodeAt(i), hash |= 0;
-      // let pub = Math.abs(hash).toString(16).padStart(16,'0') + 'DTC';
-      // return pub.slice(0, 48);
-
-      // ตามคำขอ ให้คืนค่า password + pin
       return password + pin;
     }
 
+    // Function to calculate password strength
     function pwStrength(pw) {
       if(!pw) return 0;
       let s = 0;
@@ -111,25 +152,30 @@
       return Math.min(s, 4);
     }
 
+    // Function to update the password strength bar
     function updateStrength() {
       const pw = document.getElementById('password').value;
       const bar = document.getElementById('pw-strength');
       const lvl = pwStrength(pw);
-      bar.style.width = (25*lvl) + '%';
+      bar.style.width = (25 * lvl) + '%';
       bar.style.background = lvl >= 4 ? '#43a047' : lvl >= 3 ? '#ffd600' : lvl ? '#ffa726' : '#eee';
     }
 
+    // Function to apply feedback (valid/invalid) to input fields
     function feedback(id, isValid) {
       const input = document.getElementById(id);
       if(isValid === true) {
-        input.classList.add('valid'); input.classList.remove('invalid');
+        input.classList.add('valid');
+        input.classList.remove('invalid');
       } else if(isValid === false) {
-        input.classList.remove('valid'); input.classList.add('invalid');
+        input.classList.remove('valid');
+        input.classList.add('invalid');
       } else {
-        input.classList.remove('valid','invalid');
+        input.classList.remove('valid','invalid'); // Reset state
       }
     }
 
+    // Main validation function for all inputs
     function validateInputs() {
       const pw = document.getElementById('password').value.trim();
       const cpw = document.getElementById('confirmPassword').value.trim();
@@ -137,10 +183,10 @@
       const cpin = document.getElementById('confirmPin').value.trim();
 
       const isPwValid = validPw(pw);
-      // ตรวจสอบว่ารหัสผ่านที่ยืนยันตรงกับรหัสผ่านหรือไม่
+      // Check if confirm password matches password AND is valid format
       const isCpwMatching = (cpw.length > 0 && cpw === pw && isPwValid);
       const isPinValid = validPin(pin);
-      // ตรวจสอบว่า PIN ที่ยืนยันตรงกับ PIN หรือไม่
+      // Check if confirm PIN matches PIN AND is valid format
       const isCpinMatching = (cpin.length > 0 && cpin === pin && isPinValid);
 
       feedback('password', isPwValid);
@@ -150,7 +196,7 @@
       
       updateStrength();
 
-      // เปิด/ปิดปุ่มสร้างคีย์ตามการตรวจสอบทั้งหมด
+      // Enable/disable generate button based on all validations
       const generateBtn = document.getElementById('generateBtn');
       if (isPwValid && isCpwMatching && isPinValid && isCpinMatching) {
         generateBtn.disabled = false;
@@ -161,21 +207,36 @@
       return (isPwValid && isCpwMatching && isPinValid && isCpinMatching);
     }
 
-    // เพิ่ม event listener ให้กับทุกฟิลด์ที่เกี่ยวข้อง
+    // Toggle password/PIN visibility
+    document.querySelectorAll('.eye-icon').forEach(icon => {
+      icon.addEventListener('click', function() {
+        const targetId = this.dataset.target;
+        const input = document.getElementById(targetId);
+        if (input.type === 'password') {
+          input.type = 'text';
+          // You could change the SVG path here for an 'eye-slash' icon if desired
+          this.innerHTML = '<path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3zM22 12c0-5.52-4.48-10-10-10S2 6.48 2 12c0 1.66.41 3.25 1.14 4.67L19.33 3.14A9.95 9.95 0 0 1 22 12zM12 20c-1.66 0-3.25-.41-4.67-1.14L3.14 19.33A9.95 9.95 0 0 1 2 12c0-5.52 4.48-10 10-10s10 4.48 10 10-4.48 10-10 10zM12 5.5c-3.59 0-6.68 2.06-8.24 5H20.24c-1.56-2.94-4.65-5-8.24-5z">'; // Example 'eye-slash' path
+        } else {
+          input.type = 'password';
+          this.innerHTML = '<path d="M12 4.5c-4.42 0-8.22 2.81-9.56 6.8-.15.49-.15 1.01 0 1.5C3.78 16.69 7.58 19.5 12 19.5s8.22-2.81 9.56-6.8c.15-.49.15-1.01 0-1.5C20.22 7.31 16.42 4.5 12 4.5zm0 13c-2.48 0-4.5-2.02-4.5-4.5S9.52 8.5 12 8.5s4.5 2.02 4.5 4.5-2.02 4.5-4.5 4.5zm0-7.5c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>'; // Original 'eye' path
+        }
+      });
+    });
+
+    // Attach input event listeners to all relevant fields
     ['password','confirmPassword','pin','confirmPin'].forEach(id => {
       document.getElementById(id).addEventListener('input', validateInputs);
     });
 
     document.getElementById('generateBtn').onclick = function() {
       if (!validateInputs()) {
-        // หากการตรวจสอบล้มเหลว จะไม่ดำเนินการต่อ
-        // ปุ่มควรจะถูกปิดใช้งานอยู่แล้ว แต่อันนี้เป็นมาตรการป้องกัน
+        // If validation fails, do not proceed.
         return;
       }
       const pw = document.getElementById('password').value.trim();
       const pin = document.getElementById('pin').value.trim();
       
-      // รับค่าที่รวมกันสำหรับแสดงผล
+      // Get the combined string for display
       let combinedValue = genKey(pw, pin); 
       
       document.getElementById('publicKeyPlaceholder').textContent = combinedValue;
@@ -184,7 +245,7 @@
 
     document.getElementById('copyBtn').onclick = function() {
       const textToCopy = document.getElementById('publicKeyPlaceholder').textContent;
-      // ใช้ document.execCommand('copy') เพื่อความเข้ากันได้ที่ดีขึ้นในสภาพแวดล้อม iframe
+      // Using document.execCommand('copy') for better compatibility in iframe environments
       const textarea = document.createElement('textarea');
       textarea.value = textToCopy;
       document.body.appendChild(textarea);
@@ -193,7 +254,7 @@
         document.execCommand('copy');
         const pubkeyBox = document.getElementById('pubkeyBox');
         const copyStatus = document.getElementById('copyStatus');
-        copyStatus.textContent = '✓ คัดลอกแล้ว!';
+        copyStatus.textContent = '✓ Copied!';
         copyStatus.classList.add('visible');
         pubkeyBox.classList.add('copied');
         setTimeout(()=>{
@@ -201,14 +262,14 @@
           pubkeyBox.classList.remove('copied');
         }, 1100);
       } catch (err) {
-        console.error('คัดลอกข้อความไม่สำเร็จ: ', err);
-        // ทางเลือก: แจ้งให้ผู้ใช้ทราบว่าการคัดลอกล้มเหลว
+        console.error('Failed to copy text: ', err);
+        // Optionally, inform the user that copying failed
       } finally {
         document.body.removeChild(textarea);
       }
     };
 
-    // เรียกใช้การตรวจสอบเริ่มต้นเพื่อตั้งค่าสถานะปุ่มและข้อเสนอแนะ
+    // Initial validation call to set button state and feedback
     validateInputs();
   </script>
 </body>
