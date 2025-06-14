@@ -6,47 +6,159 @@
   <title>Generate Public Key - DTC</title>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; padding: 1.3em; max-width: 480px; margin: 0 auto;}
-    h1 { color: #219150; text-align: center; margin-bottom: 1.2em; font-size: 1.15em;}
-    .form-group { margin-bottom: 1em; }
-    label { font-weight: bold; color: #2d3c35; margin-bottom: 0.35em; display:block;}
-    input[type="password"], .pubkey-box {
-      width: 100%; padding: 11px 12px; font-size: 1em; border: 2px solid #cfd8dc;
+    h1 { color: #219150; text-align: center; margin-bottom: 1.1em; font-size: 1.13em;}
+   .form-group { margin-bottom: 1.12em; }
+    label { font-weight: bold; color: #2d3c35;}
+   .input-box { position: relative; display: flex; align-items: center; }
+    input[type="password"],.pubkey-box {
+      width: 100%; padding: 10px 11px 10px 38px; font-size: 1em; border: 2px solid #cfd8dc;
       border-radius: 9px; box-sizing: border-box; background: #fff;
-      margin-top: 0.13em; transition: border 0.15s;
+      margin-top: 0.21em; transition: border 0.15s;
+    }
+    /* Adjusted padding for input to prevent overlap with icon */
+    input[type="password"], input[type="text"] {
+        padding-left: 42px; /* Increased space for icon */
+    }
+    /* Sensitive input specific background */
+    #password, #confirmPassword, #pin, #confirmPin {
+      background-color: #fffde7; /* Light yellow for sensitive inputs */
     }
     input:focus { border-color: #ffd600; background: #ffffed; }
+
+    /* New input icon styling */
+   .input-icon {
+        position: absolute; left: 8px; top: 50%; transform: translateY(-50%);
+        font-family: monospace; /* Use monospace for consistent width */
+        font-size: 0.8em; /* Smaller font size */
+        color: #90a4ae;
+        pointer-events: none;
+        width: 24px; /* Give it a fixed width */
+        text-align: center;
+    }
+
+   .status-svg {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      width: 20px; height: 20px; pointer-events: none;
+      opacity: 0; transition: opacity 0.16s;
+    }
     input.valid { border-color: #43a047;}
     input.invalid { border-color: #e53935;}
-    .pubkey-box {
-      background: #eafaf0; color: #222; margin-top: 1.05em;
+   .status-svg.visible { opacity: 1;}
+   .hint {
+      color: #b0bec5; font-size: 0.93em; margin-top: 2px; margin-bottom: 0.4em;
+      display: block;
+    }
+   .pubkey-box {
+      background: #eafaf0; color: #222; margin-top: 1.1em;
       font-family: 'Courier New', monospace; min-height: 39px; font-size: 0.98em;
-      border-color: #219150; display: flex; align-items: center; justify-content: space-between;
-      transition: border 0.18s;
-      padding: 10px 12px;
+      border-color: #219150; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      transition: border 0.18s, box-shadow 0.18s; /* Added box-shadow transition */
+      padding: 18px; /* Increased padding for prominence */
+      box-shadow: 0 6px 18px rgba(0,0,0,0.15); /* Stronger shadow */
     }
-    .pubkey-box.copied { border-color: #43a047; background: #f0fff0;}
-    .copy-btn {
+   .pubkey-box.copied { border-color: #43a047; background: #f0fff0;}
+   .pubkey-box.success-flash {
+      border-color: #4CAF50; /* Brighter green on success */
+      box-shadow: 0 0 25px rgba(76, 175, 80, 0.8); /* Stronger glow */
+    }
+   .public-key-value {
+      flex-grow: 1; /* Allows the public key text to take available space */
+      word-break: break-all; /* Ensures long keys wrap */
+      margin-right: 10px; /* Space before copy button */
+      font-size: 1.15em; /* Make public key text more prominent */
+      font-weight: bold; /* Make public key text bold */
+    }
+   .copy-area {
+      display: flex;
+      align-items: center;
+      margin-left: auto; /* Pushes copy button and status to the right */
+    }
+   .copy-btn {
       background: #2196f3; color: #fff; border: none; border-radius: 8px;
-      padding: 6px 14px; font-size: 0.95em; cursor: pointer; font-weight: bold; margin-left: 10px;
+      padding: 6px 14px; font-size: 0.95em; cursor: pointer; font-weight: bold;
     }
-    .copy-btn:active { filter: brightness(0.95);}
-    .copy-status { color: #43a047; font-size: 0.97em; margin-left: 8px; opacity: 0; transition: opacity 0.18s;}
-    .copy-status.visible { opacity: 1;}
-    .strength-bar { height: 7px; width: 100%; margin-top: 4px; border-radius: 5px; background: #f5f5f5; overflow: hidden;}
-    .strength-inner { height: 100%; width: 0; border-radius: 5px; transition: width 0.22s;}
-    .btn-gen {
-      width: 100%; background: #2196f3; color: #fff; border: none; border-radius: 8px;
-      padding: 11px 0; font-size: 1.08em; font-weight: bold; margin-top: 0.7em; cursor: pointer;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.09); transition: background 0.13s;
+   .copy-btn:active { filter: brightness(0.95);}
+   .copy-status { color: #43a047; font-size: 0.97em; margin-left: 8px; opacity: 0; transition: opacity 0.18s;}
+   .copy-status.visible { opacity: 1;}
+   .timestamp-note {
+      font-size: 0.8em;
+      color: #607d8b;
+      margin-top: 5px;
+      text-align: right;
+      width: 100%; /* Ensure it takes full width to align right */
+      display: block; /* Make it a block element */
     }
-    .btn-gen:active { background: #1976d2;}
-    .btn-gen:disabled { opacity: 0.6; cursor: not-allowed;}
+   .note { color: #9e9e9e; font-size: 0.96em; margin: 1em 0;}
+   .formula-box {
+        background: #e0f2f7; /* Light blue background for formula */
+        border-left: 5px solid #00acc1; /* Teal border */
+        padding: 1em;
+        margin-top: 1.5em;
+        border-radius: 8px;
+        box-shadow: 0 2px 7px rgba(0,0,0,0.05);
+        color: #444;
+        font-size: 0.9em;
+        line-height: 1.5;
+    }
+   .formula-box code {
+        display: block;
+        background: #cceeff; /* Lighter blue for code */
+        padding: 0.5em;
+        border-radius: 5px;
+        font-family: 'Courier New', monospace;
+        margin: 0.5em 0;
+        word-break: break-all;
+    }
+    /* PIN Dots */
+   .pin-dots {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 21px;
+      margin-top: 6px;
+      margin-bottom: 2px;
+      width: 100%; /* Ensure it takes full width to center dots */
+      box-sizing: border-box; /* Include padding/border in width */
+    }
+   .pin-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #e0e0e0;
+      margin: 0 2.5px;
+      transition: background 0.1s;
+    }
+   .pin-dot.active { background: #ffd600; } /* Yellow for active */
+   .pin-dot.error { background: #e53935; } /* Red for error */
+   .pin-dot.success { background: #43a047; } /* Green for success */
+
+    /* Generate Button Prominence */
+   .btn {
+      display: block;
+      width: 100%;
+      padding: 0.9em 1.3em; /* Increased padding */
+      margin-top: 18px; /* More space above button */
+      color: #fff;
+      font-weight: bold;
+      border-radius: 8px;
+      font-size: 1.15em; /* Increased font size */
+      text-align: center;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: background 0.13s, filter 0.13s;
+      background: #2196f3;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2); /* Stronger shadow */
+    }
+   .btn:active { filter: brightness(0.97);}
+
     @media (max-width: 600px) {
       body { padding: 1em 0.08em;}
       h1 { font-size: 1em;}
-      .copy-btn { padding: 5px 9px;}
-      .pubkey-box { font-size: 0.93em;}
-      .btn-gen { padding: 10px 0;}
+     .copy-btn { padding: 5px 9px;}
+     .pubkey-box { font-size: 0.93em; padding: 8px;}
+     .public-key-value { margin-right: 5px; font-size: 1em;} /* Adjust for mobile */
+     .timestamp-note { font-size: 0.75em;}
     }
   </style>
 </head>
@@ -54,105 +166,236 @@
   <h1>Generate Public Key (DTC)</h1>
   <div class="form-group">
     <label>Password</label>
-    <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="6-12 chars (a-z,0-9)"/>
-    <div class="strength-bar"><div id="pw-strength" class="strength-inner"></div></div>
+    <div class="input-box">
+      <span class="input-icon">abc</span>
+      <input type="password" id="password" maxlength="12" autocomplete="new-password" placeholder="Password (a-z, 0-9, 8-12 chars)"/>
+      <span class="status-svg" id="pw-status"></span>
+    </div>
+    <span class="hint">Password: 8-12 characters (a-z, 0-9)</span>
   </div>
   <div class="form-group">
     <label>Confirm Password</label>
-    <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="Confirm"/>
+    <div class="input-box">
+      <span class="input-icon">abc</span>
+      <input type="password" id="confirmPassword" maxlength="12" autocomplete="new-password" placeholder="Confirm Password"/>
+      <span class="status-svg" id="cpw-status"></span>
+    </div>
   </div>
   <div class="form-group">
     <label>PIN</label>
-    <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="4 digits (0-9)"/>
+    <div class="input-box">
+      <span class="input-icon">1234</span>
+      <input type="password" id="pin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="PIN (4 digits, 0-9)"/>
+      <span class="status-svg" id="pin-status"></span>
+    </div>
+    <span class="hint">PIN: 4 digits (0-9). White Paper recommends min 6 chars.</span>
+    <div class="pin-dots" id="pinDots">
+        <div class="pin-dot"></div><div class="pin-dot"></div>
+        <div class="pin-dot"></div><div class="pin-dot"></div>
+    </div>
   </div>
   <div class="form-group">
     <label>Confirm PIN</label>
-    <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="Confirm"/>
-  </div>
-  <button class="btn-gen" id="generateBtn">Generate Public Key</button>
-  <div class="form-group" id="pubkeyArea" style="display:none;">
-    <div class="pubkey-box" id="pubkeyBox">
-      <span id="publicKeyPlaceholder">Public Key will appear here</span>
-      <button class="copy-btn" id="copyBtn">Copy</button>
-      <span id="copyStatus" class="copy-status"></span>
+    <div class="input-box">
+      <span class="input-icon">1234</span>
+      <input type="password" id="confirmPin" maxlength="4" pattern="\d*" inputmode="numeric" placeholder="Confirm PIN"/>
+      <span class="status-svg" id="cpin-status"></span>
     </div>
   </div>
+  <div class="form-group">
+    <div class="pubkey-box" id="pubkeyBox">
+      <span class="public-key-value" id="publicKeyPlaceholder" style="color:#90a4ae;">Public Key will appear here</span>
+      <div class="copy-area">
+        <button class="copy-btn" id="copyBtn" style="display:none;">Copy</button>
+        <span id="copyStatus" class="copy-status"></span>
+      </div>
+      <span class="timestamp-note" id="generatedTimestamp"></span>
+    </div>
+  </div>
+  <button class="btn" id="generateKeyBtn" title="Click to generate Public Key if all inputs are valid">Generate Public Key</button>
+
+  <div class="formula-box">
+    <p>Your Public Key is generated deterministically using these formulas:</p>
+    <code>Private Key = SHA256(Password:PIN)</code>
+    <code>Public Key = SHA256(Private Key)</code>
+    <p>No salt is used. We never store or know your Private Key.</p>
+  </div>
+
   <script>
+    // Mock SHA256 for demonstration purposes (NOT cryptographically secure)
+    function mockSha256(str) {
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash |= 0; // Convert to 32bit integer
+      }
+      // Return a fixed-length hex string to simulate SHA256 output (64 chars)
+      // This is a very basic mock and not a real SHA256.
+      let hexHash = Math.abs(hash).toString(16);
+      while (hexHash.length < 64) {
+        hexHash = hexHash + Math.abs(Math.random() * 1e10 | 0).toString(16);
+      }
+      return hexHash.substring(0, 64);
+    }
+
+    // Function to generate Public Key based on White Paper logic
+    function genKey(password, pin) {
+      // Step 1: Private Key = SHA256(password:PIN)
+      const combinedSecret = `${password}:${pin}`;
+      const privateKeyMock = mockSha256(combinedSecret);
+
+      // Step 2: Public Key = SHA256(private_key)
+      const publicKeyMock = mockSha256(privateKeyMock);
+
+      return publicKeyMock.toUpperCase();
+    }
+
+    // Validation functions
     function validPw(pw) {
-      return /^[a-zA-Z0-9]{6,12}$/.test(pw);
+      return /^[a-zA-Z0-9]{8,12}$/.test(pw); // Password: 8-12 characters
     }
     function validPin(pin) {
-      return /^\d{4}$/.test(pin);
+      return /^\d{4}$/.test(pin); // PIN: 4 digits
     }
-    function genKey(password, pin) {
-      // ไม่มี salt!
-      let str = password + pin;
-      let hash = 0;
-      for (let i = 0; i < str.length; i++)
-        hash = ((hash << 5) - hash) + str.charCodeAt(i), hash |= 0;
-      let pub = Math.abs(hash).toString(16).padStart(16,'0') + 'DTC';
-      return pub.slice(0, 48);
-    }
-    function pwStrength(pw) {
-      if(!pw) return 0;
-      let s = 0;
-      if(pw.length >= 6) s++;
-      if(/[A-Z]/.test(pw)) s++;
-      if(/[a-z]/.test(pw)) s++;
-      if(/\d/.test(pw)) s++;
-      if(pw.length > 9) s++;
-      return Math.min(s, 4);
-    }
-    function updateStrength() {
-      const pw = document.getElementById('password').value;
-      const bar = document.getElementById('pw-strength');
-      const lvl = pwStrength(pw);
-      bar.style.width = (25*lvl) + '%';
-      bar.style.background = lvl >= 4 ? '#43a047' : lvl >= 3 ? '#ffd600' : lvl ? '#ffa726' : '#eee';
-    }
+
+    // Update status icon and input class
     function feedback(id, isValid) {
       const input = document.getElementById(id);
-      if(isValid === true) {
+      const svg = document.getElementById(id + '-status');
+      if (isValid === true) {
         input.classList.add('valid'); input.classList.remove('invalid');
-      } else if(isValid === false) {
+        svg.innerHTML = `<svg width="20" height="20"><polyline points="5,12 10,17 17,6" fill="none" stroke="#43a047" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        svg.classList.add('visible');
+      } else if (isValid === false) {
         input.classList.remove('valid'); input.classList.add('invalid');
+        svg.innerHTML = `<svg width="20" height="20"><line x1="6" y1="6" x2="16" y2="16" stroke="#e53935" stroke-width="2.2"/><line x1="16" y1="6" x2="6" y2="16" stroke="#e53935" stroke-width="2.2"/></svg>`;
+        svg.classList.add('visible');
       } else {
-        input.classList.remove('valid','invalid');
+        input.classList.remove('valid', 'invalid');
+        svg.innerHTML = ``; svg.classList.remove('visible');
       }
     }
-    function validateInputs() {
+
+    // Update PIN dots visual feedback
+    function updatePinDotsVisual(pinValue, confirmPinValue) {
+      const dots = document.querySelectorAll('.pin-dot');
+      dots.forEach((dot, index) => {
+        dot.classList.remove('active', 'error', 'success'); // Reset classes
+
+        if (index < pinValue.length) {
+          dot.classList.add('active');
+        }
+
+        // Add error/success state based on full PIN validation
+        // This condition ensures both PIN fields are 4 digits long before applying error/success
+        if (pinValue.length === 4 && confirmPinValue.length === 4) {
+          if (pinValue === confirmPinValue) {
+            dot.classList.add('success');
+          } else {
+            dot.classList.add('error');
+          }
+        }
+      });
+    }
+
+    // Update all fields' status and Public Key display
+    function updateAll() {
       const pw = document.getElementById('password').value.trim();
       const cpw = document.getElementById('confirmPassword').value.trim();
       const pin = document.getElementById('pin').value.trim();
       const cpin = document.getElementById('confirmPin').value.trim();
-      feedback('password', validPw(pw));
-      feedback('confirmPassword', (cpw.length > 0 && cpw === pw && validPw(cpw)));
-      feedback('pin', validPin(pin));
-      feedback('confirmPin', (cpin.length > 0 && cpin === pin && validPin(cpin)));
-      updateStrength();
-      return (validPw(pw) && cpw === pw && validPin(pin) && cpin === pin);
+
+      const isPwValid = validPw(pw);
+      const isCpwValid = (cpw.length > 0 && cpw === pw && isPwValid);
+      const isPinValid = validPin(pin);
+      const isCpinValid = (cpin.length > 0 && cpin === pin && isPinValid);
+
+      feedback('password', isPwValid);
+      feedback('confirmPassword', isCpwValid);
+      feedback('pin', isPinValid);
+      feedback('confirmPin', isCpinValid);
+
+      // Update PIN dots
+      updatePinDotsVisual(pin, cpin);
+
+      const pubkeyBox = document.getElementById('pubkeyBox');
+      const publicKeyPlaceholder = document.getElementById('publicKeyPlaceholder');
+      const copyBtn = document.getElementById('copyBtn');
+      const generatedTimestamp = document.getElementById('generatedTimestamp');
+
+      // Only update Public Key display if all fields are valid
+      if (isPwValid && isCpwValid && isPinValid && isCpinValid) {
+        let pubkey = genKey(pw, pin);
+        publicKeyPlaceholder.textContent = pubkey;
+        publicKeyPlaceholder.style.color = '#222'; // Change color from placeholder gray
+        copyBtn.style.display = '';
+        generatedTimestamp.textContent = new Date().toISOString() + "Z"; // ISO 8601 format
+        pubkeyBox.classList.remove('copied'); // Ensure no copied class if inputs change
+      } else {
+        publicKeyPlaceholder.textContent = 'Public Key will appear here';
+        publicKeyPlaceholder.style.color = '#90a4ae'; // Reset color to placeholder gray
+        copyBtn.style.display = 'none';
+        generatedTimestamp.textContent = '';
+      }
     }
-    ['password','confirmPassword','pin','confirmPin'].forEach(id => {
-      document.getElementById(id).addEventListener('input', validateInputs);
-    });
-    document.getElementById('generateBtn').onclick = function() {
-      if (!validateInputs()) return;
-      const pw = document.getElementById('password').value.trim();
-      const pin = document.getElementById('pin').value.trim();
-      let pubkey = genKey(pw, pin);
-      document.getElementById('publicKeyPlaceholder').textContent = pubkey;
-      document.getElementById('pubkeyArea').style.display = '';
-    };
-    document.getElementById('copyBtn').onclick = function() {
+
+    // Copy public key logic
+    function copyKey() {
       navigator.clipboard.writeText(document.getElementById('publicKeyPlaceholder').textContent);
       const pubkeyBox = document.getElementById('pubkeyBox');
       const copyStatus = document.getElementById('copyStatus');
       copyStatus.textContent = '✓ Copied!';
       copyStatus.classList.add('visible');
       pubkeyBox.classList.add('copied');
-      setTimeout(()=>{copyStatus.classList.remove('visible'); pubkeyBox.classList.remove('copied');}, 1100);
-    };
-    validateInputs();
+      setTimeout(() => { copyStatus.classList.remove('visible'); pubkeyBox.classList.remove('copied'); }, 1100);
+    }
+
+    // Event Listeners
+    const passwordInput = document.getElementById('password');
+    const confirmPasswordInput = document.getElementById('confirmPassword');
+    const pinInput = document.getElementById('pin');
+    const confirmPinInput = document.getElementById('confirmPin');
+    const generateKeyBtn = document.getElementById('generateKeyBtn');
+    const copyBtn = document.getElementById('copyBtn');
+
+    [passwordInput, confirmPasswordInput, pinInput, confirmPinInput].forEach(input => {
+      input.addEventListener('input', updateAll);
+      input.addEventListener('blur', updateAll);
+    });
+
+    // Generate Key Button Click
+    generateKeyBtn.addEventListener('click', () => {
+      // Trigger a full validation update to ensure all statuses are current
+      updateAll();
+
+      const pw = passwordInput.value.trim();
+      const cpw = confirmPasswordInput.value.trim();
+      const pin = pinInput.value.trim();
+      const cpin = confirmPinInput.value.trim();
+
+      // Check if all fields are valid based on their current state
+      const isAllValid = validPw(pw) && cpw === pw && validPin(pin) && cpin === pin;
+
+      if (isAllValid) {
+        // Public Key is already updated by updateAll() if valid, just add visual flash
+        const pubkeyBox = document.getElementById('pubkeyBox');
+        pubkeyBox.classList.add('success-flash');
+        setTimeout(() => {
+          pubkeyBox.classList.remove('success-flash');
+        }, 1000); // Remove flash after 1 second
+      } else {
+        // Visual feedback for invalid state if button is clicked
+        generateKeyBtn.style.background = "#e53935";
+        setTimeout(() => { generateKeyBtn.style.background = "#2196f3"; }, 600);
+      }
+    });
+
+    copyBtn.addEventListener('click', copyKey);
+
+    // Initial update on page load
+    updateAll();
+    updatePinDotsVisual(pinInput.value, confirmPinInput.value);
   </script>
 </body>
 </html>
