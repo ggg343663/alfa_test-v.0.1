@@ -20,7 +20,7 @@
     .copy-btn { background: #ebfbee; border: none; border-radius: 4px; cursor: pointer; color: #219150; font-size: 1em; font-weight: 500; padding: 0.36em 1.05em; margin-left: 0.2em; margin-right: 0.2em; transition: background .18s; }
     .copy-btn:active { background: #d1fae5; color: #176d38; }
     .copy-success { color: #16a34a; font-size: 0.95em; margin-left: 0.27em; min-width: 2.4em; display: inline-block; }
-    .receiver-group, .yellow-group { margin-bottom: 1.23em; background: #f6fbfe; border-radius: 7px; padding: 0.9em 1em 0.85em 1em; box-shadow: 0 1px 4px #d0e8fd12;}
+    .receiver-group, .yellow-group { margin-bottom: 1.23em; background: #f6f7fa; border-radius: 7px; padding: 0.9em 1em 0.85em 1em; box-shadow: 0 1px 4px #d0e8fd12;}
     .receiver-group label, .yellow-group label { font-size: 1.03em; color: #246bfd; margin-bottom: 0.32em; display: block; font-weight: 600;}
     .receiver-group input, .yellow-group input { margin-top: 0.22em; width: 100%; padding: 0.7em 0.9em; border: 1.3px solid #c7d5ee; border-radius: 6px; font-size: 1em; background: #fafdff; outline: none; margin-bottom: 0.6em;}
     .pw-input { border: 1.5px solid #ffe066; background: #fffde7;}
@@ -47,6 +47,7 @@
     #qr-reader { margin-top: 1.2em; }
     .export-btn { margin-top: 0.7em; width: 100%; background: #ffd600; color: #222; border: none; border-radius: 8px; font-weight: 600; padding: 0.69em 0; font-size: 1em;}
     .export-btn:active { background: #ffb300;}
+    .note { color: #90a4ae; font-size: 0.97em; margin: 1.7em 0 0.8em 0; text-align: center;}
     @media (max-width: 540px) { .container { padding: 1em 0.1em 1.3em 0.1em; border-radius: 0; } .nav-row {margin-bottom:1.1em;} .row { flex-direction: column; gap: 0.11em;} .mini-btn, .export-btn { font-size: 1em; } }
   </style>
 </head>
@@ -95,6 +96,8 @@
     <button class="export-btn" style="display:none;" id="exportLogBtn">Export Transfer Log (JSON)</button>
 
     <div id="qr-reader"></div>
+
+    <p class="note">No blockchain backend. Log is kept only in your browser.<br>All signatures use your derived address (not plain password/pin).</p>
   </div>
   <script>
     let qrReader = null;
@@ -180,25 +183,17 @@
       }
       return valid;
     }
-    // SHA256 derive address (เหมือนหน้า generate_key.html)
+    // SHA256 derive address (ตามสูตร DTC จริง)
     async function deriveAddress(password, pin) {
-      const passphrase = password + pin;
       const encoder = new TextEncoder();
-      const keyMaterial = await window.crypto.subtle.importKey(
-        "raw", encoder.encode(passphrase), {name: "PBKDF2"}, false, ["deriveBits"]
-      );
-      const derivedBits = await window.crypto.subtle.deriveBits(
-        {
-          "name": "PBKDF2",
-          salt: new Uint8Array([]),
-          iterations: 250000,
-          hash: "SHA-256"
-        },
-        keyMaterial,
-        256
-      );
-      // Address (แบบ mock, ตัด hex 40 ตัวหลัง + 0x)
-      let hex = Array.from(new Uint8Array(derivedBits)).map(b => b.toString(16).padStart(2, '0')).join('');
+      const hash1 = await crypto.subtle.digest("SHA-256", encoder.encode(password));
+      const hash2 = await crypto.subtle.digest("SHA-256", encoder.encode(pin));
+      // SHA256(hash1 + hash2)
+      let total = new Uint8Array([...new Uint8Array(hash1), ...new Uint8Array(hash2)]);
+      const privKey = await crypto.subtle.digest("SHA-256", total);
+      // Public key = SHA256(privKey)
+      const pubKey = await crypto.subtle.digest("SHA-256", privKey);
+      let hex = Array.from(new Uint8Array(pubKey)).map(b => b.toString(16).padStart(2, '0')).join('');
       return '0x'+hex.slice(-40);
     }
     async function preview() {
@@ -234,7 +229,6 @@
         <small style="color:#666;">(Sign this payload with your private key derived from password+PIN.)</small>`;
       confirmBtn.style.display = "block";
       exportBtn.style.display = "none";
-      // Save for confirm step
       window._pendingMsg = msg;
     }
     async function confirmTransfer() {
