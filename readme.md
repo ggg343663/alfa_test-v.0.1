@@ -1,67 +1,239 @@
-README.md สำหรับ UI/UX ของ DTC "One Page Minimal" 
-DTC "One Page Minimal" แนวทาง UI/UX
-แนวทางนี้กำหนดหลักการและตรรกะ UI/UX หลักสำหรับแอปพลิเคชัน DTC "One Page Minimal" เป้าหมายคือการมอบ ประสบการณ์ผู้ใช้ที่เรียบง่าย มีประสิทธิภาพ ปลอดภัย และสอดคล้องกัน โดยยึดแนวคิดหน้าเดียวและการสื่อสารผ่าน สีและสัญลักษณ์ เป็นหลัก
-1. หลักการสำคัญ
- * เรียบง่ายและไม่รก (Minimal & Uncluttered):
-   * แนวคิดหน้าเดียว (One Page Concept): ฟังก์ชันหลักทั้งหมดถูกรวมไว้ในหน้าเดียวเพื่อลดความซับซ้อนในการนำทาง
-   * เน้นฟอร์มเป็นหลัก: ส่วนแสดงผลลัพธ์ (เช่น QR Preview, Commitment Box, Log) จะไม่เด่นหรือกินพื้นที่มากเกินส่วนป้อนข้อมูล เพื่อให้ผู้ใช้จดจ่อกับการป้อนข้อมูลเป็นหลัก
-   * ไม่มีการแจ้งเตือนชัดเจน: หลีกเลี่ยง Pop-up หรือข้อความแจ้งเตือน การสื่อสารสถานะทั้งหมด (สำเร็จ, ผิดพลาด, กำลังโหลด) ใช้เพียง สีและสัญลักษณ์มาตรฐาน
- * สอดคล้องและเป็นระเบียบ (Consistent & Organized):
-   * การจัดวางตามสัดส่วน: องค์ประกอบต่างๆ เช่น ช่อง Input, ปุ่ม และพื้นที่แสดงผล ถูกจัดวางตามสัดส่วนที่เหมาะสม โดยมีระยะห่างที่พอดี (ความสูง Input/กล่อง: 36–44px; ระยะขอบ/ช่องว่างภายใน: 12–20px)
-   * โทนสีที่กลมกลืน: ใช้โทนสีที่เข้ากันทั่วทั้งหน้า สีของแต่ละกลุ่มจะบ่งบอกประเภทการกระทำ แต่ยังคงความกลมกลืนโดยรวม
-   * สีเพื่อการสื่อสาร: สีและสัญลักษณ์เป็นตัวบ่งชี้หลักสำหรับสถานะ UI
- * ตำแหน่งคงที่และคาดเดาได้ (Fixed & Predictable Positions):
-   * ปุ่ม Action คงที่: ปุ่ม Action หลัก (Generate, Export, Regen) และการนำทางจะอยู่ในตำแหน่งเดิมเสมอไม่ว่าผู้ใช้จะเลื่อนไปส่วนใด เพื่อสร้างความคุ้นเคย
-   * แถบนำทางคงที่: ปุ่มนำทาง (Back, Home, Next) จะอยู่ด้านล่างสุดของหน้าจอเสมอและมีขนาดสอดคล้องกัน
- * การออกแบบรองรับอุปกรณ์พกพา (Responsive Design):
-   * UI/UX ถูกออกแบบมาให้ปรับขนาดและทำงานได้อย่างราบรื่นบนอุปกรณ์มือถือ โดยเฉพาะการรองรับการย่อ/ขยายของแต่ละส่วน (Collapse/Expand)
-   * พื้นที่เป้าหมายการสัมผัส (Touch Targets): ปุ่มและไอคอนทั้งหมดมีขนาดขั้นต่ำ 40x40px เพื่อให้ง่ายต่อการสัมผัสด้วยนิ้วมือ
-2. โครงสร้างตามฟังก์ชัน (Section Logic)
-ทุกส่วนจะถูกจัดเรียงตามแนวตั้ง ผู้ใช้ต้องเลื่อนหน้าจอเพื่อดูเนื้อหาทั้งหมด
-ส่วน A: ข้อมูลกุญแจและ Batch (โทนสี: เขียว)
- * ตรรกะ: รวบรวมข้อมูลเริ่มต้นทั้งหมดที่จำเป็นสำหรับการสร้าง QR Code และ Batch
- * การจัดวาง: ช่อง Input สำหรับ รหัสผ่าน (Password), PIN, ความลับ (Secret) (พื้นหลังสีเหลืองอ่อน: #fffde7); ชื่อ Batch, จำนวน QR (พื้นหลังสีเทาอ่อน: #f6f7fa) มี Label/Hint ขนาดเล็กสีเทาอ่อน (#90a4ae) ใต้ช่อง Input
- * การจัดการสถานะ (State Management): ข้อมูลในส่วนนี้ (ยกเว้นข้อมูลสำคัญ เช่น รหัสผ่าน, PIN, ความลับ) จะถูกเก็บไว้ใน Session Storage เพื่อคงอยู่แม้จะมีการรีเฟรชหน้า แต่จะถูกล้างเมื่อปิดแท็บ/เบราว์เซอร์
-ส่วน B: การกระทำ (Action) (โทนสี: เขียว)
- * ตรรกะ: มีปุ่มหลักเพื่อเริ่มการสร้าง QR Code Batch
- * การจัดวาง: ปุ่ม Action หลัก (เช่น "สร้าง Public Key", "สร้าง QR Batch") มีขนาดใหญ่ เด่นชัด และใช้สี (เขียว) ที่แตกต่าง
-ส่วน C: ผลลัพธ์ (Results) (สีปุ่ม: ฟ้า/เหลือง/ฟ้าอ่อน)
- * ตรรกะ: แสดงผลลัพธ์ทันทีหลังการสร้าง (QR Preview, Commitment Hash) พร้อมตัวเลือกในการส่งออก
- * การจัดวาง: พื้นที่แสดงผลขนาดกะทัดรัดที่สามารถเลื่อนได้หากเนื้อหามีมาก ประกอบด้วยกล่องแสดงตัวอย่าง QR (PNG/SVG), hash1, กล่อง Commitment (hash2: สีฟ้า/เทาอ่อน) การแสดงเวลา (ISO8601) ด้วยสี #607d8b (1em) จัดวางที่ด้านขวาล่างของกล่องผลลัพธ์/ส่วนนั้นๆ ปุ่ม "คัดลอก"
- * ปุ่มส่งออก (Export Buttons): จัดกลุ่มรวมกัน: "ส่งออก Ticket" (เหลือง), "ส่งออก QR" (ฟ้า), "ส่งออก Log" (ฟ้าอ่อน)
- * การจัดการสถานะ: ผลลัพธ์ถูกเก็บใน Session Storage เพื่อคงอยู่แม้จะมีการรีเฟรชหน้า แต่จะถูกล้างเมื่อปิดแท็บ/เบราว์เซอร์
-ส่วน D: สร้าง QR ซ้ำ (Regen QR) (สีปุ่ม: ฟ้า)
- * ตรรกะ: รองรับการสร้าง QR Code ซ้ำโดยใช้ Ticket ที่มีอยู่
- * การจัดวาง: ช่อง Input สำหรับ Ticket (พื้นหลังสีเทาอ่อน), ปุ่มอัปโหลด/QR ช่องสำหรับ Slot ID, Prev Hash, Timestamp, Nonce (พื้นหลังสีเทาอ่อน) รหัสผ่าน (Password), PIN, ความลับ (Secret) (พื้นหลังสีเหลืองอ่อน) ปุ่ม "สร้างซ้ำ" (Regen) (ฟ้า) พร้อมตัวอย่างขนาดเล็กหลังการดำเนินการสำเร็จ ปุ่ม "วาง" (Paste) เมื่อช่อง Input ถูกโฟกัส
- * การจัดการสถานะ: ไม่มีการบันทึกอัตโนมัติสำหรับข้อมูล Ticket ผู้ใช้ต้องป้อน/วางด้วยตนเอง
-ส่วน E: ตรวจสอบ Chain (Audit Chain) (สีปุ่ม: ฟ้า)
- * ตรรกะ: อนุญาตให้ผู้ใช้ตรวจสอบข้อมูล Audit Chain ของ QR/Commitment Hash
- * การจัดวาง: ช่อง Input สำหรับ QR/Commitment Hash (hash2) พร้อมปุ่ม "ตรวจสอบ" (Audit) ขนาดเล็ก (ฟ้า) กล่อง Audit Chain (เจ้าของ/ลำดับ Chain) ซึ่งสามารถย่อ/ขยายได้
- * การจัดการสถานะ: ข้อมูลการตรวจสอบที่แสดงจะถูกเก็บไว้ใน Session Storage ชั่วคราว
-ส่วน F: แถบนำทาง (Navigation Bar) (สีปุ่ม: ม่วงจาง/เทาอ่อน)
- * ตรรกะ: มีปุ่มนำทางที่สอดคล้องกันทั่วทั้งแอปพลิเคชัน
- * การจัดวาง: ปุ่ม "ย้อนกลับ" (Back), "หน้าหลัก" (Home), "ถัดไป" (Next) มีขนาดสอดคล้องกัน และอยู่ในตำแหน่งคงที่ที่ด้านล่างสุดของหน้าจอ (ซ้าย-กลาง-ขวา)
-3. การปรับปรุง UX และแนวทางปฏิบัติที่ดีที่สุด
- * ผลลัพธ์ที่ไม่เด่นเกินไป: พื้นที่แสดงผลลัพธ์ (QR Preview, Commitment Box, Log, Audit Chain) จะไม่เด่นหรือใหญ่กว่าช่อง Input หลัก
- * ปุ่ม Action ที่ชัดเจน: ปุ่มที่ใช้สำหรับการกระทำหลัก (Generate, Export, Regen, Audit) มีสีและขนาดที่ชัดเจนเพื่อนำทางผู้ใช้
- * ตำแหน่งผลลัพธ์: การแสดงผลลัพธ์/Log จะอยู่ด้านล่างหรือด้านขวาของฟอร์มเสมอ
- * สถานะว่างเปล่า (Empty States): จัดการโดยการแสดง ไอคอนที่ละเอียดและข้อความสั้นๆ สีจาง ภายในกล่องแสดงผลนั้นๆ (เช่น "ยังไม่มี QR Code สร้าง", "กำลังรอ Commitment Hash")
- * การสื่อสารด้วยสีและสัญลักษณ์ (ไม่มีการแจ้งเตือนข้อความ):
-   * สำเร็จ (Success): ปุ่ม/ขอบเป็นสีเขียวอ่อนชั่วคราว หรือมีไอคอน ✓ สีเขียวขนาดเล็กปรากฏขึ้น
-   * ข้อผิดพลาด (Error): ขอบช่อง Input เป็นสีแดง/พื้นหลังสีแดงอ่อน, มีไอคอน X หรือ ! สีแดงขนาดเล็ก
-   * กำลังโหลด (Loading): มี Spinner ขนาดเล็กปรากฏบนปุ่มที่ทำงานอยู่/พื้นที่ประมวลผล (ปุ่มจะอยู่ในสถานะ Disabled)
-   * Input ที่ละเอียดอ่อน (Sensitive Input): ใช้พื้นหลังสีเหลืองอ่อน (#fffde7) สำหรับช่องรหัสผ่าน (Password), PIN, ความลับ (Secret) เพื่อสื่อถึงความระมัดระวังโดยปริยาย
- * การเข้าถึง (Accessibility):
-   * ใช้ <label for="..."> สำหรับช่อง Input ทั้งหมด
-   * ตรวจสอบ ความต่างของสี (Color Contrast) ให้เป็นไปตามมาตรฐาน WCAG AA/AAA
-   * ขนาดตัวอักษรขั้นต่ำ 15px
-   * รองรับการ นำทางด้วยคีย์บอร์ด อย่างสมบูรณ์ (Tab, Enter)
- * การจัดการสถานะ (ความปลอดภัยสูงสุด):
-   * ไม่มีปุ่ม "ล้างทั้งหมด" (Clear All): การปิดแท็บหรือเบราว์เซอร์จะ ล้างข้อมูลทั้งหมด ที่เก็บใน Session Storage และ In-Memory โดยอัตโนมัติ
-   * ข้อมูลสำคัญ: รหัสผ่าน (Private Key), PIN, ความลับ (Secret) ถูกเก็บไว้ เฉพาะในหน่วยความจำ (In-Memory) เท่านั้น และไม่ถูกบันทึกใน Session/Local Storage
-   * Ticket สำหรับสร้างซ้ำ (Regen): จะไม่ถูกบันทึกอัตโนมัติ ผู้ใช้ต้องป้อนเองทุกครั้ง
-   * ข้อมูลทั่วไป: บันทึกอัตโนมัติใน Session Storage เพื่อความสะดวกในการรีเฟรชหน้า แต่จะถูกล้างเมื่อปิดแท็บ/เบราว์เซอร์
- * โค้ดและการบำรุงรักษา:
-   * แยกตรรกะ (JS/TS) สำหรับแต่ละส่วนเพื่อความง่ายในการบำรุงรักษา
-   * ใช้ตัวแปร CSS (CSS Variables) สำหรับสีธีมหลัก
-   * ใช้ Flexbox หรือ CSS Grid สำหรับ Layout ที่รองรับอุปกรณ์หลากหลาย (Responsive)
+นี่คือตัวอย่าง **README.md** ฉบับสมบูรณ์สำหรับ DTC UI/UX “One Page Minimal” (แนวภาษา markdown พร้อม section ชัดเจน)
+เนื้อหานี้จัดเรียงเพื่อใช้งานเป็น “มาตรฐานอ้างอิง” ในการพัฒนาและรีวิวระบบ DTC รุ่น One Page Minimal ได้ทันที
+**(รองรับทั้ง developer และ auditor สามารถ copy ใช้งาน/แปลงเป็นภาษาอังกฤษ/markdown ได้เลย)**
+
+---
+
+````markdown
+# DTC "One Page Minimal" — UI/UX Design & Core Logic
+
+> **มาตรฐานการออกแบบ UI/UX และตรรกะระบบ DTC ที่เรียบง่ายสุด (Minimal) สำหรับทุกหน้าของแอป DTC**
+>
+> เวอร์ชัน 0.7.6.2+ | อัปเดต 2025 | ใช้ตรวจสอบ/อ้างอิง Whitepaper & โค้ด production
+
+---
+
+## 1. **ปรัชญาและแนวคิด (Key Principles)**
+
+- **One Page Minimal** — ทุกฟังก์ชันหลักอยู่ในหน้าเดียว, ไม่มีเมนูย่อย/Pop-up รก  
+- **สี & สัญลักษณ์** — สื่อสถานะทุกอย่างผ่าน “สี/ไอคอน/ขอบ” (ไม่ใช้ข้อความแจ้งเตือนเด่น)  
+- **Form-driven** — โฟกัสการกรอกข้อมูล, ส่วนผลลัพธ์ (QR, Hash, Log) จะไม่กินพื้นที่หลัก  
+- **ตำแหน่ง UI คงที่** — ปุ่ม Action/Navigate อยู่ล่างสุด, ขนาดเท่ากันทุกหน้า  
+- **Responsive/Touch** — ปรับขนาดอัตโนมัติ, ปุ่มใหญ่กดง่าย, mobile friendly  
+- **ไม่มีข้อมูลสำคัญใน Storage** — Password, PIN, Secret อยู่แค่ in-memory; Log/Batches เก็บ session, เคลียร์เมื่อปิดแท็บ  
+- **No Redundant Alerts** — ความสำเร็จ/ผิดพลาด/โหลด สื่อด้วยสี, border, ไอคอนเล็กๆ
+
+---
+
+## 2. **โครงสร้าง UI (Section-by-Section Minimal Logic)**
+
+### **A. Key & Batch Info** (เทา/เหลืองอ่อน)
+- Password, PIN, Secret — กล่องสีเหลือง #fffde7
+- Batch Name, Qty — กล่องสีเทา #f6f7fa  
+- Label/Hint เล็ก #90a4ae ใต้ input  
+- Session Storage เฉพาะ field ทั่วไป
+
+### **B. Action (ปุ่มหลัก)**
+- ปุ่ม Generate, Export, Regen — สีเด่น, ใหญ่, ตำแหน่งแน่นอน
+
+### **C. Results/Preview** (ฟ้า/เหลือง/เทา)
+- QR Preview, hash1, hash2 (Commitment) — กล่องแคบ, slide ได้, ปุ่ม copy  
+- Export: Ticket (เหลือง), QR (ฟ้า), Log (ฟ้าอ่อน) — ปุ่มเรียงแถว  
+- Timestamp (ISO8601) มุมขวาล่าง #607d8b  
+- Session Storage
+
+### **D. Regen QR** (เทาอ่อน/เหลือง)
+- Ticket/Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
+- Password, PIN, Secret (เหลืองอ่อน)
+- ปุ่ม Regen (ฟ้า), ตัวอย่าง hash แสดงหลังสำเร็จ
+
+### **E. Audit Chain** (ฟ้า)
+- ช่อง hash2, ปุ่ม Audit  
+- กล่อง chain expand/collapse
+
+### **F. Navigation Bar** (ม่วงจาง/เทา)
+- Back | Home | Next (ขนาดเท่ากัน, ล่างสุดของจอ)
+
+---
+
+## 3. **แนวทาง UX & Accessibility**
+
+- **ผลลัพธ์ไม่เด่นเกินไป** — Output (QR/Hash/Log) เล็กกว่า Input
+- **Empty State** — กล่องว่าง, ไอคอน+ข้อความจาง (“ยังไม่มี QR”, “รอผล”)
+- **Success/Error/Loading** — สีเขียว✓, ขอบแดง✗, spinner ปุ่ม disabled
+- **Input Sensitive** — กล่องสีเหลืองสำหรับ Password/PIN/Secret
+- **Label, Contrast, Font ≥15px, Keyboard nav, ARIA-compliant**
+
+---
+
+## 4. **Security & State**
+
+- ไม่มีปุ่ม “ล้างทั้งหมด”
+- Password/PIN/Secret ไม่เก็บ storage ใดๆ
+- Ticket (regen) — ผู้ใช้ต้องวางเองทุกครั้ง
+- Log/Batch info — session storage เท่านั้น (ล้างเมื่อปิด tab)
+
+---
+
+## 5. **Core Logic & Naming (Function Reference)**
+
+### 5.1 Key Generation
+
+```python
+hash1 = SHA256(password)
+hash2 = SHA256(pin)
+private_key = SHA256(hash1 + hash2)
+public_key = SHA256(private_key)
+````
+
+### 5.2 Genesis Node
+
+```python
+genesis_hash = SHA256(public_key + seed + timestamp + nonce)
+prev_hash = "0"*64
+qr_id = "GENESIS_000"
+```
+
+### 5.3 Master/Agent Registration
+
+```python
+# Master
+master_raw = prev_hash + "master" + master_id + pubkey + "" + timestamp + nonce
+master_hash = SHA256(master_raw)
+
+# Agent
+agent_raw = prev_hash + "agent" + agent_id + pubkey + "" + timestamp + nonce
+agent_hash = SHA256(agent_raw)
+```
+
+* master\_id: ≤8 ตัว, พิมพ์ใหญ่ + \_000
+* agent\_id: ≤16 ตัว, พิมพ์เล็ก + \_000 หรือใช้ ":"
+
+### 5.4 QR Assignment (ไม่มี slot!)
+
+```python
+def assign_qr_order(node_hash, total_count, timestamp):
+    assigned = [None] * total_count
+    used_index = set()
+    for i in range(1, total_count+1):
+        raw = f"{node_hash}_QR_{i:03d}:{timestamp}"
+        h = hashlib.sha256(raw.encode()).hexdigest()
+        idx = int(h, 16) % total_count
+        orig_idx = idx
+        while idx in used_index:
+            idx = (idx + 1) % total_count
+            if idx == orig_idx:
+                raise Exception("No available index!")
+        assigned[idx] = i
+        used_index.add(idx)
+    return assigned
+```
+
+* QR ID: `[node_id]_[เลข 3 หลัก]` เช่น maple\_000\_134
+
+### 5.5 Register/Activate QR
+
+```python
+def register_qr(pubkey, node_hash, assigned_index, whitelist):
+    qr_id = f"{node_hash.lower()}_{assigned_index:03d}"
+    timestamp = str(int(time.time()))
+    whitelist[qr_id] = {
+        "qr_id": qr_id,
+        "node_hash": node_hash,
+        "registered_by": pubkey,
+        "timestamp": timestamp,
+        "status": "active"
+    }
+    return qr_id
+```
+
+### 5.6 Transfer/Ownership
+
+```python
+transfer_hash = SHA256(prev_owner_hash + to_pubkey + timestamp + nonce)
+signature = sign(private_key, transfer_hash)
+```
+
+* Log ทุกรายการ transfer
+
+### 5.7 Double Hash Commitment / Regen
+
+```python
+hash1 = SHA256(qr_content)
+hash2 = SHA256(hash1 + meta_info)
+regen_hash = SHA256(prev_hash + object_type + object_id + public_key + to_public_key + timestamp + nonce)
+assert regen_hash == qr["hash"]
+```
+
+* regen hash ใช้ input ตรงจริง, ห้าม slot/slot\_id
+
+### 5.8 QR ID 0x... (address style)
+
+```python
+def make_qr_id(pubkey, parent_hash, slot_no, timestamp=None, nonce=None):
+    if not timestamp:
+        timestamp = str(int(time.time()))
+    if not nonce:
+        nonce = os.urandom(8).hex()
+    raw = f"{pubkey}:{parent_hash}:{slot_no}:{timestamp}:{nonce}"
+    h = hashlib.sha256(raw.encode()).hexdigest()
+    return "0x" + h[-40:], nonce, timestamp
+```
+
+* ใช้ format 0x... เฉพาะ qr\_id แบบ address
+
+### 5.9 Logging/Audit Trail
+
+* log ทุกรายการ mint, register, transfer, regen, revoke
+* ทุกธุรกรรม audit/regen ได้ 100%
+* log ตัวอย่าง: มีทั้ง id (name-id + address) ทุกจุด
+
+---
+
+## 6. **มาตรฐาน Naming & Policy**
+
+| Type    | Structure       | Notes                    |
+| ------- | --------------- | ------------------------ |
+| genesis | GENESIS\_000    | root node only           |
+| master  | MAPLE\_000      | UPPER ≤8 + \_000         |
+| agent   | maple\_000      | lower ≤16 + \_000 or ":" |
+| qr      | maple\_000\_134 | deterministic assignment |
+| 0xqr    | 0x... (40 hex)  | address style, optional  |
+
+* **ห้าม slot/slot\_id ทุกจุดใน logic**
+* agent node ต้อง \_000/ใช้ colon
+* QR hash ≠ QR id
+
+---
+
+## 7. **Security**
+
+* password/PIN ห้ามซ้ำระบบอื่น
+* ห้ามเก็บ private key plain text
+* ทุกธุรกรรมมี timestamp + nonce
+* ต้องเช็ค id/hash ซ้ำทุกครั้ง
+* ห้าม double spend (โอนซ้ำ)
+
+---
+
+## 8. **ตัวอย่าง log**
+
+```json
+{
+  "qr_id": "maple_000_134",
+  "qr_address": "0x1f3f5e9ab12d75af4e2c2cfe3ad527bd8074654a",
+  ...
+}
+```
+
+---
+
+## 9. **สรุป**
+
+* ระบบนี้โปร่งใส, audit/self-proof 100%
+* UI/UX minimal ตาม spec
+* Naming & ID logic เดียวกับ white paper ล่าสุด
+* ใช้ไฟล์นี้เป็น “มาตรฐาน” DTC One Page Minimal ได้ทันที
+
+---
+
