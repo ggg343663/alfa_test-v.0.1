@@ -1,30 +1,31 @@
+// ตัวอย่าง qrLogs สมจริงมากขึ้น
 const qrLogs = [
   {
-    "slot": 1,
-    "hash": "c86b6a1b...a5e1",
-    "prev_hash": "00000000...0000",
-    "qr_hash": "a1234b5678cde...f9ab",
-    "timestamp": "2024-06-02T00:41:00Z",
-    "nonce": "123456789012",
-    "pubkey": "0x8b3d...fa17",
-    "status": "active",
-    "action": "register",
-    "sig": "SIGNATURE_BASE64_OR_HEX",
-    "meta": {}
+    slot: 1,
+    hash: "c86b6a1b...a5e1",
+    prev_hash: "00000000...0000",
+    qr_hash: "a1234b5678cde...f9ab",
+    timestamp: "2024-06-02T00:41:00Z",
+    nonce: "123456789012",
+    pubkey: "0x8b3d...fa17",
+    status: "active",
+    action: "register",
+    sig: "SIGNATURE_BASE64_OR_HEX",
+    meta: { example: "data", version: 1 }
   }
 ];
 
-// ตัวอย่างแสดงข้อมูล QR ล่าสุดในหน้า resultArea
-const log = qrLogs[0];
+// แสดงข้อมูล log ล่าสุด (หรือ log ตามที่ต้องการ)
+const log = qrLogs[0] || {};
 document.getElementById('resultArea').innerHTML = `
   <div class="result-box registered">
-    <b>Slot:</b> ${log.slot}<br>
-    <b>QR Hash:</b> <code>${log.qr_hash}</code><br>
-    <b>Public Key:</b> <code>${log.pubkey}</code><br>
-    <b>Status:</b> ${log.status}<br>
-    <b>Action:</b> ${log.action}<br>
-    <b>Timestamp:</b> ${log.timestamp}<br>
-    <b>Signature:</b> <code>${log.sig.slice(0,18)}...</code><br>
-    <b>Meta:</b> <pre style="display:inline">${JSON.stringify(log.meta,null,2)}</pre>
+    <b>Slot:</b> ${log.slot ?? "-"}<br>
+    <b>QR Hash:</b> <code>${log.qr_hash ?? "-"}</code><br>
+    <b>Public Key:</b> <code>${log.pubkey ?? "-"}</code><br>
+    <b>Status:</b> ${log.status ?? "-"}<br>
+    <b>Action:</b> ${log.action ?? "-"}<br>
+    <b>Timestamp:</b> ${log.timestamp ?? "-"}<br>
+    <b>Signature:</b> <code>${(log.sig ?? "").slice(0,18)}${log.sig ? "..." : ""}</code><br>
+    <b>Meta:</b> <pre style="display:inline">${JSON.stringify(log.meta ?? {},null,2)}</pre>
   </div>
 `;
