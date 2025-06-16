@@ -6,13 +6,8 @@
     <title>Register Master | DTC Magic Chain</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body {
-            font-family: 'Inter', Arial, sans-serif;
-            background-color: #f0f4f8;
-            display: flex; justify-content: center; align-items: center;
-            min-height: 100vh; margin: 0; padding: 1.5rem;
-        }
-        .main { background-color: #fff; border-radius: 1rem; box-shadow: 0 8px 40px rgba(36,107,253,0.07); padding: 2.5rem; width: 100%; max-width: 28rem; text-align: center; box-sizing: border-box;}
+        body { font-family: 'Inter', Arial, sans-serif; background-color: #f0f4f8;}
+        .main { background-color: #fff; border-radius: 1rem; box-shadow: 0 8px 40px rgba(36,107,253,0.07); padding: 2.5rem; width: 100%; max-width: 28rem; text-align: center; box-sizing: border-box; margin: 0 auto;}
         .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
         .nav-btn { background-color: #ede7f6; color: #246bfd; border: none; border-radius: 0.5rem; padding: 0.53em 1.4em; font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background-color 0.18s ease; height: 44px; min-width: 80px; }
         .nav-btn:hover { background-color: #d1c4e9; }
@@ -42,7 +37,6 @@
         .preview-box pre { background: none; padding: 0; font-size: 0.95em; color: #246bfd; white-space: pre-wrap; }
         .copy-json-btn { background-color: #2196f3; color: #fff; padding: 0.3em 0.8em; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.9em; margin-top: 0.5em; transition: background-color 0.18s ease;}
         .copy-json-btn:hover { background-color: #1976D2; }
-        /* Modal Confirm */
         .modal-overlay { display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.20); z-index: 99; justify-content: center; align-items: center;}
         .modal-content { background: #fff; border-radius: 13px; padding: 2em 1.4em 1.3em 1.4em; max-width: 420px; margin: 0 auto; box-shadow: 0 8px 32px #21915023, 0 2px 8px #36d86d0c; text-align: center; position: relative;}
         .modal-content h3 { margin: 0 0 1em 0; color: #219150; font-size: 1.25em; }
@@ -59,7 +53,7 @@
         }
     </style>
 </head>
-<body class="bg-gray-100">
+<body>
     <div class="main">
         <div class="nav-row">
             <button class="nav-btn" onclick="window.history.back()">Back</button>
@@ -103,7 +97,6 @@
             *Identity QR Hash = 64 HEX chars (from "Generate Identity QR Hash" page/section).
         </div>
     </div>
-
     <!-- Modal Preview -->
     <div class="modal-overlay" id="modalOverlay">
       <div class="modal-content">
@@ -113,9 +106,8 @@
         <button class="btn-cancel" id="cancelBtn">Cancel</button>
       </div>
     </div>
-
     <script>
-        // --- Global Constants and State ---
+        // --- Constants ---
         const GENESIS_HASH = "86b1c0989f61b7f03222d861f67f259740120199e69c7662c1404e132c3f8f11";
         let badwords = {};
         let flatBadwords = [];
@@ -129,24 +121,20 @@
         const identityQrHashCounter = document.getElementById('identityQrHashCounter');
         const badwordWarn = document.getElementById('badwordWarn');
         const previewBtn = document.getElementById('previewBtn');
-        const registerButton = previewBtn; // (keep for code logic below)
         const msgBox = document.getElementById('msgBox');
         const previewBox = document.getElementById('previewBox');
         const previewJson = document.getElementById('previewJson');
         const masterForm = document.getElementById('masterForm');
-
         // Modal
         const modal = document.getElementById('modalOverlay');
         const previewList = document.getElementById('previewList');
         const confirmBtn = document.getElementById('confirmBtn');
         const cancelBtn = document.getElementById('cancelBtn');
-
         function showMsg(msg, type) {
             msgBox.textContent = msg;
             msgBox.className = "msg-box " + (type === "error" ? "msg-error" : "msg-success");
             setTimeout(() => { msgBox.textContent = ""; msgBox.className = "msg-box"; }, 5000);
         }
-
         async function sha256Hex(str) {
             const enc = new TextEncoder();
             const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
@@ -194,10 +182,11 @@
             if(masterName.length < 1 || masterName.length > 8 || publicKey.length !== 64 || identityQrHash.length !== 64) return null;
             const timestamp = Math.floor(Date.now() / 1000).toString(); 
             const nonce = genNonce();
-            const rawHashInput = identityQrHash + "master_registration" + masterName + publicKey + "" + GENESIS_HASH + timestamp + nonce;
+            // DTC audit chain standard formula
+            const rawHashInput = identityQrHash + "master" + masterName + publicKey + "" + GENESIS_HASH + timestamp + nonce;
             const recordHash = await sha256Hex(rawHashInput);
             return {
-                object_type: "master_registration",
+                object_type: "master",
                 object_id: masterName,
                 public_key: publicKey,
                 prev_hash: identityQrHash,
@@ -240,7 +229,6 @@
                 .then(() => showMsg("Copied JSON!", "success"))
                 .catch(() => showMsg("Failed to copy JSON. Please copy manually.", "error"));
         }
-
         // Show Preview Modal
         previewBtn.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -258,7 +246,6 @@
               <b>Preview Hash:</b> <code>${node.hash}</code>
             `;
             modal.style.display = "flex";
-            // Store node preview for confirm
             window._dtc_masterPreviewNode = node;
         });
         // Confirm Modal
@@ -266,7 +253,7 @@
             const node = window._dtc_masterPreviewNode;
             modal.style.display = "none";
             showMsg("Registering Master...", "success");
-            await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate network
+            await new Promise(resolve => setTimeout(resolve, 1000));
             showMsg(`Master '${node.object_id}' registered. Hash: ${node.hash}.`, "success");
             previewJson.textContent = JSON.stringify(node, null, 2);
             previewBox.style.display = "block";
@@ -276,8 +263,6 @@
         });
         // Cancel Modal
         cancelBtn.addEventListener('click', ()=>{ modal.style.display = "none"; });
-
-        // --- Event Listeners and Initial Setup ---
         masterNameInput.addEventListener('input', () => {
             masterNameInput.value = masterNameInput.value.replace(/[^A-Z]/g,'').toUpperCase();
             updateCounters(); validateInputs(); livePreview();
@@ -306,7 +291,6 @@
             }
             updateCounters(); validateInputs(); livePreview();
         });
-        // ESC ปิด modal
         document.addEventListener('keydown', (e) => {
           if (modal.style.display === "flex" && (e.key === "Escape" || e.key === "Esc")) modal.style.display = "none";
         });
