@@ -3,292 +3,322 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Register QR</title>
+  <title>Register QR - DTC</title>
   <style>
+    :root {
+      --primary-green: #219150;
+      --primary-blue: #2196f3;
+      --bg-yellow: #fffde7;
+      --bg-grey: #f6f7fa;
+      --border-grey: #cfd8dc;
+      --border-focus: #2196f3;
+      --border-error: #b91c1c;
+      --bg-error: #fbe7e7;
+      --border-success: #219150;
+      --border-warn: #ffd600;
+      --input-height: 42px;
+      --radius: 10px;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background: #f5f7fa;
-      color: #333;
-      max-width: 600px;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--bg-grey);
+      color: #222;
+      max-width: 500px;
       margin: 2em auto;
-      padding: 1em;
+      padding: 1.2em;
     }
     h2 {
       text-align: center;
-      color: #219150;
-      margin-bottom: 1em;
+      color: var(--primary-green);
+      margin-bottom: 1.1em;
+    }
+    .input-block {
+      margin-bottom: 1.1em;
+      position: relative;
     }
     label {
       display: block;
-      margin-bottom: 0.5em;
       font-weight: bold;
+      font-size: 1em;
+      margin-bottom: 0.45em;
+      color: #222;
     }
     textarea, input[type="text"] {
       width: 100%;
-      padding: 0.6em;
-      border: 1px solid #ccc;
-      border-radius: 6px;
       font-size: 1em;
-      resize: vertical;
+      padding: 0.68em 0.9em;
+      height: var(--input-height);
+      background: #fff;
+      border: 2px solid var(--border-grey);
+      border-radius: var(--radius);
+      outline: none;
+      margin-bottom: 0;
+      font-family: inherit;
+      transition: border 0.14s;
       box-sizing: border-box;
-      margin-bottom: 1em;
+      resize: none;
     }
-    textarea { min-height: 3em; }
+    textarea[readonly], input[readonly] {
+      background: var(--bg-grey);
+      color: #555;
+    }
+    textarea:focus, input[type="text"]:focus {
+      border-color: var(--border-focus);
+    }
+    .input-block.bg-yellow textarea, .input-block.bg-yellow input {
+      background: var(--bg-yellow);
+    }
+    .input-block.bg-grey textarea, .input-block.bg-grey input {
+      background: var(--bg-grey);
+    }
+    .input-block .icon-status {
+      position: absolute;
+      right: 13px;
+      top: 40px;
+      font-size: 1.12em;
+      pointer-events: none;
+      transition: color .18s;
+      opacity: 0.87;
+    }
+    .icon-ok { color: var(--border-success); }
+    .icon-warn { color: #ffd600; }
+    .icon-error { color: var(--border-error); }
+    /* Action Buttons */
     .btn {
-      display: inline-block;
-      padding: 0.6em 1.2em;
-      margin: 0.4em 0.3em 0.4em 0;
       border: none;
-      border-radius: 6px;
-      font-size: 1em;
+      border-radius: var(--radius);
       font-weight: bold;
+      font-size: 1.03em;
       cursor: pointer;
-      transition: background 0.2s;
-      text-align: center;
+      padding: 1em 0;
+      margin: 0.4em 0 0.4em 0;
+      width: 100%;
+      transition: background 0.17s, filter 0.15s;
+      min-height: 46px;
+      box-shadow: 0 2px 7px rgba(36, 145, 80, 0.08);
     }
     #reg-btn {
-      background: linear-gradient(90deg,#2196f3 70%,#219150 100%);
+      background: linear-gradient(90deg, var(--primary-green) 80%, var(--primary-blue) 100%);
       color: #fff;
-      box-shadow: 0 2px 7px rgba(36, 145, 80, 0.12);
+      margin-bottom: 0.3em;
     }
-    #reg-btn[disabled] {
+    #reg-btn:disabled {
       background: #b4dcc3;
-      cursor: not-allowed;
       color: #fff;
+      cursor: not-allowed;
+      opacity: 0.7;
     }
-    #reg-btn:hover:not([disabled]) {
-      filter: brightness(0.95);
+    #export-btn, #copy-qr-btn {
+      background: var(--primary-blue);
+      color: #fff;
+      margin: 0 0 0.4em 0;
     }
+    #export-btn { background: #ffd600; color: #222; }
     #clear-btn {
-      background: #ffd600;
-      color: #222;
-    }
-    #clear-btn:hover { background: #ffb300; }
-    #back-btn {
       background: #ede7f6;
       color: #246bfd;
+      margin-bottom: 0.3em;
     }
-    #back-btn:hover { background: #d1c4e9; }
-    #export-btn {
-      background: #2563eb;
-      color: #fff;
+    .copy-status {
+      display: inline-block;
+      margin-left: 0.7em;
+      color: var(--border-success);
+      font-size: 0.93em;
+      opacity: 0;
+      transition: opacity .22s;
+      pointer-events: none;
+      vertical-align: middle;
     }
-    #export-btn:hover { background: #1d4ed8; }
-    #copy-qr-btn {
-      background: #2563eb;
-      color: #fff;
-      margin-left: 0;
-      padding: 0.35em 1em;
-      font-size: 1em;
+    .copy-status.show { opacity: 1; }
+    .timestamp-row {
+      margin: 0.7em 0 0.8em 0;
+      color: #607d8b;
+      font-size: 0.96em;
+      text-align: right;
     }
-    #copy-qr-btn:active { background: #1747a1; }
     .status {
       margin-top: 1em;
       font-size: 1em;
       font-weight: bold;
       min-height: 2em;
+      text-align: center;
+      transition: color 0.2s;
     }
     .note {
       font-size: 0.92em;
       color: #777;
-      margin-top: 1.5em;
+      margin-top: 1.2em;
       text-align: center;
-    }
-    .timestamp-row {
-      margin-top: 0.6em;
-      color: #26733e;
-      font-size: 0.98em;
-      display: none;
-    }
-    .action-row {
-      display: flex;
-      gap: 0.6em;
-      flex-wrap: wrap;
     }
     .warn-msg {
-      color: #b91c1c;
-      background: #fbe7e7;
-      padding: 0.45em 0.85em;
-      border-radius: 7px;
-      margin: -0.7em 0 1em 0;
-      font-size: 0.95em;
-      display: none;
-    }
-    /* Modal Preview */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      left: 0; top: 0; width: 100vw; height: 100vh;
-      background: rgba(0,0,0,0.20);
-      z-index: 99;
-      justify-content: center; align-items: center;
-    }
-    .modal-content {
-      background: #fff;
-      border-radius: 13px;
-      padding: 2em 1.4em 1.3em 1.4em;
-      max-width: 420px;
-      margin: 0 auto;
-      box-shadow: 0 8px 32px #21915023, 0 2px 8px #36d86d0c;
-      text-align: center;
-      position: relative;
-    }
-    .modal-content h3 {
-      margin: 0 0 1em 0;
-      color: #219150;
-      font-size: 1.25em;
-    }
-    .modal-preview-list {
-      text-align: left;
-      margin: 0 0 1.5em 0;
-      font-size: 1.03em;
-      color: #234;
-      background: #f6f7fa;
-      border-radius: 7px;
-      padding: 1em;
-      border-left: 5px solid #219150;
-    }
-    .btn-confirm {
-      display: block;
-      width: 100%;
-      margin: 1em 0 0 0;
-      background: linear-gradient(90deg,#219150 75%,#44cc77 100%);
-      color: #fff;
-      font-size: 1.13em;
-      font-weight: bold;
-      border: none;
+      color: var(--border-error);
+      background: var(--bg-error);
       border-radius: 8px;
-      padding: 1em 0;
-      cursor: pointer;
-      transition: background .13s, filter .13s;
-      box-shadow: 0 4px 10px rgba(36,145,80,0.08);
+      font-size: 0.96em;
+      display: none;
+      margin-top: -0.6em;
+      margin-bottom: 0.9em;
+      padding: 0.28em 1em;
     }
-    .btn-confirm:hover { filter: brightness(0.96);}
-    .btn-cancel {
-      display: block;
-      width: 100%;
-      margin: 0.7em 0 0 0;
-      background: #b0bec5;
-      color: #fff;
-      font-size: 1em;
-      border: none;
-      border-radius: 8px;
-      padding: 0.7em 0;
-      cursor: pointer;
-      transition: background .13s;
-    }
-    .btn-cancel:hover { background: #90a4ae;}
     @media (max-width: 480px) {
-      body { margin: 1em; padding: 0.5em; }
-      .btn { width: 100%; margin: 0.3em 0;}
-      .action-row { flex-direction: column; gap: 0.3em; }
-      .modal-content { padding: 1em 0.3em 1em 0.3em; }
+      body { padding: 0.4em; }
+      .btn { font-size: 1em; }
+      textarea, input[type="text"] { font-size: 0.99em; }
+      .input-block { margin-bottom: 0.8em;}
     }
   </style>
 </head>
 <body>
   <h2>Register QR</h2>
 
-  <label for="pub-key-input">Public Key:</label>
-  <textarea id="pub-key-input" placeholder="Public Key will be auto-filled" autofocus></textarea>
+  <!-- Public Key input -->
+  <div class="input-block bg-yellow">
+    <label for="pub-key-input">Public Key</label>
+    <textarea id="pub-key-input" placeholder="Paste or autofill Public Key"></textarea>
+    <span class="icon-status" id="pk-status"></span>
+  </div>
   <div id="pk-symbol-warn" class="warn-msg"></div>
 
-  <label for="qr-hash-input">QR Hash:</label>
-  <div style="display:flex;gap:0.5em;align-items:center;">
-    <textarea id="qr-hash-input" placeholder="QR Hash will be auto-filled"></textarea>
-    <button id="copy-qr-btn" class="btn" type="button">Copy</button>
-  </div>
-
-  <label for="owner-name">Owner Name (optional):</label>
-  <input id="owner-name" type="text" placeholder="Enter name (optional)" />
-
-  <div class="action-row">
-    <button id="reg-btn" class="btn">Register</button>
-    <button id="export-btn" class="btn" type="button" style="display:none;">Export Log (.txt)</button>
-    <button id="clear-btn" class="btn" type="button">Clear</button>
-    <button id="back-btn" class="btn" type="button">Back</button>
-  </div>
-
-  <div class="timestamp-row" id="ts-row">
-    Registered at: <span id="ts"></span>
-  </div>
-
-  <p id="status-msg" class="status"></p>
-
-  <p class="note">
-    Public Key and QR Hash will be auto-filled if stored locally.<br />
-    If no backend, data is saved only in this browser (Demo mode).
-  </p>
-
-  <!-- Modal Preview -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="modal-content">
-      <h3>Preview Registration</h3>
-      <div class="modal-preview-list" id="previewList"></div>
-      <button class="btn-confirm" id="confirmBtn">Confirm & Register</button>
-      <button class="btn-cancel" id="cancelBtn">Cancel</button>
+  <!-- QR Hash input -->
+  <div class="input-block bg-yellow">
+    <label for="qr-hash-input">QR Hash</label>
+    <div style="display:flex;gap:0.5em;align-items:center;">
+      <textarea id="qr-hash-input" placeholder="Paste or autofill QR Hash"></textarea>
+      <button id="copy-qr-btn" class="btn" type="button" style="width:auto;min-width:80px;padding:0.7em 1em 0.7em 1em;font-size:1em;">Copy</button>
+      <span class="copy-status" id="copyStatus">✓ Copied!</span>
     </div>
   </div>
 
+  <!-- Owner Name (optional) -->
+  <div class="input-block bg-grey">
+    <label for="owner-name">Owner Name <span style="color:#90a4ae;font-weight:normal;">(optional)</span></label>
+    <input id="owner-name" type="text" placeholder="Enter name (optional)" />
+  </div>
+
+  <!-- Action Buttons -->
+  <button id="reg-btn" class="btn" disabled>Register</button>
+  <button id="export-btn" class="btn" type="button" style="display:none;">Export Log (.txt)</button>
+  <button id="clear-btn" class="btn" type="button">Clear</button>
+
+  <div class="timestamp-row" id="ts-row" style="display:none;">
+    Registered at: <span id="ts"></span>
+  </div>
+  <p id="status-msg" class="status"></p>
+  <p class="note">
+    <span style="color:#90a4ae;">Public Key/QR Hash auto-filled if saved in browser. <br>
+    No backend: demo data is browser-only.</span>
+  </p>
+
   <script>
+    // DOM
     const pubInput = document.getElementById('pub-key-input');
     const qrInput = document.getElementById('qr-hash-input');
     const ownerInput = document.getElementById('owner-name');
     const regBtn = document.getElementById('reg-btn');
-    const backBtn = document.getElementById('back-btn');
     const clearBtn = document.getElementById('clear-btn');
     const exportBtn = document.getElementById('export-btn');
     const copyQrBtn = document.getElementById('copy-qr-btn');
+    const copyStatus = document.getElementById('copyStatus');
     const statusMsg = document.getElementById('status-msg');
     const tsRow = document.getElementById('ts-row');
     const tsEl = document.getElementById('ts');
+    const pkStatus = document.getElementById('pk-status');
     const pkSymbolWarn = document.getElementById('pk-symbol-warn');
     let lastLogObj = null;
 
-    // Modal
-    const modal = document.getElementById('modalOverlay');
-    const previewList = document.getElementById('previewList');
-    const confirmBtn = document.getElementById('confirmBtn');
-    const cancelBtn = document.getElementById('cancelBtn');
-
-    function validatePubKey() {
+    // Validate and symbol-driven feedback
+    function validateInputs() {
+      // --- Validate Public Key ---
       const pk = pubInput.value.trim();
       const hasSymbol = /[^a-zA-Z0-9]/.test(pk);
-      if (!hasSymbol && pk.length > 0) {
-        pkSymbolWarn.style.display = "";
-        pkSymbolWarn.textContent = "Public Key must include at least one symbol (e.g. !@#$%^&* etc.).";
-        regBtn.disabled = true;
+      // Visual Feedback (Symbol + Color)
+      if (pk.length === 0) {
+        pkStatus.innerHTML = '';
+        pubInput.style.borderColor = 'var(--border-grey)';
+      } else if (!hasSymbol) {
+        pkStatus.innerHTML = svgWarn();
+        pubInput.style.borderColor = 'var(--border-error)';
+        pkSymbolWarn.style.display = "block";
+        pkSymbolWarn.textContent = "Must contain symbol (!@#$%^&*).";
       } else {
+        pkStatus.innerHTML = svgCheck();
+        pubInput.style.borderColor = 'var(--border-success)';
         pkSymbolWarn.style.display = "none";
-        regBtn.disabled = !(pk.length > 0 && qrInput.value.trim().length > 0);
       }
+
+      // --- QR Hash ---
+      if (qrInput.value.trim().length === 0) {
+        qrInput.style.borderColor = 'var(--border-grey)';
+      } else {
+        qrInput.style.borderColor = 'var(--border-success)';
+      }
+
+      // Enable register only if valid
+      regBtn.disabled = !(pk.length > 0 && hasSymbol && qrInput.value.trim().length > 0);
     }
 
-    pubInput.addEventListener('input', validatePubKey);
-    qrInput.addEventListener('input', validatePubKey);
+    function svgCheck() {
+      return `<svg width="20" height="20" viewBox="0 0 20 20"><polyline points="5,11 9,15 15,6" fill="none" stroke="#219150" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+    }
+    function svgWarn() {
+      return `<svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="#ffd600" stroke-width="2"/><line x1="10" y1="6" x2="10" y2="12" stroke="#ffd600" stroke-width="2"/><circle cx="10" cy="15" r="1.1" fill="#ffd600"/></svg>`;
+    }
 
-    // Auto-fill public key and QR hash from localStorage
+    // Input event listeners
+    pubInput.addEventListener('input', validateInputs);
+    qrInput.addEventListener('input', validateInputs);
+
+    // Auto-fill from localStorage
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       const savedQr  = localStorage.getItem('dtc_qrHash');
       if (savedPub) pubInput.value = savedPub;
       if (savedQr)  qrInput.value = savedQr;
-      validatePubKey();
+      validateInputs();
     });
 
-    // Copy QR Hash
+    // Copy QR Hash button
     copyQrBtn.addEventListener('click', () => {
       const qr = qrInput.value.trim();
       if (!qr) return;
       navigator.clipboard.writeText(qr);
-      copyQrBtn.textContent = "Copied!";
-      setTimeout(() => copyQrBtn.textContent = "Copy", 1200);
+      copyStatus.classList.add('show');
+      setTimeout(() => copyStatus.classList.remove('show'), 1200);
     });
 
-    // Back to homepage
-    backBtn.addEventListener('click', () => {
-      window.location.href = 'index.html';
+    // Register logic (DEMO)
+    regBtn.addEventListener('click', () => {
+      // Minimal feedback with icon+color
+      statusMsg.textContent = '';
+      const pub       = pubInput.value.trim();
+      const qr        = qrInput.value.trim();
+      const ownerName = ownerInput.value.trim();
+      if (!pub || !qr || !/[^a-zA-Z0-9]/.test(pub)) {
+        statusMsg.style.color = 'var(--border-error)';
+        statusMsg.innerHTML = svgError() + " Public Key and QR Hash required (with symbol).";
+        return;
+      }
+      regBtn.disabled = true;
+      // Save DEMO data
+      const ts = new Date().toISOString();
+      const logObj = { publicKey: pub, qrHash: qr, ownerName, registeredAt: ts };
+      let demoList = [];
+      try { demoList = JSON.parse(localStorage.getItem('dtc_demoRegList')) || []; } catch (e) {}
+      demoList.push(logObj);
+      localStorage.setItem('dtc_demoRegList', JSON.stringify(demoList));
+      // Feedback
+      statusMsg.style.color = 'var(--border-success)';
+      statusMsg.innerHTML = svgCheck() + " Registration successful!";
+      exportBtn.style.display = 'inline-block';
+      tsRow.style.display = 'block';
+      tsEl.textContent = ts;
+      lastLogObj = logObj;
+      regBtn.disabled = false;
     });
+
+    function svgError() {
+      return `<svg width="19" height="19" viewBox="0 0 19 19" style="vertical-align:-3px;"><circle cx="9.5" cy="9.5" r="8" fill="none" stroke="#b91c1c" stroke-width="2"/><line x1="9.5" y1="5.7" x2="9.5" y2="12.2" stroke="#b91c1c" stroke-width="2"/><circle cx="9.5" cy="14.1" r="1.2" fill="#b91c1c"/></svg>`;
+    }
 
     // Clear form
     clearBtn.addEventListener('click', () => {
@@ -296,6 +326,8 @@
       qrInput.value = '';
       ownerInput.value = '';
       statusMsg.textContent = '';
+      statusMsg.style.color = '';
+      pkStatus.innerHTML = '';
       exportBtn.style.display = 'none';
       tsRow.style.display = 'none';
       lastLogObj = null;
@@ -303,70 +335,8 @@
       regBtn.disabled = true;
       localStorage.removeItem('dtc_publicKey');
       localStorage.removeItem('dtc_qrHash');
+      validateInputs();
     });
-
-    // Show Preview Modal
-    regBtn.addEventListener('click', () => {
-      const pub       = pubInput.value.trim();
-      const qr        = qrInput.value.trim();
-      const ownerName = ownerInput.value.trim();
-      const hasSymbol = /[^a-zA-Z0-9]/.test(pub);
-      if (!pub || !qr || !hasSymbol) {
-        statusMsg.style.color = 'red';
-        statusMsg.textContent = '📛 Please enter both Public Key and QR Hash (Public Key must have symbol)';
-        exportBtn.style.display = 'none';
-        tsRow.style.display = 'none';
-        return;
-      }
-      // Build preview info
-      previewList.innerHTML = `
-        <b>Public Key:</b> <code>${pub}</code><br>
-        <b>QR Hash:</b> <code>${qr}</code><br>
-        <b>Owner Name:</b> ${ownerName ? ownerName : '<span style="color:#b0bec5;">-</span>'}
-      `;
-      modal.style.display = "flex";
-    });
-
-    // Confirm from modal
-    confirmBtn.addEventListener('click', () => {
-      const pub       = pubInput.value.trim();
-      const qr        = qrInput.value.trim();
-      const ownerName = ownerInput.value.trim();
-      regBtn.disabled = true;
-      modal.style.display = "none";
-      statusMsg.style.color = '#26733e';
-      statusMsg.textContent = '⏳ Registering...';
-
-      // === DEMO MODE ===
-      const ts = new Date().toISOString();
-      const logObj = {
-        publicKey: pub,
-        qrHash: qr,
-        ownerName,
-        registeredAt: ts
-      };
-
-      let demoList = [];
-      try {
-        demoList = JSON.parse(localStorage.getItem('dtc_demoRegList')) || [];
-      } catch (e) {
-        demoList = [];
-      }
-
-      demoList.push(logObj);
-      localStorage.setItem('dtc_demoRegList', JSON.stringify(demoList));
-
-      statusMsg.style.color = 'green';
-      statusMsg.textContent = '✅ (Demo) Registration successful! (Saved in this browser only)';
-      regBtn.disabled = false;
-      exportBtn.style.display = 'inline-block';
-      tsRow.style.display = 'block';
-      tsEl.textContent = ts;
-      lastLogObj = logObj;
-    });
-
-    // Cancel Modal
-    cancelBtn.addEventListener('click', ()=>{ modal.style.display = "none"; });
 
     // Export log as .txt
     exportBtn.addEventListener('click', () => {
@@ -382,17 +352,6 @@ Registered At: ${lastLogObj.registeredAt}`;
       link.download = `qr_reg_log_${Date.now()}.txt`;
       link.click();
       URL.revokeObjectURL(url);
-    });
-
-    // ESC ปิด modal
-    document.addEventListener('keydown', (e) => {
-      if (modal.style.display === "flex" && (e.key === "Escape" || e.key === "Esc")) {
-        modal.style.display = "none";
-      }
-    });
-    // click นอกกล่อง modal เพื่อปิด
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) modal.style.display = "none";
     });
   </script>
 </body>
