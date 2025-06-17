@@ -69,7 +69,11 @@
             </div>
             <div class="input-group">
                 <label for="masterPublicKey">Your Public Key <span class="counter" id="pubkeyCounter">0/64</span></label>
-                <input type="text" id="masterPublicKey" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your public key here" required autocomplete="off" />
+                <!-- pattern อนุญาต symbol และบังคับอย่างน้อย 1 ตัว -->
+                <input type="text" id="masterPublicKey" maxlength="64"
+                       pattern="^(?=.*[^a-zA-Z0-9])[a-zA-Z0-9!@#$%^&*()_\-=\[\]{};':&quot;\\|,.&lt;&gt;\/?]{8,64}$"
+                       placeholder="Must include symbol, e.g. !@#$, etc." required autocomplete="off" />
+                <div id="pkSymbolWarn" class="warn-msg" style="display:none;"></div>
                 <button class="btn-scan-paste" type="button" onclick="handleScanPaste('masterPublicKey')">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11l-3-3m0 0L9 11m3-3v7m0 0l-3 3m3-3l3 3m0-3h-6"></path></svg>
                     Paste / Scan QR
@@ -93,7 +97,7 @@
         </div>
         <div class="note-text">
             *Master Name = 1-8 chars, A-Z only.<br>
-            *Your Public Key = 64 HEX chars (from Generate Key page).<br>
+            *Your Public Key = 8-64 chars (must include symbol).<br>
             *Identity QR Hash = 64 HEX chars (from "Generate Identity QR Hash" page/section).
         </div>
     </div>
@@ -120,6 +124,7 @@
         const pubkeyCounter = document.getElementById('pubkeyCounter');
         const identityQrHashCounter = document.getElementById('identityQrHashCounter');
         const badwordWarn = document.getElementById('badwordWarn');
+        const pkSymbolWarn = document.getElementById('pkSymbolWarn');
         const previewBtn = document.getElementById('previewBtn');
         const msgBox = document.getElementById('msgBox');
         const previewBox = document.getElementById('previewBox');
@@ -160,9 +165,12 @@
             const pk = masterPublicKeyInput.value.trim();
             const idQrHash = identityQrHashInput.value.trim();
             const isNameValid = name.length >= 1 && name.length <= 8 && /^[A-Z]+$/.test(name);
-            const isPkValid = pk.length === 64 && /^[a-fA-F0-9]{64}$/.test(pk);
+            // NEW: ต้องมี symbol อย่างน้อย 1 ตัว
+            const hasSymbol = /[^a-zA-Z0-9]/.test(pk);
+            const isPkValid = pk.length >= 8 && pk.length <= 64 && hasSymbol;
             const isIdQrHashValid = idQrHash.length === 64 && /^[a-fA-F0-9]{64}$/.test(idQrHash);
             const isNoBadwords = !findBadwords(name).length;
+            // Badword
             if (badwordsError) {
                 badwordWarn.style.display = "";
                 badwordWarn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
@@ -173,14 +181,21 @@
             } else {
                 badwordWarn.style.display = "none";
             }
+            // Public Key Symbol
+            if (!hasSymbol && pk.length > 0) {
+                pkSymbolWarn.style.display = "";
+                pkSymbolWarn.textContent = "Public Key must include at least one symbol (e.g. !@#$%^&* etc.).";
+            } else {
+                pkSymbolWarn.style.display = "none";
+            }
             previewBtn.disabled = !(isNameValid && isPkValid && isIdQrHashValid && isNoBadwords && !badwordsError);
         }
         async function buildMasterNodePreview() {
             const masterName = masterNameInput.value.trim().toUpperCase();
             const publicKey = masterPublicKeyInput.value.trim();
             const identityQrHash = identityQrHashInput.value.trim();
-            if(masterName.length < 1 || masterName.length > 8 || publicKey.length !== 64 || identityQrHash.length !== 64) return null;
-            const timestamp = Math.floor(Date.now() / 1000).toString(); 
+            if(masterName.length < 1 || masterName.length > 8 || publicKey.length < 8 || publicKey.length > 64 || !/[^a-zA-Z0-9]/.test(publicKey) || identityQrHash.length !== 64) return null;
+            const timestamp = Math.floor(Date.now() / 1000).toString();
             const nonce = genNonce();
             // DTC audit chain standard formula
             const rawHashInput = identityQrHash + "master" + masterName + publicKey + "" + GENESIS_HASH + timestamp + nonce;
@@ -268,7 +283,7 @@
             updateCounters(); validateInputs(); livePreview();
         });
         masterPublicKeyInput.addEventListener('input', () => {
-            masterPublicKeyInput.value = masterPublicKeyInput.value.replace(/[^a-fA-F0-9]/g,'');
+            // now allow symbol, do not strip
             updateCounters(); validateInputs(); livePreview();
         });
         identityQrHashInput.addEventListener('input', () => {
@@ -286,7 +301,7 @@
                 validateInputs();
             }, 500);
             const localPub = localStorage.getItem('dtc_publicKey');
-            if (localPub && localPub.length === 64 && /^[a-fA-F0-9]+$/.test(localPub)) {
+            if (localPub && localPub.length >= 8 && localPub.length <= 64) {
                 masterPublicKeyInput.value = localPub;
             }
             updateCounters(); validateInputs(); livePreview();
