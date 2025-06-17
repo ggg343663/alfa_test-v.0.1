@@ -105,6 +105,15 @@
       gap: 0.6em;
       flex-wrap: wrap;
     }
+    .warn-msg {
+      color: #b91c1c;
+      background: #fbe7e7;
+      padding: 0.45em 0.85em;
+      border-radius: 7px;
+      margin: -0.7em 0 1em 0;
+      font-size: 0.95em;
+      display: none;
+    }
     /* Modal Preview */
     .modal-overlay {
       display: none;
@@ -182,6 +191,7 @@
 
   <label for="pub-key-input">Public Key:</label>
   <textarea id="pub-key-input" placeholder="Public Key will be auto-filled" autofocus></textarea>
+  <div id="pk-symbol-warn" class="warn-msg"></div>
 
   <label for="qr-hash-input">QR Hash:</label>
   <div style="display:flex;gap:0.5em;align-items:center;">
@@ -232,6 +242,7 @@
     const statusMsg = document.getElementById('status-msg');
     const tsRow = document.getElementById('ts-row');
     const tsEl = document.getElementById('ts');
+    const pkSymbolWarn = document.getElementById('pk-symbol-warn');
     let lastLogObj = null;
 
     // Modal
@@ -240,12 +251,29 @@
     const confirmBtn = document.getElementById('confirmBtn');
     const cancelBtn = document.getElementById('cancelBtn');
 
+    function validatePubKey() {
+      const pk = pubInput.value.trim();
+      const hasSymbol = /[^a-zA-Z0-9]/.test(pk);
+      if (!hasSymbol && pk.length > 0) {
+        pkSymbolWarn.style.display = "";
+        pkSymbolWarn.textContent = "Public Key must include at least one symbol (e.g. !@#$%^&* etc.).";
+        regBtn.disabled = true;
+      } else {
+        pkSymbolWarn.style.display = "none";
+        regBtn.disabled = !(pk.length > 0 && qrInput.value.trim().length > 0);
+      }
+    }
+
+    pubInput.addEventListener('input', validatePubKey);
+    qrInput.addEventListener('input', validatePubKey);
+
     // Auto-fill public key and QR hash from localStorage
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       const savedQr  = localStorage.getItem('dtc_qrHash');
       if (savedPub) pubInput.value = savedPub;
       if (savedQr)  qrInput.value = savedQr;
+      validatePubKey();
     });
 
     // Copy QR Hash
@@ -271,6 +299,8 @@
       exportBtn.style.display = 'none';
       tsRow.style.display = 'none';
       lastLogObj = null;
+      pkSymbolWarn.style.display = "none";
+      regBtn.disabled = true;
       localStorage.removeItem('dtc_publicKey');
       localStorage.removeItem('dtc_qrHash');
     });
@@ -280,9 +310,10 @@
       const pub       = pubInput.value.trim();
       const qr        = qrInput.value.trim();
       const ownerName = ownerInput.value.trim();
-      if (!pub || !qr) {
+      const hasSymbol = /[^a-zA-Z0-9]/.test(pub);
+      if (!pub || !qr || !hasSymbol) {
         statusMsg.style.color = 'red';
-        statusMsg.textContent = '📛 Please enter both Public Key and QR Hash';
+        statusMsg.textContent = '📛 Please enter both Public Key and QR Hash (Public Key must have symbol)';
         exportBtn.style.display = 'none';
         tsRow.style.display = 'none';
         return;
