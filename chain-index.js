@@ -1,172 +1,136 @@
-// chain-index.js - Mockup Version
-// This file will handle the logic for parsing QR content/Commitment Hash
-// and dynamically populating the chain index on index.html
+// chain-index.js - DTC Minimal One Page Chain Viewer (v0.7.6.3+)
+// UI/UX = No slot/slot_id, No secret, No alert, use color/icon/size only
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Select elements from index.html
     const expandChainBtn = document.getElementById('expandChainBtn');
     const qrInput = document.getElementById('qrInput');
     const chainIndexSection = document.getElementById('chainIndexSection');
     const chainIndexList = document.getElementById('chainIndexList');
 
-    // --- Mock Data for Demonstration ---
-    // In a real system, this data would come from actual QR content parsing
-    // and potentially fetching from a distributed ledger or GitHub records.
+    // Minimal mock chain data
     const mockChainData = {
-        "QR123456": {
-            id: "QR123456",
-            status: "Active",
-            slot: "S001",
-            owner: "0xABC123DEF456ABC123DEF456ABC123DEF456",
-            hash1: "a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6",
-            hash2: "0xCOMMITMENTHASH1234567890ABCDEFABCDEF",
-            timestamp: "2025-06-12T10:30:00Z",
-            prev_hash: "0xPREVGENESISHASH",
-            type: "Mint",
+        "QRMAPLE000001": {
+            object_type: "qr",
+            object_id: "maple_000_001",
+            status: "active",
+            owner: "0xABCDEF1234567890ABCDEF1234567890ABCDEF12",
+            public_key: "c1b2c3d4e5f6c1b2c3d4e5f6c1b2c3d4e5f6c1b2c3d4e5f6",
+            qr_address: "0x1234567890ABCDEF1234567890ABCDEF12345678",
+            hash: "0xHASH_QRMAPLE000001",
+            prev_hash: "0xHASH_MAPLE000",
+            timestamp: "2025-06-17T12:10:10Z",
+            nonce: "xyz123",
             history: [
-                { event: "Minted", owner: "0xABC123DEF456", timestamp: "2025-06-12T10:30:00Z", hash2: "0xCOMMITMENTHASH1234567890ABCDEFABCDEF" },
+                { event: "mint", owner: "0xABCDEF...", timestamp: "2025-06-17T12:10:10Z", hash: "0xHASH_QRMAPLE000001" }
             ]
         },
-        "QR654321": {
-            id: "QR654321",
-            status: "Transferred",
-            slot: "S002",
-            owner: "0xNEWOWNERPUBKEY7890ABCDEF1234567890",
-            hash1: "f6e5d4c3b2a1f6e5d4c3b2a1f6e5d4c3b2a1",
-            hash2: "0xCOMMITMENTHASHABCDEF9876543210ABCDEF",
-            timestamp: "2025-06-12T11:00:00Z",
-            prev_hash: "0xPREVQR123456HASH2", // Linked to QR123456's hash2 as prev_hash for transfer
-            type: "Transfer",
+        "AGENTMAPLE000": {
+            object_type: "agent",
+            object_id: "maple_000",
+            status: "active",
+            owner: "0xAGENTPUBKEYMAPLE000...",
+            public_key: "b1c2d3e4f5g6...",
+            hash: "0xHASH_MAPLE000",
+            prev_hash: "0xHASH_MASTER",
+            timestamp: "2025-06-16T08:22:22Z",
+            nonce: "def456",
             history: [
-                { event: "Minted", owner: "0xOLDOWNERABC123", timestamp: "2025-06-12T09:00:00Z", hash2: "0xORIGINALHASHXYZ" },
-                { event: "Transferred", owner: "0xNEWOWNERPUBKEY7890ABCDEF1234567890", timestamp: "2025-06-12T11:00:00Z", hash2: "0xCOMMITMENTHASHABCDEF9876543210ABCDEF" }
+                { event: "register", owner: "0xAGENT...", timestamp: "2025-06-16T08:22:22Z", hash: "0xHASH_MAPLE000" }
             ]
         },
-        // Mock data for a QR that leads to a Master Node
-        "MASTERQR001": {
-            id: "MASTERQR001",
-            status: "Master Node",
-            slot: "MSTR001",
-            owner: "0xMASTERPUBKEYXYZABCDEF1234567890",
-            hash1: "m1a2s3t4e5r6m1a2s3t4e5r6m1a2s3t4e5r6",
-            hash2: "0xMASTERCOMMITMENTHASHABCDEF",
-            timestamp: "2025-01-01T00:00:00Z",
-            prev_hash: "0xGENESISHASH",
-            type: "Master Node Registration",
+        "MASTERMAPLE": {
+            object_type: "master",
+            object_id: "MAPLE_000",
+            status: "active",
+            owner: "0xMASTERPUBKEY...",
+            public_key: "d2e3f4g5h6i7...",
+            hash: "0xHASH_MASTER",
+            prev_hash: "0xHASH_GENESIS",
+            timestamp: "2025-06-10T00:00:00Z",
+            nonce: "aaa111",
             history: [
-                { event: "Registered", owner: "0xMASTERPUBKEYXYZABCDEF1234567890", timestamp: "2025-01-01T00:00:00Z", hash2: "0xMASTERCOMMITMENTHASHABCDEF" }
-            ],
-            agent_qrs: [ // Example of linking to child QRs
-                { id: "AGENTQR001", hash2: "0xAGENTHASH001" },
-                { id: "AGENTQR002", hash2: "0xAGENTHASH002" }
+                { event: "register", owner: "0xMASTER...", timestamp: "2025-06-10T00:00:00Z", hash: "0xHASH_MASTER" }
             ]
         }
+        // (เพิ่ม QR/Agent/Master ตามโครงสร้างนี้ได้)
     };
 
-    /**
-     * Simulates parsing QR content or a Commitment Hash to find relevant chain data.
-     * In a real scenario, this would involve complex parsing, decryption, and lookup.
-     * @param {string} input - The QR content (JSON) or Commitment Hash (Hash2).
-     * @returns {object|null} The mock chain data, or null if not found.
-     */
+    // ฟังก์ชันหาข้อมูลจาก mockChainData
     function parseAndRetrieveChainData(input) {
-        input = input.toLowerCase(); // Normalize input for easier matching
+        input = input.trim().toLowerCase();
         for (const key in mockChainData) {
             const data = mockChainData[key];
-            if (data.id.toLowerCase() === input ||
-                data.hash2.toLowerCase() === input ||
-                JSON.stringify(data).toLowerCase().includes(input)) { // Simple check if input is part of data
-                return data;
-            }
-        }
-        // Fallback for simple ID lookup if the full hash or content isn't provided
-        if (input.startsWith("qr")) {
-            const qrId = input.toUpperCase();
-            if (mockChainData[qrId]) {
-                return mockChainData[qrId];
-            }
+            // Matching by object_id, hash, qr_address, public_key
+            if (
+                (data.object_id && data.object_id.toLowerCase() === input) ||
+                (data.hash && data.hash.toLowerCase() === input) ||
+                (data.qr_address && data.qr_address.toLowerCase() === input) ||
+                (data.public_key && data.public_key.toLowerCase() === input)
+            ) return data;
         }
         return null;
     }
 
-    /**
-     * Renders a single chain item in the index.
-     * @param {object} data - The chain data for a single record.
-     * @param {number} level - The nesting level for indentation (for tree view).
-     * @returns {string} HTML string for the list item.
-     */
+    // ฟังก์ชันแสดงรายละเอียดแบบ Minimal ตาม DTC Spec
     function renderChainItem(data, level = 0) {
-        // Basic rendering of details. In a real app, this would be more detailed.
-        const detailHtml = `
-            <div class="chain-detail" style="display:none; padding-left: ${level * 15}px;">
-                <div><strong>Type:</strong> ${data.type || 'N/A'}</div>
-                <div><strong>Slot:</strong> ${data.slot || 'N/A'}</div>
-                <div><strong>Owner:</strong> ${data.owner || 'N/A'}</div>
-                <div><strong>Hash1:</strong> <span class="hash-text">${data.hash1 || 'N/A'}</span></div>
-                <div><strong>Hash2 (Commitment):</strong> <span class="hash-text">${data.hash2 || 'N/A'}</span></div>
-                <div><strong>Timestamp:</strong> ${data.timestamp ? new Date(data.timestamp).toLocaleString() : 'N/A'}</div>
-                <div><strong>Previous Hash:</strong> <span class="hash-text">${data.prev_hash || 'N/A'}</span></div>
-                ${data.history && data.history.length > 0 ?
-                    `<div><strong>History:</strong><ul>` +
-                    data.history.map(h => `<li>${h.event} by ${h.owner.substring(0, 8)}... at ${new Date(h.timestamp).toLocaleString()}</li>`).join('') +
-                    `</ul></div>` : ''
-                }
-                ${data.agent_qrs && data.agent_qrs.length > 0 ?
-                    `<div><strong>Associated QRs:</strong><ul>` +
-                    data.agent_qrs.map(qr => `<li>ID: ${qr.id} (Hash2: ${qr.hash2.substring(0, 10)}...)</li>`).join('') +
-                    `</ul></div>` : ''
-                }
-                <div class="chain-actions">
-                    <button class="btn btn-primary btn-small" onclick="window.location.href='regenerate_qr_hash.html?hash2=${data.hash2}'">Regen This QR</button>
-                    <button class="btn btn-primary btn-small" onclick="window.location.href='transfer_qr.html?hash2=${data.hash2}'">Transfer This QR</button>
-                    <button class="btn btn-primary btn-small" onclick="window.location.href='audit_chain.html?hash2=${data.hash2}'">Audit Full Chain</button>
-                    <button class="btn btn-secondary btn-small" onclick="alert('Export functionality for ${data.id} is coming soon!')">Export Data</button>
-                </div>
-            </div>
-        `;
-
         return `
             <li>
-                <span style="padding-left: ${level * 15}px;">${data.id} (${data.status})</span>
-                <button class="expand-btn">[+]</button>
-                ${detailHtml}
+                <div style="padding-left:${level * 14}px;">
+                    <span style="font-weight:bold;">${data.object_id || data.object_type}</span>
+                    <span style="background:#f3f6fa;border-radius:5px;padding:2px 8px;font-size:0.98em;margin-left:8px;">
+                        ${data.object_type}
+                    </span>
+                    <span style="color:${data.status === 'active' ? '#22c55e' : '#d32f2f'};font-weight:500;margin-left:8px;">
+                        ${data.status}
+                    </span>
+                    <button class="expand-btn" style="margin-left:9px;font-size:0.99em;">[+]</button>
+                </div>
+                <div class="chain-detail" style="display:none;margin-left:${level * 14 + 7}px;padding:7px 0 8px 12px;">
+                    <div><strong>Public Key:</strong> <span class="hash-text">${data.public_key}</span></div>
+                    <div><strong>Owner:</strong> <span class="hash-text">${data.owner}</span></div>
+                    <div><strong>Hash:</strong> <span class="hash-text">${data.hash}</span></div>
+                    <div><strong>Prev Hash:</strong> <span class="hash-text">${data.prev_hash}</span></div>
+                    <div><strong>QR Address:</strong> <span class="hash-text">${data.qr_address || '-'}</span></div>
+                    <div><strong>Timestamp:</strong> ${data.timestamp}</div>
+                    <div><strong>Nonce:</strong> ${data.nonce}</div>
+                    ${data.history && data.history.length > 0 ?
+                        `<div style="margin-top:4px;"><strong>History:</strong><ul style="margin:3px 0 0 15px;">` +
+                        data.history.map(h => `<li>${h.event} at ${new Date(h.timestamp).toLocaleString()}</li>`).join('') +
+                        `</ul></div>` : ''
+                    }
+                    <div class="chain-actions" style="margin-top:5px;">
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='regenerate_qr_hash.html?hash=${data.hash}'">Regen</button>
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='transfer_qr.html?hash=${data.hash}'">Transfer</button>
+                        <button class="btn btn-primary btn-small" onclick="window.location.href='audit_chain.html?hash=${data.hash}'">Audit</button>
+                        <button class="btn btn-secondary btn-small" onclick="alert('Export (Minimal)')">Export</button>
+                    </div>
+                </div>
             </li>
         `;
     }
 
-    /**
-     * Main function to handle the "Expand Chain" action.
-     */
     expandChainBtn.addEventListener('click', () => {
         const inputContent = qrInput.value.trim();
-        chainIndexList.innerHTML = ''; // Clear previous results
-
+        chainIndexList.innerHTML = '';
         if (inputContent) {
             const foundData = parseAndRetrieveChainData(inputContent);
-
             if (foundData) {
                 chainIndexSection.style.display = 'block';
-                // Render the found QR
-                chainIndexList.innerHTML += renderChainItem(foundData);
-
-                // For a more advanced "chain lineage", you'd recursively find prev_hash
-                // For this mockup, we'll just show the direct item.
-                // In a real 'audit-chain.js', it would build the full tree.
-
+                chainIndexList.innerHTML = renderChainItem(foundData);
             } else {
-                alert('No chain data found for the provided input. Please try a different QR Content or Hash.');
+                // ใช้สีแดง/feedback เฉพาะ ไม่ใช้ alert() เด้ง
                 chainIndexSection.style.display = 'none';
+                chainIndexList.innerHTML = `<li style="color:#e74c3c;">Not found. Please check ID/hash/public key.</li>`;
             }
         } else {
-            alert('Please enter QR Content or a Commitment Hash to expand the chain.');
             chainIndexSection.style.display = 'none';
+            chainIndexList.innerHTML = `<li style="color:#e74c3c;">Please enter QR Content or Hash.</li>`;
         }
     });
 
-    // Event listener for expanding/collapsing list items
     chainIndexList.addEventListener('click', (event) => {
         if (event.target.classList.contains('expand-btn')) {
-            const detailDiv = event.target.nextElementSibling;
+            const detailDiv = event.target.parentNode.nextElementSibling;
             if (detailDiv && detailDiv.classList.contains('chain-detail')) {
                 const isHidden = detailDiv.style.display === 'none';
                 detailDiv.style.display = isHidden ? 'block' : 'none';
@@ -174,7 +138,4 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     });
-
-    // We'll leave the 'uploadQrBtn' and 'scanQrBtn' logic in index.html for now
-    // as their implementation would be more complex and require specific browser APIs or libraries.
 });
