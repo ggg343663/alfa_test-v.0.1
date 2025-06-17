@@ -3,254 +3,170 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Audit Chain | DTC: Magic Chain System</title>
+  <title>DTC Audit Chain (v0.7.6.3+)</title>
   <style>
     :root {
-      --color-primary-green: #219150;
-      --color-accent-blue: #2196f3;
-      --color-light-blue: #e3f2fd;
-      --color-light-gray-bg: #f5f7fa;
-      --color-input-bg: #f6faf7;
-      --color-medium-gray: #90a4ae;
-      --color-dark-text: #234;
-      --color-error: #e74c3c;
-      --color-success: #22c55e;
-      --color-border-default: #b0bec5;
-      --color-node-genesis: #fce4ec; --color-node-genesis-border: #e91e63;
-      --color-node-master: #e3f2fd; --color-node-master-border: #2196f3;
-      --color-node-agent: #fffde7; --color-node-agent-border: #ffd600;
-      --color-node-qr: #eafaf0; --color-node-qr-border: #219150;
+      --green: #219150; --blue: #2196f3; --yellow: #ffd600;
+      --gray-bg: #f5f7fa; --gray-in: #f6faf7; --gray-med: #90a4ae;
+      --error: #e74c3c; --success: #22c55e; --border: #b0bec5;
     }
-    body { font-family: Arial, sans-serif; max-width: 700px; margin: 2em auto; padding: 1em; background: var(--color-light-gray-bg); color: var(--color-dark-text);}
-    h1 { text-align: center; color: var(--color-primary-green); margin-bottom: 1.2em; letter-spacing: 0.02em;}
-    h1 small { display: block; font-size: 0.5em; color: var(--color-medium-gray); margin-top: 0.5em;}
-    .intro-section { background: var(--color-light-blue); border-left: 5px solid var(--color-accent-blue); padding: 1.2em; margin-bottom: 2em; border-radius: 8px; box-shadow: 0 2px 7px rgba(0,0,0,0.05); color: var(--color-dark-text); line-height: 1.5; text-align: center; font-size: 0.95em;}
-    .section-block { margin: 1.1em 0; padding: 1.5em; border-radius: 12px; box-shadow: 0 2px 9px rgba(0,0,0,0.05); background: #fff;}
-    .block-title { font-size: 1.07em; font-weight: bold; margin-bottom: 0.9em; padding-bottom: 0.5em; border-bottom: 1px solid rgba(0,0,0,0.1);}
-    .audit-input-block { background: var(--color-input-bg); border-left: 6px solid var(--color-medium-gray); display: flex; flex-direction: column; gap: 15px;}
-    .audit-input-group { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;}
-    .audit-input-group label { flex-shrink: 0; font-weight: bold; color: #666; font-size: 0.95em;}
-    .audit-input-group input { flex-grow: 1; padding: 12px; border: 1px solid var(--color-border-default); border-radius: 8px; font-size: 1em; background: #fff; min-width: 150px; box-sizing: border-box;}
-    .input-feedback-container { position: relative; width: 100%; }
-    .feedback-message { display: flex; align-items: center; font-size: 0.95em; margin-top: 5px; padding-left: 5px;}
-    .feedback-message.error { color: var(--color-error);}
-    .feedback-message.success { color: var(--color-success);}
-    .feedback-message.hint { color: var(--color-medium-gray);}
-    .feedback-icon { width: 16px; height: 16px; margin-right: 5px; flex-shrink: 0;}
-    .input-error-border { border-color: var(--color-error) !important; background-color: rgba(231, 76, 60, 0.05) !important;}
-    .input-success-border { border-color: var(--color-success) !important; background-color: rgba(22, 163, 74, 0.05) !important;}
-    .btn-audit { flex-shrink: 0; padding: 10px 18px; color: #fff; font-weight: bold; border-radius: 8px; font-size: 1em; cursor: pointer; border: none; transition: background 0.13s, filter 0.13s; box-shadow: 0 2px 7px rgba(0,0,0,0.07); background: var(--color-accent-blue); min-width: 80px;}
-    .btn-audit:disabled { filter: grayscale(0.7) opacity(0.55);}
-    .btn-audit:hover { filter: brightness(0.93);}
-    .audit-output-block { background: var(--color-node-qr); border-left: 6px solid var(--color-node-qr-border);}
-    .chain-lineage { margin-top: 15px;}
-    .chain-node { background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; padding: 15px; margin-bottom: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.05);}
-    .chain-node.genesis { background: var(--color-node-genesis); border-color: var(--color-node-genesis-border);}
-    .chain-node.master { background: var(--color-node-master); border-color: var(--color-node-master-border);}
-    .chain-node.agent { background: var(--color-node-agent); border-color: var(--color-node-agent-border);}
-    .chain-node.qr-record { background: var(--color-node-qr); border-color: var(--color-node-qr-border);}
-    .node-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 10px; cursor: pointer;}
-    .node-header .type { font-size: 1.1em; color: var(--color-primary-green);}
-    .node-header .toggle-details { font-size: 1.5em; line-height: 1; transform: rotate(0deg); transition: transform 0.2s;}
-    .node-header .toggle-details.collapsed { transform: rotate(-90deg);}
-    .node-details { display: none; border-top: 1px dashed #eee; padding-top: 10px; margin-top: 10px; font-size: 0.9em; line-height: 1.6;}
-    .node-details.expanded { display: block;}
-    .node-details strong { color: #555; display: inline-block; min-width: 90px;}
-    .hash-text { font-family: 'Courier New', Courier, monospace; word-break: break-all; background: #f7f7f7; padding: 2px 5px; border-radius: 4px; font-size: 0.85em;}
-    .timestamp-small { font-size: 0.8em; color: #607d8b; text-align: right; margin-top: 5px;}
-    .chain-arrow { text-align: center; font-size: 2em; color: #ccc; margin: 5px 0;}
-    .navigation-bar { display: flex; justify-content: space-around; padding: 15px 10px; margin-top: 2em; background: #f0f4f7; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);}
-    .nav-button { flex: 1; padding: 12px 0; margin: 0 5px; background: #ede7f6; color: #666; border: none; border-radius: 8px; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background-color 0.2s, color 0.2s, box-shadow 0.2s;}
-    .nav-button:hover { background: #d7e0f2; color: #333; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-    .footer-note { text-align: center; margin-top: 2.4em; color: #b0bec5; font-size: 0.95em;}
-    @media (max-width: 600px) { body { margin: 0.4em; padding: 0.07em;} .section-block { padding: 0.7em 0.2em;} .audit-input-group { flex-direction: column; align-items: stretch; } .audit-input-group input { width: 100%; min-width: unset; } .btn-audit { width: 100%; margin-top: 10px; } .node-details strong { min-width: 70px; } .navigation-bar { flex-direction: column; } .nav-button { margin: 5px 0; }}
+    body { font-family: Arial,sans-serif; background: var(--gray-bg); margin:0; padding:0; }
+    .container { max-width:540px; margin:2em auto; background:#fff; border-radius:16px; box-shadow:0 2px 15px #dde; padding:2.1em 1.2em 1.7em 1.2em;}
+    h2 { color:var(--green); margin-bottom:1.1em; font-size:1.13em; text-align:center;}
+    .input-section { background: var(--gray-in); border-radius:8px; padding: 1.1em 1em; margin-bottom: 1.5em;}
+    .input-group { display:flex; gap: 0.6em; align-items: center;}
+    .input-group input { flex:1; padding:0.69em 1em; font-size:1.06em; border-radius:8px; border:1.3px solid var(--border); background:#fff;}
+    .btn-main { background: var(--blue); color: #fff; font-weight:600; border: none; border-radius: 8px; font-size:1.06em; min-width: 90px; padding: 0.7em 0.7em; cursor:pointer; }
+    .btn-main:active { background: #174fc1;}
+    .feedback { font-size:0.96em; margin: 0.31em 0 0.12em 0; display:flex; align-items:center;}
+    .feedback.error { color: var(--error);}
+    .feedback.success { color: var(--success);}
+    .icon { width:16px; height:16px; margin-right:5px;}
+    .input-error-border { border-color: var(--error) !important; background: #fef0f0 !important;}
+    .input-success-border { border-color: var(--success) !important; background: #f0fdf7 !important;}
+    .audit-block { margin: 1.4em 0; background: #fafcff; border-radius:9px; box-shadow:0 1px 7px #eef; padding: 1.3em 0.8em;}
+    .audit-node { border-left: 7px solid var(--blue); background: #fff; border-radius:8px; margin-bottom: 1.1em; padding: 1.1em 1em; }
+    .audit-node.genesis { border-color: var(--green);}
+    .audit-node.master { border-color: var(--yellow);}
+    .audit-node.agent { border-color: var(--blue);}
+    .audit-node.qr { border-color: var(--success);}
+    .node-type { font-weight: bold; color: var(--green);}
+    .chain-arrow { text-align:center; color:#bbb; font-size:1.6em;}
+    .k { min-width:96px; color:#333; font-weight:500; display:inline-block;}
+    .v { font-family:monospace; word-break:break-all; color:#256; }
+    .footer { text-align:center; color:#b0bec5; margin-top:2.5em; font-size:0.97em;}
+    @media (max-width:600px) {.container { padding:0.7em 0.12em 1em 0.12em;}}
   </style>
 </head>
 <body>
-  <h1>DTC: Magic Chain System <br><small>Decentralized Trust Community</small></h1>
-
-  <div class="intro-section">
-    <p>This is the <b>Audit Chain</b> page. Enter any <b>Commitment Hash (Hash2)</b> from a DTC QR Code to trace its full lineage back to the <b>Genesis Record</b>.</p>
-    <p>Verify ownership, transaction history, and data integrity on the Decentralized Traceability Chain.</p>
-  </div>
-
-  <div class="section-block audit-input-block">
-    <div class="block-title">Audit Chain Lineage</div>
-    <div class="input-feedback-container">
-      <div class="audit-input-group">
-        <label for="commitmentHashInput">QR / Commitment Hash (Hash2):</label>
-        <input type="text" id="commitmentHashInput" placeholder="Paste Hash2 here (e.g., 0xCOMMITMENT...)" autocomplete="off" />
-        <button class="btn-audit" id="auditChainBtn">Audit</button>
+<div class="container">
+  <h2>DTC Audit Chain (Minimal v0.7.6.3+)</h2>
+  <div class="input-section">
+    <form id="auditForm" autocomplete="off">
+      <div class="input-group">
+        <input type="text" id="hash2input" maxlength="66" placeholder="Enter QR Address (Hash2, 0x...)" />
+        <button type="submit" class="btn-main">Audit</button>
       </div>
-      <div id="hash2Feedback" class="feedback-message error" style="display:none;">
-        <svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-        <span id="hash2FeedbackText"></span>
-      </div>
-    </div>
-    <span class="label-hint">Enter the Hash2 of any QR Code to see its entire audit trail.</span>
+      <div id="feedback" class="feedback"></div>
+    </form>
   </div>
+  <div class="audit-block" id="auditResult" style="display:none;"></div>
+</div>
+<p class="footer">DTC Standard Audit Chain | No slot/secret | Mobile-Friendly | 100% Self-Proof</p>
+<script>
+const demoChain = [
+  // ตัวอย่าง record: genesis, master, agent, qr
+  {
+    object_type: "genesis",
+    object_id: "GENESIS_000",
+    public_key: "3e8ba...f7c1e",
+    to_public_key: "",
+    timestamp: "2024-01-01T00:00:00Z",
+    nonce: "root",
+    prev_hash: "",
+    hash: "0xgenesis1234567890",
+    signature: "sig_genesis"
+  },
+  {
+    object_type: "master",
+    object_id: "MAPLE_000",
+    public_key: "77cde...dc334",
+    to_public_key: "",
+    timestamp: "2024-06-11T14:05:23Z",
+    nonce: "abc12",
+    prev_hash: "0xgenesis1234567890",
+    hash: "0xmaster99998888aabb",
+    signature: "sig_master"
+  },
+  {
+    object_type: "agent",
+    object_id: "maple_000",
+    public_key: "aae3b...e19c5",
+    to_public_key: "",
+    timestamp: "2024-06-17T10:23:45Z",
+    nonce: "r8v3wq12",
+    prev_hash: "0xmaster99998888aabb",
+    hash: "0xagentabcdef123456",
+    signature: "sig_agent"
+  },
+  {
+    object_type: "qr",
+    object_id: "maple_000_017",
+    public_key: "aae3b...e19c5",
+    to_public_key: "",
+    timestamp: "2024-06-17T11:55:13Z",
+    nonce: "qrnonce17",
+    prev_hash: "0xagentabcdef123456",
+    hash: "0xqr17fedcba789012",
+    signature: "sig_qr"
+  }
+];
 
-  <div class="section-block audit-output-block" id="auditResultsSection" style="display:none;">
-    <div class="block-title">Chain Lineage Details</div>
-    <div class="chain-lineage" id="chainLineageDisplay"></div>
-    <p class="timestamp-note" id="auditTimestampNote">Audit performed at: <span id="auditTimestamp"></span></p>
-  </div>
+// Map type to display
+function nodeTypeLabel(t) {
+  if(t==="genesis") return "Genesis";
+  if(t==="master") return "Master";
+  if(t==="agent") return "Agent";
+  if(t==="qr") return "QR";
+  return t;
+}
+function nodeTypeClass(t) {
+  if(t==="genesis") return "genesis";
+  if(t==="master") return "master";
+  if(t==="agent") return "agent";
+  if(t==="qr") return "qr";
+  return "";
+}
 
-  <div class="navigation-bar">
-    <button class="nav-button" onclick="window.history.back()">Back</button>
-    <button class="nav-button" onclick="window.location.href='index.html'">Home</button>
-    <button class="nav-button" onclick="window.location.href='audit_chain.html'">Next</button>
-  </div>
+// Input feedback
+function setFeedback(msg, type="error") {
+  const d = document.getElementById('feedback');
+  d.innerHTML = (type==="success" ? `<span class="icon">✓</span>` : `<span class="icon">!</span>`) + msg;
+  d.className = "feedback " + type;
+  let inp = document.getElementById('hash2input');
+  if(type==="error"){ inp.classList.add('input-error-border'); inp.classList.remove('input-success-border');}
+  else { inp.classList.add('input-success-border'); inp.classList.remove('input-error-border'); }
+}
+function clearFeedback() {
+  document.getElementById('feedback').innerHTML = "";
+  document.getElementById('hash2input').classList.remove('input-error-border','input-success-border');
+}
 
-  <p class="footer-note">
-    Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
-  </p>
-
-  <script>
-    // --- Input Feedback Utility (DTC Standard) ---
-    function showFeedback(elementId, msg, type='error') {
-      const box = document.getElementById(elementId);
-      const text = document.getElementById(elementId+'Text');
-      if (!box || !text) return;
-      box.style.display = 'flex'; text.textContent = msg;
-      box.className = 'feedback-message ' + type;
-      if (type === 'error') {
-        document.getElementById('commitmentHashInput').classList.add('input-error-border');
-        document.getElementById('commitmentHashInput').classList.remove('input-success-border');
-      } else if (type === 'success') {
-        document.getElementById('commitmentHashInput').classList.add('input-success-border');
-        document.getElementById('commitmentHashInput').classList.remove('input-error-border');
-      }
-    }
-    function hideFeedback(elementId) {
-      const box = document.getElementById(elementId);
-      if (box) box.style.display = 'none';
-      document.getElementById('commitmentHashInput').classList.remove('input-error-border','input-success-border');
-    }
-
-    document.addEventListener('DOMContentLoaded', () => {
-      const commitmentHashInput = document.getElementById('commitmentHashInput');
-      const auditChainBtn = document.getElementById('auditChainBtn');
-      const auditResultsSection = document.getElementById('auditResultsSection');
-      const chainLineageDisplay = document.getElementById('chainLineageDisplay');
-      const auditTimestamp = document.getElementById('auditTimestamp');
-      const auditTimestampNote = document.getElementById('auditTimestampNote');
-      const hash2Feedback = document.getElementById('hash2Feedback');
-
-      // Mock chainDB as before...
-      const mockChainDB = [ /* ... same data as before ... */ ];
-
-      // For brevity, use only part of previous mockChainDB (or copy all if needed)
-      // --- Function to Render a Chain Node (same as before) ---
-      function renderChainNode(nodeData, isExpanded = false) {
-        if (!nodeData) return '';
-        let typeClass = '';
-        let nodeTypeDisplay = nodeData.type || 'Unknown Record';
-        switch (nodeData.type) {
-          case 'Genesis Record': typeClass = 'genesis'; nodeTypeDisplay = 'Genesis Record'; break;
-          case 'Master Record': typeClass = 'master'; nodeTypeDisplay = 'Master Record'; break;
-          case 'Agent Record': typeClass = 'agent'; nodeTypeDisplay = 'Agent Record'; break;
-          case 'QR_Batch_Mint': typeClass = 'qr-record'; nodeTypeDisplay = 'QR Mint Record'; break;
-          case 'QR_Regenerate': typeClass = 'qr-record'; nodeTypeDisplay = 'QR Regeneration Record'; break;
-          case 'QR_Transfer': typeClass = 'qr-record'; nodeTypeDisplay = 'QR Transfer Record'; break;
-          case 'QR_Unlock': typeClass = 'qr-record'; nodeTypeDisplay = 'QR Unlock Record'; break;
-          default: typeClass = 'qr-record';
-        }
-        const timestampDisplay = nodeData.meta?.timestamp ? new Date(nodeData.meta.timestamp).toLocaleString() : 'N/A';
-        const detailsClass = isExpanded ? 'expanded' : '';
-        const toggleClass = isExpanded ? '' : 'collapsed';
-        return `
-          <div class="chain-node ${typeClass}" data-hash2="${nodeData.hash2}">
-            <div class="node-header">
-              <span class="type">${nodeTypeDisplay}</span>
-              <span class="toggle-details ${toggleClass}">&#9660;</span>
-            </div>
-            <div class="node-details ${detailsClass}">
-              <p><strong>Owner:</strong> <span class="hash-text">${nodeData.issuerPublicKey || 'N/A'}</span></p>
-              <p><strong>Hash1:</strong> <span class="hash-text">${nodeData.hash1 || 'N/A'}</span></p>
-              <p><strong>Hash2:</strong> <span class="hash-text">${nodeData.hash2 || 'N/A'}</span></p>
-              <p><strong>Prev Hash:</strong> <span class="hash-text">${nodeData.meta?.prev_hash || 'None'}</span></p>
-              <p><strong>Data:</strong> ${nodeData.data || 'N/A'}</p>
-              <p><strong>Timestamp:</strong> ${timestampDisplay}</p>
-              ${nodeData.meta?.batchName ? `<p><strong>Batch Name:</strong> ${nodeData.meta.batchName}</p>` : ''}
-              ${nodeData.meta?.quantity ? `<p><strong>Quantity:</strong> ${nodeData.meta.quantity}</p>` : ''}
-              ${nodeData.meta?.slotId ? `<p><strong>Slot ID:</strong> ${nodeData.meta.slotId}</p>` : ''}
-              ${nodeData.originalIssuerPublicKey && nodeData.type !== 'QR_Batch_Mint' ? `<p><strong>Original Issuer:</strong> <span class="hash-text">${nodeData.originalIssuerPublicKey}</span></p>` : ''}
-              <p><strong>Signature:</strong> <span class="hash-text">${nodeData.signature || 'N/A'}</span></p>
-            </div>
-          </div>
-        `;
-      }
-
-      auditChainBtn.addEventListener('click', () => {
-        const targetHash2 = commitmentHashInput.value.trim();
-        chainLineageDisplay.innerHTML = '';
-        hideFeedback('hash2Feedback');
-        if (!targetHash2) {
-          showFeedback('hash2Feedback', 'Please enter a Hash2 to audit.', 'error');
-          auditResultsSection.style.display = 'none';
-          return;
-        }
-        // Validate format: must start with 0x and be hex+length
-        if (!/^0x[a-fA-F0-9]{16,64}$/.test(targetHash2)) {
-          showFeedback('hash2Feedback', 'Invalid Hash2 format. Must start with 0x and be hex.', 'error');
-          auditResultsSection.style.display = 'none';
-          return;
-        }
-        showFeedback('hash2Feedback', 'Format OK.', 'success');
-        auditResultsSection.style.display = 'block';
-        auditTimestamp.textContent = new Date().toLocaleString();
-        auditTimestampNote.style.display = 'block';
-        let currentHash = targetHash2;
-        const chainHistory = [];
-        const visitedHashes = new Set();
-        while (currentHash && !visitedHashes.has(currentHash)) {
-          visitedHashes.add(currentHash);
-          const currentNode = mockChainDB.find(node => node.hash2 === currentHash);
-          if (currentNode) {
-            chainHistory.push(currentNode);
-            currentHash = currentNode.meta?.prev_hash;
-          } else { break; }
-        }
-        if (chainHistory.length === 0 || (chainHistory.length === 1 && chainHistory[0].hash2 !== targetHash2)) {
-          chainLineageDisplay.innerHTML = '<p style="text-align: center; color: #d32f2f;">No chain found for this Hash2 or invalid hash. Please check the input.</p>';
-          return;
-        }
-        for (let i = chainHistory.length - 1; i >= 0; i--) {
-          const node = chainHistory[i];
-          chainLineageDisplay.innerHTML += renderChainNode(node, i === 0);
-          if (i > 0) { chainLineageDisplay.innerHTML += '<div class="chain-arrow">&#8595;</div>'; }
-        }
-        // Expand/collapse
-        chainLineageDisplay.querySelectorAll('.node-header').forEach(header => {
-          header.addEventListener('click', () => {
-            const details = header.nextElementSibling;
-            const toggleIcon = header.querySelector('.toggle-details');
-            if (details.classList.contains('expanded')) {
-              details.classList.remove('expanded');
-              toggleIcon.classList.add('collapsed');
-            } else {
-              details.classList.add('expanded');
-              toggleIcon.classList.remove('collapsed');
-            }
-          });
-        });
-      });
-
-      // Validate on typing
-      commitmentHashInput.addEventListener('input', () => {
-        const v = commitmentHashInput.value.trim();
-        hideFeedback('hash2Feedback');
-        if (!v) return;
-        if (!/^0x[a-fA-F0-9]{16,64}$/.test(v)) {
-          showFeedback('hash2Feedback', 'Format: 0x + hex (min 16 chars)', 'error');
-        } else {
-          showFeedback('hash2Feedback', 'Format OK.', 'success');
-        }
-      });
-
-      // ... pre-fill and URL param trigger (optional, as before) ...
-    });
-  </script>
+document.getElementById('auditForm').onsubmit = function(e){
+  e.preventDefault();
+  clearFeedback();
+  const v = document.getElementById('hash2input').value.trim();
+  if(!/^0x[a-fA-F0-9]{10,64}$/.test(v)) { setFeedback("Format: 0x + hex, 10-64 chars","error"); return;}
+  // Chain lookup
+  let history = [];
+  let found = demoChain.find(x=>x.hash===v);
+  let loops = 0;
+  while(found && loops<16){
+    history.push(found);
+    if(!found.prev_hash) break;
+    found = demoChain.find(x=>x.hash===found.prev_hash);
+    loops++;
+  }
+  if(history.length===0) { setFeedback("Not found. Try another hash2.","error"); document.getElementById('auditResult').style.display="none"; return;}
+  setFeedback("Valid hash, chain found.","success");
+  let html = "";
+  for(let i=history.length-1; i>=0; i--){
+    let n = history[i];
+    html += `<div class="audit-node ${nodeTypeClass(n.object_type)}">
+      <div class="node-type">${nodeTypeLabel(n.object_type)}</div>
+      <div><span class="k">Object ID:</span> <span class="v">${n.object_id}</span></div>
+      <div><span class="k">Public Key:</span> <span class="v">${n.public_key}</span></div>
+      <div><span class="k">Prev Hash:</span> <span class="v">${n.prev_hash||"-"}</span></div>
+      <div><span class="k">Timestamp:</span> <span class="v">${n.timestamp}</span></div>
+      <div><span class="k">Nonce:</span> <span class="v">${n.nonce}</span></div>
+      <div><span class="k">Hash (QR Addr):</span> <span class="v">${n.hash}</span></div>
+      <div><span class="k">Signature:</span> <span class="v">${n.signature}</span></div>
+    </div>`;
+    if(i>0) html += `<div class="chain-arrow">&#8595;</div>`;
+  }
+  document.getElementById('auditResult').innerHTML = html;
+  document.getElementById('auditResult').style.display = "block";
+};
+</script>
 </body>
 </html>
