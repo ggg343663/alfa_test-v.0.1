@@ -1,548 +1,236 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Register Agent | DTC</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    /* CSS Variables for consistent theming */
-    :root {
-      --color-primary-green: #219150;
-      --color-dark-green: #176d38;
-      --color-accent-blue: #2196f3;
-      --color-light-blue: #e3f2fd;
-      --color-yellow: #ffd600;
-      --color-light-yellow: #fffde7; /* for sensitive inputs */
-      --color-light-gray-bg: #f5f7fa; /* general background */
-      --color-input-bg: #f6faf7; /* input background */
-      --color-medium-gray: #90a4ae;
-      --color-dark-text: #234;
-      --color-error: #e74c3c;
-      --color-success: #22c55e;
-      --color-nav-purple: #512da8;
-      --color-nav-light-purple: #ede7f6;
-      --color-border-default: #b0bec5;
-      --color-modal-shadow: rgba(33,145,80,0.19);
-    }
-
-    body { font-family: Arial,sans-serif; background: var(--color-light-gray-bg); margin:0; padding:0;}
-    .container {
-      max-width: 470px; margin:2em auto; background:#fff;
-      padding:2.3em 1.1em 2em 1.1em; border-radius:15px;
-      box-shadow:0 2px 16px rgba(144, 202, 249, 0.2);
-    }
-    h2 { color:var(--color-primary-green); text-align:center; margin-bottom:1.3em; font-size:1.18em;}
-    .section { margin-bottom: 1.2em; }
-
-    /* Input container with feedback */
+  <meta charset="UTF-8" />
+  <title>Register Agent | DTC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --green: #219150;
+      --blue: #2196f3;
+      --yellow: #ffd600;
+      --yellow-bg: #fffde7;
+      --gray-bg: #f5f7fa;
+      --gray-input: #f6faf7;
+      --gray-med: #90a4ae;
+      --error: #e74c3c;
+      --success: #22c55e;
+      --border: #b0bec5;
+    }
+    body { font-family: Arial,sans-serif; background: var(--gray-bg); margin:0; padding:0;}
+    .container { max-width: 470px; margin:2em auto; background:#fff; padding:2.3em 1.1em 2em 1.1em; border-radius:15px; box-shadow:0 2px 16px rgba(144,202,249,0.2);}
+    h2 { color:var(--green); text-align:center; margin-bottom:1.3em; font-size:1.18em;}
+    .section { margin-bottom: 1.2em; }
     .input-feedback-container { position: relative; margin-bottom: 0.8em; }
-    .input-with-feedback { margin-bottom: 0.1em; } /* Adjust margin for feedback row */
-
-    input, textarea {
-      width: 100%; min-height: 38px; max-height: 44px;
-      font-size: 1.07em; border-radius: 8px;
-      border: 1.4px solid var(--color-border-default);
-      padding: 0.7em 1em; background: var(--color-input-bg);
-      transition: border .2s, background .2s; box-sizing: border-box;
-    }
-    input:focus, textarea:focus { border-color: var(--color-accent-blue); background: #fff; }
-    textarea { min-height:3.2em; max-height: 6em; resize:vertical;}
-
-    /* Specific input styles */
-    .security-input { background: var(--color-light-yellow) !important; border-color: var(--color-yellow) !important; }
-    .security-input:focus { border-color: var(--color-yellow) !important; background: #fff !important; }
-
-    /* Feedback message styling */
-    .feedback-message {
-        display: flex; align-items: center; font-size: 0.95em; margin-top: 0.2em;
-        padding-left: 0.2em; /* Align text with input */
+    input, textarea {
+      width: 100%; font-size: 1.07em; border-radius: 8px;
+      border: 1.4px solid var(--border); padding: 0.7em 1em;
+      background: var(--gray-input); transition: border .2s, background .2s; box-sizing: border-box;
     }
-    .feedback-message.error { color: var(--color-error); }
-    .feedback-message.success { color: var(--color-success); }
-    .feedback-message.hint { color: var(--color-medium-gray); }
-    .feedback-icon {
-        width: 16px; height: 16px; margin-right: 5px; flex-shrink: 0;
+    input:focus, textarea:focus { border-color: var(--blue); background: #fff; }
+    textarea { min-height:3.2em; max-height: 6em; resize:vertical;}
+    .security-input { background: var(--yellow-bg) !important; border-color: var(--yellow) !important; }
+    .security-input:focus { border-color: var(--yellow) !important; background: #fff !important; }
+    .feedback-message { display: flex; align-items: center; font-size: 0.95em; margin-top: 0.2em; color: var(--gray-med);}
+    .feedback-message.error { color: var(--error);}
+    .feedback-message.success { color: var(--success);}
+    .feedback-icon { width: 16px; height: 16px; margin-right: 5px;}
+    .input-error-border { border-color: var(--error) !important; background-color: rgba(231, 76, 60, 0.05) !important; }
+    .input-success-border { border-color: var(--success) !important; background-color: rgba(22,163,74,0.05) !important; }
+    .btn-main, .btn-action, .btn-export, .btn-nav {
+      width:100%; font-size:1.11em; border-radius:8px; border:none; font-weight:bold; min-height:44px;
+      margin-top: 0.6em; padding: 0.8em 0; cursor: pointer; transition: background .18s, color .18s;
     }
-
-    /* Input border feedback */
-    .input-error-border { border-color: var(--color-error) !important; background-color: rgba(231, 76, 60, 0.05) !important; }
-    .input-success-border { border-color: var(--color-success) !important; background-color: rgba(22, 163, 74, 0.05) !important; }
-
-
-    .btn-main, .btn-action, .btn-export, .btn-nav {
-      width:100%; font-size:1.11em; border-radius:8px; border:none; font-weight:bold; min-height:44px;
-      margin-top: 0.6em; padding: 0.8em 0; cursor: pointer; transition: background .18s, color .18s;
-    }
-    .btn-main {
-      background: var(--color-primary-green);
-      color: #fff;
-    }
-    .btn-main:active { background: var(--color-dark-green);}
-
-    .btn-action { /* For Random button */
-        background: var(--color-accent-blue); /* Changed from old light blue */
-        color: #fff;
+    .btn-main { background: var(--green); color: #fff;}
+    .btn-main:active { background: #176d38;}
+    .btn-action { background: var(--blue); color: #fff;}
+    .btn-action:active { background: #173472;}
+    .btn-export { background: var(--yellow); color: #234;}
+    .btn-export.blue { background: var(--blue); color: #fff;}
+    .output-box {
+      background: #fafdff; border-radius: 8px; border: 1.2px solid #cfd8dc;
+      padding: 0.7em 0.9em; margin-bottom: 0.9em; font-size: 1em; min-height: 38px;
+      word-break: break-all; overflow-x: auto;
     }
-    .btn-action:active { background: #173472;} /* Darker blue on active */
-
-    /* Export Buttons */
-    .btn-export { background: var(--color-yellow); color: var(--color-dark-text);}
-    .btn-export.blue { background: var(--color-accent-blue); color: #fff; }
-    .btn-export.light-blue { background: var(--color-light-blue); color: var(--color-accent-blue); }
-    .btn-export:active { background: #ffb300;}
-
-    .output-box {
-      background: #fafdff; border-radius: 8px; border: 1.2px solid #cfd8dc;
-      padding: 0.7em 0.9em; margin-bottom: 0.9em; font-size: 1em; min-height: 38px;
-      word-break: break-all; overflow-x: auto;
-    }
-    /* Removed .warn specific styling, will use feedback-message.error */
-    /* Removed .success specific styling for text, will use feedback-message.success */
-    .step-label { margin:0.97em 0 0.24em 0; font-weight:bold; color:var(--color-primary-green); font-size:1.02em; }
-    .step-label.disabled { opacity:0.38; font-weight:500;}
-
-    .copy-btn { background:none; border:none; color:var(--color-accent-blue); cursor:pointer; font-weight:600; font-size:1em; }
-    .copy-success { color:var(--color-success); font-size:0.97em; margin-left:0.33em;}
-
-    .nav-bar { display: flex; gap: 0.7em; margin-top: 2.1em;}
-    .btn-nav { flex: 1; background: var(--color-nav-light-purple); color: var(--color-nav-purple);}
-    .btn-nav:active { background: #b39ddb;}
-    .btn-nav.home { background: var(--color-medium-gray); color: #fff; }
-    .btn-nav.next { background: var(--color-accent-blue); color: #fff; }
-
-
-    /* Modal Confirm */
-    .modal-overlay { display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.38); z-index: 99; justify-content: center; align-items: center;}
-    .modal-content {
-      background: #fff; border-radius: 13px; padding: 2em 1.3em 1.3em 1.3em; max-width: 400px; margin: 0 auto;
-      box-shadow: 0 8px 32px var(--color-modal-shadow), 0 2px 8px rgba(54,216,109,0.05); /* Adjusted shadow */
-      text-align: center; position: relative;
-    }
-    .modal-content h3 { margin: 0 0 1em 0; color: var(--color-primary-green); font-size: 1.17em; }
-    .modal-preview-list {
-      text-align: left; margin: 0 0 1.5em 0; font-size: 1.03em; color: var(--color-dark-text);
-      background: var(--color-light-gray-bg); border-radius: 7px; padding: 1em;
-      border-left: 5px solid var(--color-primary-green);
-    }
-    .btn-confirm { background: var(--color-primary-green); color: #fff; }
-    .btn-confirm:hover { filter: brightness(0.96);}
-    .btn-cancel { background: var(--color-medium-gray); color: #fff; }
-    .btn-cancel:hover { background: #90a4ae;}
-
-    @media (max-width:600px) {
-      .container { padding:1.1em 0.22em 1em 0.22em;}
-      .nav-bar { flex-direction: column; gap:0.4em;}
-      h2 { font-size:1.13em;}
-      .modal-content { padding: 1em 0.3em 1em 0.3em; }
-    }
-  </style>
+    .step-label { margin:0.97em 0 0.24em 0; font-weight:bold; color:var(--green); font-size:1.02em;}
+    .copy-btn { background:none; border:none; color:var(--blue); cursor:pointer; font-weight:600; font-size:1em; }
+    .copy-success { color:var(--success); font-size:0.97em; margin-left:0.33em;}
+    .nav-bar { display: flex; gap: 0.7em; margin-top: 2.1em;}
+    .btn-nav { flex: 1; background: #ede7f6; color: #512da8;}
+    .btn-nav:active { background: #b39ddb;}
+    .btn-nav.home { background: var(--gray-med); color: #fff; }
+    .btn-nav.next { background: var(--blue); color: #fff;}
+    @media (max-width:600px) {.container { padding:1.1em 0.22em 1em 0.22em;} .nav-bar { flex-direction: column; gap:0.4em;}}
+  </style>
 </head>
 <body>
 <div class="container">
-  <h2>Register Agent<br>(Dual Sign, DTC v.0.7.5.1)</h2>
+  <h2>Register Agent<br>(DTC v.0.7.6.3+ Minimal)</h2>
 
-    <div class="section input-section">
-    <div class="step-label">Step 1: Master creates Agent slot</div>
-    
+  <div class="section input-section">
+    <div class="step-label">Step 1: Master creates Agent</div>
     <div class="input-feedback-container">
-        <input type="text" id="agentName" maxlength="16" autocomplete="off" placeholder="Agent Name (a-z, 0-9, max 16 chars)">
-        <div class="feedback-message hint">No inappropriate words. Lowercase & numbers only.</div>
-        <div id="agentNameFeedback" class="feedback-message error" style="display:none;">
-            <svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <span id="agentNameFeedbackText"></span>
-        </div>
+      <input type="text" id="agentName" maxlength="16" autocomplete="off" placeholder="Agent Name (a-z, 0-9, max 16)">
+      <div class="feedback-message" id="agentNameHint"><span class="feedback-icon"></span>lowercase, number only</div>
     </div>
-
     <div class="input-feedback-container">
-        <input type="text" id="agentPubKey" maxlength="64" autocomplete="off" placeholder="Agent Public Key (SHA256 hex)">
-        <div id="agentPubKeyFeedback" class="feedback-message error" style="display:none;">
-            <svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <span id="agentPubKeyFeedbackText"></span>
-        </div>
+      <input type="text" id="agentPubKey" maxlength="64" autocomplete="off" placeholder="Agent Public Key (SHA256 hex)">
+      <div class="feedback-message" id="agentPubKeyHint"></div>
     </div>
-
-    <div class="input-feedback-container" style="display:flex; gap:7px;">
-      <input type="text" id="nonce" maxlength="20" autocomplete="off" placeholder="Nonce (random string)" style="flex:1;" />
-      <button type="button" onclick="randomNonce()" class="btn-action" style="flex:0.7;">Random</button>
-        <div id="nonceFeedback" class="feedback-message error" style="display:none; position:absolute; bottom:-25px; left:0; width:100%;">
-            <svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <span id="nonceFeedbackText"></span>
-        </div>
-    </div>
-    <button class="btn-main" type="button" id="previewBtn">Create Agent Slot</button>
-  </div>
-
-    <div class="section" id="section-sign" style="display:none;">
-    <div class="step-label">Step 2: Agent confirms and signs</div>
-    <div class="input-hint">Copy payload & sign with Agent password+PIN</div>
-    <textarea id="agentPayload" readonly class="output-box" placeholder="Agent Payload for Signing"></textarea>
-    <button class="copy-btn" onclick="copyAgentPayload()">Copy Payload
-        <span id="copyAgentPayloadSuccess" class="copy-success" style="display:none;">✓ Copied!</span>
-    </button>
-    
-    <div class="input-feedback-container" style="margin-top:0.6em;">
-        <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" class="security-input" placeholder="Agent Password (6-12 chars, alpha+num)">
-        <div id="agentPwFeedback" class="feedback-message error" style="display:none;">
-            <svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <span id="agentPwFeedbackText"></span>
-        </div>
+    <div class="input-feedback-container" style="display:flex; gap:7px;">
+      <input type="text" id="nonce" maxlength="20" autocomplete="off" placeholder="Nonce (random string)" style="flex:1;" />
+      <button type="button" onclick="randomNonce()" class="btn-action" style="flex:0.7;">Random</button>
+      <div class="feedback-message" id="nonceHint"></div>
     </div>
+    <button class="btn-main" type="button" id="previewBtn">Preview Agent</button>
+  </div>
 
-    <div class="input-feedback-container">
-        <input type="password" id="agentPin" maxlength="4" pattern="\d{4}" autocomplete="new-password" class="security-input" placeholder="Agent PIN (4 digits)">
-        <div id="agentPinFeedback" class="feedback-message error" style="display:none;">
-            <svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-            <span id="agentPinFeedbackText"></span>
-        </div>
+  <div class="section" id="section-sign" style="display:none;">
+    <div class="step-label">Step 2: Agent Sign</div>
+    <textarea id="agentPayload" readonly class="output-box" placeholder="Payload for Signing"></textarea>
+    <button class="copy-btn" onclick="copyAgentPayload()">Copy Payload <span id="copyAgentPayloadSuccess" class="copy-success" style="display:none;">✓</span></button>
+    <div class="input-feedback-container" style="margin-top:0.6em;">
+      <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" class="security-input" placeholder="Agent Password (8+ chars)">
     </div>
-
-    <button class="btn-main" type="button" onclick="signAgent()">Agent Sign</button>
-    <div class="output-box" id="sigResult" style="display:none;"></div>
-    <div id="sigResultFeedback" class="feedback-message success" style="display:none;">
-        <svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
-        <span id="sigResultFeedbackText"></span>
+    <div class="input-feedback-container">
+      <input type="password" id="agentPin" maxlength="6" pattern="\d{6}" autocomplete="new-password" class="security-input" placeholder="Agent PIN (6 digits)">
     </div>
+    <button class="btn-main" type="button" onclick="signAgent()">Agent Sign</button>
+    <div class="output-box" id="sigResult" style="display:none;"></div>
+    <button class="btn-export blue" type="button" onclick="exportLog()">Export Log (JSON)</button>
+    <span id="exportSuccess" class="copy-success" style="display:none;">✓ Exported!</span>
+  </div>
 
-    <button class="btn-export blue" type="button" onclick="exportLog()">Export Log (JSON)</button>
-    <span id="exportSuccess" class="copy-success" style="display:none;">✓ Exported!</span>
-  </div>
-
-  <div class="nav-bar">
-    <button class="btn-nav" onclick="location.href='index.html'">Back</button>
-    <button class="btn-nav home" onclick="location.href='index.html'">Home</button>
-    <button class="btn-nav next" onclick="alert('Next coming soon!')">Next</button>
-  </div>
+  <div class="nav-bar">
+    <button class="btn-nav" onclick="location.href='index.html'">Back</button>
+    <button class="btn-nav home" onclick="location.href='index.html'">Home</button>
+    <button class="btn-nav next" onclick="alert('Next coming soon!')">Next</button>
+  </div>
 </div>
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal-content">
-    <h3>Preview Agent Registration</h3>
-    <div class="modal-preview-list" id="previewList"></div>
-    <button class="btn-confirm" id="confirmBtn">Confirm & Register</button>
-    <button class="btn-cancel" id="cancelBtn">Cancel</button>
-  </div>
-</div>
 <script>
-  let lastTimestamp = "";
-  function randomNonce() {
-    const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-    let s = "";
-    for (let i=0;i<16;i++) s += chars[Math.floor(Math.random()*chars.length)];
-    document.getElementById('nonce').value = s;
-  }
-  randomNonce();
+function randomNonce() {
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
+  let s = "";
+  for (let i=0;i<16;i++) s += chars[Math.floor(Math.random()*chars.length)];
+  document.getElementById('nonce').value = s;
+}
+randomNonce();
 
-  // --- Feedback Functions (New) ---
-  // SVG icons for feedback messages
-  const ICONS = {
-    error: '<svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>',
-    success: '<svg class="feedback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>'
+function showHint(id, msg, type) {
+  let d = document.getElementById(id);
+  if (type === "error") {
+    d.style.color = "#e74c3c";
+    d.innerHTML = `<span class="feedback-icon">!</span>${msg}`;
+  } else if (type === "success") {
+    d.style.color = "#22c55e";
+    d.innerHTML = `<span class="feedback-icon">✓</span>${msg}`;
+  } else {
+    d.style.color = "#90a4ae";
+    d.innerHTML = msg;
+  }
+}
+
+// Validation
+function validateAgentName(v) {
+  if (!/^[a-z0-9]{1,16}$/.test(v)) throw "Invalid agent name";
+}
+function validatePubKey(k) {
+  if (!/^[0-9a-fA-F]{64}$/.test(k)) throw "Invalid pubkey";
+}
+function validateNonce(n) {
+  if (!n) throw "Empty nonce";
+}
+function validatePassword(pw) {
+  if (pw.length < 8) throw "Password must be at least 8 chars";
+  if (!/[a-zA-Z]/.test(pw)) throw "Password needs letter";
+  if (!/\d/.test(pw)) throw "Password needs digit";
+}
+function validatePin(pin) {
+  if (pin.length !== 6 || !/^\d+$/.test(pin)) throw "6 digits only";
+}
+
+// Preview Logic (Step 1)
+document.getElementById('previewBtn').onclick = function() {
+  let name = document.getElementById('agentName').value.trim();
+  let pubkey = document.getElementById('agentPubKey').value.trim();
+  let nonce = document.getElementById('nonce').value.trim();
+  // Clear feedback
+  showHint('agentNameHint', 'lowercase, number only');
+  showHint('agentPubKeyHint', '');
+  showHint('nonceHint', '');
+  // Validate
+  try { validateAgentName(name); showHint('agentNameHint', "OK", "success"); } catch(e) { showHint('agentNameHint', e, "error"); return; }
+  try { validatePubKey(pubkey); showHint('agentPubKeyHint', "OK", "success"); } catch(e) { showHint('agentPubKeyHint', e, "error"); return; }
+  try { validateNonce(nonce); showHint('nonceHint', "OK", "success"); } catch(e) { showHint('nonceHint', e, "error"); return; }
+
+  // Generate payload (ตรงตาม DTC)
+  let lastTimestamp = new Date().toISOString();
+  let prev_hash = "abcdef..."; // ปกติคือ master_hash ที่สร้าง agent นี้ (ต้องใส่จริง)
+  let payload = prev_hash + "agent" + name + pubkey + "" + lastTimestamp + nonce;
+  window.agent_hash_data = {
+    prev_hash: prev_hash,
+    object_type: "agent",
+    object_id: name,
+    public_key: pubkey,
+    to_public_key: "",
+    timestamp: lastTimestamp,
+    nonce: nonce
   };
+  window.agent_hash_to_sign = payload;
+  // Show next step
+  document.getElementById('section-sign').style.display = "block";
+  document.getElementById('agentPayload').value = payload;
+  document.getElementById('sigResult').style.display = "none";
+  document.getElementById('exportSuccess').style.display = "none";
+}
 
-  function showFeedback(inputElementId, message, type = 'error') {
-      const inputElement = document.getElementById(inputElementId);
-      const container = inputElement.closest('.input-feedback-container');
-      const feedbackMessageDiv = container.querySelector('.feedback-message');
-      const feedbackTextSpan = feedbackMessageDiv.querySelector('span');
-      const feedbackIconSvg = feedbackMessageDiv.querySelector('svg');
+// Agent Sign Logic (Step 2)
+async function signAgent() {
+  let pw = document.getElementById('agentPw').value.trim();
+  let pin = document.getElementById('agentPin').value.trim();
+  try { validatePassword(pw); } catch(e) { alert(e); return;}
+  try { validatePin(pin); } catch(e) { alert(e); return;}
+  let priv = await sha256(pw) + await sha256(pin);
+  let sig = await sha256(priv + window.agent_hash_to_sign);
+  let hash = await sha256(window.agent_hash_to_sign);
+  let res = {
+    ...window.agent_hash_data,
+    hash: hash,
+    signature: sig
+  };
+  document.getElementById('sigResult').style.display = "block";
+  document.getElementById('sigResult').innerHTML = "<b>Agent Registration Complete</b><br><pre>"+JSON.stringify(res,null,2)+"</pre>";
+  window.lastExportObj = res;
+}
 
-      feedbackMessageDiv.style.display = 'flex'; // Show the feedback message div
-      feedbackTextSpan.textContent = message;
-      feedbackIconSvg.innerHTML = ICONS[type]; // Set the icon based on type
+// SHA256 (browser)
+async function sha256(s) {
+  let b = new TextEncoder().encode(s);
+  let h = await crypto.subtle.digest("SHA-256", b);
+  return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,"0")).join("");
+}
 
-      // Apply border styling to the input element
-      if (type === 'error') {
-          inputElement.classList.add('input-error-border');
-          inputElement.classList.remove('input-success-border');
-          feedbackMessageDiv.classList.add('error');
-          feedbackMessageDiv.classList.remove('success');
-      } else if (type === 'success') {
-          inputElement.classList.add('input-success-border');
-          inputElement.classList.remove('input-error-border');
-          feedbackMessageDiv.classList.add('success');
-          feedbackMessageDiv.classList.remove('error');
-      }
-  }
-
-  function hideFeedback(inputElementId) {
-      const inputElement = document.getElementById(inputElementId);
-      const container = inputElement.closest('.input-feedback-container');
-      const feedbackMessageDiv = container.querySelector('.feedback-message');
-      
-      feedbackMessageDiv.style.display = 'none'; // Hide the feedback message div
-      inputElement.classList.remove('input-error-border', 'input-success-border'); // Remove border styling
-      feedbackMessageDiv.classList.remove('error', 'success'); // Remove feedback type classes
-  }
-  
-  // --- Validation Functions (from utils_validation.js equivalent) ---
-  function validatePasswordJs(password) {
-      if (!(password.length >= 6 && password.length <= 12)) {
-          throw new Error("6-12 chars, alpha+num.");
-      }
-      if (!(/[a-zA-Z]/.test(password))) {
-          throw new Error("Must contain letter.");
-      }
-      if (!(/\d/.test(password))) {
-          throw new Error("Must contain digit.");
-      }
-      return true;
-  }
-
-  function validatePinJs(pin) {
-      if (!(pin.length === 4 && /^\d+$/.test(pin))) {
-          throw new Error("4 digits only.");
-      }
-      return true;
-  }
-
-
-  // --- Badwords warn (existing logic, adapted to new feedback system) ---
-  let badwords = {};
-  let flatBadwords = [];
-  let badwordsReady = false, badwordsError = false;
-  fetch('badwords.json').then(r=>r.json()).then(list=>{
-      badwords=list;
-      flatBadwords = Object.values(list).flat().map(x=>x.toLowerCase());
-      badwordsReady = true;
-    }).catch(()=>{
-      badwordsReady = false; badwordsError = true;
-      showFeedback('agentName', "Could not load badwords list. Contact admin.", 'error'); // Use new feedback
-    });
-  function findBadwords(str) {
-    if (!badwordsReady || !str) return [];
-    const s = str.toLowerCase();
-    return flatBadwords.filter(w => w && s.includes(w));
-  }
-  document.getElementById('agentName').addEventListener('input', function(){
-    hideFeedback('agentName'); // Clear previous feedback
-    const v = this.value.trim().toLowerCase();
-    const found = findBadwords(v);
-    if (badwordsError) {
-        showFeedback('agentName', "Cannot verify inappropriate words. Contact admin.", 'error');
-    } else if (found.length) {
-        showFeedback('agentName', "Contains bad word(s). Please reconsider.", 'error'); // Shorten message
-    } else {
-      hideFeedback('agentName');
-    }
-  });
-
-  // --- Step 1: Master Create with Modal Preview
-  const previewBtn = document.getElementById('previewBtn');
-  const modal = document.getElementById('modalOverlay');
-  const previewList = document.getElementById('previewList');
-  const confirmBtn = document.getElementById('confirmBtn');
-  const cancelBtn = document.getElementById('cancelBtn');
-  previewBtn.addEventListener('click', () => {
-    // Validate
-    const name = document.getElementById('agentName').value.trim();
-    const pubkey = document.getElementById('agentPubKey').value.trim();
-    const nonce = document.getElementById('nonce').value.trim();
-    
-    // Clear all previous feedbacks
-    hideFeedback('agentName');
-    hideFeedback('agentPubKey');
-    hideFeedback('nonce');
-
-    // Basic Validations
-    if (badwordsReady && findBadwords(name).length) {
-      showFeedback('agentName', "Name contains inappropriate words.", 'error');
-      return;
-    }
-    if (badwordsError) {
-        showFeedback('agentName', "Cannot verify bad words. Contact admin.", 'error');
-      return;
-    }
-    if (!name || !/^[a-z0-9]{1,16}$/.test(name)) {
-        showFeedback('agentName', "Invalid name (a-z, 0-9, max 16 chars).", 'error');
-        return;
-    }
-    if (!pubkey || pubkey.length !== 64 || !/^[0-9a-fA-F]{64}$/.test(pubkey)) { // Assuming pubkey is a 64-char hex
-        showFeedback('agentPubKey', "Invalid public key (64 hex chars).", 'error');
-        return;
-    }
-    if (!nonce || nonce.length < 1) { // Assuming nonce can be flexible length but not empty
-        showFeedback('nonce', "Nonce cannot be empty.", 'error');
-        return;
-    }
-    
-    // If all validations pass, proceed to show modal
-    showFeedback('agentName', "Name OK.", 'success');
-    showFeedback('agentPubKey', "Public Key OK.", 'success');
-    showFeedback('nonce', "Nonce OK.", 'success');
-
-
-    lastTimestamp = new Date().toISOString();
-    const master_hash = "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890"; // demo only, replace by real hash
-    const agent_hash_str = `${master_hash}:${pubkey}:${name}:${nonce}:${lastTimestamp}`; // This is a simplified payload for demo
-
-    // Assuming the full raw string for signing (as per DTC logic) would be:
-    // raw = prev_hash + object_type + object_id + public_key + to_public_key + timestamp + nonce
-    // For Agent registration:
-    // prev_hash = master_hash
-    // object_type = "agent"
-    // object_id = agent_name (as per Agent Naming Standard: maple_000)
-    // public_key = agent_pubkey
-    // to_public_key = "" (as no transfer/delegate here)
-    // timestamp = lastTimestamp
-    // nonce = nonce
-    const actual_payload_for_signing = `${master_hash}agent${name}${pubkey} ${lastTimestamp}${nonce}`; // Using space for "" to match universal hash string concatenation for demo. In real impl, check your sha256_string utility if it handles empty strings directly or requires concatenation of ' '.
-
-    window.agent_hash_data = {
-        prev_hash: master_hash,
-        object_type: "agent",
-        object_id: name, // Agent name as object_id
-        public_key: pubkey,
-        to_public_key: "", // Agent registration is not a transfer
-        timestamp: lastTimestamp,
-        nonce: nonce
-    };
-    window.agent_hash_to_sign = actual_payload_for_signing; // This is the string that will be hashed and signed.
-
-    // Show preview modal
-    previewList.innerHTML = `
-      <b>Agent Name:</b> <code>${name}</code><br>
-      <b>Agent Public Key:</b> <code>${pubkey}</code><br>
-      <b>Nonce:</b> <code>${nonce}</code><br>
-      <b>Timestamp:</b> ${lastTimestamp}<br>
-      <b>Master Hash:</b> <code>${master_hash}</code>
-    `;
-    modal.style.display = "flex";
-  });
-  confirmBtn.addEventListener('click', () => {
-    modal.style.display = "none";
-    document.getElementById('section-sign').style.display = "block";
-    document.getElementById('agentPayload').value = window.agent_hash_to_sign;
-    document.getElementById('sigResult').style.display = "none";
-    document.getElementById('exportSuccess').style.display = "none"; // Hide export success message
-    hideFeedback('sigResultFeedback'); // Hide previous sign result feedback
-  });
-  cancelBtn.addEventListener('click', ()=>{ modal.style.display = "none"; });
-  document.addEventListener('keydown', (e) => {
-    if (modal.style.display === "flex" && (e.key === "Escape" || e.key === "Esc")) modal.style.display = "none";
-  });
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) modal.style.display = "none";
-  });
-
-  // --- PBKDF2 derive (browser) (existing logic) ---
-  async function pbkdf2_sha256(password, pin) {
-    const enc = new TextEncoder();
-    const key = await window.crypto.subtle.importKey("raw", enc.encode(password+"|"+pin), "PBKDF2", false, ["deriveBits"]);
-    const bits = await window.crypto.subtle.deriveBits(
-      {name:"PBKDF2",salt:enc.encode("DTC-KEY-SALT"),iterations:100000,hash:"SHA-256"}, key, 256);
-    return Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2,"0")).join("");
-  }
-  async function hmac_sha256(keyHex, msg) {
-    const enc = new TextEncoder();
-    const key = await window.crypto.subtle.importKey("raw", hex2buf(keyHex), {name:"HMAC",hash:"SHA-256"}, false, ["sign"]);
-    const sig = await window.crypto.subtle.sign("HMAC", key, enc.encode(msg));
-    return Array.from(new Uint8Array(sig)).map(b=>b.toString(16).padStart(2,"0")).join("");
-  }
-  function hex2buf(hex){return new Uint8Array(hex.match(/../g).map(x=>parseInt(x,16)));}
-
-  // --- Step 2: Agent Sign
-  async function signAgent() {
-    const pw = document.getElementById('agentPw').value.trim();
-    const pin = document.getElementById('agentPin').value.trim();
-    
-    // Clear previous feedbacks
-    hideFeedback('agentPw');
-    hideFeedback('agentPin');
-
-    // Validation
-    try {
-        validatePasswordJs(pw);
-    } catch (e) {
-        showFeedback('agentPw', e.message, 'error');
-        return;
-    }
-    try {
-        validatePinJs(pin);
-    } catch (e) {
-        showFeedback('agentPin', e.message, 'error');
-        return;
-    }
-
-    // Indicate loading state
-    const signButton = document.querySelector('button[onclick="signAgent()"]');
-    signButton.disabled = true; // Disable button during processing
-    signButton.textContent = 'Signing...'; // Change button text (optional, but good UX)
-    // You might also show a spinner here if desired.
-
-    const priv = await pbkdf2_sha256(pw, pin);
-    const sig = await hmac_sha256(priv, window.agent_hash_to_sign);
-    window.agent_hash = sig; // This is the signature of the agent registration payload.
-
-    const finalResultHash = sha256_string_js(window.agent_hash_to_sign); // Recompute final hash (assuming SHA256)
-    // The previous code had window.agent_hash_data.sig_agent = sig, but sig is the signature, not the final hash of the record.
-    // The final hash of the agent record should be computed from the full payload (master_hash + object_type + object_id + public_key + to_public_key + timestamp + nonce)
-    // If you need to include the signature in the final record hash, that needs to be part of your raw string logic.
-
-    const res = {
-      ...window.agent_hash_data, // Contains prev_hash, object_type, object_id, public_key, to_public_key, timestamp, nonce
-      hash: finalResultHash, // The hash of the agent record
-      signature: sig // The signature by the agent
-    };
-    
-    // Reset button state
-    signButton.disabled = false;
-    signButton.textContent = 'Agent Sign';
-
-    const div = document.getElementById('sigResult');
-    div.style.display = "block";
-    div.innerHTML = "<b>Agent Registration Complete</b><br><pre>"+JSON.stringify(res,null,2)+"</pre>";
-    window.lastExportObj = res;
-
-    // Show success feedback for signing process
-    showFeedback('sigResultFeedback', "Signed successfully!", 'success');
-    document.getElementById('sigResultFeedback').style.display = "flex"; // Ensure it's visible
-
-  }
-
-  // A simple SHA256 for JS for demo purposes (NOT for production use in browser, use Web Crypto API)
-  // This is needed because `generate_public_key_from_private_key` or final hash calculation might need it.
-  function sha256_string_js(s) {
-      // This is a placeholder. In a real app, use Web Crypto API.
-      // E.g., crypto.subtle.digest('SHA-256', new TextEncoder().encode(s))
-      // For a quick demo, a minimal non-secure hash or a precomputed one would be used.
-      // For now, let's use a very basic simulation.
-      let hash = 0;
-      for (let i = 0; i < s.length; i++) {
-          const char = s.charCodeAt(i);
-          hash = ((hash << 5) - hash) + char;
-          hash |= 0; // Convert to 32bit integer
-      }
-      return (hash >>> 0).toString(16).padStart(8, '0'); // Convert to unsigned hex
-  }
-
-
-  // --- Copy util (Updated to use new feedback) ---
-  function copyAgentPayload() {
-    const el = document.getElementById('agentPayload');
-    el.select(); el.setSelectionRange(0, 9999);
-    navigator.clipboard.writeText(el.value);
-    const successSpan = document.getElementById('copyAgentPayloadSuccess');
-    successSpan.style.display = "inline";
-    setTimeout(()=>{successSpan.style.display = "none";},1200);
-  }
-
-  // --- Export Log (JSON) (Updated to use new feedback) ---
-  function exportLog() {
-    const obj = window.lastExportObj || window.agent_hash_data || {};
-    if (Object.keys(obj).length === 0) { // Check if obj is empty
-        showFeedback('exportSuccess', "Nothing to export yet.", 'error'); 
-        return; 
-    }
-    obj.exported_at = new Date().toISOString();
-    const blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
-    const a = document.createElement("a");
-    a.href = URL.createObjectURL(blob);
-    a.download = "dtc_agent_registration_log.json";
-    a.click();
-    const successSpan = document.getElementById('exportSuccess');
-    successSpan.style.display = "inline";
-    setTimeout(()=>{successSpan.style.display = "none";}, 1500);
-  }
+// Copy & Export
+function copyAgentPayload() {
+  let el = document.getElementById('agentPayload');
+  el.select(); el.setSelectionRange(0, 9999);
+  document.execCommand('copy');
+  document.getElementById('copyAgentPayloadSuccess').style.display = "inline";
+  setTimeout(()=>{document.getElementById('copyAgentPayloadSuccess').style.display = "none";},1200);
+}
+function exportLog() {
+  let obj = window.lastExportObj || window.agent_hash_data || {};
+  if (!obj || !obj.prev_hash) return;
+  obj.exported_at = new Date().toISOString();
+  let blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
+  let a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "dtc_agent_registration_log.json";
+  a.click();
+  document.getElementById('exportSuccess').style.display = "inline";
+  setTimeout(()=>{document.getElementById('exportSuccess').style.display = "none";}, 1500);
+}
 </script>
 </body>
 </html>
