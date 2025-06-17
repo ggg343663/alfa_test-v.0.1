@@ -1,14 +1,20 @@
 [
   {
-    "slot": 1,
-    "hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+    "tx_id": "TX_20250601_ABCD1289",
+    "hash2": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
     "prev_hash": "0000000000000000000000000000000000000000000000000000000000000000",
     "timestamp": "2025-06-01T10:15:00.000Z",
     "qr_hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
     "pubkey": "0x1234567890abcdef1234567890abcdef12345678",
     "action": "register",
+    "type": "QR_Batch_Mint",
+    "version": "DTC_0.7.6.1",
+    "nonce": "x3j4k2l8",
     "detail": "Initial QR registration",
     "sig": "SIGNATURE_BASE64_OR_HEX",
-    "meta": {}
+    "meta": {
+      "batchName": "Spring2025A",
+      "appVersion": "1.0.0"
+    }
   }
 ]
