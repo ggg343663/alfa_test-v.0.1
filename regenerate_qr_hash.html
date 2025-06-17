@@ -73,7 +73,11 @@
     <div class="block-title">Regenerate (Update) QR Hash</div>
     <div class="input-label">Paste QR Ticket JSON Content</div>
     <textarea id="qrTicketContent" rows="4" placeholder='Paste the original QR Ticket JSON'></textarea>
-    <div class="input-note">* ใส่เฉพาะ Ticket ที่ได้จากระบบ DTC (commitment hash จะใช้เป็น prev_hash ใหม่)</div>
+    <div class="input-note">
+      * ใส่เฉพาะ Ticket ที่ได้จากระบบ DTC (commitment hash จะใช้เป็น prev_hash ใหม่)<br>
+      * <b>Policy:</b> Public Key และ Password ต้องมีเครื่องหมายอย่างน้อย 1 ตัว (เช่น @#%&), agent QR สูงสุด 10,000<br>
+      * QR id (ชื่อ/ลำดับ) และ QR address (0x...) แยกกัน
+    </div>
     <div class="input-row">
       <input type="file" id="uploadTicket" accept=".json" style="width:auto;"/>
       <button class="btn-export" id="scanQrTicketBtn" type="button">Scan QR Ticket</button>
@@ -128,17 +132,17 @@
       </div>
       <div class="qr-hashes-box">
         <div class="hash-display">
-          <label>New Hash1 (QR Content Hash):</label>
-          <div class="hash-value" id="newHash1"></div>
+          <label>New Commitment Hash (QR address):</label>
+          <div class="hash-value" id="newHash2"></div>
         </div>
         <div class="hash-display">
-          <label>New Hash2 (Commitment Hash):</label>
-          <div class="hash-value" id="newHash2"></div>
+          <label>QR Address (0x...):</label>
+          <div class="hash-value" id="qrAddress"></div>
         </div>
       </div>
     </div>
     <div class="hash-display" style="margin-top:1em;">
-      <label>Regenerated QR Content:</label>
+      <label>Regenerated QR Content (JSON):</label>
       <pre id="regeneratedQrContentDisplay" style="font-size:0.97em;color:#234;white-space:pre-wrap;"></pre>
     </div>
     <div class="input-hint" style="margin-top:0.9em;">
@@ -177,16 +181,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const regenOutputSection = document.getElementById('regenOutputSection');
     const regeneratedQrCodeImage = document.getElementById('regeneratedQrCodeImage');
     const regeneratedQrContentDisplay = document.getElementById('regeneratedQrContentDisplay');
-    const newHash1Display = document.getElementById('newHash1');
     const newHash2Display = document.getElementById('newHash2');
+    const qrAddressDisplay = document.getElementById('qrAddress');
     const regeneratedTimestampDisplay = document.getElementById('regeneratedTimestamp');
     let pendingRegen = null;
+
+    // symbol validator
+    function hasSymbol(str) {
+        return /[^a-zA-Z0-9]/.test(str);
+    }
 
     // Parse Ticket JSON to fill prevHash, batchName, timestamp
     qrTicketContentInput.addEventListener('input', () => {
         try {
             const ticketJson = JSON.parse(qrTicketContentInput.value);
-            prevHashDisplay.value = ticketJson.hash2 || 'N/A';
+            prevHashDisplay.value = ticketJson.hash2 || ticketJson.hash || 'N/A';
             originalTimestampDisplay.value = ticketJson.meta?.timestamp ? new Date(ticketJson.meta.timestamp).toLocaleString() : 'N/A';
             batchNameDisplay.value = ticketJson.meta?.batchName || '';
             if (!newSecretDataInput.value.trim() && ticketJson.data) {
@@ -237,12 +246,14 @@ document.addEventListener('DOMContentLoaded', () => {
         let originalTicketJson;
         try {
             originalTicketJson = JSON.parse(qrTicketContent);
-            if (!originalTicketJson.hash2 || !originalTicketJson.issuerPublicKey || !originalTicketJson.data) {
+            if ((!originalTicketJson.hash2 && !originalTicketJson.hash) || !originalTicketJson.issuerPublicKey || !originalTicketJson.data) {
                 alert('Invalid QR Ticket Content: Missing required fields (hash2, issuerPublicKey, data).');
                 return;
             }
         } catch (e) { alert('Invalid QR Ticket Content: Please provide valid JSON.'); return; }
         if (!issuerPublicKey || !password || !pin) { alert('Please fill in your Public Key, Password, and PIN for signing.'); return; }
+        if (!hasSymbol(issuerPublicKey)) { alert('Public Key ต้องมีเครื่องหมาย (symbol) อย่างน้อย 1 ตัว เช่น @#$%'); return; }
+        if (!hasSymbol(password)) { alert('Password ต้องมีเครื่องหมาย (symbol) อย่างน้อย 1 ตัว เช่น @#$%'); return; }
         if (pin.length !== 4 || !/^\d{4}$/.test(pin)) { alert('PIN must be 4 digits.'); return; }
 
         // DTC chain meta for regen
@@ -250,8 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const timestamp = now.toISOString();
         const newNonce = Math.random().toString(36).substring(2, 10);
 
-        // prevHash2 = hash2 of previous (QR chain linkage)
-        const prevHash2 = originalTicketJson.hash2;
+        // prevHash2 = hash2/hash of previous (QR chain linkage)
+        const prevHash2 = originalTicketJson.hash2 || originalTicketJson.hash;
         const originalBatchName = originalTicketJson.meta?.batchName || 'N/A';
         const originalQuantity = originalTicketJson.meta?.quantity || 1;
         const finalData = newSecretData.trim() === '' ? originalTicketJson.data : newSecretData;
@@ -268,9 +279,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const regenRaw = prevHash2 + object_type + object_id + public_key + to_public_key + timestamp + newNonce;
         const regenHash = await sha256Hex(regenRaw);
 
-        // 2. QR Content structure (Ticket)
+        // 2. qr_address = 0x... (40 ตัวท้าย)
+        const qr_address = "0x" + regenHash.slice(-40);
+
+        // 3. QR Content structure (Ticket)
         pendingRegen = {
-            version: "DTC_0.7.6.2",
+            version: "DTC_0.7.6.4",
             type: "QR_Regenerate",
             issuerPublicKey: public_key,
             data: finalData,
@@ -281,6 +295,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 nonce: newNonce,
                 prev_hash: prevHash2
             },
+            qr_id: object_id,
+            qr_address: qr_address,
             hash: regenHash,
             object_type: object_type,
             object_id: object_id,
@@ -290,7 +306,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Show modal
         previewDetails.innerHTML = `
           <b>Issuer Public Key:</b> <span style="color:#246bfd;">${issuerPublicKey}</span><br>
-          <b>Batch Name:</b> ${originalBatchName}<br>
+          <b>Batch Name (qr_id):</b> ${originalBatchName}<br>
+          <b>QR Address:</b> <span style="color:#2196f3">${qr_address}</span><br>
           <b>Quantity:</b> ${originalQuantity}<br>
           <b>Prev Hash2:</b> <span style="color:#2196f3">${prevHash2}</span><br>
           <b>New Content:</b> <span style="color:#26733e;">${finalData}</span><br>
@@ -310,8 +327,8 @@ document.addEventListener('DOMContentLoaded', () => {
       regenOutputSection.style.display = 'flex';
       regeneratedQrCodeImage.src = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(JSON.stringify(pendingRegen))}`;
       regeneratedQrContentDisplay.textContent = JSON.stringify(pendingRegen, null, 2);
-      newHash1Display.textContent = "-";  // No separate hash1 (if needed, put logic here)
       newHash2Display.textContent = pendingRegen.hash;
+      qrAddressDisplay.textContent = pendingRegen.qr_address;
       regeneratedTimestampDisplay.textContent = new Date(pendingRegen.meta.timestamp).toLocaleString();
     };
 
@@ -338,6 +355,7 @@ document.addEventListener('DOMContentLoaded', () => {
             newSecretData: newSecretDataInput.value,
             issuerPublicKey: issuerPublicKeyInput.value,
             regenHash: newHash2Display.textContent,
+            qr_address: qrAddressDisplay.textContent,
             regeneratedAt: regeneratedTimestampDisplay.textContent
         };
         if (!logData.regenHash) return;
