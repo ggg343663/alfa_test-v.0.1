@@ -1,15 +1,8 @@
-นี่คือตัวอย่าง **README.md** ฉบับสมบูรณ์สำหรับ DTC UI/UX “One Page Minimal” (แนวภาษา markdown พร้อม section ชัดเจน)
-เนื้อหานี้จัดเรียงเพื่อใช้งานเป็น “มาตรฐานอ้างอิง” ในการพัฒนาและรีวิวระบบ DTC รุ่น One Page Minimal ได้ทันที
-**(รองรับทั้ง developer และ auditor สามารถ copy ใช้งาน/แปลงเป็นภาษาอังกฤษ/markdown ได้เลย)**
-
----
-
-````markdown
 # DTC "One Page Minimal" — UI/UX Design & Core Logic
 
 > **มาตรฐานการออกแบบ UI/UX และตรรกะระบบ DTC ที่เรียบง่ายสุด (Minimal) สำหรับทุกหน้าของแอป DTC**
 >
-> เวอร์ชัน 0.7.6.2+ | อัปเดต 2025 | ใช้ตรวจสอบ/อ้างอิง Whitepaper & โค้ด production
+> เวอร์ชัน 0.7.6.4 | อัปเดต 2025 | ใช้ตรวจสอบ/อ้างอิง Whitepaper & โค้ด production
 
 ---
 
@@ -28,7 +21,7 @@
 ## 2. **โครงสร้าง UI (Section-by-Section Minimal Logic)**
 
 ### **A. Key & Batch Info** (เทา/เหลืองอ่อน)
-- Password, PIN, Secret — กล่องสีเหลือง #fffde7
+- Password, PIN, Secret — กล่องสีเหลือง #fffde7  
 - Batch Name, Qty — กล่องสีเทา #f6f7fa  
 - Label/Hint เล็ก #90a4ae ใต้ input  
 - Session Storage เฉพาะ field ทั่วไป
@@ -43,7 +36,7 @@
 - Session Storage
 
 ### **D. Regen QR** (เทาอ่อน/เหลือง)
-- Ticket/Slot ID, Prev Hash, Timestamp, Nonce (เทาอ่อน)
+- Ticket/tx_id, Prev Hash, Timestamp, Nonce (เทาอ่อน)
 - Password, PIN, Secret (เหลืองอ่อน)
 - ปุ่ม Regen (ฟ้า), ตัวอย่าง hash แสดงหลังสำเร็จ
 
@@ -58,10 +51,10 @@
 
 ## 3. **แนวทาง UX & Accessibility**
 
-- **ผลลัพธ์ไม่เด่นเกินไป** — Output (QR/Hash/Log) เล็กกว่า Input
-- **Empty State** — กล่องว่าง, ไอคอน+ข้อความจาง (“ยังไม่มี QR”, “รอผล”)
-- **Success/Error/Loading** — สีเขียว✓, ขอบแดง✗, spinner ปุ่ม disabled
-- **Input Sensitive** — กล่องสีเหลืองสำหรับ Password/PIN/Secret
+- **ผลลัพธ์ไม่เด่นเกินไป** — Output (QR/Hash/Log) เล็กกว่า Input  
+- **Empty State** — กล่องว่าง, ไอคอน+ข้อความจาง (“ยังไม่มี QR”, “รอผล”)  
+- **Success/Error/Loading** — สีเขียว✓, ขอบแดง✗, spinner ปุ่ม disabled  
+- **Input Sensitive** — กล่องสีเหลืองสำหรับ Password/PIN/Secret  
 - **Label, Contrast, Font ≥15px, Keyboard nav, ARIA-compliant**
 
 ---
@@ -80,11 +73,13 @@
 ### 5.1 Key Generation
 
 ```python
+import re
+assert re.search(r'[^a-zA-Z0-9]', password) # ต้องมีเครื่องหมายอย่างน้อย 1 ตัว
 hash1 = SHA256(password)
 hash2 = SHA256(pin)
 private_key = SHA256(hash1 + hash2)
 public_key = SHA256(private_key)
-````
+```
 
 ### 5.2 Genesis Node
 
@@ -101,13 +96,13 @@ qr_id = "GENESIS_000"
 master_raw = prev_hash + "master" + master_id + pubkey + "" + timestamp + nonce
 master_hash = SHA256(master_raw)
 
-# Agent
+# Agent (สูงสุด 10,000 agent)
 agent_raw = prev_hash + "agent" + agent_id + pubkey + "" + timestamp + nonce
 agent_hash = SHA256(agent_raw)
 ```
-
-* master\_id: ≤8 ตัว, พิมพ์ใหญ่ + \_000
-* agent\_id: ≤16 ตัว, พิมพ์เล็ก + \_000 หรือใช้ ":"
+* master_id: ≤8 ตัว, พิมพ์ใหญ่ + \_000  
+* agent_id: ≤16 ตัว, พิมพ์เล็ก + \_000 หรือใช้ ":"  
+* **Agent QR ได้สูงสุด 10,000 รายการ**  
 
 ### 5.4 QR Assignment (ไม่มี slot!)
 
@@ -128,8 +123,8 @@ def assign_qr_order(node_hash, total_count, timestamp):
         used_index.add(idx)
     return assigned
 ```
-
-* QR ID: `[node_id]_[เลข 3 หลัก]` เช่น maple\_000\_134
+* QR ID: `[node_id]_[เลข 3 หลัก]` เช่น maple\_000\_134  
+* **ห้ามใช้ slot/slot_id ในทุกจุด**  
 
 ### 5.5 Register/Activate QR
 
@@ -153,8 +148,7 @@ def register_qr(pubkey, node_hash, assigned_index, whitelist):
 transfer_hash = SHA256(prev_owner_hash + to_pubkey + timestamp + nonce)
 signature = sign(private_key, transfer_hash)
 ```
-
-* Log ทุกรายการ transfer
+* Log ทุกรายการ transfer  
 
 ### 5.7 Double Hash Commitment / Regen
 
@@ -164,29 +158,27 @@ hash2 = SHA256(hash1 + meta_info)
 regen_hash = SHA256(prev_hash + object_type + object_id + public_key + to_public_key + timestamp + nonce)
 assert regen_hash == qr["hash"]
 ```
-
-* regen hash ใช้ input ตรงจริง, ห้าม slot/slot\_id
+* regen hash ใช้ input ตรงจริง, **ห้าม slot/slot_id**  
 
 ### 5.8 QR ID 0x... (address style)
 
 ```python
-def make_qr_id(pubkey, parent_hash, slot_no, timestamp=None, nonce=None):
+def make_qr_id(pubkey, parent_hash, index, timestamp=None, nonce=None):
     if not timestamp:
         timestamp = str(int(time.time()))
     if not nonce:
         nonce = os.urandom(8).hex()
-    raw = f"{pubkey}:{parent_hash}:{slot_no}:{timestamp}:{nonce}"
+    raw = f"{pubkey}:{parent_hash}:{index}:{timestamp}:{nonce}"
     h = hashlib.sha256(raw.encode()).hexdigest()
     return "0x" + h[-40:], nonce, timestamp
 ```
-
-* ใช้ format 0x... เฉพาะ qr\_id แบบ address
+* ใช้ format 0x... เฉพาะ qr_id แบบ address
 
 ### 5.9 Logging/Audit Trail
 
-* log ทุกรายการ mint, register, transfer, regen, revoke
-* ทุกธุรกรรม audit/regen ได้ 100%
-* log ตัวอย่าง: มีทั้ง id (name-id + address) ทุกจุด
+- log ทุกรายการ mint, register, transfer, regen, revoke  
+- ทุกธุรกรรม audit/regen ได้ 100%  
+- log ตัวอย่าง: มีทั้ง id (name-id + address) ทุกจุด  
 
 ---
 
@@ -208,11 +200,12 @@ def make_qr_id(pubkey, parent_hash, slot_no, timestamp=None, nonce=None):
 
 ## 7. **Security**
 
-* password/PIN ห้ามซ้ำระบบอื่น
-* ห้ามเก็บ private key plain text
-* ทุกธุรกรรมมี timestamp + nonce
-* ต้องเช็ค id/hash ซ้ำทุกครั้ง
-* ห้าม double spend (โอนซ้ำ)
+- **password/Public Key ต้องมีเครื่องหมายอย่างน้อย 1 ตัว**
+- password/PIN ห้ามซ้ำระบบอื่น
+- ห้ามเก็บ private key plain text
+- ทุกธุรกรรมมี timestamp + nonce
+- ต้องเช็ค id/hash ซ้ำทุกครั้ง
+- ห้าม double spend (โอนซ้ำ)
 
 ---
 
@@ -220,9 +213,16 @@ def make_qr_id(pubkey, parent_hash, slot_no, timestamp=None, nonce=None):
 
 ```json
 {
-  "qr_id": "maple_000_134",
+  "tx_id": "maple_000_134",        // ใช้ tx_id แทน slot/slot_id
   "qr_address": "0x1f3f5e9ab12d75af4e2c2cfe3ad527bd8074654a",
-  ...
+  "prev_hash": "0000...000",
+  "timestamp": "2025-06-01T10:15:00.000Z",
+  "qr_hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
+  "pubkey": "0x1234567890abcdef1234567890abcdef12345678",
+  "action": "register",
+  "detail": "Initial QR registration",
+  "sig": "SIGNATURE_BASE64_OR_HEX",
+  "meta": {}
 }
 ```
 
@@ -236,4 +236,3 @@ def make_qr_id(pubkey, parent_hash, slot_no, timestamp=None, nonce=None):
 * ใช้ไฟล์นี้เป็น “มาตรฐาน” DTC One Page Minimal ได้ทันที
 
 ---
-
