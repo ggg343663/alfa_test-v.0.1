@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Agent Dashboard - DTC</title>
+    <style>
+        /* Reusing some styles from index.html for consistency */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 1em 0.2em 4em 0.2em;
+            background: #f5f6fa;
+            color: #333;
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            min-height: calc(100vh - 5em); /* Adjust for padding and nav-bar */
+        }
+        h1 {
+            text-align: center;
+            color: #1976d2; /* Blue tone for registration/dashboards */
+            margin-bottom: 1.5em;
+            font-size: 1.8em;
+            letter-spacing: 0.02em;
+        }
+        .content-block {
+            background: #fff;
+            padding: 1.5em;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(60,70,120,0.08);
+            border-left: 6px solid #1976d2; /* Blue accent */
+            text-align: center;
+            flex-grow: 1; /* Allows content to expand */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .content-block p {
+            font-size: 1.1em;
+            color: #555;
+            margin-bottom: 1.5em;
+        }
+        .back-button {
+            display: inline-block;
+            padding: 0.8em 1.5em;
+            background: #1976d2;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 7px;
+            text-decoration: none;
+            transition: background 0.13s, transform 0.11s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .back-button:hover {
+            filter: brightness(1.09) contrast(1.09);
+            transform: translateY(-1px) scale(1.01);
+        }
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5em 0.06em;
+            background: #ffffff;
+            border-top: 1.2px solid #eee;
+            position: fixed;
+            left: 0; right: 0;
+            bottom: 0;
+            z-index: 9;
+            max-width: 700px;
+            margin: 0 auto;
+            box-shadow: 0 -1.5px 8px rgba(0,0,0,0.04);
+            border-radius: 12px 12px 0 0;
+        }
+        .nav-bar a {
+            flex: 1;
+            padding: 0.6em 0.1em;
+            text-align: center;
+            color: #3f51b5;
+            background: none;
+            font-weight: 600;
+            border-radius: 7px;
+            margin: 0 0.17em;
+            font-size: 0.96em;
+            min-height: 36px;
+            text-decoration: none;
+            transition: background 0.13s, color 0.13s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-bar a:hover {
+            background: #e8eaf6;
+            color: #1976d2;
+        }
+        .nav-bar a.active {
+            color: #2196f3;
+            border-bottom: 2px solid #2196f3;
+            padding-bottom: 0.2em;
+        }
+        @media (max-width: 600px) {
+            body { margin: 0; padding: 0.15em 0.06em 4em 0.06em;}
+            h1 { font-size: 1.3em; margin-bottom: 1em; }
+            .content-block { padding: 1em; }
+            .content-block p { font-size: 1em; }
+            .back-button { padding: 0.6em 1em; font-size: 0.9em; }
+            .nav-bar { padding: 0.36em 0.03em;}
+        }
+    </style>
+</head>
+<body>
+    <h1>Agent Dashboard</h1>
+
+    <main class="flex-grow flex flex-col justify-center items-center px-2">
+        <div class="content-block">
+            <p>This is a placeholder for the Agent Dashboard content.</p>
+            <p>Future enhancements will include agent-specific QR management, performance metrics, and activity logs.</p>
+            <a href="index.html" class="back-button">Go to Home Page</a>
+        </div>
+    </main>
+
+    <nav class="nav-bar">
+        <a href="#" onclick="history.back()">Back</a>
+        <a href="index.html">Home</a>
+        <a href="#" onclick="history.forward()">Next</a>
+    </nav>
+</body>
+</html>
