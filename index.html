@@ -1,187 +1,189 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DTC: Magic Chain System</title>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      max-width: 700px;
-      margin: 0 auto;
-      padding: 1em 0.2em 4em 0.2em;
-      background: #f5f6fa;
-      color: #333;
-      line-height: 1.6;
-    }
-    h1 {
-      text-align: center;
-      color: #23754b;
-      margin-bottom: 0.7em;
-      font-size: 1.3em;
-      letter-spacing: 0.02em;
-    }
-    .menu-block {
-      margin: 0.6em 0;
-      padding: 0.4em 0.7em 0.6em 0.7em;
-      border-radius: 12px;
-      background: #fff;
-      box-shadow: 0 2px 8px 0 rgba(60,70,120,0.08);
-      border-left: 6px solid #e0e4e9;
-      min-width: 0;
-      transition: box-shadow 0.18s, transform 0.17s;
-    }
-    .menu-block:hover {
-      box-shadow: 0 6px 18px 0 rgba(60,70,120,0.13);
-      transform: translateY(-1.5px) scale(1.01);
-    }
-    .block-general { border-left-color: #43a047; }
-    .block-register { border-left-color: #1976d2; }
-    .block-audit { border-left-color: #ffc107; }
-    .block-title {
-      font-size: 1em;
-      font-weight: 600;
-      margin-bottom: 0.32em;
-      color: #333;
-      letter-spacing: 0.01em;
-      padding-bottom: 0.13em;
-      border-bottom: 1.2px solid #eef1f5;
-    }
-    .menu-block a {
-      display: flex;
-      align-items: center;
-      justify-content: flex-start;
-      width: 100%;
-      padding: 0.48em 0.5em;
-      margin-bottom: 0.33em;
-      color: #fff;
-      font-weight: 600;
-      border-radius: 7px;
-      font-size: 0.98em;
-      box-shadow: 0 1px 5px rgba(0,0,0,0.06);
-      transition: background 0.13s, transform 0.11s;
-      border: none;
-      min-height: 34px;
-      outline: none;
-      text-align: left;
-      text-decoration: none;
-      letter-spacing: 0.01em;
-      cursor: pointer;
-      gap: 0.6em;
-    }
-    .block-general a { background: #43a047; }
-    .block-register a { background: #1976d2; }
-    .block-audit a { background: #ffc107; color: #212121;}
-    .menu-block a:hover:not(.disabled) {
-      filter: brightness(1.09) contrast(1.09);
-      transform: translateY(-1px) scale(1.01);
-    }
-    .filename {
-      font-size: 0.96em;
-      font-weight: 600;
-      letter-spacing: 0.01em;
-    }
-    .label {
-      font-size: 0.91em;
-      font-weight: 400;
-      margin-left: 0.4em;
-      color: #e8f5e9;
-      opacity: 0.89;
-      font-style: italic;
-    }
-    .block-audit .label { color: #888; }
-    .nav-bar {
-      display: flex;
-      justify-content: space-around;
-      padding: 0.5em 0.06em;
-      background: #ffffff;
-      border-top: 1.2px solid #eee;
-      position: fixed;
-      left: 0; right: 0;
-      bottom: 0;
-      z-index: 9;
-      max-width: 700px;
-      margin: 0 auto;
-      box-shadow: 0 -1.5px 8px rgba(0,0,0,0.04);
-      border-radius: 12px 12px 0 0;
-    }
-    .nav-bar a {
-      flex: 1;
-      padding: 0.6em 0.1em;
-      text-align: center;
-      color: #3f51b5;
-      background: none;
-      font-weight: 600;
-      border-radius: 7px;
-      margin: 0 0.17em;
-      font-size: 0.96em;
-      min-height: 36px;
-      text-decoration: none;
-      transition: background 0.13s, color 0.13s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .nav-bar a:hover {
-      background: #e8eaf6;
-      color: #1976d2;
-    }
-    .nav-bar a.active {
-      color: #2196f3;
-      border-bottom: 2px solid #2196f3;
-      padding-bottom: 0.2em;
-    }
-    .footer-note {
-      text-align: center;
-      margin-top: 2.2em;
-      margin-bottom: 0.8em;
-      color: #90a4ae;
-      font-size: 0.83em;
-    }
-    @media (max-width: 600px) {
-      body { margin: 0; padding: 0.15em 0.06em 4em 0.06em;}
-      h1 { font-size: 1em; margin-bottom: 0.7em; }
-      .menu-block { padding: 0.25em 0.25em 0.5em 0.38em; margin: 0.36em 0;}
-      .block-title { font-size: 0.92em; }
-      .menu-block a, .nav-bar a { font-size: 0.87em; min-height: 28px; }
-      .footer-note { font-size: 0.77em; }
-      .nav-bar { padding: 0.36em 0.03em;}
-    }
-  </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>DTC: Magic Chain System</title>
+    <style>
+        /* Keep original styles as much as possible */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 700px;
+            margin: 0 auto;
+            padding: 1em 0.2em 4em 0.2em;
+            background: #f5f6fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        h1 {
+            text-align: center;
+            color: #23754b;
+            margin-bottom: 0.7em;
+            font-size: 1.3em;
+            letter-spacing: 0.02em;
+        }
+        .menu-block {
+            margin: 0.6em 0;
+            padding: 0.4em 0.7em 0.6em 0.7em;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 2px 8px 0 rgba(60,70,120,0.08);
+            border-left: 6px solid #e0e4e9;
+            min-width: 0;
+            transition: box-shadow 0.18s, transform 0.17s;
+        }
+        .menu-block:hover {
+            box-shadow: 0 6px 18px 0 rgba(60,70,120,0.13);
+            transform: translateY(-1.5px) scale(1.01);
+        }
+        .block-general { border-left-color: #43a047; }
+        .block-register { border-left-color: #1976d2; }
+        .block-audit { border-left-color: #ffc107; }
+        .block-title {
+            font-size: 1em;
+            font-weight: 600;
+            margin-bottom: 0.32em;
+            color: #333;
+            letter-spacing: 0.01em;
+            padding-bottom: 0.13em;
+            border-bottom: 1.2px solid #eef1f5;
+        }
+        .menu-block a {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 100%;
+            padding: 0.48em 0.5em;
+            margin-bottom: 0.33em;
+            color: #fff;
+            font-weight: 600;
+            border-radius: 7px;
+            font-size: 0.98em;
+            box-shadow: 0 1px 5px rgba(0,0,0,0.06);
+            transition: background 0.13s, transform 0.11s;
+            border: none;
+            min-height: 34px;
+            outline: none;
+            text-align: left;
+            text-decoration: none;
+            letter-spacing: 0.01em;
+            cursor: pointer;
+            gap: 0.6em; /* Added gap for spacing between filename and label */
+        }
+        .block-general a { background: #43a047; }
+        .block-register a { background: #1976d2; }
+        .block-audit a { background: #ffc107; color: #212121;}
+        .menu-block a:hover:not(.disabled) {
+            filter: brightness(1.09) contrast(1.09);
+            transform: translateY(-1px) scale(1.01);
+        }
+        .filename {
+            font-size: 0.96em;
+            font-weight: 600;
+            letter-spacing: 0.01em;
+        }
+        .label {
+            font-size: 0.91em;
+            font-weight: 400;
+            margin-left: 0.4em;
+            color: #e8f5e9;
+            opacity: 0.89;
+            font-style: italic;
+        }
+        .block-audit .label { color: #888; }
+        .nav-bar {
+            display: flex;
+            justify-content: space-around;
+            padding: 0.5em 0.06em;
+            background: #ffffff;
+            border-top: 1.2px solid #eee;
+            position: fixed;
+            left: 0; right: 0;
+            bottom: 0;
+            z-index: 9;
+            max-width: 700px;
+            margin: 0 auto;
+            box-shadow: 0 -1.5px 8px rgba(0,0,0,0.04);
+            border-radius: 12px 12px 0 0;
+        }
+        .nav-bar a {
+            flex: 1;
+            padding: 0.6em 0.1em;
+            text-align: center;
+            color: #3f51b5;
+            background: none;
+            font-weight: 600;
+            border-radius: 7px;
+            margin: 0 0.17em;
+            font-size: 0.96em;
+            min-height: 36px;
+            text-decoration: none;
+            transition: background 0.13s, color 0.13s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .nav-bar a:hover {
+            background: #e8eaf6;
+            color: #1976d2;
+        }
+        .nav-bar a.active {
+            color: #2196f3;
+            border-bottom: 2px solid #2196f3;
+            padding-bottom: 0.2em;
+        }
+        .footer-note {
+            text-align: center;
+            margin-top: 2.2em;
+            margin-bottom: 0.8em;
+            color: #90a4ae;
+            font-size: 0.83em;
+        }
+        @media (max-width: 600px) {
+            body { margin: 0; padding: 0.15em 0.06em 4em 0.06em;}
+            h1 { font-size: 1em; margin-bottom: 0.7em; }
+            .menu-block { padding: 0.25em 0.25em 0.5em 0.38em; margin: 0.36em 0;}
+            .block-title { font-size: 0.92em; }
+            .menu-block a, .nav-bar a { font-size: 0.87em; min-height: 28px; }
+            .footer-note { font-size: 0.77em; }
+            .nav-bar { padding: 0.36em 0.03em;}
+        }
+    </style>
 </head>
 <body>
-  <h1>DTC: Magic Chain System</h1>
+    <h1>DTC: Magic Chain System</h1>
 
-  <div class="menu-block block-general">
-    <div class="block-title">1. General</div>
-    <a href="generate_key.html"><span class="filename">generate_key.html</span> <span class="label">Generate Public Key</span></a>
-    <a href="generate_qr_hash.html"><span class="filename">generate_qr_hash.html</span> <span class="label">Generate QR Hash</span></a>
-    <a href="regenerate_qr_hash.html"><span class="filename">regenerate_qr_hash.html</span> <span class="label">Regenerate QR Hash</span></a>
-    <a href="transfer.html"><span class="filename">transfer.html</span> <span class="label">Transfer QR</span></a>
-  </div>
+    <div class="menu-block block-general">
+        <div class="block-title">1. General & Key Management</div>
+        <a href="generate_key.html"><span class="filename">generate_key.html</span> <span class="label">Generate Public Key</span></a>
+        <a href="request_qr.html"><span class="filename">request_qr.html</span> <span class="label">Request QR / Node</span></a>
+        <a href="generate_qr_batch.html"><span class="filename">generate_qr.html</span> <span class="label">Generate QR Batch</span></a>
+        <a href="regenerate_qr.html"><span class="filename">regenerate_qr.html</span> <span class="label">Regenerate QR</span></a>
+        <a href="transfer_qr.html"><span class="filename">transfer_qr.html</span> <span class="label">Transfer QR</span></a>
+    </div>
 
-  <div class="menu-block block-register">
-    <div class="block-title">2. Register</div>
-    <a href="register_qr.html"><span class="filename">register_qr.html</span> <span class="label">Register QR</span></a>
-    <a href="register_master.html"><span class="filename">register_master.html</span> <span class="label">Register Master</span></a>
-    <a href="master_dashboard.html"><span class="filename">master_dashboard.html</span> <span class="label">Master Dashboard</span></a>
-    <a href="agent_register.html"><span class="filename">agent_register.html</span> <span class="label">Register Agent</span></a>
-  </div>
+    <div class="menu-block block-register">
+        <div class="block-title">2. Node Registration</div>
+        <!-- Implicit Genesis is handled by register_master.html -->
+        <a href="register_master.html"><span class="filename">register_master.html</span> <span class="label">Register Master Node</span></a>
+        <a href="register_agent.html"><span class="filename">register_agent_deterministic.html</span> <span class="label">Register Agent Node</span></a>
+        <a href="register_qr_deterministic.html"><span class="filename">register_qr_deterministic.html</span> <span class="label">Register Single QR</span></a>
+    </div>
 
-  <div class="menu-block block-audit">
-    <div class="block-title">3. Audit & Status</div>
-    <a href="verify_qr.html"><span class="filename">verify_qr.html</span> <span class="label">Check QR Status</span></a>
-    <a href="verify_log.html"><span class="filename">verify_log.html</span> <span class="label">Audit Log</span></a>
-    <a href="audit_chain.html"><span class="filename">audit_chain.html</span> <span class="label">Audit Chain</span></a>
-  </div>
+    <div class="menu-block block-audit">
+        <div class="block-title">3. Audit & Status</div>
+        <a href="verify_qr.html"><span class="filename">verify_qr.html</span> <span class="label">Check QR Status</span></a>
+        <a href="audit_chain.html"><span class="filename">export_audit_chain.html</span> <span class="label">Audit Chain</span></a>
+        <a href="commit_log.html"><span class="filename">commit_log.html</span> <span class="label">Commit Log (Double Hash)</span></a>
+    </div>
 
-  <div class="nav-bar">
-    <a href="#">Back</a>
-    <a href="index.html" class="active">Home</a>
-    <a href="#">Next</a>
-  </div>
-  <p class="footer-note">
-    Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
-  </p>
+    <div class="nav-bar">
+        <a href="#" onclick="history.back()">Back</a>
+        <a href="index.html" class="active">Home</a>
+        <a href="#" onclick="history.forward()">Next</a>
+    </div>
+    <p class="footer-note">
+        Developed &amp; Deployed on GitHub Pages • 100% Mobile-Friendly System
+    </p>
 </body>
 </html>
