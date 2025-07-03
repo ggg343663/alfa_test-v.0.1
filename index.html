@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8" />
@@ -15,63 +16,107 @@
         .block-audit    { border-left-color: #ffc107; }
         .block-docs     { border-left-color: #607d8b; }
         .block-title { font-size: 1em; font-weight: 600; margin-bottom: 0.32em; color: #333; border-bottom: 1.2px solid #eef1f5; padding-bottom: 0.13em;}
-        .menu-block a { display: flex; align-items: center; width: 100%; padding: 0.48em 0.5em; margin-bottom: 0.33em; color: #fff; font-weight: 600; border-radius: 7px; font-size: 0.98em; box-shadow: 0 1px 5px rgba(0,0,0,0.06); transition: background 0.13s; text-decoration: none; }
+        .menu-block a { display: block; padding: 0.65em 0.7em 0.42em 0.7em; margin-bottom: 0.26em; color: #fff; font-weight: 600; border-radius: 7px; font-size: 1em; box-shadow: 0 1px 5px rgba(0,0,0,0.06); transition: background 0.13s; text-decoration: none; position: relative; }
+        .menu-block a .desc { display: block; font-size: 0.85em; font-weight: 400; color: #f3f6f3; opacity: 0.89; margin-top: 0.11em; }
         .block-setup a, .block-op a { background: #43a047; }
         .block-node a, .block-qr a { background: #1976d2; }
         .block-audit a { background: #ffc107; color: #212121;}
+        .block-audit a .desc { color: #fffde7; }
         .block-docs a { background: #607d8b; }
+        .block-docs a .desc { color: #eceff1; }
+        .menu-block a:hover:not(.disabled) { filter: brightness(1.10) contrast(1.10); }
         .footer-note { text-align: center; margin-top: 2.2em; margin-bottom: 0.8em; color: #90a4ae; font-size: 0.83em; }
         @media (max-width:600px) {
             body { margin: 0; padding: 0.15em 0.06em 4em 0.06em;}
-            .menu-block { padding: 0.25em 0.25em 0.5em 0.38em; }
+            .menu-block { padding: 0.22em 0.12em 0.34em 0.20em; }
+            .menu-block a { font-size: 0.97em; padding: 0.52em 0.5em 0.3em 0.6em; }
+            .block-title { font-size: 0.93em; }
         }
     </style>
 </head>
 <body>
     <h1>DTC: Magic Chain System</h1>
 
-    <div class="menu-block block-setup">
-        <div class="block-title">Key Management & Setup</div>
-        <a href="generate_key.html">🔑 Generate Public Key</a>
-    </div>
+```
+<div class="menu-block block-setup">
+    <div class="block-title">Key Management & Setup</div>
+    <a href="generate_key.html">🔑 Generate Public Key
+        <span class="desc">สร้างกุญแจสาธารณะสำหรับระบบ (ใช้ครั้งแรกเท่านั้น)</span>
+    </a>
+</div>
 
-    <div class="menu-block block-node">
-        <div class="block-title">Node & QR Request</div>
-        <a href="request_qr.html">🪪 Request QR / Node</a>
-    </div>
+<div class="menu-block block-node">
+    <div class="block-title">Node & QR Request</div>
+    <a href="request_qr.html">🪪 Request QR / Node
+        <span class="desc">ยื่นคำขอรับ QR หรือ Node ใหม่</span>
+    </a>
+</div>
 
-    <div class="menu-block block-node">
-        <div class="block-title">Node Registration</div>
-        <a href="register_master.html">🛡️ Register Master Node</a>
-        <a href="register_agent.html">🤝 Register Agent Node</a>
-        <a href="register_qr.html">📋 Register QR</a>
-        <a href="master_dashboard.html">🏠 Master Dashboard</a>
-        <a href="agent_dashboard.html">🗺️ Agent Dashboard</a>
-    </div>
+<div class="menu-block block-node">
+    <div class="block-title">Node Registration</div>
+    <a href="register_master.html">🛡️ Register Master Node
+        <span class="desc">ลงทะเบียน Master Node (สำหรับเจ้าของระบบ)</span>
+    </a>
+    <a href="register_agent_request.html">🤝 Register Agent Node (Request)
+        <span class="desc">Master Node ยื่นคำขอสร้าง Agent Node</span>
+    </a>
+    <a href="activate_agent_node.html">✅ Activate Agent Node
+        <span class="desc">Agent Node ยืนยันตัวตนเพื่อเปิดใช้งาน</span>
+    </a>
+    <a href="register_qr.html">📋 Register QR
+        <span class="desc">ลงทะเบียน QR ใหม่ในระบบ</span>
+    </a>
+    <a href="master_dashboard.html">🏠 Master Dashboard
+        <span class="desc">ดูข้อมูลและจัดการ Master Node</span>
+    </a>
+    <a href="agent_dashboard.html">🗺️ Agent Dashboard
+        <span class="desc">ดูข้อมูลและจัดการ Agent Node</span>
+    </a>
+</div>
 
-    <div class="menu-block block-qr">
-        <div class="block-title">QR Operations</div>
-        <a href="generate_qr.html">📦 Generate QR</a>
-        <a href="regenerate_qr.html">♻️ Regenerate QR</a>
-        <a href="transfer_qr.html">🔄 Transfer QR</a>
-    </div>
+<div class="menu-block block-qr">
+    <div class="block-title">QR Operations</div>
+    <a href="generate_qr.html">📦 Generate QR
+        <span class="desc">สร้าง QR Code ใหม่แบบเดี่ยวหรือเป็นชุด</span>
+    </a>
+    <a href="regenerate_qr.html">♻️ Regenerate QR (Self-Proof)
+        <span class="desc">ตรวจสอบ/พิสูจน์กรรมสิทธิ์ QR เดิมของตนเอง</span>
+    </a>
+    <a href="transfer_qr.html">🔄 Transfer QR
+        <span class="desc">โอนกรรมสิทธิ์ QR ไปให้ผู้อื่น</span>
+    </a>
+</div>
 
-    <div class="menu-block block-audit">
-        <div class="block-title">Audit & Status</div>
-        <a href="verify_qr.html">🧐 Check QR Status</a>
-        <a href="audit_chain.html">📈 Audit Chain</a>
-        <a href="commit_log.html">📝 Commit Log</a>
-        <a href="export_audit_chain.html">💾 Export/Backup Log</a>
-    </div>
+<div class="menu-block block-audit">
+    <div class="block-title">Audit & Status</div>
+    <a href="verify_qr_status.html">🧐 Check QR Status
+        <span class="desc">ตรวจสอบสถานะและความถูกต้องของ QR Code</span>
+    </a>
+    <a href="audit_chain.html">📈 Audit Chain
+        <span class="desc">ดูประวัติการเปลี่ยนแปลง/การตรวจสอบ chain</span>
+    </a>
+    <a href="commit_log.html">📝 Commit Log
+        <span class="desc">บันทึก/ยืนยัน Double Hash ของข้อมูล</span>
+    </a>
+    <a href="export_audit_chain.html">💾 Export/Backup Log
+        <span class="desc">ส่งออกหรือสำรองข้อมูล audit log</span>
+    </a>
+</div>
 
-    <div class="menu-block block-docs">
-        <div class="block-title">Documents</div>
-        <a href="whitepaper.html">📄 Whitepaper</a>
-        <a href="document.html">📚 Document</a>
-    </div>
+<div class="menu-block block-docs">
+    <div class="block-title">Documents</div>
+    <a href="whitepaper.html">📄 Whitepaper
+        <span class="desc">อ่านเอกสารเทคนิคของระบบ DTC</span>
+    </a>
+    <a href="document.html">📚 Document
+        <span class="desc">คู่มือและเอกสารการใช้งาน</span>
+    </a>
+</div>
 
-    <p class="footer-note">
-        Developed &amp; Deployed on GitHub Pages • Version 1.0.0 • 100% Mobile-Friendly
-    </p>
+<p class="footer-note">
+    Developed &amp; Deployed on GitHub Pages • Version 1.0.0 • 100% Mobile-Friendly
+</p>
+```
+
 </body>
 </html>
