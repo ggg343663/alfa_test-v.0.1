@@ -253,8 +253,8 @@
         <div class="block-title">2. ข้อมูล Batch</div>
         <div class="input-group">
             <label for="batchName">ชื่อ Batch:</label>
-            <input type="text" id="batchName" placeholder="เช่น 'M-สินค้า A' หรือ 'A-สินค้า B'" />
-            <span class="label-hint" id="batchNameHint">ชื่อสำหรับระบุ Batch ของ QR Code นี้ (Master ต้องขึ้นต้นด้วย 'M-', Agent ต้องขึ้นต้นด้วย 'A-')</span>
+            <input type="text" id="batchName" placeholder="เช่น 'PRODUCT_A' หรือ 'product:b'" />
+            <span class="label-hint" id="batchNameHint">ชื่อสำหรับระบุ Batch ของ QR Code นี้ (Master: ตัวพิมพ์ใหญ่ทั้งหมด, ไม่เกิน 8 ตัวอักษร; Agent: ตัวพิมพ์เล็กทั้งหมด, ไม่เกิน 16 ตัวอักษร, ใช้ ':' แทนเว้นวรรค)</span>
         </div>
         <div class="input-group">
             <label for="quantity">จำนวน QR ที่จะสร้าง:</label>
@@ -475,16 +475,23 @@
 
             // Validate Batch Name based on issuer type
             const currentIssuerType = window.currentIssuer?.type; // Get issuer type from global state
-            if (!batchNameInput.value.trim()) {
+            const batchName = batchNameInput.value.trim();
+
+            if (!batchName) {
                 errorMessage += 'ต้องระบุชื่อ Batch ';
                 isValid = false;
-            } else if (currentIssuerType === 'master' && !batchNameInput.value.trim().startsWith('M-')) {
-                errorMessage += 'ชื่อ Batch สำหรับ Master ต้องขึ้นต้นด้วย \'M-\' ';
-                isValid = false;
-            } else if (currentIssuerType === 'agent' && !batchNameInput.value.trim().startsWith('A-')) {
-                errorMessage += 'ชื่อ Batch สำหรับ Agent ต้องขึ้นต้นด้วย \'A-\' ';
-                isValid = false;
+            } else if (currentIssuerType === 'master') {
+                if (!/^[A-Z]{1,8}$/.test(batchName)) { // ALL CAPS, max 8 chars
+                    errorMessage += 'ชื่อ Batch สำหรับ Master ต้องเป็นตัวพิมพ์ใหญ่ทั้งหมด ไม่เกิน 8 ตัวอักษร ';
+                    isValid = false;
+                }
+            } else if (currentIssuerType === 'agent') {
+                if (!/^[a-z0-9:]+$/.test(batchName) || batchName.length > 16) { // lowercase, numbers, colon, max 16 chars
+                    errorMessage += 'ชื่อ Batch สำหรับ Agent ต้องเป็นตัวพิมพ์เล็กทั้งหมด (อนุญาตตัวเลขและเครื่องหมาย \':\') ไม่เกิน 16 ตัวอักษร ';
+                    isValid = false;
+                }
             }
+
 
             // Validate Quantity selection
             if (!quantitySelect.value) { // Check if an option is selected
@@ -550,7 +557,7 @@
             quantitySelect.disabled = true;
             quantitySelect.value = ""; // Reset selected quantity
             previewBtn.disabled = true;
-            batchNameHint.textContent = 'ชื่อสำหรับระบุ Batch ของ QR Code นี้';
+            batchNameHint.textContent = 'ชื่อสำหรับระบุ Batch ของ QR Code นี้ (Master: ตัวพิมพ์ใหญ่ทั้งหมด, ไม่เกิน 8 ตัวอักษร; Agent: ตัวพิมพ์เล็กทั้งหมด, ไม่เกิน 16 ตัวอักษร, ใช้ \':\' แทนเว้นวรรค)';
             quantityHint.textContent = 'จำนวน QR Code ที่เหมือนกันที่จะสร้าง (จำกัดตามสิทธิ์ของผู้ออก)';
             window.currentIssuer = null; // Clear current issuer info
 
@@ -568,7 +575,7 @@
                     if (issuerInfo.type === 'master' || issuerInfo.type === 'agent') {
                         quantitySelect.disabled = false; // Enable quantity selection
                         showStatus(`สิทธิ์: ${issuerInfo.type === 'master' ? 'Master' : 'Agent'} Node`, 'success');
-                        batchNameHint.textContent = `ชื่อ Batch สำหรับ ${issuerInfo.type === 'master' ? 'Master' : 'Agent'} ต้องขึ้นต้นด้วย '${issuerInfo.type === 'master' ? 'M-' : 'A-'}'`;
+                        batchNameHint.textContent = `ชื่อ Batch สำหรับ ${issuerInfo.type === 'master' ? 'Master' : 'Agent'} Node: ${issuerInfo.type === 'master' ? 'ตัวพิมพ์ใหญ่ทั้งหมด ไม่เกิน 8 ตัวอักษร' : 'ตัวพิมพ์เล็กทั้งหมด ไม่เกิน 16 ตัวอักษร (ใช้ \':\' แทนเว้นวรรค)'}`;
                         quantityHint.textContent = `จำนวน QR Code ที่เหมือนกันที่จะสร้าง (Master/Agent Node สามารถ Mint ได้)`;
                     } else {
                         showStatus(`สิทธิ์: ${issuerInfo.type === 'request' ? 'คำขอ QR/Node (ยังไม่ Active)' : 'ไม่ได้รับสิทธิ์ในการ Mint QR'}`, 'error');
