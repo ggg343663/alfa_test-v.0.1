@@ -93,7 +93,7 @@
       <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" class="security-input" placeholder="Agent Password (8+ chars)">
     </div>
     <div class="input-feedback-container">
-      <input type="password" id="agentPin" maxlength="6" pattern="\d{6}" autocomplete="new-password" class="security-input" placeholder="Agent PIN (6 digits)">
+      <input type="password" id="agentPin" maxlength="5" pattern="\d{5}" autocomplete="new-password" class="security-input" placeholder="Agent PIN (5 digits)">
     </div>
     <button class="btn-main" type="button" onclick="signAgent()">Agent Sign</button>
     <div class="output-box" id="sigResult" style="display:none;"></div>
@@ -147,7 +147,7 @@ function validatePassword(pw) {
   if (!/\d/.test(pw)) throw "Password needs digit";
 }
 function validatePin(pin) {
-  if (pin.length !== 6 || !/^\d+$/.test(pin)) throw "6 digits only";
+  if (pin.length !== 5 || !/^\d+$/.test(pin)) throw "5 digits only";
 }
 
 // Preview Logic (Step 1)
