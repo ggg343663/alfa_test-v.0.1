@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Agent Dashboard - DTC</title>
     <style>
-        /* Reusing some styles from index.html for consistency */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 700px;
@@ -16,11 +15,11 @@
             line-height: 1.6;
             display: flex;
             flex-direction: column;
-            min-height: calc(100vh - 5em); /* Adjust for padding and nav-bar */
+            min-height: calc(100vh - 5em);
         }
         h1 {
             text-align: center;
-            color: #1976d2; /* Blue tone for registration/dashboards */
+            color: #1976d2;
             margin-bottom: 1.5em;
             font-size: 1.8em;
             letter-spacing: 0.02em;
@@ -30,9 +29,9 @@
             padding: 1.5em;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(60,70,120,0.08);
-            border-left: 6px solid #1976d2; /* Blue accent */
+            border-left: 6px solid #1976d2;
             text-align: center;
-            flex-grow: 1; /* Allows content to expand */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -111,19 +110,17 @@
 </head>
 <body>
     <h1>Agent Dashboard</h1>
-
-    <main class="flex-grow flex flex-col justify-center items-center px-2">
+    <main>
         <div class="content-block">
             <p>This is a placeholder for the Agent Dashboard content.</p>
             <p>Future enhancements will include agent-specific QR management, performance metrics, and activity logs.</p>
             <a href="index.html" class="back-button">Go to Home Page</a>
         </div>
     </main>
-
     <nav class="nav-bar">
-        <a href="#" onclick="history.back()">Back</a>
+        <a href="#" onclick="history.back();return false;">Back</a>
         <a href="index.html">Home</a>
-        <a href="#" onclick="history.forward()">Next</a>
+        <a href="#" onclick="history.forward();return false;">Next</a>
     </nav>
 </body>
 </html>
