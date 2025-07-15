@@ -5,14 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>DTC: Magic Chain System</title>
     <style>
-        /* DTC UI Spec & Color Mapping
-           - Green   #43a047  = General/Success/Key
-           - Blue    #1976d2  = Node/QR/Agent
-           - Yellow  #ffc107  = Audit/Log
-           - Grey    #607d8b  = Docs/Whitepaper
-           - Body BG #f5f6fa  - Menu BG #fff
-           - Label   #90a4ae  - Main text #333
-        */
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             max-width: 700px;
@@ -37,7 +29,7 @@
             border-radius: 12px;
             background: #fff;
             box-shadow: 0 2px 8px 0 rgba(60,70,120,0.08);
-            border-left: 6px solid #e0e4e9; /* Default border, will be overwritten */
+            border-left: 6px solid #e0e4e9;
             min-width: 0;
             transition: box-shadow 0.18s, transform 0.17s;
         }
@@ -166,8 +158,8 @@
         <div class="block-title">1. General &amp; Key Management</div>
         <a href="generate_key.html"><span class="label">🔑 Generate Public Key</span></a>
         <a href="request_qr.html"><span class="label">🪪 Request QR / Node</span></a>
-        <a href="generate_qr_batch.html"><span class="label">📦 Generate QR Batch</span></a>
-        <a href="regenerate_qr.html"><span class="label">♻️ Regenerate QR</span></a>
+        <a href="generate_qr_hash.html"><span class="label">📦 Generate QR Hash</span></a>
+        <a href="regenerate_qr_hash.html"><span class="label">♻️ Regenerate QR Hash</span></a>
         <a href="transfer_qr.html"><span class="label">🔄 Transfer QR</span></a>
     </div>
 
