@@ -107,7 +107,6 @@ const demoChain = [
     signature: "sig_qr"
   }
 ];
-
 // Copy utility
 function doCopy(text, btn) {
   const textarea = document.createElement('textarea');
@@ -125,7 +124,6 @@ function doCopy(text, btn) {
     setTimeout(()=>ok.remove(), 1200);
   }
 }
-
 // Map type to display
 function nodeTypeLabel(t) {
   if(t==="genesis") return "Genesis";
@@ -141,7 +139,6 @@ function nodeTypeClass(t) {
   if(t==="qr") return "qr";
   return "";
 }
-
 function setFeedback(msg, type="error") {
   const d = document.getElementById('feedback');
   d.innerHTML = (type==="success" ? `<span class="icon">✓</span>` : `<span class="icon">!</span>`) + msg;
@@ -154,7 +151,6 @@ function clearFeedback() {
   document.getElementById('feedback').innerHTML = "";
   document.getElementById('hash2input').classList.remove('input-error-border','input-success-border');
 }
-
 document.getElementById('auditForm').onsubmit = function(e){
   e.preventDefault();
   clearFeedback();
