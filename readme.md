@@ -1,87 +1,102 @@
-# DTC "One Page Minimal" — UI/UX Design & Core Logic
-
-> **มาตรฐานการออกแบบ UI/UX และตรรกะระบบ DTC ที่เรียบง่ายสุด (Minimal) สำหรับทุกหน้าของแอป DTC**
->
-> เวอร์ชัน 0.7.6.4 | อัปเดต 2025 | ใช้ตรวจสอบ/อ้างอิง Whitepaper & โค้ด production
+แน่นอนครับ นี่คือ **DTC “One Page Minimal” — UI/UX Design & Core Logic (อัปเดตเวอร์ชัน 0.7.6.5.8 | กรกฎาคม 2025)**
+พร้อมปรับถ้อยคำและ logic ให้สอดคล้องกับการ implement จริงล่าสุด, policy เวอร์ชัน DTC-2025, และ best practice ที่เกิดขึ้น
 
 ---
 
-## 1. **ปรัชญาและแนวคิด (Key Principles)**
+# DTC “One Page Minimal” — UI/UX Design & Core Logic
 
-- **One Page Minimal** — ทุกฟังก์ชันหลักอยู่ในหน้าเดียว, ไม่มีเมนูย่อย/Pop-up รก  
-- **สี & สัญลักษณ์** — สื่อสถานะทุกอย่างผ่าน “สี/ไอคอน/ขอบ” (ไม่ใช้ข้อความแจ้งเตือนเด่น)  
-- **Form-driven** — โฟกัสการกรอกข้อมูล, ส่วนผลลัพธ์ (QR, Hash, Log) จะไม่กินพื้นที่หลัก  
-- **ตำแหน่ง UI คงที่** — ปุ่ม Action/Navigate อยู่ล่างสุด, ขนาดเท่ากันทุกหน้า  
-- **Responsive/Touch** — ปรับขนาดอัตโนมัติ, ปุ่มใหญ่กดง่าย, mobile friendly  
-- **ไม่มีข้อมูลสำคัญใน Storage** — Password, PIN, Secret อยู่แค่ in-memory; Log/Batches เก็บ session, เคลียร์เมื่อปิดแท็บ  
-- **No Redundant Alerts** — ความสำเร็จ/ผิดพลาด/โหลด สื่อด้วยสี, border, ไอคอนเล็กๆ
+> **มาตรฐาน UI/UX & Core Logic ฉบับ “Minimal” ที่ต้องใช้กับทุกหน้าเว็บของ DTC**
+>
+> **เวอร์ชัน 0.7.6.5.8 | อัปเดตล่าสุด: ก.ค. 2025 | อ้างอิง Whitepaper, Production Code, และ Audit Log จริง**
+
+---
+
+## 1. **หลักการออกแบบ (Minimal Principle)**
+
+* **One Page, No Distraction:** ทุกฟังก์ชัน “อยู่ในหน้าเดียว” ไม่มี menu ย่อย, popup หรือ modal ซ้อน
+* **สื่อสถานะด้วยสี/ขอบ/ไอคอน:** ความสำเร็จ/ผิดพลาด/สถานะ สื่อด้วยสี, ขอบ, หรือ icon เล็ก — *ไม่มี alert/dialog เด้งหรือ banner รบกวน*
+* **Form-First:** Input สำคัญสุด, Output (QR, Hash, Log) เล็ก, อยู่หลังหรือข้าง input
+* **ตำแหน่งปุ่มคงที่:** ปุ่มหลักอยู่ล่างสุด (nav-bar), ขนาดและตำแหน่งเท่ากัน
+* **Mobile First & Touch Optimized:** ทุกปุ่มกดง่าย, รองรับมือถือ 100%
+* **No Sensitive Storage:** Password, PIN, Secret ไม่เก็บใน storage ทุกชนิด, เคลียร์อัตโนมัติเมื่อปิด tab
+* **ไม่มี slot/slot\_id:** *ห้าม* มีฟิลด์หรือ logic ใดใช้ slot, slot\_id, หรือ index ลำดับ “ที่แก้ไขได้”
+* **Self-Audit & Proof:** ทุกธุรกรรม log & audit chain ได้ 100% ด้วย double hash, timestamp, nonce, pubkey
 
 ---
 
 ## 2. **โครงสร้าง UI (Section-by-Section Minimal Logic)**
 
-### **A. Key & Batch Info** (เทา/เหลืองอ่อน)
-- Password, PIN, Secret — กล่องสีเหลือง #fffde7  
-- Batch Name, Qty — กล่องสีเทา #f6f7fa  
-- Label/Hint เล็ก #90a4ae ใต้ input  
-- Session Storage เฉพาะ field ทั่วไป
+### A. **Key, Batch, Input (โทนเทา/เหลืองอ่อน)**
 
-### **B. Action (ปุ่มหลัก)**
-- ปุ่ม Generate, Export, Regen — สีเด่น, ใหญ่, ตำแหน่งแน่นอน
+* กล่อง input: password, pin, secret = #fffde7
+* ข้อมูล batch: ชื่อ, จำนวน = #f6f7fa
+* label/hint = #90a4ae ใต้ input
+* **Session Storage** เฉพาะข้อมูล non-sensitive เช่น batch name/qty
 
-### **C. Results/Preview** (ฟ้า/เหลือง/เทา)
-- QR Preview, hash1, hash2 (Commitment) — กล่องแคบ, slide ได้, ปุ่ม copy  
-- Export: Ticket (เหลือง), QR (ฟ้า), Log (ฟ้าอ่อน) — ปุ่มเรียงแถว  
-- Timestamp (ISO8601) มุมขวาล่าง #607d8b  
-- Session Storage
+### B. **ปุ่ม Action (เด่น, ใหญ่, ตำแหน่งแน่นอน)**
 
-### **D. Regen QR** (เทาอ่อน/เหลือง)
-- Ticket/tx_id, Prev Hash, Timestamp, Nonce (เทาอ่อน)
-- Password, PIN, Secret (เหลืองอ่อน)
-- ปุ่ม Regen (ฟ้า), ตัวอย่าง hash แสดงหลังสำเร็จ
+* ปุ่ม Generate/Export/Regen = สีชัด, กว้าง, อยู่ล่าง/กลาง, กดง่าย
 
-### **E. Audit Chain** (ฟ้า)
-- ช่อง hash2, ปุ่ม Audit  
-- กล่อง chain expand/collapse
+### C. **Preview/Results (โทนฟ้า/เหลือง/เทา, ไม่เด่นกว่า input)**
 
-### **F. Navigation Bar** (ม่วงจาง/เทา)
-- Back | Home | Next (ขนาดเท่ากัน, ล่างสุดของจอ)
+* QR preview, hash1, hash2 = กล่อง slide ได้, ปุ่ม copy เล็ก, ปุ่ม export (เหลือง/ฟ้า)
+* Timestamp (ISO8601) = ขวาล่าง #607d8b
+* **Output เล็ก, ไม่แย่งจุดสนใจจาก input**
 
----
+### D. **Regen QR**
 
-## 3. **แนวทาง UX & Accessibility**
+* Ticket, prev\_hash, timestamp, nonce, password, pin, secret = สีเทา/เหลือง
+* ปุ่ม Regen (ฟ้า), hash ตัวอย่างแสดงหลังสำเร็จ
 
-- **ผลลัพธ์ไม่เด่นเกินไป** — Output (QR/Hash/Log) เล็กกว่า Input  
-- **Empty State** — กล่องว่าง, ไอคอน+ข้อความจาง (“ยังไม่มี QR”, “รอผล”)  
-- **Success/Error/Loading** — สีเขียว✓, ขอบแดง✗, spinner ปุ่ม disabled  
-- **Input Sensitive** — กล่องสีเหลืองสำหรับ Password/PIN/Secret  
-- **Label, Contrast, Font ≥15px, Keyboard nav, ARIA-compliant**
+### E. **Audit Chain**
+
+* ช่อง input hash2, ปุ่ม Audit
+* กล่อง chain แบบ expand/collapse, node type color code
+
+### F. **Navigation Bar (ล่างจอ, ม่วงจาง/เทา)**
+
+* ปุ่ม Back | Home | Next (ขนาดเท่ากัน, กว้าง, ติดล่างสุด)
 
 ---
 
-## 4. **Security & State**
+## 3. **UX & Accessibility**
 
-- ไม่มีปุ่ม “ล้างทั้งหมด”
-- Password/PIN/Secret ไม่เก็บ storage ใดๆ
-- Ticket (regen) — ผู้ใช้ต้องวางเองทุกครั้ง
-- Log/Batch info — session storage เท่านั้น (ล้างเมื่อปิด tab)
+* **Empty State:** กล่องว่าง, ไอคอน+ข้อความจาง “รอผล/ไม่มีข้อมูล”
+* **Success/Error/Loading:** สี, ขอบ, ไอคอน, spinner (disable ปุ่ม)
+* **Sensitive Input:** กล่องเหลือง, auto-clear
+* **Label/Contrast/Font ≥ 15px, keyboard friendly, ARIA label**
+* **Mobile-Responsive 100%** (แสดงผลสวยทุกอุปกรณ์)
 
 ---
 
-## 5. **Core Logic & Naming (Function Reference)**
+## 4. **Security & State Policy (ตาม DTC Production)**
 
-### 5.1 Key Generation
+* ไม่มี “ล้างข้อมูลทั้งหมด” ในหน้าเดียว
+* password, pin, secret = ไม่เก็บ storage ใดๆ, เคลียร์เมื่อปิด tab
+* ticket regen ต้องให้ผู้ใช้วางเอง, ไม่มี auto-fill
+* batch/log เก็บ session เท่านั้น
+
+---
+
+## 5. **Core Logic & Naming (Production Standard)**
+
+### 5.1 **Key Generation (2025 Update)**
 
 ```python
-import re
-assert re.search(r'[^a-zA-Z0-9]', password) # ต้องมีเครื่องหมายอย่างน้อย 1 ตัว
+import re, hashlib
+assert re.search(r'[^a-zA-Z0-9]', password)
 hash1 = SHA256(password)
 hash2 = SHA256(pin)
 private_key = SHA256(hash1 + hash2)
 public_key = SHA256(private_key)
+# public_address = SHA256(public_key)[:40]
 ```
 
-### 5.2 Genesis Node
+* **Password ต้องมี symbol อย่างน้อย 1 ตัว**
+* **PIN = 5 หลัก**
+* Public Address เอา sha256(pubkey)\[:40] (hex)
+
+### 5.2 **Genesis Node**
 
 ```python
 genesis_hash = SHA256(public_key + seed + timestamp + nonce)
@@ -89,22 +104,22 @@ prev_hash = "0"*64
 qr_id = "GENESIS_000"
 ```
 
-### 5.3 Master/Agent Registration
+### 5.3 **Master/Agent Registration**
 
 ```python
-# Master
+# Master Node
 master_raw = prev_hash + "master" + master_id + pubkey + "" + timestamp + nonce
 master_hash = SHA256(master_raw)
 
-# Agent (สูงสุด 10,000 agent)
+# Agent Node (≤ 10,000 agent ต่อ master)
 agent_raw = prev_hash + "agent" + agent_id + pubkey + "" + timestamp + nonce
 agent_hash = SHA256(agent_raw)
 ```
-* master_id: ≤8 ตัว, พิมพ์ใหญ่ + \_000  
-* agent_id: ≤16 ตัว, พิมพ์เล็ก + \_000 หรือใช้ ":"  
-* **Agent QR ได้สูงสุด 10,000 รายการ**  
 
-### 5.4 QR Assignment (ไม่มี slot!)
+* master\_id: ≤8 ตัว, พิมพ์ใหญ่ + `_000`
+* agent\_id: ≤16 ตัว, พิมพ์เล็ก + `_000` หรือใช้ `:`
+
+### 5.4 **QR Assignment (Deterministic, No Slot)**
 
 ```python
 def assign_qr_order(node_hash, total_count, timestamp):
@@ -122,11 +137,13 @@ def assign_qr_order(node_hash, total_count, timestamp):
         assigned[idx] = i
         used_index.add(idx)
     return assigned
+# qr_id = [node_id]_[เลข 3 หลัก] เช่น maple_000_134
 ```
-* QR ID: `[node_id]_[เลข 3 หลัก]` เช่น maple\_000\_134  
-* **ห้ามใช้ slot/slot_id ในทุกจุด**  
 
-### 5.5 Register/Activate QR
+* **ห้ามใช้ slot/slot\_id**
+* qr\_id ต้อง deterministic, ไม่มี index แบบ dynamic
+
+### 5.5 **Register/Activate QR**
 
 ```python
 def register_qr(pubkey, node_hash, assigned_index, whitelist):
@@ -142,15 +159,16 @@ def register_qr(pubkey, node_hash, assigned_index, whitelist):
     return qr_id
 ```
 
-### 5.6 Transfer/Ownership
+### 5.6 **Transfer/Ownership**
 
 ```python
 transfer_hash = SHA256(prev_owner_hash + to_pubkey + timestamp + nonce)
 signature = sign(private_key, transfer_hash)
 ```
-* Log ทุกรายการ transfer  
 
-### 5.7 Double Hash Commitment / Regen
+* Log transfer ทุกครั้ง, ต้องมี prev\_hash, nonce, timestamp
+
+### 5.7 **Double Hash Commitment / Regen**
 
 ```python
 hash1 = SHA256(qr_content)
@@ -158,9 +176,10 @@ hash2 = SHA256(hash1 + meta_info)
 regen_hash = SHA256(prev_hash + object_type + object_id + public_key + to_public_key + timestamp + nonce)
 assert regen_hash == qr["hash"]
 ```
-* regen hash ใช้ input ตรงจริง, **ห้าม slot/slot_id**  
 
-### 5.8 QR ID 0x... (address style)
+* regen ต้องใช้ input จริงตรง spec เท่านั้น
+
+### 5.8 **QR ID แบบ 0x… (address-style)**
 
 ```python
 def make_qr_id(pubkey, parent_hash, index, timestamp=None, nonce=None):
@@ -172,13 +191,14 @@ def make_qr_id(pubkey, parent_hash, index, timestamp=None, nonce=None):
     h = hashlib.sha256(raw.encode()).hexdigest()
     return "0x" + h[-40:], nonce, timestamp
 ```
-* ใช้ format 0x... เฉพาะ qr_id แบบ address
 
-### 5.9 Logging/Audit Trail
+* สำหรับ QR ที่ต้องการ address-style
 
-- log ทุกรายการ mint, register, transfer, regen, revoke  
-- ทุกธุรกรรม audit/regen ได้ 100%  
-- log ตัวอย่าง: มีทั้ง id (name-id + address) ทุกจุด  
+### 5.9 **Logging/Audit Trail**
+
+* log ทุกรายการ mint, register, transfer, regen, revoke
+* ทุกธุรกรรม audit/self-proof ได้ 100%
+* log ตัวอย่าง: id (name-id + address) ครบทุกจุด
 
 ---
 
@@ -190,49 +210,54 @@ def make_qr_id(pubkey, parent_hash, index, timestamp=None, nonce=None):
 | master  | MAPLE\_000      | UPPER ≤8 + \_000         |
 | agent   | maple\_000      | lower ≤16 + \_000 or ":" |
 | qr      | maple\_000\_134 | deterministic assignment |
-| 0xqr    | 0x... (40 hex)  | address style, optional  |
+| 0xqr    | 0x… (40 hex)    | address style, optional  |
 
-* **ห้าม slot/slot\_id ทุกจุดใน logic**
-* agent node ต้อง \_000/ใช้ colon
-* QR hash ≠ QR id
-
----
-
-## 7. **Security**
-
-- **password/Public Key ต้องมีเครื่องหมายอย่างน้อย 1 ตัว**
-- password/PIN ห้ามซ้ำระบบอื่น
-- ห้ามเก็บ private key plain text
-- ทุกธุรกรรมมี timestamp + nonce
-- ต้องเช็ค id/hash ซ้ำทุกครั้ง
-- ห้าม double spend (โอนซ้ำ)
+* **ห้ามใช้ slot/slot\_id**
+* agent node = \_000 หรือมี colon
+* qr\_hash ≠ qr\_id
 
 ---
 
-## 8. **ตัวอย่าง log**
+## 7. **Security (Production Policy)**
+
+* Password/Public Key ต้องมี symbol อย่างน้อย 1 ตัว
+* password/PIN ต้องไม่ซ้ำระบบอื่น
+* ไม่เก็บ private key plain
+* ทุกธุรกรรมมี timestamp+nonce
+* เช็ค id/hash ซ้ำทุกครั้ง
+* ป้องกัน double spend/transfer ซ้ำ
+
+---
+
+## 8. **ตัวอย่าง log (Updated)**
 
 ```json
 {
-  "tx_id": "maple_000_134",        // ใช้ tx_id แทน slot/slot_id
+  "tx_id": "maple_000_134",
   "qr_address": "0x1f3f5e9ab12d75af4e2c2cfe3ad527bd8074654a",
   "prev_hash": "0000...000",
-  "timestamp": "2025-06-01T10:15:00.000Z",
+  "timestamp": "2025-07-15T10:15:00.000Z",
   "qr_hash": "abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
   "pubkey": "0x1234567890abcdef1234567890abcdef12345678",
   "action": "register",
   "detail": "Initial QR registration",
   "sig": "SIGNATURE_BASE64_OR_HEX",
-  "meta": {}
+  "meta": {
+    "batchName": "Spring2025A",
+    "appVersion": "1.0.0"
+  }
 }
 ```
 
 ---
 
-## 9. **สรุป**
+## 9. **สรุป & คำแนะนำล่าสุด**
 
-* ระบบนี้โปร่งใส, audit/self-proof 100%
-* UI/UX minimal ตาม spec
-* Naming & ID logic เดียวกับ white paper ล่าสุด
-* ใช้ไฟล์นี้เป็น “มาตรฐาน” DTC One Page Minimal ได้ทันที
+* ระบบ DTC Minimal นี้ **โปร่งใส, Audit/Self-Proof 100%**
+* UI/UX ใช้ One Page Minimal ตาม spec นี้ทุกหน้า
+* Naming, Logic, Logging, Security, ID—all **ตรงตาม Whitepaper & production policy**
+* ใช้ไฟล์นี้เป็น **“มาตรฐานกลาง” ในการตรวจสอบงาน UI/Logic ของทีม, การเขียน Regression Test, และการเทียบ Audit Chain**
 
 ---
+
+**(ต้องการ Check-list/Template/Audit tool เพิ่มเติม, หรือเอกสารเปรียบเทียบกับเวอร์ชันก่อน แจ้งได้ทันทีครับ!)**
