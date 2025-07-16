@@ -1,4 +1,4 @@
-// chain-index.js - DTC Minimal One Page Chain Viewer (v0.7.6.3+)
+// chain-index.js - DTC Minimal One Page Chain Viewer (v0.7.6.5.8)
 // UI/UX = No slot/slot_id, No secret, No alert, use color/icon/size only
 
 document.addEventListener('DOMContentLoaded', () => {
