@@ -2,21 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Transfer QR - DTC System</title>
+  <title>Transfer QR – DTC v.0.7.6.5.8</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <script src="https://unpkg.com/html5-qrcode"></script>
   <style>
     body { font-family: 'Segoe UI', Arial, sans-serif; background: #f6faff; margin: 0; padding: 0; }
-    .container { max-width: 440px; margin: 2.5em auto; background: #fff; border-radius: 18px; box-shadow: 0 8px 40px #1376b114, 0 1.5px 7px #36d86d1c; padding: 2.3em 1.3em 2em 1.3em;}
-    .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.5em; }
-    .nav-btn { background: #ede7f6; color: #246bfd; border: none; border-radius: 8px; padding: 0.53em 1.4em; font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background 0.18s;}
-    .nav-btn:hover { background: #d1c4e9; }
+    .container { max-width: 440px; margin: 2.6em auto 0 auto; background: #fff; border-radius: 18px; box-shadow: 0 8px 40px #1376b114, 0 1.5px 7px #36d86d1c; padding: 2.3em 1.3em 2em 1.3em;}
     h2 { text-align: center; color: #219150; margin-bottom: 1.2em; }
     .row { display: flex; align-items: center; gap: 0.35em; margin-bottom: 1.1em; flex-wrap: wrap; }
     .row input[type="text"] { flex: 1; padding: 0.68em 0.8em; border: 1.5px solid #c9e8d4; border-radius: 6px; font-size: 1.08em; background: #f5f7fa; outline: none; transition: border .2s;}
     .row input[type="text"]:focus, .pw-input:focus { border: 1.5px solid #246bfd; background: #f0f7ff;}
-    .icon-btn { background: none; border: none; padding: 0.13em; cursor: pointer; transition: background 0.15s; border-radius: 5px; height: 38px; width: 38px; display: flex; align-items: center; justify-content: center;}
-    .icon-btn img { width: 25px; height: 25px; }
     .copy-btn { background: #ebfbee; border: none; border-radius: 4px; cursor: pointer; color: #219150; font-size: 1em; font-weight: 500; padding: 0.36em 1.05em; margin-left: 0.2em; margin-right: 0.2em; transition: background .18s; }
     .copy-btn:active { background: #d1fae5; color: #176d38; }
     .copy-success { color: #16a34a; font-size: 0.95em; margin-left: 0.27em; min-width: 2.4em; display: inline-block; }
@@ -28,131 +22,56 @@
     .input-error { border: 2px solid #dc2626 !important; background: #fef2f2;}
     .input-err { color: #dc2626; font-size: 0.97em; margin-bottom: 0.45em;}
     .mini-btn {
-      width: 100%;
-      background: linear-gradient(90deg, #219150 75%, #44cc77 100%);
-      color: #fff;
-      border: none;
-      font-weight: bold;
-      border-radius: 8px;
-      font-size: 1.11em;
-      margin: 0.36em 0 0.2em 0;
-      padding: 0.82em 0;
-      transition: background .2s, box-shadow .17s;
-      box-shadow: 0 1.5px 9px #60a5fa12;
-      cursor: pointer;
-      letter-spacing: 0.01em;
+      width: 100%; background: linear-gradient(90deg, #219150 75%, #44cc77 100%);
+      color: #fff; border: none; font-weight: bold; border-radius: 8px;
+      font-size: 1.11em; margin: 0.36em 0 0.2em 0; padding: 0.82em 0;
+      transition: background .2s, box-shadow .17s; box-shadow: 0 1.5px 9px #60a5fa12; cursor: pointer; letter-spacing: 0.01em;
     }
     .mini-btn:active { background: #176d38; }
     #previewBox { margin-top: 0.4em; padding: 0.9em 0.7em; border-radius: 7px; background: #f0fdf4; font-size: 1.04em; box-shadow: 0 0.7px 4px #67e8f9a2; border-left: 6px solid #15803d; min-height: 2.2em;}
-    #qr-reader { margin-top: 1.2em; }
     .export-btn { margin-top: 0.7em; width: 100%; background: #ffd600; color: #222; border: none; border-radius: 8px; font-weight: 600; padding: 0.69em 0; font-size: 1em;}
     .export-btn:active { background: #ffb300;}
     .note { color: #90a4ae; font-size: 0.97em; margin: 1.7em 0 0.8em 0; text-align: center;}
-    @media (max-width: 540px) { .container { padding: 1em 0.1em 1.3em 0.1em; border-radius: 0; } .nav-row {margin-bottom:1.1em;} .row { flex-direction: column; gap: 0.11em;} .mini-btn, .export-btn { font-size: 1em; } }
+    .nav-bar { display: flex; gap:0.6em; position:fixed; left:0; right:0; bottom:0; background:#ede7f6; padding:0.5em 0; max-width:440px; margin:0 auto; border-radius: 0 0 14px 14px; z-index:8;}
+    .nav-btn { flex:1; background:none; color:#246bfd; border:none; border-radius:8px; padding:0.63em 0; font-size:1em; font-weight:600; cursor:pointer;}
+    .nav-btn:active { background: #d1c4e9;}
+    @media (max-width: 540px) { .container { padding: 1em 0.1em 1.3em 0.1em; border-radius: 0; } .mini-btn, .export-btn { font-size: 1em; } .nav-bar {max-width:100vw;} }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="nav-row">
-      <button class="nav-btn" onclick="window.location.href='index.html'">Back</button>
-      <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
-    </div>
     <h2>Transfer QR</h2>
-
     <div class="row">
-      <input type="text" id="qrhash" maxlength="64" autocomplete="off" placeholder="Enter QR Hash" />
-      <button class="icon-btn" title="Scan QR" onclick="openQRScanner()" id="scanBtn">
-        <img src="/scan-qr-icon.png" alt="Scan QR"/>
-      </button>
-      <input type="file" accept="image/*" style="display:none;" id="imgQRInput" onchange="scanImageQR(this)">
-      <button class="icon-btn" title="Import QR Image" onclick="document.getElementById('imgQRInput').click()" id="imgBtn">
-        <img src="/gallery-icon.png" alt="Gallery"/>
-      </button>
+      <input type="text" id="qrhash" maxlength="64" autocomplete="off" placeholder="Enter QR Hash (64 hex)" />
       <button class="copy-btn" onclick="copyField('qrhash')">Copy</button>
       <span id="copyHashSuccess" class="copy-success"></span>
     </div>
-
     <div class="receiver-group">
       <label for="recipientpk">Receiver Public Key (0x...):</label>
-      <div style="display:flex;align-items:center;gap:0.2em;">
-        <input type="text" id="recipientpk" maxlength="42" autocomplete="off" placeholder="Enter recipient's public key" />
-        <button class="copy-btn" onclick="copyField('recipientpk')">Copy</button>
-        <span id="copyPkSuccess" class="copy-success"></span>
-      </div>
+      <input type="text" id="recipientpk" maxlength="42" autocomplete="off" placeholder="Enter recipient's public key (0x...)" />
+      <button class="copy-btn" onclick="copyField('recipientpk')">Copy</button>
+      <span id="copyPkSuccess" class="copy-success"></span>
       <div class="input-err" id="pubkeyErr"></div>
     </div>
-
     <div class="yellow-group">
-      <label for="password">Your Password (6-12 chars, letters and numbers):</label>
+      <label for="password">Your Password (6-12 chars, must have symbol):</label>
       <input class="pw-input" type="password" id="password" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your password" />
-
       <label for="pin">Your PIN (5 digits):</label>
       <input class="pw-input" type="password" id="pin" maxlength="5" minlength="5" pattern="\d{5}" autocomplete="off" placeholder="Enter your 5-digit PIN" />
     </div>
-
     <button class="mini-btn" onclick="preview()" type="button" id="previewBtn">Preview Transfer</button>
     <div id="previewBox"></div>
-    <button class="mini-btn" style="background:linear-gradient(90deg,#219150 75%,#44cc77 100%);color:#fff;" onclick="confirmTransfer()" type="button" style="display:none;" id="confirmBtn">Confirm Transfer</button>
+    <button class="mini-btn" style="background:linear-gradient(90deg,#219150 75%,#44cc77 100%);color:#fff;display:none;" onclick="confirmTransfer()" type="button" id="confirmBtn">Confirm Transfer</button>
     <button class="export-btn" style="display:none;" id="exportLogBtn">Export Transfer Log (JSON)</button>
-
-    <div id="qr-reader"></div>
-
     <p class="note">No blockchain backend. Log is kept only in your browser.<br>All signatures use your derived address (not plain password/pin).</p>
   </div>
+  <div class="nav-bar">
+    <button class="nav-btn" onclick="window.location.href='index.html'">Back</button>
+    <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
+  </div>
   <script>
-    let qrReader = null;
     let lastTransferLog = null;
-    window.onload = function() {
-      document.getElementById('qrhash').focus();
-      if (!navigator.clipboard) {
-        document.getElementById('scanBtn').disabled = true;
-        document.getElementById('imgBtn').disabled = true;
-      }
-    };
-    function openQRScanner() {
-      if (qrReader) try { qrReader.stop(); } catch {}
-      const qrDiv = document.getElementById('qr-reader');
-      qrDiv.style.display = 'block';
-      qrDiv.innerHTML = '';
-      qrReader = new Html5Qrcode("qr-reader");
-      qrReader.start(
-        { facingMode: "environment" },
-        { fps: 10, qrbox: 180 },
-        qrCodeMessage => {
-          document.getElementById('qrhash').value = qrCodeMessage;
-          qrReader.stop();
-          qrDiv.style.display = 'none';
-          document.getElementById('recipientpk').focus();
-        }
-      ).catch(err => {
-        alert("Cannot open camera: " + err);
-        qrDiv.style.display = 'none';
-      });
-    }
-    function scanImageQR(input) {
-      if (input.files && input.files.length > 0) {
-        const file = input.files[0];
-        const qrDiv = document.getElementById('qr-reader');
-        qrDiv.style.display = 'block';
-        qrDiv.innerHTML = '';
-        if (qrReader) try { qrReader.clear(); } catch {}
-        qrReader = new Html5Qrcode("qr-reader");
-        qrReader.scanFile(file, true)
-          .then(qrCodeMessage => {
-            document.getElementById('qrhash').value = qrCodeMessage;
-            qrReader.clear();
-            qrDiv.style.display = 'none';
-            document.getElementById('recipientpk').focus();
-          })
-          .catch(() => {
-            alert("QR not found in this image.");
-            qrDiv.style.display = 'none';
-          });
-      }
-    }
-    function validatePubkey(pk) {
-      return /^0x[a-fA-F0-9]{40}$/.test(pk);
-    }
+    function validatePubkey(pk) { return /^0x[a-fA-F0-9]{40}$/.test(pk);}
     function validateInputs() {
       const hash = document.getElementById('qrhash').value.trim();
       const pub = document.getElementById('recipientpk').value.trim();
@@ -164,7 +83,7 @@
       document.getElementById('qrhash').classList.remove('input-error');
       document.getElementById('password').classList.remove('input-error');
       document.getElementById('pin').classList.remove('input-error');
-      if (hash.length !== 64) {
+      if (!/^[a-fA-F0-9]{64}$/.test(hash)) {
         valid = false;
         document.getElementById('qrhash').classList.add('input-error');
       }
@@ -173,7 +92,7 @@
         document.getElementById('recipientpk').classList.add('input-error');
         if (pub) document.getElementById('pubkeyErr').textContent = "Public Key must start with 0x and be 42 chars.";
       }
-      if (pw.length < 6 || pw.length > 12 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw)) {
+      if (pw.length < 6 || pw.length > 12 || !/[A-Za-z]/.test(pw) || !/\d/.test(pw) || !/[^a-zA-Z0-9]/.test(pw)) {
         valid = false;
         document.getElementById('password').classList.add('input-error');
       }
@@ -183,15 +102,13 @@
       }
       return valid;
     }
-    // SHA256 derive address (ตามสูตร DTC จริง)
+    // SHA256 derive address (DTC 2025 Spec)
     async function deriveAddress(password, pin) {
       const encoder = new TextEncoder();
       const hash1 = await crypto.subtle.digest("SHA-256", encoder.encode(password));
       const hash2 = await crypto.subtle.digest("SHA-256", encoder.encode(pin));
-      // SHA256(hash1 + hash2)
       let total = new Uint8Array([...new Uint8Array(hash1), ...new Uint8Array(hash2)]);
       const privKey = await crypto.subtle.digest("SHA-256", total);
-      // Public key = SHA256(privKey)
       const pubKey = await crypto.subtle.digest("SHA-256", privKey);
       let hex = Array.from(new Uint8Array(pubKey)).map(b => b.toString(16).padStart(2, '0')).join('');
       return '0x'+hex.slice(-40);
@@ -256,7 +173,7 @@
     });
     function copyField(id) {
       const el = document.getElementById(id);
-      el.select(); el.setSelectionRange(0, 9999);
+      el.select && el.select();
       navigator.clipboard.writeText(el.value);
       if (id === 'qrhash') showCopySuccess('copyHashSuccess');
       else if (id === 'recipientpk') showCopySuccess('copyPkSuccess');
