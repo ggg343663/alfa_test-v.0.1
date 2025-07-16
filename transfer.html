@@ -86,8 +86,8 @@
       <label for="password">Your Password (6-12 chars, letters and numbers):</label>
       <input class="pw-input" type="password" id="password" maxlength="12" minlength="6" autocomplete="off" placeholder="Enter your password" />
 
-      <label for="pin">Your PIN (4 digits):</label>
-      <input class="pw-input" type="password" id="pin" maxlength="4" minlength="4" pattern="\d{4}" autocomplete="off" placeholder="Enter your 4-digit PIN" />
+      <label for="pin">Your PIN (5 digits):</label>
+      <input class="pw-input" type="password" id="pin" maxlength="5" minlength="5" pattern="\d{5}" autocomplete="off" placeholder="Enter your 5-digit PIN" />
     </div>
 
     <button class="mini-btn" onclick="preview()" type="button" id="previewBtn">Preview Transfer</button>
@@ -177,7 +177,7 @@
         valid = false;
         document.getElementById('password').classList.add('input-error');
       }
-      if (!/^\d{4}$/.test(pin)) {
+      if (!/^\d{5}$/.test(pin)) {
         valid = false;
         document.getElementById('pin').classList.add('input-error');
       }
