@@ -1,317 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Master | DTC Magic Chain</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: 'Inter', Arial, sans-serif; background-color: #f0f4f8;}
-        .main { background-color: #fff; border-radius: 1rem; box-shadow: 0 8px 40px rgba(36,107,253,0.07); padding: 2.5rem; width: 100%; max-width: 28rem; text-align: center; box-sizing: border-box; margin: 0 auto;}
-        .nav-row { display: flex; justify-content: space-between; margin-bottom: 1.5rem; }
-        .nav-btn { background-color: #ede7f6; color: #246bfd; border: none; border-radius: 0.5rem; padding: 0.53em 1.4em; font-size: 1.03em; font-weight: 500; cursor: pointer; transition: background-color 0.18s ease; height: 44px; min-width: 80px; }
-        .nav-btn:hover { background-color: #d1c4e9; }
-        h2 { text-align: center; color: #26733e; margin-bottom: 1.2rem; font-size: 1.875rem; font-weight: bold; }
-        .input-group { margin-bottom: 1.13rem; background-color: #fffde7; border-radius: 0.75rem; padding: 1.25rem; border: 1px solid #ffe0b2; }
-        label { font-weight: bold; color: #26733e; display: block; margin-bottom: 0.21em; font-size: 0.95em; text-align: left; }
-        input[type="text"] { width: 100%; padding: 0.7em; border-radius: 0.5rem; border: 1.5px solid #dde6ee; font-size: 1.08em; margin-bottom: 0.19em; background-color: #f7fbff; height: 44px; box-sizing: border-box; color: #222; }
-        #masterPublicKey { color: #26733e; }
-        #identityQrHash { background-color: #f6f7fa; color: #246bfd; }
-        .counter { font-size: 0.85em; color: #90a4ae; float: right; }
-        .btn-action { display: block; width: 100%; padding: 0.9em 0; border-radius: 0.625rem; border: none;
-            background: linear-gradient(90deg,#2196f3 70%,#219150 100%);
-            color: #fff; font-size: 1.11em; font-weight: 600; margin: 1.2em 0 0.7em 0; cursor: pointer;
-            box-shadow: 0 2px 8px rgba(36,107,253,0.1); transition: background 0.18s, transform 0.1s; height: 48px; }
-        .btn-action:hover { background: linear-gradient(90deg,#1976D2 70%,#1c5e2d 100%); transform: translateY(-1px);}
-        .btn-action[disabled] { opacity: 0.54; cursor: not-allowed; }
-        .btn-scan-paste { background-color: #ffd600; color: #222; padding: 0.4em 1em; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.95em; font-weight: 500; margin-top: 0.5em; transition: background-color 0.18s ease; display: flex; align-items: center; justify-content: center;}
-        .btn-scan-paste:hover { background-color: #e0b300; }
-        .btn-scan-paste svg { margin-right: 0.3em; }
-        .msg-box { text-align: center; margin: 1.1em 0 0.6em 0; font-size: 1.02em; padding: 0.5em; border-radius: 0.5em; }
-        .msg-error { color: #c41e1e; background: #fff2f2; border-left: 5px solid #c41e1e; }
-        .msg-success { color: #16774a; background: #eafff1; border-left: 5px solid #31e57a; }
-        .warn-msg { color:#b91c1c; background:#fbe7e7; padding:0.5em 0.8em; border-radius:7px; margin:0.36em 0 0.8em 0; font-size:0.9em;}
-        .note-text { font-size: 0.9em; color: #90a4ae; text-align: left; margin-top: 1.15em;}
-        .preview-box { background-color: #f6fafd; border: 1.5px solid #dde6ee; border-radius: 0.625rem; padding: 1.2em 1em; margin: 1em 0 0.4em 0; font-size: 0.97em; color: #246bfd; word-break: break-all; max-height: 180px; overflow: auto; display: none; text-align: left;}
-        .preview-title { color: #26733e; font-size: 1.04em; margin-bottom:0.2em;}
-        .preview-box pre { background: none; padding: 0; font-size: 0.95em; color: #246bfd; white-space: pre-wrap; }
-        .copy-json-btn { background-color: #2196f3; color: #fff; padding: 0.3em 0.8em; border-radius: 0.5rem; border: none; cursor: pointer; font-size: 0.9em; margin-top: 0.5em; transition: background-color 0.18s ease;}
-        .copy-json-btn:hover { background-color: #1976D2; }
-        .modal-overlay { display: none; position: fixed; left: 0; top: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.20); z-index: 99; justify-content: center; align-items: center;}
-        .modal-content { background: #fff; border-radius: 13px; padding: 2em 1.4em 1.3em 1.4em; max-width: 420px; margin: 0 auto; box-shadow: 0 8px 32px #21915023, 0 2px 8px #36d86d0c; text-align: center; position: relative;}
-        .modal-content h3 { margin: 0 0 1em 0; color: #219150; font-size: 1.25em; }
-        .modal-preview-list { text-align: left; margin: 0 0 1.5em 0; font-size: 1.03em; color: #234; background: #f6f7fa; border-radius: 7px; padding: 1em; border-left: 5px solid #219150;}
-        .btn-confirm { display: block; width: 100%; margin: 1em 0 0 0; background: linear-gradient(90deg,#219150 75%,#44cc77 100%); color: #fff; font-size: 1.13em; font-weight: bold; border: none; border-radius: 8px; padding: 1em 0; cursor: pointer; transition: background .13s, filter .13s; box-shadow: 0 4px 10px rgba(36,145,80,0.08);}
-        .btn-confirm:hover { filter: brightness(0.96);}
-        .btn-cancel { display: block; width: 100%; margin: 0.7em 0 0 0; background: #b0bec5; color: #fff; font-size: 1em; border: none; border-radius: 8px; padding: 0.7em 0; cursor: pointer; transition: background .13s;}
-        .btn-cancel:hover { background: #90a4ae;}
-        @media (max-width: 640px) { .main { padding: 1.5rem 1rem; max-width: 100%; }
-            .input-group { padding: 1rem; }
-            .nav-btn { font-size: 0.9em; padding: 0.5em 1em; min-width: unset; }
-            .btn-action { font-size: 1em; padding: 0.8em 0; }
-            .modal-content { padding: 1em 0.3em 1em 0.3em; }
-        }
-    </style>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Register Master Node - DTC: Magic Chain System</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; color: #333; margin:0; padding:0;}
+    .container { max-width: 430px; margin: 2.7em auto 0 auto; background: #fff; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2.3em 1.3em 2em 1.3em;}
+    h2 { color: #219150; text-align: center; margin-bottom: 1.2em; font-size: 1.25em;}
+    .section-block { margin-bottom:1.15em; padding:1.3em; border-radius:12px; box-shadow:0 2px 9px #edf1f6; background: #f6f7fa;}
+    .block-title { font-weight: bold; color: #555; margin-bottom: 0.9em; font-size: 1.05em;}
+    label { font-weight: bold; color: #1976d2; margin-bottom:0.25em; display:block;}
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 0.83em 1em; border: 1.4px solid #b0bec5; border-radius: 8px; font-size: 1.06em;
+      background: #fff; margin-bottom: 0.65em; transition: border .17s, background .15s;
+    }
+    input[type="text"]:focus, input[type="password"]:focus { border-color: #2196f3; background: #f0f7ff;}
+    .input-yellow { background: #fffde7; border: 1.4px solid #ffe066;}
+    .label-hint { font-size:0.92em; color:#90a4ae; margin-bottom:0.55em; display:block;}
+    .btn-main {
+      width:100%; margin-top: 0.9em; padding: 1em 0; color: #fff; background: linear-gradient(90deg, #219150 75%, #44cc77 100%);
+      font-weight:bold; font-size:1.14em; border-radius:8px; border:none; cursor:pointer; box-shadow:0 2px 9px #21915022; transition: background .2s;
+    }
+    .btn-main:active { background: #176d38;}
+    .result-box { background: #eafaf0; border:1.5px solid #219150; border-radius:9px; margin-top:1.5em; padding:1em 1em; color:#26733e; font-size:1.02em; word-break:break-all;}
+    .copy-btn { background: #1976d2; color: #fff; border: none; border-radius: 7px; padding: 6px 18px; font-size: 0.99em; font-weight: 600; margin-top: 1.1em; cursor: pointer;}
+    .copy-btn:active { filter: brightness(0.93);}
+    .footer-note { text-align: center; margin-top: 2.2em; color: #90a4ae; font-size: 0.96em;}
+    @media (max-width: 600px) {
+      .container { padding: 1em 0.07em 1.2em 0.07em; }
+      .section-block { padding: 1em;}
+    }
+  </style>
 </head>
 <body>
-    <div class="main">
-        <div class="nav-row">
-            <button class="nav-btn" onclick="window.history.back()">Back</button>
-            <button class="nav-btn" onclick="window.location.href='index.html'">Home</button>
-        </div>
-        <h2>Register Master</h2>
-        <p class="text-gray-600 text-sm mb-6">Step 2: Register your Master role. You must have an Identity QR Hash from Step 1.</p>
-        <form id="masterForm" autocomplete="off">
-            <div class="input-group">
-                <label for="masterName">Master Name <span class="counter" id="nameCounter">0/8</span></label>
-                <input type="text" id="masterName" maxlength="8" pattern="[A-Z]+" placeholder="A-Z only (up to 8 chars)" required autocomplete="off" />
-                <div id="badwordWarn" class="warn-msg" style="display:none;"></div>
-            </div>
-            <div class="input-group">
-                <label for="masterPublicKey">Your Public Key <span class="counter" id="pubkeyCounter">0/64</span></label>
-                <!-- pattern อนุญาต symbol และบังคับอย่างน้อย 1 ตัว -->
-                <input type="text" id="masterPublicKey" maxlength="64"
-                       pattern="^(?=.*[^a-zA-Z0-9])[a-zA-Z0-9!@#$%^&*()_\-=\[\]{};':&quot;\\|,.&lt;&gt;\/?]{8,64}$"
-                       placeholder="Must include symbol, e.g. !@#$, etc." required autocomplete="off" />
-                <div id="pkSymbolWarn" class="warn-msg" style="display:none;"></div>
-                <button class="btn-scan-paste" type="button" onclick="handleScanPaste('masterPublicKey')">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11l-3-3m0 0L9 11m3-3v7m0 0l-3 3m3-3l3 3m0-3h-6"></path></svg>
-                    Paste / Scan QR
-                </button>
-            </div>
-            <div class="input-group">
-                <label for="identityQrHash">Identity QR Hash <span class="counter" id="identityQrHashCounter">0/64</span></label>
-                <input type="text" id="identityQrHash" maxlength="64" pattern="^[a-fA-F0-9]{64}$" placeholder="Paste your Identity QR Hash here (from Step 1)" required autocomplete="off" />
-                <button class="btn-scan-paste" type="button" onclick="handleScanPaste('identityQrHash')">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11l-3-3m0 0L9 11m3-3v7m0 0l-3 3m3-3l3 3m0-3h-6"></path></svg>
-                    Paste / Scan QR
-                </button>
-            </div>
-            <button class="btn-action" type="button" id="previewBtn" disabled>Register Master</button>
-            <div id="msgBox" class="msg-box"></div>
-        </form>
-        <div id="previewBox" class="preview-box">
-            <div class="preview-title">Preview Master Node (Audit Structure):</div>
-            <pre id="previewJson"></pre>
-            <button class="copy-json-btn" onclick="copyPreviewJson()">Copy JSON</button>
-        </div>
-        <div class="note-text">
-            *Master Name = 1-8 chars, A-Z only.<br>
-            *Your Public Key = 8-64 chars (must include symbol).<br>
-            *Identity QR Hash = 64 HEX chars (from "Generate Identity QR Hash" page/section).
-        </div>
+  <div class="container">
+    <h2>ลงทะเบียน Master Node</h2>
+    <div class="section-block">
+      <div class="block-title">ข้อมูล Master Node</div>
+      <form id="registerForm" autocomplete="off">
+        <label for="master_id">รหัส Master Node (A-Z, ≤8 ตัว):</label>
+        <input type="text" id="master_id" maxlength="8" required pattern="[A-Z0-9_]+" placeholder="เช่น MAPLE_000"/>
+        <span class="label-hint">ใช้ตัวพิมพ์ใหญ่เท่านั้น, เช่น MAPLE_000</span>
+        <label for="description">คำอธิบาย/รายละเอียด:</label>
+        <input type="text" id="description" maxlength="64" required placeholder="รายละเอียด Master Node"/>
+        <span class="label-hint">ระบุวัตถุประสงค์ หรือหมายเหตุ (จะแสดงใน log)</span>
+        <label for="password">Password (6-12 ตัว, มีอักษร+ตัวเลข+สัญลักษณ์):</label>
+        <input type="password" id="password" class="input-yellow" maxlength="12" minlength="6" autocomplete="new-password" required placeholder="Password"/>
+        <span class="label-hint">Password ต้องมีอักษร, ตัวเลข, และสัญลักษณ์อย่างน้อย 1 ตัว</span>
+        <label for="pin">PIN (5 หลัก):</label>
+        <input type="password" id="pin" class="input-yellow" maxlength="5" minlength="5" pattern="\d{5}" required placeholder="PIN 5 หลัก"/>
+        <span class="label-hint">PIN ต้องเป็นตัวเลข 5 หลัก (0-9)</span>
+        <button class="btn-main" type="submit" id="registerBtn">ลงทะเบียน Master Node</button>
+      </form>
     </div>
-    <!-- Modal Preview -->
-    <div class="modal-overlay" id="modalOverlay">
-      <div class="modal-content">
-        <h3>Preview Master Registration</h3>
-        <div class="modal-preview-list" id="previewList"></div>
-        <button class="btn-confirm" id="confirmBtn">Confirm & Register</button>
-        <button class="btn-cancel" id="cancelBtn">Cancel</button>
-      </div>
-    </div>
-    <script>
-        // --- Constants ---
-        const GENESIS_HASH = "86b1c0989f61b7f03222d861f67f259740120199e69c7662c1404e132c3f8f11";
-        let badwords = {};
-        let flatBadwords = [];
-        let badwordsReady = false;
-        let badwordsError = false;
-        const masterNameInput = document.getElementById('masterName');
-        const masterPublicKeyInput = document.getElementById('masterPublicKey');
-        const identityQrHashInput = document.getElementById('identityQrHash');
-        const nameCounter = document.getElementById('nameCounter');
-        const pubkeyCounter = document.getElementById('pubkeyCounter');
-        const identityQrHashCounter = document.getElementById('identityQrHashCounter');
-        const badwordWarn = document.getElementById('badwordWarn');
-        const pkSymbolWarn = document.getElementById('pkSymbolWarn');
-        const previewBtn = document.getElementById('previewBtn');
-        const msgBox = document.getElementById('msgBox');
-        const previewBox = document.getElementById('previewBox');
-        const previewJson = document.getElementById('previewJson');
-        const masterForm = document.getElementById('masterForm');
-        // Modal
-        const modal = document.getElementById('modalOverlay');
-        const previewList = document.getElementById('previewList');
-        const confirmBtn = document.getElementById('confirmBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        function showMsg(msg, type) {
-            msgBox.textContent = msg;
-            msgBox.className = "msg-box " + (type === "error" ? "msg-error" : "msg-success");
-            setTimeout(() => { msgBox.textContent = ""; msgBox.className = "msg-box"; }, 5000);
-        }
-        async function sha256Hex(str) {
-            const enc = new TextEncoder();
-            const buf = await crypto.subtle.digest("SHA-256", enc.encode(str));
-            return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,"0")).join("");
-        }
-        function genNonce() {
-            let arr = new Uint8Array(8);
-            window.crypto.getRandomValues(arr);
-            return Array.from(arr).map(x=>x.toString(16).padStart(2,'0')).join('');
-        }
-        function findBadwords(str) {
-            if (!badwordsReady || !str) return [];
-            const s = str.toLowerCase();
-            return flatBadwords.filter(w => w && s.includes(w));
-        }
-        function updateCounters() {
-            nameCounter.textContent = masterNameInput.value.length + "/8";
-            pubkeyCounter.textContent = masterPublicKeyInput.value.length + "/64";
-            identityQrHashCounter.textContent = identityQrHashInput.value.length + "/64";
-        }
-        function validateInputs() {
-            const name = masterNameInput.value.trim();
-            const pk = masterPublicKeyInput.value.trim();
-            const idQrHash = identityQrHashInput.value.trim();
-            const isNameValid = name.length >= 1 && name.length <= 8 && /^[A-Z]+$/.test(name);
-            // NEW: ต้องมี symbol อย่างน้อย 1 ตัว
-            const hasSymbol = /[^a-zA-Z0-9]/.test(pk);
-            const isPkValid = pk.length >= 8 && pk.length <= 64 && hasSymbol;
-            const isIdQrHashValid = idQrHash.length === 64 && /^[a-fA-F0-9]{64}$/.test(idQrHash);
-            const isNoBadwords = !findBadwords(name).length;
-            // Badword
-            if (badwordsError) {
-                badwordWarn.style.display = "";
-                badwordWarn.textContent = "Could not load badwords list. Please check badwords.json or contact admin.";
-            } else if (!isNoBadwords) {
-                const found = findBadwords(name);
-                badwordWarn.style.display = "";
-                badwordWarn.textContent = "Warning: Contains inappropriate words (" + found.slice(0,3).join(', ') + (found.length>3?',...':'') + "). Please reconsider.";
-            } else {
-                badwordWarn.style.display = "none";
-            }
-            // Public Key Symbol
-            if (!hasSymbol && pk.length > 0) {
-                pkSymbolWarn.style.display = "";
-                pkSymbolWarn.textContent = "Public Key must include at least one symbol (e.g. !@#$%^&* etc.).";
-            } else {
-                pkSymbolWarn.style.display = "none";
-            }
-            previewBtn.disabled = !(isNameValid && isPkValid && isIdQrHashValid && isNoBadwords && !badwordsError);
-        }
-        async function buildMasterNodePreview() {
-            const masterName = masterNameInput.value.trim().toUpperCase();
-            const publicKey = masterPublicKeyInput.value.trim();
-            const identityQrHash = identityQrHashInput.value.trim();
-            if(masterName.length < 1 || masterName.length > 8 || publicKey.length < 8 || publicKey.length > 64 || !/[^a-zA-Z0-9]/.test(publicKey) || identityQrHash.length !== 64) return null;
-            const timestamp = Math.floor(Date.now() / 1000).toString();
-            const nonce = genNonce();
-            // DTC audit chain standard formula
-            const rawHashInput = identityQrHash + "master" + masterName + publicKey + "" + GENESIS_HASH + timestamp + nonce;
-            const recordHash = await sha256Hex(rawHashInput);
-            return {
-                object_type: "master",
-                object_id: masterName,
-                public_key: publicKey,
-                prev_hash: identityQrHash,
-                parent_chain_hash: GENESIS_HASH,
-                timestamp: timestamp,
-                nonce: nonce,
-                hash: recordHash
-            };
-        }
-        async function livePreview() {
-            const node = await buildMasterNodePreview();
-            if(node) {
-                previewJson.textContent = JSON.stringify(node, null, 2);
-                previewBox.style.display = "block";
-            } else {
-                previewBox.style.display = "none";
-            }
-        }
-        async function handleScanPaste(targetId) {
-            const inputElement = document.getElementById(targetId);
-            try {
-                const clipboardText = await navigator.clipboard.readText();
-                if (clipboardText) {
-                    inputElement.value = clipboardText.trim();
-                    showMsg("Pasted from clipboard!", "success");
-                } else {
-                    const pastedValue = prompt("Please paste your QR Hash or Public Key here:");
-                    if (pastedValue) inputElement.value = pastedValue.trim();
-                }
-            } catch (err) {
-                const pastedValue = prompt("Please paste your QR Hash or Public Key here:");
-                if (pastedValue) inputElement.value = pastedValue.trim();
-                showMsg("Clipboard access denied. Please paste manually.", "error");
-            }
-            inputElement.dispatchEvent(new Event('input', { bubbles: true }));
-        }
-        function copyPreviewJson() {
-            const txt = previewJson.textContent;
-            navigator.clipboard.writeText(txt)
-                .then(() => showMsg("Copied JSON!", "success"))
-                .catch(() => showMsg("Failed to copy JSON. Please copy manually.", "error"));
-        }
-        // Show Preview Modal
-        previewBtn.addEventListener('click', async (e) => {
-            e.preventDefault();
-            const masterName = masterNameInput.value.trim();
-            const masterPublicKey = masterPublicKeyInput.value.trim();
-            const identityQrHash = identityQrHashInput.value.trim();
-            const node = await buildMasterNodePreview();
-            if (!node) return;
-            previewList.innerHTML = `
-              <b>Master Name:</b> <code>${masterName}</code><br>
-              <b>Public Key:</b> <code>${masterPublicKey}</code><br>
-              <b>Identity QR Hash:</b> <code>${identityQrHash}</code><br>
-              <b>Timestamp:</b> ${node.timestamp}<br>
-              <b>Nonce:</b> ${node.nonce}<br>
-              <b>Preview Hash:</b> <code>${node.hash}</code>
-            `;
-            modal.style.display = "flex";
-            window._dtc_masterPreviewNode = node;
-        });
-        // Confirm Modal
-        confirmBtn.addEventListener('click', async () => {
-            const node = window._dtc_masterPreviewNode;
-            modal.style.display = "none";
-            showMsg("Registering Master...", "success");
-            await new Promise(resolve => setTimeout(resolve, 1000));
-            showMsg(`Master '${node.object_id}' registered. Hash: ${node.hash}.`, "success");
-            previewJson.textContent = JSON.stringify(node, null, 2);
-            previewBox.style.display = "block";
-            masterForm.reset();
-            updateCounters();
-            validateInputs();
-        });
-        // Cancel Modal
-        cancelBtn.addEventListener('click', ()=>{ modal.style.display = "none"; });
-        masterNameInput.addEventListener('input', () => {
-            masterNameInput.value = masterNameInput.value.replace(/[^A-Z]/g,'').toUpperCase();
-            updateCounters(); validateInputs(); livePreview();
-        });
-        masterPublicKeyInput.addEventListener('input', () => {
-            // now allow symbol, do not strip
-            updateCounters(); validateInputs(); livePreview();
-        });
-        identityQrHashInput.addEventListener('input', () => {
-            identityQrHashInput.value = identityQrHashInput.value.replace(/[^a-fA-F0-9]/g,'');
-            updateCounters(); validateInputs(); livePreview();
-        });
-        window.addEventListener('DOMContentLoaded', function() {
-            setTimeout(() => {
-                badwords = {
-                    "common": ["fuck", "shit", "ass", "damn"],
-                    "thai": ["ควย", "เหี้ย"]
-                };
-                flatBadwords = Object.values(badwords).flat().map(x=>x.toLowerCase());
-                badwordsReady = true;
-                validateInputs();
-            }, 500);
-            const localPub = localStorage.getItem('dtc_publicKey');
-            if (localPub && localPub.length >= 8 && localPub.length <= 64) {
-                masterPublicKeyInput.value = localPub;
-            }
-            updateCounters(); validateInputs(); livePreview();
-        });
-        document.addEventListener('keydown', (e) => {
-          if (modal.style.display === "flex" && (e.key === "Escape" || e.key === "Esc")) modal.style.display = "none";
-        });
-        modal.addEventListener('click', (e) => {
-          if (e.target === modal) modal.style.display = "none";
-        });
-    </script>
+    <div id="resultBox" class="result-box" style="display:none;"></div>
+    <button class="copy-btn" id="copyBtn" style="display:none;">คัดลอกผลลัพธ์ (Copy)</button>
+    <div class="footer-note">ระบบจะไม่เก็บ Password หรือ PIN ใด ๆ • ใช้ใน browser เท่านั้น</div>
+  </div>
+  <script>
+    // Validation helper
+    function validPassword(pw) {
+      return pw.length >= 6 && pw.length <= 12
+        && /[a-zA-Z]/.test(pw)
+        && /\d/.test(pw)
+        && /[^a-zA-Z0-9]/.test(pw);
+    }
+    function validPIN(pin) {
+      return /^\d{5}$/.test(pin);
+    }
+    function validMasterId(id) {
+      return /^[A-Z0-9_]{1,8}$/.test(id);
+    }
+
+    document.getElementById('registerForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const master_id = document.getElementById('master_id').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const password = document.getElementById('password').value;
+      const pin = document.getElementById('pin').value;
+
+      if (!validMasterId(master_id)) {
+        alert("รหัส Master Node ต้องเป็นตัวพิมพ์ใหญ่ (A-Z, 0-9, _), ≤8 ตัว");
+        return;
+      }
+      if (!validPassword(password)) {
+        alert("Password ไม่ถูกต้อง (ต้องมีอักษร, ตัวเลข, สัญลักษณ์ และ 6-12 ตัว)");
+        return;
+      }
+      if (!validPIN(pin)) {
+        alert("PIN ต้องเป็นตัวเลข 5 หลัก");
+        return;
+      }
+
+      // mock key/hash for demo
+      const timestamp = new Date().toISOString();
+      const node_hash = "MST_" + master_id + "_" + Math.random().toString(36).substr(2, 8).toUpperCase();
+      const pubkey = "0x" + Array(40).fill(0).map(_=>Math.floor(Math.random()*16).toString(16)).join("");
+      const result = {
+        node_type: "master",
+        master_id: master_id,
+        node_hash: node_hash,
+        pubkey: pubkey,
+        description: description,
+        timestamp: timestamp,
+        status: "pending"
+      };
+
+      document.getElementById('resultBox').style.display = 'block';
+      document.getElementById('resultBox').textContent = JSON.stringify(result, null, 2);
+      document.getElementById('copyBtn').style.display = 'block';
+    };
+
+    document.getElementById('copyBtn').onclick = function() {
+      const txt = document.getElementById('resultBox').textContent;
+      navigator.clipboard.writeText(txt);
+      document.getElementById('copyBtn').textContent = "✓ คัดลอกแล้ว!";
+      setTimeout(()=>{document.getElementById('copyBtn').textContent="คัดลอกผลลัพธ์ (Copy)";}, 1200);
+    };
+  </script>
 </body>
 </html>
