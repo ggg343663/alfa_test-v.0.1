@@ -15,15 +15,15 @@
       width: 100%; padding: 0.83em 1em; border: 1.4px solid #b0bec5; border-radius: 8px; font-size: 1.06em;
       background: #fff; margin-bottom: 0.65em; transition: border .17s, background .15s;
     }
-    input[type="text"]:focus, input[type="password"]:focus { border-color: #2196f3; background: #f0f7ff;}
+    input[type="text"]:focus, input[type="password"]:focus { border-color: #1976d2; background: #f0f7ff;}
     .input-yellow { background: #fffde7; border: 1.4px solid #ffe066;}
     .label-hint { font-size:0.92em; color:#90a4ae; margin-bottom:0.55em; display:block;}
     .btn-main {
-      width:100%; margin-top: 0.9em; padding: 1em 0; color: #fff; background: linear-gradient(90deg, #1976d2 75%, #43a047 100%);
-      font-weight:bold; font-size:1.13em; border-radius:8px; border:none; cursor:pointer; box-shadow:0 2px 9px #1976d244; transition: background .2s;
+      width:100%; margin-top: 0.9em; padding: 1em 0; color: #fff; background: linear-gradient(90deg, #1976d2 80%, #43a047 100%);
+      font-weight:bold; font-size:1.13em; border-radius:8px; border:none; cursor:pointer; box-shadow:0 2px 9px #1976d222; transition: background .2s;
     }
-    .btn-main:active { background: #176d38;}
-    .result-box { background: #eafaf0; border:1.5px solid #219150; border-radius:9px; margin-top:1.5em; padding:1em 1em; color:#26733e; font-size:1.02em; word-break:break-all;}
+    .btn-main:active { background: #0e3b87;}
+    .result-box { background: #eafaf0; border:1.5px solid #1976d2; border-radius:9px; margin-top:1.5em; padding:1em 1em; color:#246bfd; font-size:1.02em; word-break:break-all;}
     .copy-btn { background: #1976d2; color: #fff; border: none; border-radius: 7px; padding: 6px 18px; font-size: 0.99em; font-weight: 600; margin-top: 1.1em; cursor: pointer;}
     .copy-btn:active { filter: brightness(0.93);}
     .footer-note { text-align: center; margin-top: 2.2em; color: #90a4ae; font-size: 0.96em;}
@@ -39,9 +39,9 @@
     <div class="section-block">
       <div class="block-title">ข้อมูล Agent Node</div>
       <form id="registerForm" autocomplete="off">
-        <label for="agent_id">รหัส Agent Node (a-z, 0-9, ":" , ≤16 ตัว):</label>
-        <input type="text" id="agent_id" maxlength="16" required pattern="[a-z0-9:]{1,16}" placeholder="เช่น maple:demo"/>
-        <span class="label-hint">ใช้ตัวพิมพ์เล็ก ตัวเลข ":" เท่านั้น, เช่น maple:demo</span>
+        <label for="agent_id">รหัส Agent Node (a-z,0-9,:, ≤16 ตัว):</label>
+        <input type="text" id="agent_id" maxlength="16" required pattern="[a-z0-9:]{1,16}" placeholder="agent:0001"/>
+        <span class="label-hint">ใช้ตัวพิมพ์เล็ก/ตัวเลข/colon ไม่เกิน 16 ตัว เช่น agent:001, maple:agent</span>
         <label for="description">คำอธิบาย/รายละเอียด:</label>
         <input type="text" id="description" maxlength="64" required placeholder="รายละเอียด Agent Node"/>
         <span class="label-hint">ระบุวัตถุประสงค์ หรือหมายเหตุ (จะแสดงใน log)</span>
@@ -59,7 +59,6 @@
     <div class="footer-note">ระบบจะไม่เก็บ Password หรือ PIN ใด ๆ • ใช้ใน browser เท่านั้น</div>
   </div>
   <script>
-    // Validation helper
     function validPassword(pw) {
       return pw.length >= 6 && pw.length <= 12
         && /[a-zA-Z]/.test(pw)
@@ -81,7 +80,7 @@
       const pin = document.getElementById('pin').value;
 
       if (!validAgentId(agent_id)) {
-        alert("รหัส Agent Node ต้องเป็นตัวพิมพ์เล็ก ตัวเลข หรือ ':' และไม่เกิน 16 ตัว");
+        alert("รหัส Agent Node ต้องเป็นตัวพิมพ์เล็ก ตัวเลข หรือ colon ไม่เกิน 16 ตัว");
         return;
       }
       if (!validPassword(password)) {
