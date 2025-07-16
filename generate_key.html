@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
-    <title>Generate Public Key - DTC</title>
+    <title>Generate Public Key - DTC v.0.7.6.5.8</title>
+    <!-- DTC Minimal UI/UX - Version v.0.7.6.5.8 (2025) -->
     <style>
         :root {
             --color-primary-green: #219150;
@@ -32,6 +33,12 @@
             color: var(--color-text-main);
         }
         h1 { color: var(--color-primary-green); text-align: center; margin-bottom: 1.2em; font-size: 1.15em; }
+        .version-tag {
+            text-align:right;
+            font-size:0.99em;
+            color:#90a4ae;
+            margin-bottom:0.5em;
+        }
         .form-group { margin-bottom: 1em; }
         label { font-weight: bold; color: #2d3c35; margin-bottom: 0.35em; display:block; }
         .input-with-toggle { position: relative; width: 100%; }
@@ -93,6 +100,7 @@
 </head>
 <body>
     <h1>Generate Public Key (DTC)</h1>
+    <div class="version-tag">v.0.7.6.5.8</div>
     <div class="form-group">
         <label for="password">Password</label>
         <div class="input-with-toggle">
@@ -166,7 +174,14 @@
             </svg>
         </a>
     </div>
+    <div style="text-align:center;margin:2.2em 0 1em 0;color:#b0bec5;font-size:0.92em;">
+        DTC Minimal KeyGen — v.0.7.6.5.8
+    </div>
     <script>
+        // ... [JavaScript code remains unchanged from your last version] ...
+        // (วาง script เดิมทั้งหมดจากไฟล์ของคุณตรงนี้)
+        // (ไม่มีส่วนไหนต้องแก้ไข logic เพิ่มเติมสำหรับ v.0.7.6.5.8)
+        // ---------------------
         // Function to validate password format (6-12 chars, including letters, numbers, and symbols)
         function validPw(pw) {
             const hasLetter = /[a-zA-Z]/.test(pw);
