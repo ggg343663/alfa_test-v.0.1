@@ -1,236 +1,123 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>Register Agent | DTC</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Register Agent Node - DTC: Magic Chain System</title>
   <style>
-    :root {
-      --green: #219150;
-      --blue: #2196f3;
-      --yellow: #ffd600;
-      --yellow-bg: #fffde7;
-      --gray-bg: #f5f7fa;
-      --gray-input: #f6faf7;
-      --gray-med: #90a4ae;
-      --error: #e74c3c;
-      --success: #22c55e;
-      --border: #b0bec5;
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; color: #333; margin:0; padding:0;}
+    .container { max-width: 430px; margin: 2.7em auto 0 auto; background: #fff; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2.3em 1.3em 2em 1.3em;}
+    h2 { color: #1976d2; text-align: center; margin-bottom: 1.2em; font-size: 1.2em;}
+    .section-block { margin-bottom:1.15em; padding:1.3em; border-radius:12px; box-shadow:0 2px 9px #edf1f6; background: #f6f7fa;}
+    .block-title { font-weight: bold; color: #555; margin-bottom: 0.9em; font-size: 1.05em;}
+    label { font-weight: bold; color: #1976d2; margin-bottom:0.25em; display:block;}
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 0.83em 1em; border: 1.4px solid #b0bec5; border-radius: 8px; font-size: 1.06em;
+      background: #fff; margin-bottom: 0.65em; transition: border .17s, background .15s;
     }
-    body { font-family: Arial,sans-serif; background: var(--gray-bg); margin:0; padding:0;}
-    .container { max-width: 470px; margin:2em auto; background:#fff; padding:2.3em 1.1em 2em 1.1em; border-radius:15px; box-shadow:0 2px 16px rgba(144,202,249,0.2);}
-    h2 { color:var(--green); text-align:center; margin-bottom:1.3em; font-size:1.18em;}
-    .section { margin-bottom: 1.2em; }
-    .input-feedback-container { position: relative; margin-bottom: 0.8em; }
-    input, textarea {
-      width: 100%; font-size: 1.07em; border-radius: 8px;
-      border: 1.4px solid var(--border); padding: 0.7em 1em;
-      background: var(--gray-input); transition: border .2s, background .2s; box-sizing: border-box;
+    input[type="text"]:focus, input[type="password"]:focus { border-color: #2196f3; background: #f0f7ff;}
+    .input-yellow { background: #fffde7; border: 1.4px solid #ffe066;}
+    .label-hint { font-size:0.92em; color:#90a4ae; margin-bottom:0.55em; display:block;}
+    .btn-main {
+      width:100%; margin-top: 0.9em; padding: 1em 0; color: #fff; background: linear-gradient(90deg, #1976d2 75%, #43a047 100%);
+      font-weight:bold; font-size:1.13em; border-radius:8px; border:none; cursor:pointer; box-shadow:0 2px 9px #1976d244; transition: background .2s;
     }
-    input:focus, textarea:focus { border-color: var(--blue); background: #fff; }
-    textarea { min-height:3.2em; max-height: 6em; resize:vertical;}
-    .security-input { background: var(--yellow-bg) !important; border-color: var(--yellow) !important; }
-    .security-input:focus { border-color: var(--yellow) !important; background: #fff !important; }
-    .feedback-message { display: flex; align-items: center; font-size: 0.95em; margin-top: 0.2em; color: var(--gray-med);}
-    .feedback-message.error { color: var(--error);}
-    .feedback-message.success { color: var(--success);}
-    .feedback-icon { width: 16px; height: 16px; margin-right: 5px;}
-    .input-error-border { border-color: var(--error) !important; background-color: rgba(231, 76, 60, 0.05) !important; }
-    .input-success-border { border-color: var(--success) !important; background-color: rgba(22,163,74,0.05) !important; }
-    .btn-main, .btn-action, .btn-export, .btn-nav {
-      width:100%; font-size:1.11em; border-radius:8px; border:none; font-weight:bold; min-height:44px;
-      margin-top: 0.6em; padding: 0.8em 0; cursor: pointer; transition: background .18s, color .18s;
-    }
-    .btn-main { background: var(--green); color: #fff;}
     .btn-main:active { background: #176d38;}
-    .btn-action { background: var(--blue); color: #fff;}
-    .btn-action:active { background: #173472;}
-    .btn-export { background: var(--yellow); color: #234;}
-    .btn-export.blue { background: var(--blue); color: #fff;}
-    .output-box {
-      background: #fafdff; border-radius: 8px; border: 1.2px solid #cfd8dc;
-      padding: 0.7em 0.9em; margin-bottom: 0.9em; font-size: 1em; min-height: 38px;
-      word-break: break-all; overflow-x: auto;
+    .result-box { background: #eafaf0; border:1.5px solid #219150; border-radius:9px; margin-top:1.5em; padding:1em 1em; color:#26733e; font-size:1.02em; word-break:break-all;}
+    .copy-btn { background: #1976d2; color: #fff; border: none; border-radius: 7px; padding: 6px 18px; font-size: 0.99em; font-weight: 600; margin-top: 1.1em; cursor: pointer;}
+    .copy-btn:active { filter: brightness(0.93);}
+    .footer-note { text-align: center; margin-top: 2.2em; color: #90a4ae; font-size: 0.96em;}
+    @media (max-width: 600px) {
+      .container { padding: 1em 0.07em 1.2em 0.07em; }
+      .section-block { padding: 1em;}
     }
-    .step-label { margin:0.97em 0 0.24em 0; font-weight:bold; color:var(--green); font-size:1.02em;}
-    .copy-btn { background:none; border:none; color: var(--blue); cursor:pointer; font-weight:600; font-size:1em; }
-    .copy-success { color:var(--success); font-size:0.97em; margin-left:0.33em;}
-    .nav-bar { display: flex; gap: 0.7em; margin-top: 2.1em;}
-    .btn-nav { flex: 1; background: #ede7f6; color: #512da8;}
-    .btn-nav:active { background: #b39ddb;}
-    .btn-nav.home { background: var(--gray-med); color: #fff; }
-    .btn-nav.next { background: var(--blue); color: #fff;}
-    @media (max-width:600px) {.container { padding:1.1em 0.22em 1em 0.22em;} .nav-bar { flex-direction: column; gap:0.4em;}}
   </style>
 </head>
 <body>
-<div class="container">
-  <h2>Register Agent<br>(DTC v.0.7.6.3+ Minimal)</h2>
-
-  <div class="section input-section">
-    <div class="step-label">Step 1: Master creates Agent</div>
-    <div class="input-feedback-container">
-      <input type="text" id="agentName" maxlength="16" autocomplete="off" placeholder="Agent Name (a-z, 0-9, max 16)">
-      <div class="feedback-message" id="agentNameHint"><span class="feedback-icon"></span>lowercase, number only</div>
+  <div class="container">
+    <h2>ลงทะเบียน Agent Node</h2>
+    <div class="section-block">
+      <div class="block-title">ข้อมูล Agent Node</div>
+      <form id="registerForm" autocomplete="off">
+        <label for="agent_id">รหัส Agent Node (a-z, 0-9, ":" , ≤16 ตัว):</label>
+        <input type="text" id="agent_id" maxlength="16" required pattern="[a-z0-9:]{1,16}" placeholder="เช่น maple:demo"/>
+        <span class="label-hint">ใช้ตัวพิมพ์เล็ก ตัวเลข ":" เท่านั้น, เช่น maple:demo</span>
+        <label for="description">คำอธิบาย/รายละเอียด:</label>
+        <input type="text" id="description" maxlength="64" required placeholder="รายละเอียด Agent Node"/>
+        <span class="label-hint">ระบุวัตถุประสงค์ หรือหมายเหตุ (จะแสดงใน log)</span>
+        <label for="password">Password (6-12 ตัว, มีอักษร+ตัวเลข+สัญลักษณ์):</label>
+        <input type="password" id="password" class="input-yellow" maxlength="12" minlength="6" autocomplete="new-password" required placeholder="Password"/>
+        <span class="label-hint">Password ต้องมีอักษร, ตัวเลข, และสัญลักษณ์อย่างน้อย 1 ตัว</span>
+        <label for="pin">PIN (5 หลัก):</label>
+        <input type="password" id="pin" class="input-yellow" maxlength="5" minlength="5" pattern="\d{5}" required placeholder="PIN 5 หลัก"/>
+        <span class="label-hint">PIN ต้องเป็นตัวเลข 5 หลัก (0-9)</span>
+        <button class="btn-main" type="submit" id="registerBtn">ลงทะเบียน Agent Node</button>
+      </form>
     </div>
-    <div class="input-feedback-container">
-      <input type="text" id="agentPubKey" maxlength="64" autocomplete="off" placeholder="Agent Public Key (SHA256 hex)">
-      <div class="feedback-message" id="agentPubKeyHint"></div>
-    </div>
-    <div class="input-feedback-container" style="display:flex; gap:7px;">
-      <input type="text" id="nonce" maxlength="20" autocomplete="off" placeholder="Nonce (random string)" style="flex:1;" />
-      <button type="button" onclick="randomNonce()" class="btn-action" style="flex:0.7;">Random</button>
-      <div class="feedback-message" id="nonceHint"></div>
-    </div>
-    <button class="btn-main" type="button" id="previewBtn">Preview Agent</button>
+    <div id="resultBox" class="result-box" style="display:none;"></div>
+    <button class="copy-btn" id="copyBtn" style="display:none;">คัดลอกผลลัพธ์ (Copy)</button>
+    <div class="footer-note">ระบบจะไม่เก็บ Password หรือ PIN ใด ๆ • ใช้ใน browser เท่านั้น</div>
   </div>
+  <script>
+    // Validation helper
+    function validPassword(pw) {
+      return pw.length >= 6 && pw.length <= 12
+        && /[a-zA-Z]/.test(pw)
+        && /\d/.test(pw)
+        && /[^a-zA-Z0-9]/.test(pw);
+    }
+    function validPIN(pin) {
+      return /^\d{5}$/.test(pin);
+    }
+    function validAgentId(id) {
+      return /^[a-z0-9:]{1,16}$/.test(id);
+    }
 
-  <div class="section" id="section-sign" style="display:none;">
-    <div class="step-label">Step 2: Agent Sign</div>
-    <textarea id="agentPayload" readonly class="output-box" placeholder="Payload for Signing"></textarea>
-    <button class="copy-btn" onclick="copyAgentPayload()">Copy Payload <span id="copyAgentPayloadSuccess" class="copy-success" style="display:none;">✓</span></button>
-    <div class="input-feedback-container" style="margin-top:0.6em;">
-      <input type="password" id="agentPw" maxlength="12" autocomplete="new-password" class="security-input" placeholder="Agent Password (8+ chars)">
-    </div>
-    <div class="input-feedback-container">
-      <input type="password" id="agentPin" maxlength="5" pattern="\d{5}" autocomplete="new-password" class="security-input" placeholder="Agent PIN (5 digits)">
-    </div>
-    <button class="btn-main" type="button" onclick="signAgent()">Agent Sign</button>
-    <div class="output-box" id="sigResult" style="display:none;"></div>
-    <button class="btn-export blue" type="button" onclick="exportLog()">Export Log (JSON)</button>
-    <span id="exportSuccess" class="copy-success" style="display:none;">✓ Exported!</span>
-  </div>
+    document.getElementById('registerForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const agent_id = document.getElementById('agent_id').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const password = document.getElementById('password').value;
+      const pin = document.getElementById('pin').value;
 
-  <div class="nav-bar">
-    <button class="btn-nav" onclick="location.href='index.html'">Back</button>
-    <button class="btn-nav home" onclick="location.href='index.html'">Home</button>
-    <button class="btn-nav next" onclick="alert('Next coming soon!')">Next</button>
-  </div>
-</div>
+      if (!validAgentId(agent_id)) {
+        alert("รหัส Agent Node ต้องเป็นตัวพิมพ์เล็ก ตัวเลข หรือ ':' และไม่เกิน 16 ตัว");
+        return;
+      }
+      if (!validPassword(password)) {
+        alert("Password ไม่ถูกต้อง (ต้องมีอักษร, ตัวเลข, สัญลักษณ์ และ 6-12 ตัว)");
+        return;
+      }
+      if (!validPIN(pin)) {
+        alert("PIN ต้องเป็นตัวเลข 5 หลัก");
+        return;
+      }
 
-<script>
-function randomNonce() {
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  let s = "";
-  for (let i=0;i<16;i++) s += chars[Math.floor(Math.random()*chars.length)];
-  document.getElementById('nonce').value = s;
-}
-randomNonce();
+      // mock key/hash for demo
+      const timestamp = new Date().toISOString();
+      const node_hash = "AGT_" + agent_id + "_" + Math.random().toString(36).substr(2, 8).toLowerCase();
+      const pubkey = "0x" + Array(40).fill(0).map(_=>Math.floor(Math.random()*16).toString(16)).join("");
+      const result = {
+        node_type: "agent",
+        agent_id: agent_id,
+        node_hash: node_hash,
+        pubkey: pubkey,
+        description: description,
+        timestamp: timestamp,
+        status: "pending"
+      };
 
-function showHint(id, msg, type) {
-  let d = document.getElementById(id);
-  if (type === "error") {
-    d.style.color = "#e74c3c";
-    d.innerHTML = `<span class="feedback-icon">!</span>${msg}`;
-  } else if (type === "success") {
-    d.style.color = "#22c55e";
-    d.innerHTML = `<span class="feedback-icon">✓</span>${msg}`;
-  } else {
-    d.style.color = "#90a4ae";
-    d.innerHTML = msg;
-  }
-}
+      document.getElementById('resultBox').style.display = 'block';
+      document.getElementById('resultBox').textContent = JSON.stringify(result, null, 2);
+      document.getElementById('copyBtn').style.display = 'block';
+    };
 
-// Validation
-function validateAgentName(v) {
-  if (!/^[a-z0-9]{1,16}$/.test(v)) throw "Invalid agent name";
-}
-function validatePubKey(k) {
-  if (!/^[0-9a-fA-F]{64}$/.test(k)) throw "Invalid pubkey";
-}
-function validateNonce(n) {
-  if (!n) throw "Empty nonce";
-}
-function validatePassword(pw) {
-  if (pw.length < 8) throw "Password must be at least 8 chars";
-  if (!/[a-zA-Z]/.test(pw)) throw "Password needs letter";
-  if (!/\d/.test(pw)) throw "Password needs digit";
-}
-function validatePin(pin) {
-  if (pin.length !== 5 || !/^\d+$/.test(pin)) throw "5 digits only";
-}
-
-// Preview Logic (Step 1)
-document.getElementById('previewBtn').onclick = function() {
-  let name = document.getElementById('agentName').value.trim();
-  let pubkey = document.getElementById('agentPubKey').value.trim();
-  let nonce = document.getElementById('nonce').value.trim();
-  // Clear feedback
-  showHint('agentNameHint', 'lowercase, number only');
-  showHint('agentPubKeyHint', '');
-  showHint('nonceHint', '');
-  // Validate
-  try { validateAgentName(name); showHint('agentNameHint', "OK", "success"); } catch(e) { showHint('agentNameHint', e, "error"); return; }
-  try { validatePubKey(pubkey); showHint('agentPubKeyHint', "OK", "success"); } catch(e) { showHint('agentPubKeyHint', e, "error"); return; }
-  try { validateNonce(nonce); showHint('nonceHint', "OK", "success"); } catch(e) { showHint('nonceHint', e, "error"); return; }
-
-  // Generate payload (ตรงตาม DTC)
-  let lastTimestamp = new Date().toISOString();
-  let prev_hash = "abcdef..."; // ปกติคือ master_hash ที่สร้าง agent นี้ (ต้องใส่จริง)
-  let payload = prev_hash + "agent" + name + pubkey + "" + lastTimestamp + nonce;
-  window.agent_hash_data = {
-    prev_hash: prev_hash,
-    object_type: "agent",
-    object_id: name,
-    public_key: pubkey,
-    to_public_key: "",
-    timestamp: lastTimestamp,
-    nonce: nonce
-  };
-  window.agent_hash_to_sign = payload;
-  // Show next step
-  document.getElementById('section-sign').style.display = "block";
-  document.getElementById('agentPayload').value = payload;
-  document.getElementById('sigResult').style.display = "none";
-  document.getElementById('exportSuccess').style.display = "none";
-}
-
-// Agent Sign Logic (Step 2)
-async function signAgent() {
-  let pw = document.getElementById('agentPw').value.trim();
-  let pin = document.getElementById('agentPin').value.trim();
-  try { validatePassword(pw); } catch(e) { alert(e); return;}
-  try { validatePin(pin); } catch(e) { alert(e); return;}
-  let priv = await sha256(pw) + await sha256(pin);
-  let sig = await sha256(priv + window.agent_hash_to_sign);
-  let hash = await sha256(window.agent_hash_to_sign);
-  let res = {
-    ...window.agent_hash_data,
-    hash: hash,
-    signature: sig
-  };
-  document.getElementById('sigResult').style.display = "block";
-  document.getElementById('sigResult').innerHTML = "<b>Agent Registration Complete</b><br><pre>"+JSON.stringify(res,null,2)+"</pre>";
-  window.lastExportObj = res;
-}
-
-// SHA256 (browser)
-async function sha256(s) {
-  let b = new TextEncoder().encode(s);
-  let h = await crypto.subtle.digest("SHA-256", b);
-  return Array.from(new Uint8Array(h)).map(b => b.toString(16).padStart(2,"0")).join("");
-}
-
-// Copy & Export
-function copyAgentPayload() {
-  let el = document.getElementById('agentPayload');
-  el.select(); el.setSelectionRange(0, 9999);
-  document.execCommand('copy');
-  document.getElementById('copyAgentPayloadSuccess').style.display = "inline";
-  setTimeout(()=>{document.getElementById('copyAgentPayloadSuccess').style.display = "none";},1200);
-}
-function exportLog() {
-  let obj = window.lastExportObj || window.agent_hash_data || {};
-  if (!obj || !obj.prev_hash) return;
-  obj.exported_at = new Date().toISOString();
-  let blob = new Blob([JSON.stringify(obj, null, 2)], {type: "application/json"});
-  let a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "dtc_agent_registration_log.json";
-  a.click();
-  document.getElementById('exportSuccess').style.display = "inline";
-  setTimeout(()=>{document.getElementById('exportSuccess').style.display = "none";}, 1500);
-}
-</script>
+    document.getElementById('copyBtn').onclick = function() {
+      const txt = document.getElementById('resultBox').textContent;
+      navigator.clipboard.writeText(txt);
+      document.getElementById('copyBtn').textContent = "✓ คัดลอกแล้ว!";
+      setTimeout(()=>{document.getElementById('copyBtn').textContent="คัดลอกผลลัพธ์ (Copy)";}, 1200);
+    };
+  </script>
 </body>
 </html>
