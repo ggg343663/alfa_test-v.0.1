@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Request QR / Node - DTC: Magic Chain System</title>
+  <style>
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: #f5f6fa; color: #333; margin:0; padding:0;}
+    .container { max-width: 430px; margin: 2.7em auto 0 auto; background: #fff; border-radius: 15px; box-shadow: 0 2px 16px #90caf933; padding: 2.3em 1.3em 2em 1.3em;}
+    h2 { color: #219150; text-align: center; margin-bottom: 1.2em; font-size: 1.25em;}
+    .section-block { margin-bottom:1.15em; padding:1.3em; border-radius:12px; box-shadow:0 2px 9px #edf1f6; background: #f6f7fa;}
+    .block-title { font-weight: bold; color: #555; margin-bottom: 0.9em; font-size: 1.05em;}
+    label { font-weight: bold; color: #1976d2; margin-bottom:0.25em; display:block;}
+    input[type="text"], input[type="password"] {
+      width: 100%; padding: 0.83em 1em; border: 1.4px solid #b0bec5; border-radius: 8px; font-size: 1.06em;
+      background: #fff; margin-bottom: 0.65em; transition: border .17s, background .15s;
+    }
+    input[type="text"]:focus, input[type="password"]:focus { border-color: #2196f3; background: #f0f7ff;}
+    .input-yellow { background: #fffde7; border: 1.4px solid #ffe066;}
+    .label-hint { font-size:0.92em; color:#90a4ae; margin-bottom:0.55em; display:block;}
+    .btn-main {
+      width:100%; margin-top: 0.9em; padding: 1em 0; color: #fff; background: linear-gradient(90deg, #219150 75%, #44cc77 100%);
+      font-weight:bold; font-size:1.14em; border-radius:8px; border:none; cursor:pointer; box-shadow:0 2px 9px #21915022; transition: background .2s;
+    }
+    .btn-main:active { background: #176d38;}
+    .result-box { background: #eafaf0; border:1.5px solid #219150; border-radius:9px; margin-top:1.5em; padding:1em 1em; color:#26733e; font-size:1.02em; word-break:break-all;}
+    .copy-btn { background: #1976d2; color: #fff; border: none; border-radius: 7px; padding: 6px 18px; font-size: 0.99em; font-weight: 600; margin-top: 1.1em; cursor: pointer;}
+    .copy-btn:active { filter: brightness(0.93);}
+    .footer-note { text-align: center; margin-top: 2.2em; color: #90a4ae; font-size: 0.96em;}
+    @media (max-width: 600px) {
+      .container { padding: 1em 0.07em 1.2em 0.07em; }
+      .section-block { padding: 1em;}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>ขอ QR / Node ใหม่ (Request QR / Node)</h2>
+    <div class="section-block">
+      <div class="block-title">ข้อมูลผู้ขอ QR / Node</div>
+      <form id="requestForm" autocomplete="off">
+        <label for="name">ชื่อผู้ขอ / Node name:</label>
+        <input type="text" id="name" maxlength="32" required placeholder="เช่น MAPLE หรือ yourname"/>
+        <span class="label-hint">ใช้ตัวอักษรหรือตัวเลข, สูงสุด 32 ตัวอักษร</span>
+        <label for="purpose">วัตถุประสงค์ / Purpose:</label>
+        <input type="text" id="purpose" maxlength="64" required placeholder="จุดประสงค์การขอ QR หรือ Node"/>
+        <span class="label-hint">อธิบายสั้น ๆ เพื่อ audit (แสดงใน log)</span>
+        <label for="password">Password (6-12 ตัว, มีตัวอักษร+ตัวเลข+สัญลักษณ์):</label>
+        <input type="password" id="password" class="input-yellow" maxlength="12" minlength="6" autocomplete="new-password" required placeholder="Password สำหรับขอ QR"/>
+        <span class="label-hint">Password ต้องมีตัวอักษร, ตัวเลข, และสัญลักษณ์อย่างน้อย 1 ตัว</span>
+        <label for="pin">PIN (5 หลัก):</label>
+        <input type="password" id="pin" class="input-yellow" maxlength="5" minlength="5" pattern="\d{5}" required placeholder="PIN 5 หลัก (0-9)"/>
+        <span class="label-hint">PIN ต้องเป็นตัวเลข 5 หลัก (0-9)</span>
+        <button class="btn-main" type="submit" id="requestBtn">Request QR / Node</button>
+      </form>
+    </div>
+    <div id="resultBox" class="result-box" style="display:none;"></div>
+    <button class="copy-btn" id="copyBtn" style="display:none;">คัดลอกผลลัพธ์ (Copy)</button>
+    <div class="footer-note">ระบบนี้จะไม่เก็บ Password หรือ PIN ของคุณ • สร้าง QR/Node ใหม่ใน browser เท่านั้น</div>
+  </div>
+  <script>
+    // Validation helper
+    function validPassword(pw) {
+      return pw.length >= 6 && pw.length <= 12
+        && /[a-zA-Z]/.test(pw)
+        && /\d/.test(pw)
+        && /[^a-zA-Z0-9]/.test(pw);
+    }
+    function validPIN(pin) {
+      return /^\d{5}$/.test(pin);
+    }
+
+    document.getElementById('requestForm').onsubmit = async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value.trim();
+      const purpose = document.getElementById('purpose').value.trim();
+      const password = document.getElementById('password').value;
+      const pin = document.getElementById('pin').value;
+
+      if (!validPassword(password)) {
+        alert("Password ไม่ถูกต้อง (ต้องมีอักษร, ตัวเลข, สัญลักษณ์ และ 6-12 ตัว)");
+        return;
+      }
+      if (!validPIN(pin)) {
+        alert("PIN ต้องเป็นตัวเลข 5 หลัก");
+        return;
+      }
+
+      // สร้าง request_id และ log object (mock, ไม่มี blockchain backend)
+      const timestamp = new Date().toISOString();
+      const req_id = "REQ_" + Math.random().toString(36).substr(2, 10).toUpperCase();
+      const mock_pubkey = "0x" + Array(40).fill(0).map(_=>Math.floor(Math.random()*16).toString(16)).join("");
+      const result = {
+        request_id: req_id,
+        node_name: name,
+        purpose: purpose,
+        pubkey: mock_pubkey,
+        password_hash: "(not stored, only for demo)",
+        pin_hash: "(not stored, only for demo)",
+        timestamp: timestamp,
+        status: "pending",
+      };
+
+      // แสดงผลลัพธ์
+      document.getElementById('resultBox').style.display = 'block';
+      document.getElementById('resultBox').textContent = JSON.stringify(result, null, 2);
+      document.getElementById('copyBtn').style.display = 'block';
+    };
+
+    document.getElementById('copyBtn').onclick = function() {
+      const txt = document.getElementById('resultBox').textContent;
+      navigator.clipboard.writeText(txt);
+      document.getElementById('copyBtn').textContent = "✓ คัดลอกแล้ว!";
+      setTimeout(()=>{document.getElementById('copyBtn').textContent="คัดลอกผลลัพธ์ (Copy)";}, 1200);
+    };
+  </script>
+</body>
+</html>
