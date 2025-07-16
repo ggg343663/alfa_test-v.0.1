@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Register QR - DTC</title>
+  <title>Register QR - DTC v.0.7.6.5.8</title>
   <style>
     :root {
       --primary-green: #219150;
@@ -15,8 +15,6 @@
       --border-error: #b91c1c;
       --bg-error: #fbe7e7;
       --border-success: #219150;
-      --border-warn: #ffd600;
-      --input-height: 42px;
       --radius: 10px;
     }
     body {
@@ -31,11 +29,9 @@
       text-align: center;
       color: var(--primary-green);
       margin-bottom: 1.1em;
+      font-size: 1.2em;
     }
-    .input-block {
-      margin-bottom: 1.1em;
-      position: relative;
-    }
+    .input-block { margin-bottom: 1.1em; position: relative; }
     label {
       display: block;
       font-weight: bold;
@@ -47,7 +43,7 @@
       width: 100%;
       font-size: 1em;
       padding: 0.68em 0.9em;
-      height: var(--input-height);
+      height: 42px;
       background: #fff;
       border: 2px solid var(--border-grey);
       border-radius: var(--radius);
@@ -58,32 +54,16 @@
       box-sizing: border-box;
       resize: none;
     }
-    textarea[readonly], input[readonly] {
-      background: var(--bg-grey);
-      color: #555;
-    }
-    textarea:focus, input[type="text"]:focus {
-      border-color: var(--border-focus);
-    }
-    .input-block.bg-yellow textarea, .input-block.bg-yellow input {
-      background: var(--bg-yellow);
-    }
-    .input-block.bg-grey textarea, .input-block.bg-grey input {
-      background: var(--bg-grey);
-    }
+    textarea[readonly], input[readonly] { background: var(--bg-grey); color: #555; }
+    textarea:focus, input[type="text"]:focus { border-color: var(--border-focus); }
+    .input-block.bg-yellow textarea, .input-block.bg-yellow input { background: var(--bg-yellow); }
+    .input-block.bg-grey textarea, .input-block.bg-grey input { background: var(--bg-grey); }
     .input-block .icon-status {
-      position: absolute;
-      right: 13px;
-      top: 40px;
-      font-size: 1.12em;
-      pointer-events: none;
-      transition: color .18s;
-      opacity: 0.87;
+      position: absolute; right: 13px; top: 40px; font-size: 1.12em; pointer-events: none; opacity: 0.87;
     }
     .icon-ok { color: var(--border-success); }
     .icon-warn { color: #ffd600; }
     .icon-error { color: var(--border-error); }
-    /* Action Buttons */
     .btn {
       border: none;
       border-radius: var(--radius);
@@ -205,12 +185,11 @@
   </div>
   <p id="status-msg" class="status"></p>
   <p class="note">
-    <span style="color:#90a4ae;">Public Key/QR Hash auto-filled if saved in browser. <br>
+    <span style="color:#90a4ae;">Public Key/QR Hash auto-filled if saved in browser.<br>
     No backend: demo data is browser-only.</span>
   </p>
 
   <script>
-    // DOM
     const pubInput = document.getElementById('pub-key-input');
     const qrInput = document.getElementById('qr-hash-input');
     const ownerInput = document.getElementById('owner-name');
@@ -226,12 +205,9 @@
     const pkSymbolWarn = document.getElementById('pk-symbol-warn');
     let lastLogObj = null;
 
-    // Validate and symbol-driven feedback
     function validateInputs() {
-      // --- Validate Public Key ---
       const pk = pubInput.value.trim();
       const hasSymbol = /[^a-zA-Z0-9]/.test(pk);
-      // Visual Feedback (Symbol + Color)
       if (pk.length === 0) {
         pkStatus.innerHTML = '';
         pubInput.style.borderColor = 'var(--border-grey)';
@@ -245,15 +221,11 @@
         pubInput.style.borderColor = 'var(--border-success)';
         pkSymbolWarn.style.display = "none";
       }
-
-      // --- QR Hash ---
       if (qrInput.value.trim().length === 0) {
         qrInput.style.borderColor = 'var(--border-grey)';
       } else {
         qrInput.style.borderColor = 'var(--border-success)';
       }
-
-      // Enable register only if valid
       regBtn.disabled = !(pk.length > 0 && hasSymbol && qrInput.value.trim().length > 0);
     }
 
@@ -263,12 +235,9 @@
     function svgWarn() {
       return `<svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="none" stroke="#ffd600" stroke-width="2"/><line x1="10" y1="6" x2="10" y2="12" stroke="#ffd600" stroke-width="2"/><circle cx="10" cy="15" r="1.1" fill="#ffd600"/></svg>`;
     }
-
-    // Input event listeners
     pubInput.addEventListener('input', validateInputs);
     qrInput.addEventListener('input', validateInputs);
 
-    // Auto-fill from localStorage
     window.addEventListener('DOMContentLoaded', () => {
       const savedPub = localStorage.getItem('dtc_publicKey');
       const savedQr  = localStorage.getItem('dtc_qrHash');
@@ -277,7 +246,6 @@
       validateInputs();
     });
 
-    // Copy QR Hash button
     copyQrBtn.addEventListener('click', () => {
       const qr = qrInput.value.trim();
       if (!qr) return;
@@ -286,9 +254,7 @@
       setTimeout(() => copyStatus.classList.remove('show'), 1200);
     });
 
-    // Register logic (DEMO)
     regBtn.addEventListener('click', () => {
-      // Minimal feedback with icon+color
       statusMsg.textContent = '';
       const pub       = pubInput.value.trim();
       const qr        = qrInput.value.trim();
@@ -299,14 +265,12 @@
         return;
       }
       regBtn.disabled = true;
-      // Save DEMO data
       const ts = new Date().toISOString();
       const logObj = { publicKey: pub, qrHash: qr, ownerName, registeredAt: ts };
       let demoList = [];
       try { demoList = JSON.parse(localStorage.getItem('dtc_demoRegList')) || []; } catch (e) {}
       demoList.push(logObj);
       localStorage.setItem('dtc_demoRegList', JSON.stringify(demoList));
-      // Feedback
       statusMsg.style.color = 'var(--border-success)';
       statusMsg.innerHTML = svgCheck() + " Registration successful!";
       exportBtn.style.display = 'inline-block';
@@ -320,7 +284,6 @@
       return `<svg width="19" height="19" viewBox="0 0 19 19" style="vertical-align:-3px;"><circle cx="9.5" cy="9.5" r="8" fill="none" stroke="#b91c1c" stroke-width="2"/><line x1="9.5" y1="5.7" x2="9.5" y2="12.2" stroke="#b91c1c" stroke-width="2"/><circle cx="9.5" cy="14.1" r="1.2" fill="#b91c1c"/></svg>`;
     }
 
-    // Clear form
     clearBtn.addEventListener('click', () => {
       pubInput.value = '';
       qrInput.value = '';
@@ -338,7 +301,6 @@
       validateInputs();
     });
 
-    // Export log as .txt
     exportBtn.addEventListener('click', () => {
       if (!lastLogObj) return;
       const txt = `Public Key: ${lastLogObj.publicKey}
